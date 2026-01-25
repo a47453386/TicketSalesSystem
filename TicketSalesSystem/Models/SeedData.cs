@@ -51,7 +51,7 @@ namespace TicketSalesSystem.Models
                     }
                 );
                 context.SaveChanges();
-
+                context.SaveChanges();
             }
         }
     }
