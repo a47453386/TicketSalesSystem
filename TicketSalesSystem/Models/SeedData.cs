@@ -36,7 +36,7 @@ namespace TicketSalesSystem.Models
                         UpdatedAt = null,
                         CoverImage = "C20260201.jpg",
                         SeatImage = "S20260201.jpg",
-                        LimitPerOrder = 6                       
+                        LimitPerOrder = 6
                     },
                     new Programme
                     {
@@ -47,10 +47,36 @@ namespace TicketSalesSystem.Models
                         UpdatedAt = null,
                         CoverImage = "C20260301.jpg",
                         SeatImage = "S20260301.jpg",
-                        LimitPerOrder = 2                       
+                        LimitPerOrder = 2
                     }
                 );
                 context.SaveChanges();
+                context.Session.AddRange(
+                    new Session
+                    {
+                        SessionID = "2026010101",
+                        SaleStartTime = new DateTime(2025, 12, 1, 12, 0, 0),
+                        SaleEndTime = new DateTime(2026, 1, 9, 23, 59, 59),
+                        StartTime = new DateTime(2026, 1, 10, 19, 30, 0),
+                        ProgrammeID = "20260101"
+                    },
+                    new Session
+                    {
+                        SessionID = "2026020101",
+                        SaleStartTime = new DateTime(2025, 12, 2, 12, 0, 0),
+                        SaleEndTime = new DateTime(2026, 1, 10, 23, 59, 59),
+                        StartTime = new DateTime(2026, 1, 11, 19, 30, 0),
+                        ProgrammeID = "20260201"
+                    },
+                    new Session
+                    {
+                        SessionID = "2026030101",
+                        SaleStartTime = new DateTime(2025, 12, 3, 12, 0, 0),
+                        SaleEndTime = new DateTime(2026, 1, 11, 23, 59, 59),
+                        StartTime = new DateTime(2026, 1, 12, 19, 30, 0),
+                        ProgrammeID = "20260301"
+                    }
+                    );
                 context.SaveChanges();
             }
         }
