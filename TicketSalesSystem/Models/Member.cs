@@ -52,7 +52,7 @@ namespace TicketSalesSystem.Models
         [Display(Name = "建立時間")]
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 hh:mm:ss}")]
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         [Display(Name = "最後登入時間")]
         [DataType(DataType.DateTime)]
