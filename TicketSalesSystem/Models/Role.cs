@@ -6,7 +6,7 @@ namespace TicketSalesSystem.Models
     public class Role
     {
         [Key]
-        [Column(TypeName = "nchar(1)")]
+        [StringLength(1)]
         public string RoleID { get; set; } = null!;
 
         [Display(Name = "職位名稱")]

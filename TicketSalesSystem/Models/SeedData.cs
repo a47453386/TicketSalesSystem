@@ -19,7 +19,7 @@ namespace TicketSalesSystem.Models
                     },
                     new Role
                     {
-                        RoleID = "P",
+                        RoleID = "B",
                         RoleName = "活動管理員",
                         RoleDescription = ""
                     },
@@ -345,7 +345,7 @@ namespace TicketSalesSystem.Models
                          Photo = "P23001.jpg",
                          CreatedTime = DateTime.Now,
                          LastLoginTime = null,
-                         RoleID = "P",
+                         RoleID = "A",
                          AccountStatusID = "A"
                      },
                      new Employee
@@ -543,7 +543,7 @@ namespace TicketSalesSystem.Models
                 for (int i = 0; i < Cfiles.Length; i++)
                 {
                     var CfileName = "C" + Image[i] + ".jpg";
-                    var CDestFile = Path.Combine(CCoverImagePhotoPath,Image[i] + ".jpg");
+                    var CDestFile = Path.Combine(CCoverImagePhotoPath, CfileName);
                     File.Copy(Cfiles[i], CDestFile, overwrite: true);
                 }
 
@@ -556,7 +556,7 @@ namespace TicketSalesSystem.Models
                 for (int i = 0; i < Sfiles.Length; i++)
                 {
                     var SfileName = "C" + Image[i] + ".jpg";
-                    var SDestFile = Path.Combine(SCoverImagePhotoPath,Image[i] + ".jpg");
+                    var SDestFile = Path.Combine(SCoverImagePhotoPath, SfileName);
                     File.Copy(Sfiles[i], SDestFile, overwrite: true);
                 }
 
@@ -765,46 +765,7 @@ namespace TicketSalesSystem.Models
                      }
                     );
                 context.SaveChanges();
-
-
-
-                //訂單
-                context.Order.AddRange(
-                     new Order
-                     {
-                         OrderID = "202612000001",
-                         OrderCreatedTime = DateTime.Now,
-                         PaidTime = new DateTime(2026, 12, 1, 16, 00, 00),
-                         MemberID = guidMember[0],
-                         PaymentMethodID = "A",
-                         OrderStatusID = "Y",
-                         SessionID = "2026010101",
-                         PaymentTradeNO = "C"
-                     },
-                     new Order
-                     {
-                         OrderID = "202612000002",
-                         OrderCreatedTime = DateTime.Now,
-                         PaidTime = null,
-                         MemberID = guidMember[1],
-                         PaymentMethodID = "A",
-                         OrderStatusID = "N",
-                         SessionID = "2026020101",
-                         PaymentTradeNO = "C"
-                     },
-                     new Order
-                     {
-                         OrderID = "202612000003",
-                         OrderCreatedTime = DateTime.Now,
-                         PaidTime = new DateTime(2026, 12, 3, 14, 20, 00),
-                         MemberID = guidMember[2],
-                         PaymentMethodID = "C",
-                         OrderStatusID = "Y",
-                         SessionID = "2026030101",
-                         PaymentTradeNO = "A"
-                     }
-                    );
-                context.SaveChanges();
+                              
 
                 //金流
                 string[] guidPayment = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
@@ -828,6 +789,44 @@ namespace TicketSalesSystem.Models
                         PaymentStatusID = "N",
                     }
 
+                    );
+                context.SaveChanges();
+
+                //訂單
+                context.Order.AddRange(
+                     new Order
+                     {
+                         OrderID = "202612000001",
+                         OrderCreatedTime = DateTime.Now,
+                         PaidTime = new DateTime(2026, 12, 1, 16, 00, 00),
+                         MemberID = guidMember[0],
+                         PaymentMethodID = "A",
+                         OrderStatusID = "Y",
+                         SessionID = "2026010101",
+                         PaymentTradeNO = guidPayment[1]
+                     },
+                     new Order
+                     {
+                         OrderID = "202612000002",
+                         OrderCreatedTime = DateTime.Now,
+                         PaidTime = null,
+                         MemberID = guidMember[1],
+                         PaymentMethodID = "A",
+                         OrderStatusID = "N",
+                         SessionID = "2026020101",
+                         PaymentTradeNO = guidPayment[1]
+                     },
+                     new Order
+                     {
+                         OrderID = "202612000003",
+                         OrderCreatedTime = DateTime.Now,
+                         PaidTime = new DateTime(2026, 12, 3, 14, 20, 00),
+                         MemberID = guidMember[2],
+                         PaymentMethodID = "C",
+                         OrderStatusID = "Y",
+                         SessionID = "2026030101",
+                         PaymentTradeNO = guidPayment[0]
+                     }
                     );
                 context.SaveChanges();
 
