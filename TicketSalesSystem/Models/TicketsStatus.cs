@@ -6,7 +6,7 @@ namespace TicketSalesSystem.Models
     public class TicketsStatus
     {
         [Key]
-        [Column(TypeName = "nchar(2)")]
+        [Column(TypeName = "nchar(1)")]
         public string TicketsStatusID { get; set; } = null!;
 
         [Display(Name = "票券狀態")]

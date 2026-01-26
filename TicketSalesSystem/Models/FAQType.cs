@@ -6,7 +6,7 @@ namespace TicketSalesSystem.Models
     public class FAQType
     {
         [Key]
-        [Column(TypeName = "nchar(1)")]
+        [Column(TypeName = "nchar(2)")]
         public string FAQTypeID { get; set; } = null!;
 
         [Display(Name = "常見問題種類")]

@@ -7,7 +7,7 @@ namespace TicketSalesSystem.Models
     public class Session
     {
         [Key]
-        [Column(TypeName = "nchar(2)")]
+        [Column(TypeName = "nchar(10)")]
         public string SessionID { get; set; }= null!;
 
         [Display(Name = "開賣時間")]

@@ -9,7 +9,7 @@ namespace TicketSalesSystem.Models
     {
         [Key]
         [Display(Name = "員工編號")]
-        [Column(TypeName = "nchar(4)")]
+        [Column(TypeName = "nchar(6)")]
         public string EmployeeID { get; set; } = null!;
 
         [Display(Name = "員工姓名")]
