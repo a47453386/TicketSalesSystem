@@ -345,7 +345,7 @@ namespace TicketSalesSystem.Models
                          Photo = "P23001.jpg",
                          CreatedTime = DateTime.Now,
                          LastLoginTime = null,
-                         RoleID = "A",
+                         RoleID = "B",
                          AccountStatusID = "A"
                      },
                      new Employee
@@ -535,29 +535,29 @@ namespace TicketSalesSystem.Models
                 context.SaveChanges();
 
                 //封面圖片
-                string CSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "CoverImage");
-                string CCoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CoverImage");
+                string CoverImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "CoverImage");
+                string CoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CoverImage");
 
-                string[] Cfiles = Directory.GetFiles(CSeedPhotoPath);
+                string[] CoverImageFiles = Directory.GetFiles(CoverImageSeedPhotoPath);
 
-                for (int i = 0; i < Cfiles.Length; i++)
+                for (int i = 0; i < CoverImageFiles.Length; i++)
                 {
-                    var CfileName = "C" + Image[i] + ".jpg";
-                    var CDestFile = Path.Combine(CCoverImagePhotoPath, CfileName);
-                    File.Copy(Cfiles[i], CDestFile, overwrite: true);
+                    var CoverImageFileName = "C" + Image[i] + ".jpg";
+                    var CoverImageDestFile = Path.Combine(CoverImagePhotoPath, CoverImageFileName);
+                    File.Copy(CoverImageFiles[i], CoverImageDestFile, overwrite: true);
                 }
 
                 //座位圖片
-                string SSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "SeatImage");
-                string SCoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "SeatImage");
+                string SeatImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "SeatImage");
+                string SeatImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "SeatImage");
 
-                string[] Sfiles = Directory.GetFiles(SSeedPhotoPath);
+                string[] SeatImageFiles = Directory.GetFiles(SeatImageSeedPhotoPath);
 
-                for (int i = 0; i < Sfiles.Length; i++)
+                for (int i = 0; i < SeatImageFiles.Length; i++)
                 {
-                    var SfileName = "C" + Image[i] + ".jpg";
-                    var SDestFile = Path.Combine(SCoverImagePhotoPath, SfileName);
-                    File.Copy(Sfiles[i], SDestFile, overwrite: true);
+                    var SeatImageFileName = "C" + Image[i] + ".jpg";
+                    var SeatImageDestFile = Path.Combine(SeatImagePhotoPath, SeatImageFileName);
+                    File.Copy(SeatImageFiles[i], SeatImageDestFile, overwrite: true);
                 }
 
                 //場次
@@ -589,40 +589,40 @@ namespace TicketSalesSystem.Models
                     );
                 context.SaveChanges();
 
-                //活動說明圖片
-                string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                context.DescriptionImage.AddRange(
-                    new DescriptionImage
-                    {
-                        DescriptionImageID = guidDescriptionImage[0],
-                        DescriptionImageName = guidDescriptionImage[0] + ".jpg",
-                        ProgrammeID = "20260101"
-                    },
-                    new DescriptionImage
-                    {
-                        DescriptionImageID = guidDescriptionImage[1],
-                        DescriptionImageName = guidDescriptionImage[1] + ".jpg",
-                        ProgrammeID = "20260201"
-                    },
-                    new DescriptionImage
-                    {
-                        DescriptionImageID = guidDescriptionImage[2],
-                        DescriptionImageName = guidDescriptionImage[2] + ".jpg",
-                        ProgrammeID = "20260301"
-                    }
-                    );
-                context.SaveChanges();
-                string SeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "DescriptionImage");
-                string CoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "DescriptionImage");
+                ////活動說明圖片
+                //string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                //context.DescriptionImage.AddRange(
+                //    new DescriptionImage
+                //    {
+                //        DescriptionImageID = guidDescriptionImage[0],
+                //        DescriptionImageName = guidDescriptionImage[0] + ".jpg",
+                //        ProgrammeID = "20260101"
+                //    },
+                //    new DescriptionImage
+                //    {
+                //        DescriptionImageID = guidDescriptionImage[1],
+                //        DescriptionImageName = guidDescriptionImage[1] + ".jpg",
+                //        ProgrammeID = "20260201"
+                //    },
+                //    new DescriptionImage
+                //    {
+                //        DescriptionImageID = guidDescriptionImage[2],
+                //        DescriptionImageName = guidDescriptionImage[2] + ".jpg",
+                //        ProgrammeID = "20260301"
+                //    }
+                //    );
+                //context.SaveChanges();
+                //string SeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "DescriptionImage");
+                //string CoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "DescriptionImage");
 
-                string[] files = Directory.GetFiles(SeedPhotoPath);
+                //string[] files = Directory.GetFiles(SeedPhotoPath);
 
-                for (int i = 0; i < files.Length; i++)
-                {
-                    var fileName = guidDescriptionImage[i] + ".jpg";
-                    var DestFile = Path.Combine(CoverImagePhotoPath, guidDescriptionImage[i] + ".jpg");
-                    File.Copy(files[i], DestFile, overwrite: true);
-                }
+                //for (int i = 0; i < files.Length; i++)
+                //{
+                //    var fileName = guidDescriptionImage[i] + ".jpg";
+                //    var DestFile = Path.Combine(CoverImagePhotoPath, guidDescriptionImage[i] + ".jpg");
+                //    File.Copy(files[i], DestFile, overwrite: true);
+                //}
 
                 
 
@@ -803,7 +803,7 @@ namespace TicketSalesSystem.Models
                          PaymentMethodID = "A",
                          OrderStatusID = "Y",
                          SessionID = "2026010101",
-                         PaymentTradeNO = guidPayment[1]
+                         PaymentTradeNO = guidPayment[0]
                      },
                      new Order
                      {
@@ -825,7 +825,7 @@ namespace TicketSalesSystem.Models
                          PaymentMethodID = "C",
                          OrderStatusID = "Y",
                          SessionID = "2026030101",
-                         PaymentTradeNO = guidPayment[0]
+                         PaymentTradeNO = guidPayment[2]
                      }
                     );
                 context.SaveChanges();
@@ -848,7 +848,7 @@ namespace TicketSalesSystem.Models
                     {
                         TicketsID = "T000002",
                         CreatedTime = DateTime.Now,
-                        ScannedTime = new DateTime(2026, 1, 11, 16, 30, 0),
+                        ScannedTime = new DateTime(2027, 1, 11, 16, 30, 0),
                         RefundTime = null,
                         TicketsAreaID = "B01",
                         SeatID = "01",
@@ -859,9 +859,8 @@ namespace TicketSalesSystem.Models
                     new Tickets
                     {
                         TicketsID = "T000003",
-
-                        CreatedTime = new DateTime(2026, 1, 21, 14, 30, 00),
-                        ScannedTime = new DateTime(2026, 1, 12, 17, 30, 0),
+                        CreatedTime = DateTime.Now,
+                        ScannedTime = new DateTime(2027, 1, 12, 17, 30, 0),
                         RefundTime = null,
                         TicketsAreaID = "B01",
                         SeatID = "02",

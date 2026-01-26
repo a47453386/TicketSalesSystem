@@ -35,13 +35,13 @@ namespace TicketSalesSystem.Models
 
         [Display(Name = "封面圖片")]
         [Required(ErrorMessage = "必填")]
-        [StringLength(40, MinimumLength = 40)]
+        [StringLength(13, MinimumLength = 13)]
         public string CoverImage { get; set; } = null!;
 
    
         [Display(Name = "座位圖片")]
         [Required(ErrorMessage = "必填")]
-        [StringLength(40, MinimumLength = 40)]
+        [StringLength(13, MinimumLength = 13)]
         public string SeatImage { get; set; } = null!;
 
         [Display(Name = "限購")]
