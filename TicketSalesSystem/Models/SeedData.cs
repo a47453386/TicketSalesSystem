@@ -77,8 +77,8 @@ namespace TicketSalesSystem.Models
                 }
 
                 //座位圖片
-                string SSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "CoverImage");
-                string SCoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CoverImage");
+                string SSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "SeatImage");
+                string SCoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "SeatImage");
 
                 string[] Sfiles = Directory.GetFiles(SSeedPhotoPath);
 
@@ -90,6 +90,41 @@ namespace TicketSalesSystem.Models
                 }
 
                 //活動說明圖片
+                string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                context.DescriptionImage.AddRange(
+                    new DescriptionImage
+                    {
+                        DescriptionImageID= guidDescriptionImage[0],
+                        DescriptionImageName= guidDescriptionImage[0] +".jpg",
+                        ProgrammeID = "20260101"
+                    },
+                    new DescriptionImage
+                    {
+                        DescriptionImageID = Guid.NewGuid().ToString(),
+                        DescriptionImageName = guidDescriptionImage[1] + ".jpg",
+                        ProgrammeID = "20260201"
+                    },
+                    new DescriptionImage
+                    {
+                        DescriptionImageID = Guid.NewGuid().ToString(),
+                        DescriptionImageName = guidDescriptionImage[2] + ".jpg",
+                        ProgrammeID = "20260301"
+                    }
+                    );
+                context.SaveChanges();
+                string DSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "DescriptionImage");
+                string DCoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "DescriptionImage");
+
+                string[] Dfiles = Directory.GetFiles(DSeedPhotoPath);
+
+                for (int i = 0; i < Sfiles.Length; i++)
+                {
+                    var DfileName = guidDescriptionImage[i] + ".jpg";
+                    var DDestFile = Path.Combine(guidDescriptionImage[i] + ".jpg");
+                    File.Copy(Dfiles[i], DDestFile);
+                }
+                
+
 
 
                 //場次

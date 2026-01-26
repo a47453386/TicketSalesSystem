@@ -13,7 +13,7 @@ namespace TicketSalesSystem.Models
         [Display(Name = "說明圖片")]
         [Required(ErrorMessage = "必填")]
         [StringLength(40, MinimumLength = 40)]
-        public string ImageUrl { get; set; } = null!;
+        public string DescriptionImageName { get; set; } = null!;
 
         //FK            
         public string ProgrammeID { get; set; } = null!;
