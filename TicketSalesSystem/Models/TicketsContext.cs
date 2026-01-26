@@ -83,12 +83,12 @@ namespace TicketSalesSystem.Models
             modelBuilder.Entity<Employee>()
                 .HasOne(e => e.EmployeeLogin)
                 .WithOne(l => l.Employee)
-                .HasForeignKey<EmployeeLogin>(l => l.EmployeeID);
+                .HasForeignKey<EmployeeLogin>(l => l.EmployeeID);           
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Payment)
-                .WithOne(p => p.Order)
-                .HasForeignKey<Payment>(l => l.OrderID);
+            modelBuilder.Entity<Payment>()
+                .HasOne(o => o.Order)
+                .WithOne(p => p.Payment)
+                .HasForeignKey<Order>(l => l.PaymentTradeNO);
 
             // =========================
             // One-to-Many
@@ -173,12 +173,12 @@ namespace TicketSalesSystem.Models
             modelBuilder.Entity<Member>()
                 .HasMany(m => m.Order)
                 .WithOne(o => o.Member)
-                .HasForeignKey(o => o.MemberID);
+                .HasForeignKey(o => o.MemberID);          
 
-            modelBuilder.Entity<Programme>()
+            modelBuilder.Entity<Session>()
                 .HasMany(a => a.Order)
-                .WithOne(o => o.Programme)
-                .HasForeignKey(o => o.ProgrammeID);
+                .WithOne(o => o.Session)
+                .HasForeignKey(o => o.SessionID);
 
             modelBuilder.Entity<OrderStatus>()
                 .HasMany(s => s.Order)

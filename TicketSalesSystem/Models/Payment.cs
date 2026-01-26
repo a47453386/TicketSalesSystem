@@ -18,8 +18,7 @@ namespace TicketSalesSystem.Models
 
 
 
-        //FK區
-        public string OrderID { get; set; } = null!;
+        //FK區       
         public string PaymentStatusID { get; set; } = null!;
 
         //關聯區

@@ -9,11 +9,7 @@ namespace TicketSalesSystem.Models
         [Display(Name = "票券號碼")]
         [Column(TypeName = "nchar(7)")]        
         public string TicketsID { get; set; } = null!;
-
-        [Display(Name = "QRCode")]
-        [StringLength(50)]
-        [Required(ErrorMessage = "必填")]
-        public string QRCodeContent { get; set; } = null!;
+   
 
         [Display(Name = "退票處理時間")]
         [DataType(DataType.DateTime)]

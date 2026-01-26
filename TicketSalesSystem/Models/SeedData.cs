@@ -525,7 +525,8 @@ namespace TicketSalesSystem.Models
                          MemberID = guidMember[0],
                          PaymentMethodID = "A",
                          OrderStatusID = "Y",
-                         SessionID = "2026010101"
+                         SessionID = "2026010101",
+                         PaymentTradeNO = "C"
                      },
                      new Order
                      {
@@ -534,8 +535,9 @@ namespace TicketSalesSystem.Models
                          PaidTime = null,
                          MemberID = guidMember[1],
                          PaymentMethodID = "A",
-                         OrderStatusID ="N",
-                         SessionID = "2026020101"
+                         OrderStatusID = "N",
+                         SessionID = "2026020101",
+                         PaymentTradeNO = "C"
                      },
                      new Order
                      {
@@ -544,23 +546,24 @@ namespace TicketSalesSystem.Models
                          PaidTime = new DateTime(2026, 1, 21, 14, 20, 00),
                          MemberID = guidMember[2],
                          PaymentMethodID = "C",
-                         OrderStatusID ="Y",
-                         SessionID = "2026030101"
+                         OrderStatusID = "Y",
+                         SessionID = "2026030101",
+                         PaymentTradeNO = "A"
                      }
                     );
                 context.SaveChanges();
 
                 //訂單狀態
                 context.OrderStatus.AddRange(
-                    new OrderStatus 
-                    { 
-                        OrderStatusID = "N", 
-                        OrderStatusName = "未付款" 
+                    new OrderStatus
+                    {
+                        OrderStatusID = "N",
+                        OrderStatusName = "未付款"
                     },
                     new OrderStatus
-                    { 
+                    {
                         OrderStatusID = "Y",
-                        OrderStatusName = "已付款" 
+                        OrderStatusName = "已付款"
                     }
 );
                 context.SaveChanges();
@@ -568,28 +571,231 @@ namespace TicketSalesSystem.Models
                 //付款方式
                 context.PaymentMethod.AddRange(
                     new PaymentMethod
-                    { 
+                    {
                         PaymentMethodID = "C",
-                        PaymentMethodName = "信用卡" 
+                        PaymentMethodName = "信用卡"
                     },
                     new PaymentMethod
-                    { 
-                        PaymentMethodID = "A", 
-                        PaymentMethodName = "ATM 轉帳" 
+                    {
+                        PaymentMethodID = "A",
+                        PaymentMethodName = "ATM 轉帳"
                     }
                     );
                 context.SaveChanges();
 
-                context.AccountStatus.AddRange();
+                //金流
+                string[] guidPayment = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                context.Payment.AddRange(
+                    new Payment
+                    {
+                        PaymentTradeNO = guidPayment[0],
+                        PaymentDescription = "信用卡付款成功",
+                        PaymentStatusID = "Y",
+                    },
+                    new Payment
+                    {
+                        PaymentTradeNO = guidPayment[1],
+                        PaymentDescription = "ATM 轉帳等待付款中",
+                        PaymentStatusID = "W",
+                    },
+                    new Payment
+                    {
+                        PaymentTradeNO = guidPayment[2],
+                        PaymentDescription = "ATM轉帳失敗",
+                        PaymentStatusID = "N",
+                    }
+
+                    );
                 context.SaveChanges();
 
-                context.AccountStatus.AddRange();
+                //金流狀態
+
+                context.PaymentStatus.AddRange(
+                    new PaymentStatus
+                    {
+                        PaymentStatusID = "W",
+                        PaymentStatusName = "待付款"
+                    },
+                    new PaymentStatus
+                    {
+                        PaymentStatusID = "Y",
+                        PaymentStatusName = "付款成功"
+                    },
+                    new PaymentStatus
+                    {
+                        PaymentStatusID = "N",
+                        PaymentStatusName = "付款失敗"
+                    }
+                    );
                 context.SaveChanges();
 
-                context.AccountStatus.AddRange();
+                //票券
+                context.Tickets.AddRange(
+                    new Tickets
+                    {
+                        TicketsID = "T000001",
+                        CreatedTime = DateTime.Now,
+                        ScannedTime = new DateTime(2026, 1, 10, 19, 30, 0),
+                        RefundTime = null,
+                        TicketsAreaID = "A01",
+                        SeatID = "01",
+                        RowID = "01",
+                        TicketsStatusID = "N",
+                        OrderID = "202601200001"
+                    },
+                    new Tickets
+                    {
+                        TicketsID = "T000002",
+
+                        CreatedTime = new DateTime(2026, 1, 20, 11, 05, 00),
+                        ScannedTime = new DateTime(2026, 1, 11, 19, 30, 0),
+                        RefundTime = null,
+                        TicketsAreaID = "B01",
+                        SeatID ="01",
+                        RowID = "02",
+                        TicketsStatusID = "N",
+                        OrderID = "202601200002"
+                    },
+                    new Tickets
+                    {
+                        TicketsID = "T000003",
+
+                        CreatedTime = new DateTime(2026, 1, 21, 14, 30, 00),
+                        ScannedTime = new DateTime(2026, 1, 12, 19, 30, 0),
+                        RefundTime = null,
+                        TicketsAreaID = "B01",
+                        SeatID = "02",
+                        RowID = "01",
+                        TicketsStatusID = "N",
+                        OrderID = "202601200003"
+                    }
+                    );
                 context.SaveChanges();
 
-                context.AccountStatus.AddRange();
+                //票券狀態
+                context.TicketsStatus.AddRange(
+                     new TicketsStatus
+                     {
+                         TicketsStatusID = "N",
+                         TicketsStatusName = "未使用"
+                     },
+                     new TicketsStatus
+                     {
+                         TicketsStatusID = "Y",
+                         TicketsStatusName = "已使用"
+                     }
+                    );
+                context.SaveChanges();
+
+                //號
+                context.Seat.AddRange(
+                    new Seat
+                    {
+                        SeatID = "01",
+                        SeatName = "01",
+                        SeatStatusID = "A"
+                    },
+                    new Seat
+                    {
+                        SeatID = "02",
+                        SeatName = "02",
+                        SeatStatusID = "A"
+                    },
+                    new Seat
+                    {
+                        SeatID = "03",
+                        SeatName = "03",
+                        SeatStatusID = "B"
+                    }
+                    );
+                context.SaveChanges();
+
+                //座位狀態
+                context.SeatStatus.AddRange(
+                     new SeatStatus 
+                     { 
+                         SeatStatusID = "A",
+                         SeatStatusName = "可選" 
+                     },
+                     new SeatStatus 
+                     { 
+                         SeatStatusID = "B", 
+                         SeatStatusName = "已售出" 
+                     },
+                     new SeatStatus 
+                     { 
+                         SeatStatusID = "C",
+                         SeatStatusName = "保留" 
+                     }
+                    );
+                context.SaveChanges();
+
+                //排
+                context.SeatRow.AddRange(
+                    new SeatRow
+                    {
+                        SeatRowID = "01",
+                        SeatRowName = "01"                        
+                    },
+                    new SeatRow
+                    {
+                        SeatRowID = "02",
+                        SeatRowName = "02"
+                    },
+                    new SeatRow
+                    {
+                        SeatRowID = "03",
+                        SeatRowName = "03"
+                    }
+
+                    );
+                context.SaveChanges();
+
+                //票區
+                context.TicketsArea.AddRange(
+                    new TicketsArea
+                    {
+                        TicketsAreaID = "A01",
+                        TicketsAreaName = "搖滾站區",
+                        Price = 4800,
+                        TicketsAreaStatusID ="O"
+                    },
+                    new TicketsArea
+                    {
+                        TicketsAreaID = "B01",
+                        TicketsAreaName = "二樓看台區",
+                        Price = 3200,
+                        TicketsAreaStatusID ="I"
+                    },
+                    new TicketsArea
+                    {
+                        TicketsAreaID = "C01",
+                        TicketsAreaName = "視線加強區",
+                        Price = 1200,
+                        TicketsAreaStatusID ="S"
+                    }
+
+                    );
+                context.SaveChanges();
+
+                //票區狀態
+                context.TicketsAreaStatus.AddRange(
+                    new TicketsAreaStatus 
+                    { 
+                        TicketsAreaStatusID = "I", 
+                        TicketsAreaStatusName = "販售中" 
+                    },
+                    new TicketsAreaStatus
+                    { 
+                        TicketsAreaStatusID = "O",
+                        TicketsAreaStatusName = "售完" 
+                    },
+                    new TicketsAreaStatus
+                    {
+                        TicketsAreaStatusID = "S",
+                        TicketsAreaStatusName = "停止販售"
+                    }
+                     );
                 context.SaveChanges();
             }
         }

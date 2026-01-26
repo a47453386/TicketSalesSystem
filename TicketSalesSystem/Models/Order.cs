@@ -33,6 +33,7 @@ namespace TicketSalesSystem.Models
         public  string PaymentMethodID { get; set; } = null!;        
         public string OrderStatusID { get; set; } = null!;     
         public string SessionID { get; set; } = null!;
+        public string PaymentTradeNO { get; set; } = null!;
 
 
 
