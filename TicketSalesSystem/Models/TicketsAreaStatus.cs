@@ -11,7 +11,7 @@ namespace TicketSalesSystem.Models
 
         [Display(Name = "票區狀態")]
         [Required(ErrorMessage = "必填")]
-        [StringLength(2, MinimumLength = 30, ErrorMessage = "請輸入2~30個字")]
+        [StringLength(30, MinimumLength = 2, ErrorMessage = "請輸入2~30個字")]
         public string TicketsAreaStatusName { get; set; } = null!;
 
         //關聯

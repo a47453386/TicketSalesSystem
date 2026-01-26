@@ -64,7 +64,7 @@ namespace TicketSalesSystem.Models
         public string? Extension { get; set; }
 
         [Display(Name = "照片")]
-        [StringLength(40, MinimumLength = 40)]
+        [StringLength(40)]
         public string? Photo { get; set; }
 
         [Display(Name = "建立時間")]
