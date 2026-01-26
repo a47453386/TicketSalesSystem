@@ -16,16 +16,17 @@ namespace TicketSalesSystem.Models
                 }
 
                 //活動
+                string[] Image = { "20260101", "20260201", "20260301" };
                 context.Programme.AddRange(
                     new Programme()
                     {
                         ProgrammeID = "20260101",
                         ProgrammeName = "五月天 2026 世界巡迴演唱會",
                         ProgrammeDescription = "五月天 2026 世界巡迴演唱會－台北站，經典曲目全新編排。",
-                        CreatedTime = new DateTime(2026, 1, 1),
+                        CreatedTime =DateTime.Now,
                         UpdatedAt = null,
-                        CoverImage = "C20260101.jpg",
-                        SeatImage = "S20260101.jpg",
+                        CoverImage = "C" + Image[0]+".jpg",
+                        SeatImage = "S"+ Image[0] + ".jpg",
                         LimitPerOrder = 4,
                         EmployeeID = "P23001",
                         PlaceID = "B",
@@ -34,12 +35,12 @@ namespace TicketSalesSystem.Models
                     new Programme
                     {
                         ProgrammeID = "20260201",
-                        ProgrammeName = "周杰倫 嘉年華 世界巡演",
-                        ProgrammeDescription = "周杰倫嘉年華演唱會，橫跨經典與新作。",
-                        CreatedTime = new DateTime(2026, 2, 1),
+                        ProgrammeName = "頑童MJ116 OGS 台中洲際演唱會",
+                        ProgrammeDescription = "睽違六年，OG再起——金曲嘻哈天團頑童MJ116重磅回歸！",
+                        CreatedTime = DateTime.Now,
                         UpdatedAt = null,
-                        CoverImage = "C20260201.jpg",
-                        SeatImage = "S20260201.jpg",
+                        CoverImage = "C" + Image[1] + ".jpg",
+                        SeatImage = "S" + Image[1] + ".jpg",
                         LimitPerOrder = 6,
                         EmployeeID = "P23001",
                         PlaceID = "A",
@@ -48,12 +49,12 @@ namespace TicketSalesSystem.Models
                     new Programme
                     {
                         ProgrammeID = "20260301",
-                        ProgrammeName = "音樂劇《悲慘世界》",
-                        ProgrammeDescription = "經典音樂劇《Les Misérables》中文版。",
-                        CreatedTime = new DateTime(2026, 2, 1),
+                        ProgrammeName = "丁噹Della 《夜遊 A Night Tour》",
+                        ProgrammeDescription = "丁噹Della 《夜遊 A Night Tour》高雄巨蛋夜未眠巡迴演唱會",
+                        CreatedTime = DateTime.Now,
                         UpdatedAt = null,
-                        CoverImage = "C20260301.jpg",
-                        SeatImage = "S20260301.jpg",
+                        CoverImage = "C" + Image[2] + ".jpg",
+                        SeatImage = "S" + Image[2] + ".jpg",
                         LimitPerOrder = 2,
                         EmployeeID = "P23001",
                         PlaceID = "A",
@@ -61,6 +62,35 @@ namespace TicketSalesSystem.Models
                     }
                 );
                 context.SaveChanges();
+               
+                //封面圖片
+                string CSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "CoverImage");
+                string CCoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CoverImage");
+
+                string[] Cfiles = Directory.GetFiles(CSeedPhotoPath);
+
+                for (int i = 0; i < Cfiles.Length; i++)
+                {
+                    var CfileName = "C"+Image[i] + ".jpg";
+                    var CDestFile = Path.Combine(Image[i] + ".jpg");
+                    File.Copy(Cfiles[i], CDestFile);
+                }
+
+                //座位圖片
+                string SSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "CoverImage");
+                string SCoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CoverImage");
+
+                string[] Sfiles = Directory.GetFiles(SSeedPhotoPath);
+
+                for (int i = 0; i < Sfiles.Length; i++)
+                {
+                    var SfileName = "C" + Image[i] + ".jpg";
+                    var SDestFile = Path.Combine(Image[i] + ".jpg");
+                    File.Copy(Sfiles[i], SDestFile);
+                }
+
+                //活動說明圖片
+
 
                 //場次
                 context.Session.AddRange(
