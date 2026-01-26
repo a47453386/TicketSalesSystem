@@ -6,8 +6,8 @@ namespace TicketSalesSystem.Models
     public class Member
     {
         [Key]
-        [Column(TypeName = "nchar(4)")]
         [Display(Name = "會員編號")]
+        [StringLength(36, MinimumLength = 36)]        
         public string MemberID { get; set; } = null!;
 
         [Display(Name = "會員姓名")]

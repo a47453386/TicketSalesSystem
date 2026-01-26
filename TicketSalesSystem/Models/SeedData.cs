@@ -182,6 +182,30 @@ namespace TicketSalesSystem.Models
                     );
                 context.SaveChanges();
 
+                //員工帳號密碼
+                context.EmployeeLogin.AddRange(
+                    new EmployeeLogin
+                    {
+                        Account = "admin0001",
+                        Password = "Aa123456",
+                        EmployeeID = "P23001"
+                    },
+                    new EmployeeLogin
+                    {
+                        Account = "staff0002",
+                        Password = "Bb123456",
+                        EmployeeID = "A23025"
+                    },
+                    new EmployeeLogin
+                    {
+                        Account = "staff0003",
+                        Password = "Cc123456",
+                        EmployeeID = "F24001"
+                    }
+                    );
+                context.SaveChanges();
+
+
                 //角色
                 context.Role.AddRange(
                     new Role { RoleID = "A", RoleName = "系統管理員" },
@@ -212,7 +236,7 @@ namespace TicketSalesSystem.Models
                     {
                         MemberID = guidMember[0],
                         Name = "王小明",
-                        Address="台北市信義區松仁路100號",
+                        Address = "台北市信義區松仁路100號",
                         Birthday = new DateTime(1990, 5, 15),
                         Tel = "0911111111",
                         Gender = true,
@@ -225,7 +249,7 @@ namespace TicketSalesSystem.Models
                     },
                     new Member
                     {
-                        MemberID = guidMember[1],                        
+                        MemberID = guidMember[1],
                         Name = "陳小華",
                         Address = "新北市板橋區文化路200號",
                         Birthday = new DateTime(1985, 8, 20),
@@ -236,11 +260,11 @@ namespace TicketSalesSystem.Models
                         CreatedDate = DateTime.Now,
                         LastLoginTime = null,
                         IsPhoneVerified = false,
-                        AccountStatusID = "A"                       
+                        AccountStatusID = "A"
                     },
                     new Member
                     {
-                        MemberID = guidMember[2],                       
+                        MemberID = guidMember[2],
                         Name = "林小美",
                         Address = "台中市西屯區台灣大道300號",
                         Birthday = new DateTime(1995, 12, 25),
@@ -252,15 +276,33 @@ namespace TicketSalesSystem.Models
                         LastLoginTime = null,
                         IsPhoneVerified = false,
                         AccountStatusID = "B"
-
                     }
-
                     );
                 context.SaveChanges();
 
-
-                context.AccountStatus.AddRange();
+                //會員登入資料
+                context.MemberLogin.AddRange(
+                     new MemberLogin
+                     {
+                         Account = "member001",
+                         Password = "Aa123456",
+                         MemberID = guidMember[0]
+                     },
+                     new MemberLogin
+                     {
+                         Account = "member002",
+                         Password = "Bb123456",
+                         MemberID = guidMember[1]
+                     },
+                     new MemberLogin
+                     {
+                         Account = "member003",
+                         Password = "Cc123456",
+                         MemberID = guidMember[2]
+                     }
+                    );
                 context.SaveChanges();
+
 
                 context.AccountStatus.AddRange();
                 context.SaveChanges();
