@@ -132,25 +132,25 @@ namespace TicketSalesSystem.Models
                     new Session
                     {
                         SessionID = "2026010101",
-                        SaleStartTime = new DateTime(2025, 12, 1, 12, 0, 0),
-                        SaleEndTime = new DateTime(2026, 1, 9, 23, 59, 59),
-                        StartTime = new DateTime(2026, 1, 10, 19, 30, 0),
+                        SaleStartTime = new DateTime(2026, 12, 1, 12, 0, 0),
+                        SaleEndTime = new DateTime(2027, 1, 9, 23, 59, 59),
+                        StartTime = new DateTime(2027, 1, 10, 19, 30, 0),
                         ProgrammeID = "20260101"
                     },
                     new Session
                     {
                         SessionID = "2026020101",
-                        SaleStartTime = new DateTime(2025, 12, 2, 12, 0, 0),
-                        SaleEndTime = new DateTime(2026, 1, 10, 23, 59, 59),
-                        StartTime = new DateTime(2026, 1, 11, 19, 30, 0),
+                        SaleStartTime = new DateTime(2026, 12, 2, 12, 0, 0),
+                        SaleEndTime = new DateTime(2027, 1, 10, 23, 59, 59),
+                        StartTime = new DateTime(2027, 1, 11, 19, 30, 0),
                         ProgrammeID = "20260201"
                     },
                     new Session
                     {
                         SessionID = "2026030101",
-                        SaleStartTime = new DateTime(2025, 12, 3, 12, 0, 0),
-                        SaleEndTime = new DateTime(2026, 1, 11, 23, 59, 59),
-                        StartTime = new DateTime(2026, 1, 12, 19, 30, 0),
+                        SaleStartTime = new DateTime(2026, 12, 3, 12, 0, 0),
+                        SaleEndTime = new DateTime(2027, 1, 11, 23, 59, 59),
+                        StartTime = new DateTime(2027, 1, 12, 19, 30, 0),
                         ProgrammeID = "20260301"
                     }
                     );
@@ -584,9 +584,9 @@ namespace TicketSalesSystem.Models
                 context.Order.AddRange(
                      new Order
                      {
-                         OrderID = "202601200001",
+                         OrderID = "202612000001",
                          OrderCreatedTime = DateTime.Now,
-                         PaidTime = new DateTime(2026, 1, 20, 10, 35, 00),
+                         PaidTime = new DateTime(2026, 12, 1, 16, 00, 00),
                          MemberID = guidMember[0],
                          PaymentMethodID = "A",
                          OrderStatusID = "Y",
@@ -595,7 +595,7 @@ namespace TicketSalesSystem.Models
                      },
                      new Order
                      {
-                         OrderID = "202601200002",
+                         OrderID = "202612000002",
                          OrderCreatedTime = DateTime.Now,
                          PaidTime = null,
                          MemberID = guidMember[1],
@@ -606,9 +606,9 @@ namespace TicketSalesSystem.Models
                      },
                      new Order
                      {
-                         OrderID = "202601200003",
+                         OrderID = "202612000003",
                          OrderCreatedTime = DateTime.Now,
-                         PaidTime = new DateTime(2026, 1, 21, 14, 20, 00),
+                         PaidTime = new DateTime(2026, 12, 3, 14, 20, 00),
                          MemberID = guidMember[2],
                          PaymentMethodID = "C",
                          OrderStatusID = "Y",
@@ -700,7 +700,7 @@ namespace TicketSalesSystem.Models
                     {
                         TicketsID = "T000001",
                         CreatedTime = DateTime.Now,
-                        ScannedTime = new DateTime(2026, 1, 10, 19, 30, 0),
+                        ScannedTime = new DateTime(2027, 1, 10, 16, 30, 0),
                         RefundTime = null,
                         TicketsAreaID = "A01",
                         SeatID = "01",
@@ -711,9 +711,8 @@ namespace TicketSalesSystem.Models
                     new Tickets
                     {
                         TicketsID = "T000002",
-
-                        CreatedTime = new DateTime(2026, 1, 20, 11, 05, 00),
-                        ScannedTime = new DateTime(2026, 1, 11, 19, 30, 0),
+                        CreatedTime = DateTime.Now,
+                        ScannedTime = new DateTime(2026, 1, 11, 16, 30, 0),
                         RefundTime = null,
                         TicketsAreaID = "B01",
                         SeatID ="01",
@@ -726,7 +725,7 @@ namespace TicketSalesSystem.Models
                         TicketsID = "T000003",
 
                         CreatedTime = new DateTime(2026, 1, 21, 14, 30, 00),
-                        ScannedTime = new DateTime(2026, 1, 12, 19, 30, 0),
+                        ScannedTime = new DateTime(2026, 1, 12, 17, 30, 0),
                         RefundTime = null,
                         TicketsAreaID = "B01",
                         SeatID = "02",
