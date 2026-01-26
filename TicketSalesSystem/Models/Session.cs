@@ -34,5 +34,7 @@ namespace TicketSalesSystem.Models
 
         //關聯區
         public virtual Programme? Programme { get; set; }
+
+        public virtual List<Order>? Order { get; set; }
     }
 }

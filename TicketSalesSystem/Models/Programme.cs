@@ -65,6 +65,6 @@ namespace TicketSalesSystem.Models
 
         public virtual List<DescriptionImage>? DescriptionImage { get; set; }
         public virtual List<Session>? Session { get; set; }
-        public virtual List<Order>? Order { get; set; }
+        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace TicketSalesSystem.Models
 {
@@ -157,25 +158,25 @@ namespace TicketSalesSystem.Models
                          Photo = "F23025.jpg",
                          CreatedTime = DateTime.Now,
                          LastLoginTime = null,
-                         RoleID = "A1",
+                         RoleID = "A",
                          AccountStatusID = "A"
                      },
                      new Employee
                      {
-                         EmployeeID = "F24001",
-                         Name = "劉冠佑",
+                         EmployeeID = "C24001",
+                         Name = "蔡昇宴",
                          HireDate = new DateTime(2024, 1, 10),
                          Address = "新北市板橋區永和路4巷7號",
-                         Birthday = new DateTime(1970, 04, 5),
+                         Birthday = new DateTime(1980, 5, 27),
                          Tel = "0912000003",
                          Gender = true,
                          NationalID = "C345678901",
-                         Email = "Ming@mayday.com",
+                         Email = "Masa@mayday.com",
                          Extension = "#103",
                          Photo = "F24001.jpg",
                          CreatedTime = DateTime.Now,
                          LastLoginTime = null,
-                         RoleID = "F1",
+                         RoleID = "C",
                          AccountStatusID = "A"
                      }
 
@@ -210,7 +211,7 @@ namespace TicketSalesSystem.Models
                 context.Role.AddRange(
                     new Role { RoleID = "A", RoleName = "系統管理員" },
                     new Role { RoleID = "P", RoleName = "活動管理員" },
-                    new Role { RoleID = "F", RoleName = "財務人員" }
+                    new Role { RoleID = "C", RoleName = "客服人員" }
                     );
                 context.SaveChanges();
 
@@ -303,6 +304,281 @@ namespace TicketSalesSystem.Models
                     );
                 context.SaveChanges();
 
+                //問題
+                string[] guidQuestion = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                context.Question.AddRange(
+                     new Question
+                     {
+                         QuestionID = guidQuestion[0],
+                         QuestionTitle = "無法完成訂單付款",
+                         QuestionDescription = "我在結帳時畫面一直轉圈，請問該如何處理？",
+                         CreatedTime = DateTime.Now,
+                         UploadFile = null,
+                         MemberID = guidMember[0],
+                         QuestionTypeID = "Q1"
+                     },
+                    new Question
+                    {
+                        QuestionID = guidQuestion[1],
+                        QuestionTitle = "活動是否可以退票",
+                        QuestionDescription = "請問演唱會門票是否可以在活動前退票？",
+                        CreatedTime = DateTime.Now,
+                        UploadFile = null,
+                        MemberID = guidMember[1],
+                        QuestionTypeID = "Q3"
+                    },
+                    new Question
+                    {
+                        QuestionID = guidQuestion[2],
+                        QuestionTitle = "訂單資料顯示異常",
+                        QuestionDescription = "我的訂單已付款，但狀態顯示尚未完成。",
+                        CreatedTime = DateTime.Now,
+                        UploadFile = guidQuestion[2] + ".pdf",
+                        MemberID = guidMember[2],
+                        QuestionTypeID = "Q1"
+                    }
+                    );
+                context.SaveChanges();
+
+                //問題種類
+                context.QuestionType.AddRange(
+                    new QuestionType
+                    {
+                        QuestionTypeID = "Q1",
+                        QuestionTypeName = "訂單問題"
+                    },
+                    new QuestionType
+                    {
+                        QuestionTypeID = "Q2",
+                        QuestionTypeName = "付款問題"
+                    },
+                    new QuestionType
+                    {
+                        QuestionTypeID = "Q3",
+                        QuestionTypeName = "票券問題"
+                    }
+
+                    );
+                context.SaveChanges();
+
+                //回覆表單
+                context.Reply.AddRange(
+                    new Reply
+                    {
+                        ReplyID = Guid.NewGuid().ToString(),
+                        ReplyDescription = "您好，請嘗試重新整理頁面，或更換瀏覽器後再次付款，若仍有問題請回覆告知。",
+                        CreatedTime = DateTime.Now,
+                        Note = "已電話通知會員",
+                        EmployeeID = "C24001",
+                        QuestionID = guidQuestion[0],
+                        ReplyStatusID = "Y"
+                    },
+                    new Reply
+                    {
+                        ReplyID = Guid.NewGuid().ToString(),
+                        ReplyDescription = "此活動門票可於活動前 7 天申請退票，退票流程已寄送至您的信箱。",
+                        CreatedTime = DateTime.Now,
+                        Note = null,
+                        EmployeeID = "C24001",
+                        QuestionID = guidQuestion[1],
+                        ReplyStatusID = "Y"
+                    },
+                     new Reply
+                     {
+                         ReplyID = Guid.NewGuid().ToString(),
+                         ReplyDescription = "我們正在協助查詢訂單狀態，確認後會再回覆您，感謝耐心等候。",
+                         CreatedTime = DateTime.Now,
+                         Note = "需確認金流回傳狀態",
+                         EmployeeID = "C24001",
+                         QuestionID = guidQuestion[2],
+                         ReplyStatusID = "N"
+                     }
+                    );
+                context.SaveChanges();
+
+                //回覆狀態
+                context.ReplyStatus.AddRange(
+                    new ReplyStatus
+                    {
+                        ReplyStatusID = "N",
+                        ReplyStatusName = "未回覆"
+                    },
+                    new ReplyStatus
+                    {
+                        ReplyStatusID = "Y",
+                        ReplyStatusName = "已回覆"
+                    }
+                    );
+                context.SaveChanges();
+
+                //FAQ
+                string[] guidFAQ = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                context.FAQ.AddRange(
+                    new FAQ
+                    {
+                        FAQID = guidFAQ[0],
+                        FAQTitle = "如何查詢我的訂單紀錄？",
+                        FAQDescription = "請登入會員後，至【會員中心 → 我的訂單】即可查看所有歷史訂單與狀態。",
+                        EmployeeID = "A23025",
+                        FAQPublishStatusID = "Y",
+                        FAQTypeID = "F1"
+                    },
+                    new FAQ
+                    {
+                        FAQID = guidFAQ[1],
+                        FAQTitle = "付款失敗該怎麼辦？",
+                        FAQDescription = "若付款失敗，請確認信用卡是否有效，或改用其他付款方式再次嘗試。",
+                        EmployeeID = "A23025",
+                        FAQPublishStatusID = "Y",
+                        FAQTypeID = "F2"
+                    },
+                     new FAQ
+                     {
+                         FAQID = guidFAQ[2],
+                         FAQTitle = "忘記密碼要怎麼重設？",
+                         FAQDescription = "請於登入頁面點選【忘記密碼】，依照系統指示完成密碼重設流程。",
+                         EmployeeID = "A23025",
+                         FAQPublishStatusID = "Y",
+                         FAQTypeID = "F3"
+                     }
+                    );
+                context.SaveChanges();
+
+                //FAQ種類
+                context.FAQType.AddRange(
+                    new FAQType
+                    {
+                        FAQTypeID = "F1",
+                        FAQTypeName = "訂票流程"
+                    },
+                    new FAQType
+                    {
+                        FAQTypeID = "F2",
+                        FAQTypeName = "付款問題"
+                    },
+                    new FAQType
+                    {
+                        FAQTypeID = "F3",
+                        FAQTypeName = "帳號相關"
+                    }
+                    );
+                context.SaveChanges();
+
+                //FAQ發佈狀態
+                context.FAQPublishStatus.AddRange(
+                    new FAQPublishStatus
+                    {
+                        FAQPublishStatusID = "N",
+                        FAQPublishStatusName = "未發佈"
+                    },
+                    new FAQPublishStatus
+                    {
+                        FAQPublishStatusID = "Y",
+                        FAQPublishStatusName = "已發佈"
+                    }
+                    );
+                context.SaveChanges();
+
+                //公告
+                string[] guidPublicNotice = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                context.PublicNotice.AddRange(
+                     new PublicNotice
+                     {
+                         PublicNoticeID = guidPublicNotice[0],
+                         PublicNoticeTitle = "系統維護公告",
+                         PublicNoticeDescription = "本系統將於 2026 年 1 月 25 日 02:00 至 04:00 進行系統維護，期間暫停所有購票與查詢服務。",
+                         CreatedTime = DateTime.Now,
+                         UpdatedAt = null,
+                         PublicNoticeStatus = true,
+                         EmployeeID = "A23025"
+                     },
+                     new PublicNotice
+                     {
+                         PublicNoticeID = guidPublicNotice[1],
+                         PublicNoticeTitle = "春節期間客服服務時間調整",
+                         PublicNoticeDescription = "春節連假期間，客服服務時間調整為每日 10:00 至 16:00，造成不便敬請見諒。",
+                         CreatedTime = DateTime.Now,
+                         UpdatedAt = null,
+                         PublicNoticeStatus = true,
+                         EmployeeID = "A23025"
+                     },
+                     new PublicNotice
+                     {
+                         PublicNoticeID = guidPublicNotice[2],
+                         PublicNoticeTitle = "新功能預告",
+                         PublicNoticeDescription = "我們即將推出快速選位功能，讓購票流程更加順暢，敬請期待！",
+                         CreatedTime = DateTime.Now,
+                         UpdatedAt = null,
+                         PublicNoticeStatus = false,
+                         EmployeeID = "A23025"
+                     }
+                    );
+                context.SaveChanges();
+
+                //訂單
+                context.Order.AddRange(
+                     new Order
+                     {
+                         OrderID = "202601200001",
+                         OrderCreatedTime = DateTime.Now,
+                         PaidTime = new DateTime(2026, 1, 20, 10, 35, 00),
+                         MemberID = guidMember[0],
+                         PaymentMethodID = "A",
+                         OrderStatusID = "Y",
+                         SessionID = "2026010101"
+                     },
+                     new Order
+                     {
+                         OrderID = "202601200002",
+                         OrderCreatedTime = DateTime.Now,
+                         PaidTime = null,
+                         MemberID = guidMember[1],
+                         PaymentMethodID = "A",
+                         OrderStatusID ="N",
+                         SessionID = "2026020101"
+                     },
+                     new Order
+                     {
+                         OrderID = "202601200003",
+                         OrderCreatedTime = DateTime.Now,
+                         PaidTime = new DateTime(2026, 1, 21, 14, 20, 00),
+                         MemberID = guidMember[2],
+                         PaymentMethodID = "C",
+                         OrderStatusID ="Y",
+                         SessionID = "2026030101"
+                     }
+                    );
+                context.SaveChanges();
+
+                //訂單狀態
+                context.OrderStatus.AddRange(
+                    new OrderStatus 
+                    { 
+                        OrderStatusID = "N", 
+                        OrderStatusName = "未付款" 
+                    },
+                    new OrderStatus
+                    { 
+                        OrderStatusID = "Y",
+                        OrderStatusName = "已付款" 
+                    }
+);
+                context.SaveChanges();
+
+                //付款方式
+                context.PaymentMethod.AddRange(
+                    new PaymentMethod
+                    { 
+                        PaymentMethodID = "C",
+                        PaymentMethodName = "信用卡" 
+                    },
+                    new PaymentMethod
+                    { 
+                        PaymentMethodID = "A", 
+                        PaymentMethodName = "ATM 轉帳" 
+                    }
+                    );
+                context.SaveChanges();
 
                 context.AccountStatus.AddRange();
                 context.SaveChanges();

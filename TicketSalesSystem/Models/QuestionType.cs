@@ -6,7 +6,7 @@ namespace TicketSalesSystem.Models
     public class QuestionType
     {
         [Key]
-        [Column(TypeName = "nchar(1)")]
+        [Column(TypeName = "nchar(2)")]
         public string QuestionTypeID { get; set; } = null!;
 
         [Display(Name = "問題種類名稱")]
