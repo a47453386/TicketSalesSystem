@@ -1,0 +1,93 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Programme>
+
+@{
+    ViewData["Title"] = "活動管理總覽";
+}
+<p>
+    <a asp-action="Create">新增活動</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ProgrammeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProgrammeDescription)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CoverImage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SeatImage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LimitPerOrder)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Employee.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Place.PlaceName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProgrammeStatus.ProgrammeStatusName)
+            </th>
+            <th>資訊管理</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProgrammeName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProgrammeDescription)
+            </td>
+            <td>
+                
+                @Html.DisplayFor(modelItem => item.CreatedTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedAt)
+            </td>
+            <td>
+                    @if (item.CoverImage != null)
+                    {
+                        <img src="~/Photos/CoverImage/@item.CoverImage" alt="@item.ProgrammeName" class="img-fluid" />
+                    }                  
+           </td>
+            <td>
+                    @if (item.SeatImage != null)
+                    {
+                        <img src="~/Photos/SeatImage/@item.SeatImage" alt="@item.ProgrammeName" class="img-fluid h-100" />
+                    }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LimitPerOrder)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Employee.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Place.PlaceName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProgrammeStatus.ProgrammeStatusName)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ProgrammeID">更新</a> |
+                <a asp-action="Details" asp-route-id="@item.ProgrammeID">詳細資訊</a> |
+                <a asp-action="Delete" asp-route-id="@item.ProgrammeID">刪除</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

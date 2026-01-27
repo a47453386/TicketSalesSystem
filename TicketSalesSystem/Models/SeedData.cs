@@ -642,8 +642,11 @@ namespace TicketSalesSystem.Models
                     context.SaveChanges();
                 }
                 ////活動說明圖片
+                
                 string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                context.DescriptionImage.AddRange(
+                if (!context.DescriptionImage.Any())
+                {
+                    context.DescriptionImage.AddRange(
                     new DescriptionImage
                     {
                         DescriptionImageID = guidDescriptionImage[0],
@@ -663,19 +666,19 @@ namespace TicketSalesSystem.Models
                         ProgrammeID = "20260301"
                     }
                     );
-                context.SaveChanges();
-                string DescriptionImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "DescriptionImage");
-                string DescriptionImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","Photos", "DescriptionImage");
+                    context.SaveChanges();
+                    string DescriptionImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "DescriptionImage");
+                    string DescriptionImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Photos", "DescriptionImage");
 
-                string[] files = Directory.GetFiles(DescriptionImageSeedPhotoPath);
+                    string[] files = Directory.GetFiles(DescriptionImageSeedPhotoPath);
 
-                for (int i = 0; i < files.Length; i++)
-                {
-                    var fileName = guidDescriptionImage[i] + ".jpg";
-                    var DestFile = Path.Combine(DescriptionImagePhotoPath, fileName);
-                    File.Copy(files[i], DestFile, overwrite: true);
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        var fileName = guidDescriptionImage[i] + ".jpg";
+                        var DestFile = Path.Combine(DescriptionImagePhotoPath, fileName);
+                        File.Copy(files[i], DestFile, overwrite: true);
+                    }
                 }
-
 
                 string[] guidQuestion = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 //問題
