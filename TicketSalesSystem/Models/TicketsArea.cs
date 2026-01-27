@@ -11,7 +11,7 @@ namespace TicketSalesSystem.Models
 
         [Display(Name = "票區")]
         [Required(ErrorMessage = "必填")]
-        [StringLength(20, MinimumLength = 5, ErrorMessage = "請輸入2~20個字")]
+        [StringLength(20, MinimumLength = 2, ErrorMessage = "請輸入2~20個字")]
         public string TicketsAreaName { get; set; } = null!;
 
         [Display(Name = "票價")]
