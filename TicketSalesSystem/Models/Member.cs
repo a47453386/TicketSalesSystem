@@ -29,7 +29,7 @@ namespace TicketSalesSystem.Models
         [Display(Name = "手機電話")]
         [Required(ErrorMessage = "必填")]
         [StringLength(10, MinimumLength = 10, ErrorMessage = "請輸入10碼")]
-        [RegularExpression("[09][0-9]{8}", ErrorMessage = "手機格式錯誤，請輸入 09 開頭的 10 位數字")]
+        [RegularExpression("09[0-9]{8}", ErrorMessage = "手機格式錯誤，請輸入 09 開頭的 10 位數字")]
         public string Tel { get; set; } = null!;
 
         [Display(Name = "性別")]
@@ -39,7 +39,7 @@ namespace TicketSalesSystem.Models
         [Display(Name = "身分證字號")]
         [Required(ErrorMessage = "必填")]
         [StringLength(10, MinimumLength = 10, ErrorMessage = "請輸入10碼")]
-        [RegularExpression("[A-Z][12][]0-9]{8}", ErrorMessage = "身分證字號格式錯誤")]
+        [RegularExpression("[A-Z][12][0-9]{8}", ErrorMessage = "身分證字號格式錯誤")]
         public string NationalID { get; set; } = null!;
 
 

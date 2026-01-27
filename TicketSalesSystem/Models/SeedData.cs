@@ -10,7 +10,10 @@ namespace TicketSalesSystem.Models
             using (TicketsContext context = new TicketsContext(serviceProvider.GetRequiredService<DbContextOptions<TicketsContext>>()))
             {
                 //角色
-                context.Role.AddRange(
+
+                if (!context.Role.Any())
+                {
+                    context.Role.AddRange(
                     new Role
                     {
                         RoleID = "A",
@@ -30,10 +33,13 @@ namespace TicketSalesSystem.Models
                         RoleDescription = ""
                     }
                     );
-                context.SaveChanges();
+                    context.SaveChanges();
+                }
 
                 //帳號狀態
-                context.AccountStatus.AddRange(
+                if (!context.AccountStatus.Any())
+                {
+                    context.AccountStatus.AddRange(
                      new AccountStatus
                      {
                          AccountStatusID = "A",
@@ -45,10 +51,13 @@ namespace TicketSalesSystem.Models
                          AccountStatusName = "停權"
                      }
                     );
-                context.SaveChanges();
+                    context.SaveChanges();
+                }
 
                 //活動狀態
-                context.ProgrammeStatus.AddRange(
+                if (!context.ProgrammeStatus.Any())
+                {
+                    context.ProgrammeStatus.AddRange(
                     new ProgrammeStatus
                     {
                         ProgrammeStatusID = "A",
@@ -60,10 +69,12 @@ namespace TicketSalesSystem.Models
                         ProgrammeStatusName = "上架中"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //問題種類
-                context.QuestionType.AddRange(
+                if (!context.QuestionType.Any())
+                {
+                    context.QuestionType.AddRange(
                     new QuestionType
                     {
                         QuestionTypeID = "Q1",
@@ -81,10 +92,12 @@ namespace TicketSalesSystem.Models
                     }
 
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //回覆狀態
-                context.ReplyStatus.AddRange(
+                if (!context.ReplyStatus.Any())
+                {
+                    context.ReplyStatus.AddRange(
                     new ReplyStatus
                     {
                         ReplyStatusID = "N",
@@ -96,10 +109,12 @@ namespace TicketSalesSystem.Models
                         ReplyStatusName = "已回覆"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //FAQ種類
-                context.FAQType.AddRange(
+                if (!context.FAQType.Any())
+                {
+                    context.FAQType.AddRange(
                     new FAQType
                     {
                         FAQTypeID = "F1",
@@ -116,10 +131,12 @@ namespace TicketSalesSystem.Models
                         FAQTypeName = "帳號相關"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //FAQ發佈狀態
-                context.FAQPublishStatus.AddRange(
+                if (!context.FAQPublishStatus.Any())
+                {
+                    context.FAQPublishStatus.AddRange(
                     new FAQPublishStatus
                     {
                         FAQPublishStatusID = "N",
@@ -131,10 +148,12 @@ namespace TicketSalesSystem.Models
                         FAQPublishStatusName = "已發佈"
                     }
                     );
-                context.SaveChanges();                   
-             
+                    context.SaveChanges();
+                }
                 //訂單狀態
-                context.OrderStatus.AddRange(
+                if (!context.OrderStatus.Any())
+                {
+                    context.OrderStatus.AddRange(
                     new OrderStatus
                     {
                         OrderStatusID = "N",
@@ -146,10 +165,12 @@ namespace TicketSalesSystem.Models
                         OrderStatusName = "已付款"
                     }
                 );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //付款方式
-                context.PaymentMethod.AddRange(
+                if (!context.PaymentMethod.Any())
+                {
+                    context.PaymentMethod.AddRange(
                     new PaymentMethod
                     {
                         PaymentMethodID = "C",
@@ -161,10 +182,12 @@ namespace TicketSalesSystem.Models
                         PaymentMethodName = "ATM 轉帳"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //金流狀態
-                context.PaymentStatus.AddRange(
+                if (!context.PaymentStatus.Any())
+                {
+                    context.PaymentStatus.AddRange(
                     new PaymentStatus
                     {
                         PaymentStatusID = "W",
@@ -181,10 +204,12 @@ namespace TicketSalesSystem.Models
                         PaymentStatusName = "付款失敗"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //票券狀態
-                context.TicketsStatus.AddRange(
+                if (!context.TicketsStatus.Any())
+                {
+                    context.TicketsStatus.AddRange(
                      new TicketsStatus
                      {
                          TicketsStatusID = "N",
@@ -196,10 +221,12 @@ namespace TicketSalesSystem.Models
                          TicketsStatusName = "已使用"
                      }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //座位狀態
-                context.SeatStatus.AddRange(
+                if (!context.SeatStatus.Any())
+                {
+                    context.SeatStatus.AddRange(
                      new SeatStatus
                      {
                          SeatStatusID = "A",
@@ -216,9 +243,12 @@ namespace TicketSalesSystem.Models
                          SeatStatusName = "保留"
                      }
                     );
-                context.SaveChanges();
+                    context.SaveChanges();
+                }
                 //票區狀態
-                context.TicketsAreaStatus.AddRange(
+                if (!context.TicketsAreaStatus.Any())
+                {
+                    context.TicketsAreaStatus.AddRange(
                     new TicketsAreaStatus
                     {
                         TicketsAreaStatusID = "I",
@@ -235,9 +265,12 @@ namespace TicketSalesSystem.Models
                         TicketsAreaStatusName = "停止販售"
                     }
                      );
-                context.SaveChanges();
+                    context.SaveChanges();
+                }                
                 //排
-                context.SeatRow.AddRange(
+                if (!context.SeatRow.Any())
+                {
+                    context.SeatRow.AddRange(
                     new SeatRow
                     {
                         SeatRowID = "01",
@@ -255,12 +288,12 @@ namespace TicketSalesSystem.Models
                     }
 
                     );
-                context.SaveChanges();
-
-
-
+                    context.SaveChanges();
+                }
                 //場地
-                context.Place.AddRange(
+                if (!context.Place.Any())
+                {
+                    context.Place.AddRange(
                     new Place
                     {
                         PlaceID = "A",
@@ -274,33 +307,37 @@ namespace TicketSalesSystem.Models
                         PlaceAddress = "高雄市左營區博愛二路757號"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //號
-                context.Seat.AddRange(
-                    new Seat
-                    {
-                        SeatID = "01",
-                        SeatName = "01",
-                        SeatStatusID = "A"
-                    },
-                    new Seat
-                    {
-                        SeatID = "02",
-                        SeatName = "02",
-                        SeatStatusID = "A"
-                    },
-                    new Seat
-                    {
-                        SeatID = "03",
-                        SeatName = "03",
-                        SeatStatusID = "B"
-                    }
-                    );
-                context.SaveChanges();
-
+                if (!context.Seat.Any())
+                {
+                    context.Seat.AddRange(
+                        new Seat
+                        {
+                            SeatID = "01",
+                            SeatName = "01",
+                            SeatStatusID = "A"
+                        },
+                        new Seat
+                        {
+                            SeatID = "02",
+                            SeatName = "02",
+                            SeatStatusID = "A"
+                        },
+                        new Seat
+                        {
+                            SeatID = "03",
+                            SeatName = "03",
+                            SeatStatusID = "B"
+                        }
+                        );                  
+                        context.SaveChanges();                   
+                }
                 //票區
-                context.TicketsArea.AddRange(
+                if (!context.TicketsArea.Any())
+                {
+                    context.TicketsArea.AddRange(
                     new TicketsArea
                     {
                         TicketsAreaID = "A01",
@@ -324,12 +361,15 @@ namespace TicketSalesSystem.Models
                     }
 
                     );
-                context.SaveChanges();
+                    
+                    context.SaveChanges();
+                }
 
-                
 
                 //員工
-                context.Employee.AddRange(
+                if (!context.Employee.Any())
+                {
+                    context.Employee.AddRange(
                      new Employee
                      {
                          EmployeeID = "P23001",
@@ -386,10 +426,12 @@ namespace TicketSalesSystem.Models
                      }
 
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //員工帳號密碼
-                context.EmployeeLogin.AddRange(
+                if (!context.EmployeeLogin.Any())
+                {
+                    context.EmployeeLogin.AddRange(
                     new EmployeeLogin
                     {
                         Account = "admin0001",
@@ -409,11 +451,13 @@ namespace TicketSalesSystem.Models
                         EmployeeID = "C24001"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //會員
                 string[] guidMember = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                context.Member.AddRange(
+                if (!context.Member.Any())
+                {                    
+                    context.Member.AddRange(
                     new Member
                     {
                         MemberID = guidMember[0],
@@ -460,10 +504,12 @@ namespace TicketSalesSystem.Models
                         AccountStatusID = "B"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //會員登入資料
-                context.MemberLogin.AddRange(
+                if (!context.MemberLogin.Any())
+                {                    
+                    context.MemberLogin.AddRange(
                      new MemberLogin
                      {
                          Account = "member001",
@@ -483,12 +529,14 @@ namespace TicketSalesSystem.Models
                          MemberID = guidMember[2]
                      }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
 
                 //活動
                 string[] Image = { "20260101", "20260201", "20260301" };
-                context.Programme.AddRange(
+                if (!context.Programme.Any())
+                {                    
+                    context.Programme.AddRange(
                     new Programme()
                     {
                         ProgrammeID = "20260101",
@@ -532,11 +580,13 @@ namespace TicketSalesSystem.Models
                         ProgrammeStatusID = "A"
                     }
                 );
-                context.SaveChanges();
+                    context.SaveChanges();
+                }
 
                 //封面圖片
+
                 string CoverImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "CoverImage");
-                string CoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "CoverImage");
+                string CoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","photos" ,"CoverImage");
 
                 string[] CoverImageFiles = Directory.GetFiles(CoverImageSeedPhotoPath);
 
@@ -549,19 +599,21 @@ namespace TicketSalesSystem.Models
 
                 //座位圖片
                 string SeatImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "SeatImage");
-                string SeatImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "SeatImage");
+                string SeatImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "photos", "SeatImage");
 
                 string[] SeatImageFiles = Directory.GetFiles(SeatImageSeedPhotoPath);
 
                 for (int i = 0; i < SeatImageFiles.Length; i++)
                 {
-                    var SeatImageFileName = "C" + Image[i] + ".jpg";
+                    var SeatImageFileName = "S" + Image[i] + ".jpg";
                     var SeatImageDestFile = Path.Combine(SeatImagePhotoPath, SeatImageFileName);
                     File.Copy(SeatImageFiles[i], SeatImageDestFile, overwrite: true);
                 }
 
                 //場次
-                context.Session.AddRange(
+                if (!context.Session.Any())
+                {
+                    context.Session.AddRange(
                     new Session
                     {
                         SessionID = "2026010101",
@@ -587,83 +639,88 @@ namespace TicketSalesSystem.Models
                         ProgrammeID = "20260301"
                     }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 ////活動說明圖片
-                //string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                //context.DescriptionImage.AddRange(
-                //    new DescriptionImage
-                //    {
-                //        DescriptionImageID = guidDescriptionImage[0],
-                //        DescriptionImageName = guidDescriptionImage[0] + ".jpg",
-                //        ProgrammeID = "20260101"
-                //    },
-                //    new DescriptionImage
-                //    {
-                //        DescriptionImageID = guidDescriptionImage[1],
-                //        DescriptionImageName = guidDescriptionImage[1] + ".jpg",
-                //        ProgrammeID = "20260201"
-                //    },
-                //    new DescriptionImage
-                //    {
-                //        DescriptionImageID = guidDescriptionImage[2],
-                //        DescriptionImageName = guidDescriptionImage[2] + ".jpg",
-                //        ProgrammeID = "20260301"
-                //    }
-                //    );
-                //context.SaveChanges();
-                //string SeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "DescriptionImage");
-                //string CoverImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "DescriptionImage");
-
-                //string[] files = Directory.GetFiles(SeedPhotoPath);
-
-                //for (int i = 0; i < files.Length; i++)
-                //{
-                //    var fileName = guidDescriptionImage[i] + ".jpg";
-                //    var DestFile = Path.Combine(CoverImagePhotoPath, guidDescriptionImage[i] + ".jpg");
-                //    File.Copy(files[i], DestFile, overwrite: true);
-                //}
-
-                
-
-                //問題
-                string[] guidQuestion = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                context.Question.AddRange(
-                     new Question
-                     {
-                         QuestionID = guidQuestion[0],
-                         QuestionTitle = "無法完成訂單付款",
-                         QuestionDescription = "我在結帳時畫面一直轉圈，請問該如何處理？",
-                         CreatedTime = DateTime.Now,
-                         UploadFile = null,
-                         MemberID = guidMember[0],
-                         QuestionTypeID = "Q1"
-                     },
-                    new Question
+                string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                context.DescriptionImage.AddRange(
+                    new DescriptionImage
                     {
-                        QuestionID = guidQuestion[1],
-                        QuestionTitle = "活動是否可以退票",
-                        QuestionDescription = "請問演唱會門票是否可以在活動前退票？",
-                        CreatedTime = DateTime.Now,
-                        UploadFile = null,
-                        MemberID = guidMember[1],
-                        QuestionTypeID = "Q3"
+                        DescriptionImageID = guidDescriptionImage[0],
+                        DescriptionImageName = guidDescriptionImage[0] + ".jpg",
+                        ProgrammeID = "20260101"
                     },
-                    new Question
+                    new DescriptionImage
                     {
-                        QuestionID = guidQuestion[2],
-                        QuestionTitle = "訂單資料顯示異常",
-                        QuestionDescription = "我的訂單已付款，但狀態顯示尚未完成。",
-                        CreatedTime = DateTime.Now,
-                        UploadFile = guidQuestion[2] + ".pdf",
-                        MemberID = guidMember[2],
-                        QuestionTypeID = "Q1"
+                        DescriptionImageID = guidDescriptionImage[1],
+                        DescriptionImageName = guidDescriptionImage[1] + ".jpg",
+                        ProgrammeID = "20260201"
+                    },
+                    new DescriptionImage
+                    {
+                        DescriptionImageID = guidDescriptionImage[2],
+                        DescriptionImageName = guidDescriptionImage[2] + ".jpg",
+                        ProgrammeID = "20260301"
                     }
                     );
                 context.SaveChanges();
+                string DescriptionImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "DescriptionImage");
+                string DescriptionImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","Photos", "DescriptionImage");
+
+                string[] files = Directory.GetFiles(DescriptionImageSeedPhotoPath);
+
+                for (int i = 0; i < files.Length; i++)
+                {
+                    var fileName = guidDescriptionImage[i] + ".jpg";
+                    var DestFile = Path.Combine(DescriptionImagePhotoPath, fileName);
+                    File.Copy(files[i], DestFile, overwrite: true);
+                }
+
+
+                string[] guidQuestion = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+                //問題
+                if (!context.Question.Any())
+                {                   
+                    context.Question.AddRange(
+                         new Question
+                         {
+                             QuestionID = guidQuestion[0],
+                             QuestionTitle = "無法完成訂單付款",
+                             QuestionDescription = "我在結帳時畫面一直轉圈，請問該如何處理？",
+                             CreatedTime = DateTime.Now,
+                             UploadFile = null,
+                             MemberID = guidMember[0],
+                             QuestionTypeID = "Q1"
+                         },
+                        new Question
+                        {
+                            QuestionID = guidQuestion[1],
+                            QuestionTitle = "活動是否可以退票",
+                            QuestionDescription = "請問演唱會門票是否可以在活動前退票？",
+                            CreatedTime = DateTime.Now,
+                            UploadFile = null,
+                            MemberID = guidMember[1],
+                            QuestionTypeID = "Q3"
+                        },
+                        new Question
+                        {
+                            QuestionID = guidQuestion[2],
+                            QuestionTitle = "訂單資料顯示異常",
+                            QuestionDescription = "我的訂單已付款，但狀態顯示尚未完成。",
+                            CreatedTime = DateTime.Now,
+                            UploadFile = guidQuestion[2] + ".pdf",
+                            MemberID = guidMember[2],
+                            QuestionTypeID = "Q1"
+                        }
+                        );
+                    context.SaveChanges();
+                }
+
 
                 //回覆表單
-                context.Reply.AddRange(
+                if (!context.Reply.Any())
+                {                   
+                    context.Reply.AddRange(
                     new Reply
                     {
                         ReplyID = Guid.NewGuid().ToString(),
@@ -695,11 +752,13 @@ namespace TicketSalesSystem.Models
                          ReplyStatusID = "N"
                      }
                     );
-                context.SaveChanges();               
-
+                    context.SaveChanges();
+                }
                 //FAQ
                 string[] guidFAQ = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                context.FAQ.AddRange(
+                if (!context.FAQ.Any())
+                {
+                    context.FAQ.AddRange(
                     new FAQ
                     {
                         FAQID = guidFAQ[0],
@@ -728,48 +787,65 @@ namespace TicketSalesSystem.Models
                          FAQTypeID = "F3"
                      }
                     );
-                context.SaveChanges();
+                    context.SaveChanges();
+                }
+                
+                
 
                 //公告
                 string[] guidPublicNotice = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                context.PublicNotice.AddRange(
-                     new PublicNotice
-                     {
-                         PublicNoticeID = guidPublicNotice[0],
-                         PublicNoticeTitle = "系統維護公告",
-                         PublicNoticeDescription = "本系統將於 2026 年 1 月 25 日 02:00 至 04:00 進行系統維護，期間暫停所有購票與查詢服務。",
-                         CreatedTime = DateTime.Now,
-                         UpdatedAt = null,
-                         PublicNoticeStatus = true,
-                         EmployeeID = "A23025"
-                     },
-                     new PublicNotice
-                     {
-                         PublicNoticeID = guidPublicNotice[1],
-                         PublicNoticeTitle = "春節期間客服服務時間調整",
-                         PublicNoticeDescription = "春節連假期間，客服服務時間調整為每日 10:00 至 16:00，造成不便敬請見諒。",
-                         CreatedTime = DateTime.Now,
-                         UpdatedAt = null,
-                         PublicNoticeStatus = true,
-                         EmployeeID = "A23025"
-                     },
-                     new PublicNotice
-                     {
-                         PublicNoticeID = guidPublicNotice[2],
-                         PublicNoticeTitle = "新功能預告",
-                         PublicNoticeDescription = "我們即將推出快速選位功能，讓購票流程更加順暢，敬請期待！",
-                         CreatedTime = DateTime.Now,
-                         UpdatedAt = null,
-                         PublicNoticeStatus = false,
-                         EmployeeID = "A23025"
-                     }
-                    );
-                context.SaveChanges();
-                              
+                if (!context.PublicNotice.Any())
+                {
+                    context.PublicNotice.AddRange(
+                         new PublicNotice
+                         {
+                             PublicNoticeID = guidPublicNotice[0],
+                             PublicNoticeTitle = "系統維護公告",
+                             PublicNoticeDescription = "本系統將於 2026 年 1 月 25 日 02:00 至 04:00 進行系統維護，期間暫停所有購票與查詢服務。",
+                             CreatedTime = DateTime.Now,
+                             UpdatedAt = null,
+                             PublicNoticeStatus = true,
+                             EmployeeID = "A23025"
+                         },
+                         new PublicNotice
+                         {
+                             PublicNoticeID = guidPublicNotice[1],
+                             PublicNoticeTitle = "春節期間客服服務時間調整",
+                             PublicNoticeDescription = "春節連假期間，客服服務時間調整為每日 10:00 至 16:00，造成不便敬請見諒。",
+                             CreatedTime = DateTime.Now,
+                             UpdatedAt = null,
+                             PublicNoticeStatus = true,
+                             EmployeeID = "A23025"
+                         },
+                         new PublicNotice
+                         {
+                             PublicNoticeID = guidPublicNotice[2],
+                             PublicNoticeTitle = "新功能預告",
+                             PublicNoticeDescription = "我們即將推出快速選位功能，讓購票流程更加順暢，敬請期待！",
+                             CreatedTime = DateTime.Now,
+                             UpdatedAt = null,
+                             PublicNoticeStatus = false,
+                             EmployeeID = "A23025"
+                         }
+                        );
+                    try
+                    {
+                        context.SaveChanges();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        // 重點在 InnerException，這會顯示 SQL Server 的原生錯誤
+                        var message = ex.InnerException?.Message ?? ex.Message;
+                        Console.WriteLine("資料庫報錯內容: " + message);
+                    }
+                    
+                }              
 
                 //金流
                 string[] guidPayment = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                context.Payment.AddRange(
+                if (!context.Payment.Any())
+                {
+                    context.Payment.AddRange(
                     new Payment
                     {
                         PaymentTradeNO = guidPayment[0],
@@ -790,10 +866,12 @@ namespace TicketSalesSystem.Models
                     }
 
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //訂單
-                context.Order.AddRange(
+                if (!context.Order.Any())
+                {
+                    context.Order.AddRange(
                      new Order
                      {
                          OrderID = "202612000001",
@@ -828,10 +906,12 @@ namespace TicketSalesSystem.Models
                          PaymentTradeNO = guidPayment[2]
                      }
                     );
-                context.SaveChanges();
-
+                    context.SaveChanges();
+                }
                 //票券
-                context.Tickets.AddRange(
+                if (!context.Tickets.Any())
+                {
+                    context.Tickets.AddRange(
                     new Tickets
                     {
                         TicketsID = "T000001",
@@ -868,10 +948,10 @@ namespace TicketSalesSystem.Models
                         TicketsStatusID = "N",
                         OrderID = "202612000003"
                     }
-                    );
-                context.SaveChanges();
-
-                
+                    );                   
+                        context.SaveChanges();                    
+                }
+                        
 
                 
 

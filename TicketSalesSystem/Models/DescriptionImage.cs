@@ -6,8 +6,8 @@ namespace TicketSalesSystem.Models
 {
     public class DescriptionImage
     {
-        
-        [Column(TypeName = "nchar(3)")]
+
+        [StringLength(36, MinimumLength = 36)]
         public string DescriptionImageID { get; set; } = null!;
 
         [Display(Name = "說明圖片")]
