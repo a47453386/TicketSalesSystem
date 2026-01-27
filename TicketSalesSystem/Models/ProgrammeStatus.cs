@@ -10,7 +10,7 @@ namespace TicketSalesSystem.Models
         [Column(TypeName = "nchar(1)")]
         public string ProgrammeStatusID { get; set; }= null!;
 
-        [Display(Name = "活動狀態名稱")]
+        [Display(Name = "活動狀態")]
         [Required(ErrorMessage ="必填")]
         [StringLength(10, ErrorMessage = "活動狀態名稱最多10個字")]
         public string ProgrammeStatusName { get; set; }= null!;

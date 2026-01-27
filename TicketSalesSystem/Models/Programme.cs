@@ -52,8 +52,11 @@ namespace TicketSalesSystem.Models
 
 
         //FK區
+        [Display(Name = "管理員")]
         public string EmployeeID { get; set; } = null!;
+        [Display(Name = "演出地點")]
         public string PlaceID { get; set; } = null!;
+        [Display(Name = "活動狀態")]
         public string ProgrammeStatusID { get; set; } = null!;
 
 
