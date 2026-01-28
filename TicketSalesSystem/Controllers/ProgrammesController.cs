@@ -167,8 +167,6 @@ namespace TicketSalesSystem.Controllers
         }
 
         // POST: Programmes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("ProgrammeID,ProgrammeName,ProgrammeDescription,CreatedTime,UpdatedAt,CoverImage,SeatImage,LimitPerOrder,EmployeeID,PlaceID,ProgrammeStatusID")] Programme programme)
@@ -204,26 +202,7 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
-        // GET: Programmes/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var programme = await _context.Programme
-                .Include(p => p.Employee)
-                .Include(p => p.Place)
-                .Include(p => p.ProgrammeStatus)
-                .FirstOrDefaultAsync(m => m.ProgrammeID == id);
-            if (programme == null)
-            {
-                return NotFound();
-            }
-
-            return View(programme);
-        }
+        
 
         // POST: Programmes/Delete/5
         [HttpPost, ActionName("Delete")]
