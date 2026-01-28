@@ -36,13 +36,13 @@ namespace TicketSalesSystem.Models
         [Display(Name = "封面圖片")]
         [Required(ErrorMessage = "必填")]
         [StringLength(13, MinimumLength = 13)]
-        public string CoverImage { get; set; } = null!;
+        public string? CoverImage { get; set; }
 
    
         [Display(Name = "座位圖片")]
         [Required(ErrorMessage = "必填")]
         [StringLength(13, MinimumLength = 13)]
-        public string SeatImage { get; set; } = null!;
+        public string? SeatImage { get; set; }
 
         [Display(Name = "限購")]
         [Required(ErrorMessage = "必填")]
@@ -53,11 +53,11 @@ namespace TicketSalesSystem.Models
 
         //FK區
         [Display(Name = "管理員")]
-        public string EmployeeID { get; set; } = null!;
+        public string? EmployeeID { get; set; } 
         [Display(Name = "演出地點")]
-        public string PlaceID { get; set; } = null!;
+        public string? PlaceID { get; set; }
         [Display(Name = "活動狀態")]
-        public string ProgrammeStatusID { get; set; } = null!;
+        public string? ProgrammeStatusID { get; set; } 
 
 
         //關聯區
