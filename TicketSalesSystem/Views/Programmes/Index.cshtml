@@ -64,10 +64,10 @@
                         <img src="~/Photos/CoverImage/@item.CoverImage" alt="@item.ProgrammeName" class="img-fluid" />
                     }                  
            </td>
-            <td>
+            <td >
                     @if (item.SeatImage != null)
                     {
-                        <img src="~/Photos/SeatImage/@item.SeatImage" alt="@item.ProgrammeName" class="img-fluid h-100" />
+                        <img src="~/Photos/SeatImage/@item.SeatImage" alt="@item.ProgrammeName" class="img-fluid h-50" />
                     }
             </td>
             <td>
@@ -83,9 +83,12 @@
                 @Html.DisplayFor(modelItem => item.ProgrammeStatus.ProgrammeStatusName)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ProgrammeID">更新</a> |
-                <a asp-action="Details" asp-route-id="@item.ProgrammeID">詳細資訊</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProgrammeID">刪除</a>
+                <a asp-action="Edit" asp-route-id="@item.ProgrammeID">更新</a> 
+                <a asp-action="Details" asp-route-id="@item.ProgrammeID">詳細資訊</a> 
+                <form asp-action="Delete">
+                    <input type="hidden" name="id" value="@item.ProgrammeID" />
+                    <input type="submit" value="刪除" class="btn btn-link" onclick="return confirm('確定要刪除【@item.ProgrammeName】活動嗎？');" />
+                </form>               
             </td>
         </tr>
 }

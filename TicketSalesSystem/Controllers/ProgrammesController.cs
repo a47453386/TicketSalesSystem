@@ -205,16 +205,29 @@ namespace TicketSalesSystem.Controllers
         
 
         // POST: Programmes/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             var programme = await _context.Programme.FindAsync(id);
-            if (programme != null)
+            if (programme == null)
             {
-                _context.Programme.Remove(programme);
+                return View(programme);
             }
+            var path = new[] {
+                new { Folder = "CoverImage", FileName = programme.CoverImage },
+                new { Folder = "SeatImage", FileName = programme.SeatImage }
+            };
 
+            foreach (var item in path)
+            {
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Photos", item.Folder, item.FileName ?? string.Empty);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }       
+            _context.Programme.Remove(programme);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

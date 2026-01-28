@@ -21,7 +21,7 @@ create function funGetProgrammeID ()
 	 print dbo.funGetProgrammeID();
 	 go
 
-	ALTER PROCEDURE CreateProgramme
+	create PROCEDURE CreateProgramme
             @Name nvarchar(50),      -- {0}
             @Desc nvarchar(max),     -- {1}
              @Limit int,             -- {2}
