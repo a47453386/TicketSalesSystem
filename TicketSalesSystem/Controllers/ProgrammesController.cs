@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGeneration.Design;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,64 +51,101 @@ namespace TicketSalesSystem.Controllers
         // GET: Programmes/Create
         public IActionResult Create()
         {
-            ViewData["EmployeeID"] = new SelectList(_context.Employee,"Name", "Name");
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceName", "PlaceName");
-            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusName", "ProgrammeStatusName");
+            PopulateDropdownLists();
             return View();
         }
 
         // POST: Programmes/Create       
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProgrammeID,ProgrammeName,ProgrammeDescription,CreatedTime,UpdatedAt,CoverImage,SeatImage,LimitPerOrder,EmployeeID,PlaceID,ProgrammeStatusID")] Programme programme,IFormFile newCoverImage,IFormFile newSeatImage)
+        public async Task<IActionResult> Create([Bind("ProgrammeID,ProgrammeName,ProgrammeDescription,CreatedTime,UpdatedAt,CoverImage,SeatImage,LimitPerOrder,EmployeeID,PlaceID,ProgrammeStatusID")] Programme programme, IFormFile newCoverImage, IFormFile newSeatImage)
         {
-            programme.CreatedTime= DateTime.Now;
+            //手動檢查檔案（因為我們在下個步驟會移除 Model 的圖片驗證）
+            if (newCoverImage == null) ModelState.AddModelError("newCoverImage", "請選擇封面圖");
+            if (newSeatImage == null) ModelState.AddModelError("newSeatImage", "請選擇座位圖");
 
-            // 1. 手動檢查圖片是否為空 (如果這是必填項)
-            if (newCoverImage == null) ModelState.AddModelError("CoverImage", "請上傳封面圖");
-            if (newSeatImage == null) ModelState.AddModelError("SeatImage", "請上傳座位圖");
-
-            // 2. 檢查圖片格式 (不直接存檔，只檢查)
-            IFormFile[] photos = { newCoverImage, newSeatImage };
-            foreach (var file in photos.Where(f => f != null))
-            {
-                if (file.ContentType != "image/jpeg" && file.ContentType != "image/png")
-                {
-                    ModelState.AddModelError("", $"檔案 {file.FileName} 格式不符");
-                }
-            }
+            // 2. 關鍵：移除 ModelState 中對字串欄位的驗證
+            // 因為這兩個欄位在 SaveChanges 之前一定是空的，會導致 IsValid 永遠為 false
+            ModelState.Remove("ProgrammeID"); // ID 是自動生成的
+            ModelState.Remove("CoverImage");  // 檔名是存檔後才產生的
+            ModelState.Remove("SeatImage");   // 檔名是存檔後才產生的
+            ModelState.Remove("CreatedTime"); // 時間在下面會給
+            ModelState.Remove("Employee");     // 導覽屬性不需驗證
+            ModelState.Remove("Place");
+            ModelState.Remove("ProgrammeStatus");
 
             if (ModelState.IsValid)
             {
-                // 3. 通過驗證後，才開始處理存檔邏輯
-                for (int i = 0; i < photos.Length; i++)
+                try
                 {
-                    var file = photos[i];
-                    string prefix = (i == 0) ? "C" : "S";
-                    string fileName = prefix + programme.ProgrammeID+ Path.GetExtension(file.FileName);
+                    // --- 呼叫預存程序：這裡對應你 Model 的變數 ---
+                    var createdEntry = _context.Programme
+                        .FromSqlRaw("EXEC [dbo].[CreateProgramme] {0}, {1}, {2}, {3}, {4}, {5}",
+                            programme.ProgrammeName,           // {0}
+                            programme.ProgrammeDescription, // {1}
+                            programme.LimitPerOrder,           // {2}
+                            programme.EmployeeID,              // {3}
+                            programme.PlaceID,                  // {4}
+                            programme.ProgrammeStatusID)        // {5}
+                        .AsEnumerable()
+                        .FirstOrDefault();
 
-                    string subFolder = (i == 0) ? "CoverImage" : "SeatImage";
-                    string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Photos", subFolder, fileName);
-
-                    using (var stream = new FileStream(uploadPath, FileMode.Create))
+                    if (createdEntry != null)
                     {
-                        await file.CopyToAsync(stream);
+                        string cleanID = createdEntry.ProgrammeID.Trim();
+                        bool needsUpdate = false;
+
+                        // --- 圖片變數處理與存檔 ---
+                        if (newCoverImage != null && newCoverImage.Length > 0)
+                        {
+                            // 檔名規則：C + PRG00001 + .jpg (長度約 12~13 字元)
+                            string fileName = "C" + cleanID + Path.GetExtension(newCoverImage.FileName);
+                            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Photos/CoverImage", fileName);
+                            using (var stream = new FileStream(path, FileMode.Create)) { await newCoverImage.CopyToAsync(stream); }
+
+                            createdEntry.CoverImage = fileName;
+                            needsUpdate = true;
+                        }
+
+                        if (newSeatImage != null && newSeatImage.Length > 0)
+                        {
+                            string fileName = "S" + cleanID + Path.GetExtension(newSeatImage.FileName);
+                            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Photos/SeatImage", fileName);
+                            using (var stream = new FileStream(path, FileMode.Create)) { await newSeatImage.CopyToAsync(stream); }
+
+                            createdEntry.SeatImage = fileName;
+                            needsUpdate = true;
+                        }
+
+                        // --- 更新圖片檔名回資料庫 ---
+                        if (needsUpdate)
+                        {
+                            createdEntry.UpdatedAt = DateTime.Now;
+                            _context.Update(createdEntry);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        return RedirectToAction(nameof(Index));
                     }
-
-                    // 更新 Model 的欄位值
-                    if (i == 0) programme.CoverImage = fileName;
-                    else programme.SeatImage = fileName;
                 }
-
-                _context.Add(programme);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "資料庫寫入失敗：" + ex.Message);
+                }
             }
-            ViewData["EmployeeID"] = new SelectList(_context.Employee, "EmployeeID", "Name", "EmployeeID");
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", "PlaceName");
-            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", "ProgrammeStatusName");
+
+            // 失敗則回填選單
+            PopulateDropdownLists(programme);
             return View(programme);
         }
+
+        private void PopulateDropdownLists(Programme p = null)
+        {
+            ViewData["EmployeeID"] = new SelectList(_context.Employee.ToList(), "EmployeeID", "Name", p?.EmployeeID);
+            ViewData["PlaceID"] = new SelectList(_context.Place.ToList(), "PlaceID", "PlaceName", p?.PlaceID);
+            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus.ToList(), "ProgrammeStatusID", "ProgrammeStatusName", p?.ProgrammeStatusID);
+        }
+
 
         // GET: Programmes/Edit/5
         public async Task<IActionResult> Edit(string id)
