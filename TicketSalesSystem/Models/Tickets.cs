@@ -27,6 +27,11 @@ namespace TicketSalesSystem.Models
         public DateTime? ScannedTime { get; set; }//核銷進場時間
 
 
+        [Display(Name = "排")]
+        [Required(ErrorMessage = "必填")]
+        [RegularExpression("[0-9]{2}", ErrorMessage = "請輸入2位數字")]
+        public string SeatRowName { get; set; } = null!;
+
 
 
         //FK      
