@@ -54,3 +54,4 @@ create function funGetProgrammeID ()
 go
 ALTER TABLE Programme ALTER COLUMN CoverImage nvarchar(13) NULL;
 ALTER TABLE Programme ALTER COLUMN SeatImage nvarchar(13) NULL;
+
