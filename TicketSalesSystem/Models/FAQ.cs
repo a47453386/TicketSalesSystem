@@ -12,7 +12,7 @@ namespace TicketSalesSystem.Models
 
         [Display(Name = "常見問題")]
         [Required(ErrorMessage = "必填")]
-        [StringLength(500, ErrorMessage = "標題最多50個字")]
+        [StringLength(50, ErrorMessage = "標題最多50個字")]
         public string FAQTitle { get; set; } = null!;
 
 

@@ -23,9 +23,12 @@ namespace TicketSalesSystem.Models
 
         //FK
         public string TicketsAreaStatusID { get; set; } = null!;
+        public string VenusID { get; set; } = null!;
+        public string ProgrammeID { get; set; } = null!;
 
         //關聯
-        public virtual TicketsAreaStatus? TicketsAreaStatus { get; set; }
-        public virtual List<Tickets>? Tickets { get; set; }
+        public virtual TicketsAreaStatus? TicketsAreaStatus { get; set; }        
+        public virtual Venue? Venus { get; set; }
+        public virtual Programme? Programme { get; set; }
     }
 }

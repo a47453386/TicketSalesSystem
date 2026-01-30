@@ -34,7 +34,8 @@ namespace TicketSalesSystem.Models
         public string OrderStatusID { get; set; } = null!;     
         public string SessionID { get; set; } = null!;
         public string PaymentTradeNO { get; set; } = null!;
-
+        
+       
 
 
 
@@ -46,7 +47,9 @@ namespace TicketSalesSystem.Models
         public virtual Session? Session { get; set; }
 
         public virtual Payment? Payment { get; set; }//金流
-        public virtual List<Tickets>? Tickets { get; set; }
+
         
+        public virtual List<Tickets>? Tickets { get; set; }
+
     }
 }

@@ -48,10 +48,9 @@ namespace TicketSalesSystem.Models
         public DbSet<Tickets> Tickets { get; set; }
         public DbSet<TicketsArea> TicketsArea { get; set; }
         public DbSet<TicketsAreaStatus> TicketsAreaStatus { get; set; }
-        public DbSet<TicketsStatus> TicketsStatus { get; set; }
-        public DbSet<Seat> Seat { get; set; }
-        public DbSet<SeatStatus> SeatStatus { get; set; }
-        public DbSet<SeatRow> SeatRow { get; set; }
+        public DbSet<TicketsStatus> TicketsStatus { get; set; }       
+        public DbSet<Venue>Venus { get; set; }
+        public DbSet<VenueStatus> VenueStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,7 +93,7 @@ namespace TicketSalesSystem.Models
             // One-to-Many
             // =========================
 
-
+            // Programme相關
             modelBuilder.Entity<Employee>()
                .HasMany(e => e.Programme)
                .WithOne(a => a.Employee)
@@ -120,6 +119,8 @@ namespace TicketSalesSystem.Models
                 .WithOne(s => s.Programme)
                 .HasForeignKey(s => s.ProgrammeID);
 
+
+            // Question / Reply相關
             modelBuilder.Entity<Member>()
                 .HasMany(m => m.Question)
                 .WithOne(q => q.Member)
@@ -145,11 +146,14 @@ namespace TicketSalesSystem.Models
                 .WithOne(r => r.Employee)
                 .HasForeignKey(r => r.EmployeeID);
 
+
+            //Role相關
             modelBuilder.Entity<Role>()
                 .HasMany(m => m.Employee)
                 .WithOne(o => o.Role)
                 .HasForeignKey(o => o.RoleID);
 
+            // FAQ / Notice相關
             modelBuilder.Entity<FAQType>()
              .HasMany(t => t.FAQ)
              .WithOne(f => f.FAQType)
@@ -170,6 +174,7 @@ namespace TicketSalesSystem.Models
                 .WithOne(p => p.Employee)
                 .HasForeignKey(p => p.EmployeeID);
 
+            // Order / Payment相關
             modelBuilder.Entity<Member>()
                 .HasMany(m => m.Order)
                 .WithOne(o => o.Member)
@@ -190,47 +195,41 @@ namespace TicketSalesSystem.Models
                 .WithOne(o => o.PaymentMethod)
                 .HasForeignKey(o => o.PaymentMethodID);
 
+        
             modelBuilder.Entity<PaymentStatus>()
                 .HasMany(p => p.Payment)
                 .WithOne(o => o.PaymentStatus)
                 .HasForeignKey(o => o.PaymentStatusID);
 
 
+            // Ticket / Seat相關
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.Tickets)
                 .WithOne(t => t.Order)
                 .HasForeignKey(t => t.OrderID);
-
-            modelBuilder.Entity<TicketsArea>()
-                .HasMany(a => a.Tickets)
-                .WithOne(t => t.TicketsArea)
-                .HasForeignKey(t => t.TicketsAreaID);
+           
 
             modelBuilder.Entity<TicketsStatus>()
                 .HasMany(s => s.Tickets)
                 .WithOne(t => t.TicketsStatus)
-                .HasForeignKey(t => t.TicketsStatusID);
-
-            modelBuilder.Entity<SeatRow>()
-                .HasMany(s => s.Tickets)
-                .WithOne(t => t.Row)
-                .HasForeignKey(t => t.RowID);
-
-            modelBuilder.Entity<Seat>()
-                 .HasMany(s => s.Tickets)
-                 .WithOne(t => t.Seat)
-                 .HasForeignKey(t => t.SeatID);
-
-            modelBuilder.Entity<SeatStatus>()
-                .HasMany(s => s.Seat)
-                .WithOne(t => t.SeatStatus)
-                .HasForeignKey(t => t.SeatStatusID);
+                .HasForeignKey(t => t.TicketsStatusID);                  
 
             modelBuilder.Entity<TicketsAreaStatus>()
                 .HasMany(s => s.TicketsArea)
                 .WithOne(t => t.TicketsAreaStatus)
                 .HasForeignKey(t => t.TicketsAreaStatusID);
 
+            modelBuilder.Entity<Programme>()
+               .HasMany(s => s.TicketsArea)
+               .WithOne(t => t.Programme)
+               .HasForeignKey(t => t.ProgrammeID);
+            modelBuilder.Entity<Venue>()
+               .HasMany(s => s.TicketsArea)
+               .WithOne(t => t.Venus)
+               .HasForeignKey(t => t.VenusID);
+
+
+            // AccountStatus相關
             modelBuilder.Entity<Member>()
                .HasOne(m => m.AccountStatus)
                .WithMany(a => a.Member)

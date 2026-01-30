@@ -57,17 +57,21 @@ namespace TicketSalesSystem.Models
         [Display(Name = "演出地點")]
         public string? PlaceID { get; set; }
         [Display(Name = "活動狀態")]
-        public string? ProgrammeStatusID { get; set; } 
+        public string? ProgrammeStatusID { get; set; }
+
+        
 
 
         //關聯區
         public virtual Employee? Employee { get; set; }        
         public virtual Place? Place { get; set; }                     
         public virtual ProgrammeStatus? ProgrammeStatus { get; set; }
+        
 
 
         public virtual List<DescriptionImage>? DescriptionImage { get; set; }
         public virtual List<Session>? Session { get; set; }
         
+        public virtual List<TicketsArea>? TicketsArea { get; set; }
     }
 }

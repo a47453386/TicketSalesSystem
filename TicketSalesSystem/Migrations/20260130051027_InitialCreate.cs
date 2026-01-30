@@ -146,30 +146,6 @@ namespace TicketSalesSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SeatRow",
-                columns: table => new
-                {
-                    SeatRowID = table.Column<string>(type: "nchar(2)", nullable: false),
-                    SeatRowName = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SeatRow", x => x.SeatRowID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SeatStatus",
-                columns: table => new
-                {
-                    SeatStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    SeatStatusName = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SeatStatus", x => x.SeatStatusID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TicketsAreaStatus",
                 columns: table => new
                 {
@@ -191,6 +167,18 @@ namespace TicketSalesSystem.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TicketsStatus", x => x.TicketsStatusID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VenueStatus",
+                columns: table => new
+                {
+                    VenueStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
+                    VenueStatusName = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VenueStatus", x => x.VenueStatusID);
                 });
 
             migrationBuilder.CreateTable(
@@ -254,7 +242,7 @@ namespace TicketSalesSystem.Migrations
                     NationalID = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
                     Extension = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: true),
-                    Photo = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: true),
+                    Photo = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastLoginTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RoleID = table.Column<string>(type: "nvarchar(1)", nullable: false),
@@ -278,42 +266,31 @@ namespace TicketSalesSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Seat",
+                name: "Venus",
                 columns: table => new
                 {
-                    SeatID = table.Column<string>(type: "nchar(2)", nullable: false),
-                    SeatName = table.Column<string>(type: "nvarchar(2)", maxLength: 2, nullable: false),
-                    SeatStatusID = table.Column<string>(type: "nchar(1)", nullable: false)
+                    VenueID = table.Column<string>(type: "nchar(3)", nullable: false),
+                    VenueName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    RowCount = table.Column<int>(type: "int", nullable: false),
+                    SeatCount = table.Column<int>(type: "int", nullable: false),
+                    VenueStausID = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PlaceID = table.Column<string>(type: "nchar(1)", nullable: false),
+                    VenueStatusID = table.Column<string>(type: "nchar(1)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Seat", x => x.SeatID);
+                    table.PrimaryKey("PK_Venus", x => x.VenueID);
                     table.ForeignKey(
-                        name: "FK_Seat_SeatStatus_SeatStatusID",
-                        column: x => x.SeatStatusID,
-                        principalTable: "SeatStatus",
-                        principalColumn: "SeatStatusID",
+                        name: "FK_Venus_Place_PlaceID",
+                        column: x => x.PlaceID,
+                        principalTable: "Place",
+                        principalColumn: "PlaceID",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TicketsArea",
-                columns: table => new
-                {
-                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
-                    TicketsAreaName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Price = table.Column<decimal>(type: "money", nullable: false),
-                    TicketsAreaStatusID = table.Column<string>(type: "nchar(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TicketsArea", x => x.TicketsAreaID);
                     table.ForeignKey(
-                        name: "FK_TicketsArea_TicketsAreaStatus_TicketsAreaStatusID",
-                        column: x => x.TicketsAreaStatusID,
-                        principalTable: "TicketsAreaStatus",
-                        principalColumn: "TicketsAreaStatusID",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Venus_VenueStatus_VenueStatusID",
+                        column: x => x.VenueStatusID,
+                        principalTable: "VenueStatus",
+                        principalColumn: "VenueStatusID");
                 });
 
             migrationBuilder.CreateTable(
@@ -388,7 +365,7 @@ namespace TicketSalesSystem.Migrations
                 columns: table => new
                 {
                     FAQID = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    FAQTitle = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    FAQTitle = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     FAQDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EmployeeID = table.Column<string>(type: "nchar(6)", nullable: false),
                     FAQPublishStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
@@ -429,9 +406,9 @@ namespace TicketSalesSystem.Migrations
                     CoverImage = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     SeatImage = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     LimitPerOrder = table.Column<int>(type: "int", nullable: false),
-                    EmployeeID = table.Column<string>(type: "nchar(6)", nullable: false),
-                    PlaceID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    ProgrammeStatusID = table.Column<string>(type: "nchar(1)", nullable: false)
+                    EmployeeID = table.Column<string>(type: "nchar(6)", nullable: true),
+                    PlaceID = table.Column<string>(type: "nchar(1)", nullable: true),
+                    ProgrammeStatusID = table.Column<string>(type: "nchar(1)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -440,20 +417,17 @@ namespace TicketSalesSystem.Migrations
                         name: "FK_Programme_Employee_EmployeeID",
                         column: x => x.EmployeeID,
                         principalTable: "Employee",
-                        principalColumn: "EmployeeID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "EmployeeID");
                     table.ForeignKey(
                         name: "FK_Programme_Place_PlaceID",
                         column: x => x.PlaceID,
                         principalTable: "Place",
-                        principalColumn: "PlaceID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "PlaceID");
                     table.ForeignKey(
                         name: "FK_Programme_ProgrammeStatus_ProgrammeStatusID",
                         column: x => x.ProgrammeStatusID,
                         principalTable: "ProgrammeStatus",
-                        principalColumn: "ProgrammeStatusID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ProgrammeStatusID");
                 });
 
             migrationBuilder.CreateTable(
@@ -555,6 +529,40 @@ namespace TicketSalesSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TicketsArea",
+                columns: table => new
+                {
+                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
+                    TicketsAreaName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Price = table.Column<decimal>(type: "money", nullable: false),
+                    TicketsAreaStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
+                    VenusID = table.Column<string>(type: "nchar(3)", nullable: false),
+                    ProgrammeID = table.Column<string>(type: "nchar(8)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketsArea", x => x.TicketsAreaID);
+                    table.ForeignKey(
+                        name: "FK_TicketsArea_Programme_ProgrammeID",
+                        column: x => x.ProgrammeID,
+                        principalTable: "Programme",
+                        principalColumn: "ProgrammeID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TicketsArea_TicketsAreaStatus_TicketsAreaStatusID",
+                        column: x => x.TicketsAreaStatusID,
+                        principalTable: "TicketsAreaStatus",
+                        principalColumn: "TicketsAreaStatusID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TicketsArea_Venus_VenusID",
+                        column: x => x.VenusID,
+                        principalTable: "Venus",
+                        principalColumn: "VenueID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Order",
                 columns: table => new
                 {
@@ -610,11 +618,8 @@ namespace TicketSalesSystem.Migrations
                     RefundTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ScannedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
-                    SeatID = table.Column<string>(type: "nchar(2)", nullable: false),
                     TicketsStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    OrderID = table.Column<string>(type: "nvarchar(12)", nullable: false),
-                    RowID = table.Column<string>(type: "nchar(2)", nullable: false)
+                    OrderID = table.Column<string>(type: "nvarchar(12)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -624,24 +629,6 @@ namespace TicketSalesSystem.Migrations
                         column: x => x.OrderID,
                         principalTable: "Order",
                         principalColumn: "OrderID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tickets_SeatRow_RowID",
-                        column: x => x.RowID,
-                        principalTable: "SeatRow",
-                        principalColumn: "SeatRowID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tickets_Seat_SeatID",
-                        column: x => x.SeatID,
-                        principalTable: "Seat",
-                        principalColumn: "SeatID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tickets_TicketsArea_TicketsAreaID",
-                        column: x => x.TicketsAreaID,
-                        principalTable: "TicketsArea",
-                        principalColumn: "TicketsAreaID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Tickets_TicketsStatus_TicketsStatusID",
@@ -772,11 +759,6 @@ namespace TicketSalesSystem.Migrations
                 column: "ReplyStatusID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Seat_SeatStatusID",
-                table: "Seat",
-                column: "SeatStatusID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Session_ProgrammeID",
                 table: "Session",
                 column: "ProgrammeID");
@@ -787,29 +769,34 @@ namespace TicketSalesSystem.Migrations
                 column: "OrderID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tickets_RowID",
-                table: "Tickets",
-                column: "RowID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tickets_SeatID",
-                table: "Tickets",
-                column: "SeatID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tickets_TicketsAreaID",
-                table: "Tickets",
-                column: "TicketsAreaID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Tickets_TicketsStatusID",
                 table: "Tickets",
                 column: "TicketsStatusID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TicketsArea_ProgrammeID",
+                table: "TicketsArea",
+                column: "ProgrammeID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TicketsArea_TicketsAreaStatusID",
                 table: "TicketsArea",
                 column: "TicketsAreaStatusID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketsArea_VenusID",
+                table: "TicketsArea",
+                column: "VenusID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Venus_PlaceID",
+                table: "Venus",
+                column: "PlaceID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Venus_VenueStatusID",
+                table: "Venus",
+                column: "VenueStatusID");
         }
 
         /// <inheritdoc />
@@ -837,6 +824,9 @@ namespace TicketSalesSystem.Migrations
                 name: "Tickets");
 
             migrationBuilder.DropTable(
+                name: "TicketsArea");
+
+            migrationBuilder.DropTable(
                 name: "FAQPublishStatus");
 
             migrationBuilder.DropTable(
@@ -852,16 +842,13 @@ namespace TicketSalesSystem.Migrations
                 name: "Order");
 
             migrationBuilder.DropTable(
-                name: "SeatRow");
-
-            migrationBuilder.DropTable(
-                name: "Seat");
-
-            migrationBuilder.DropTable(
-                name: "TicketsArea");
-
-            migrationBuilder.DropTable(
                 name: "TicketsStatus");
+
+            migrationBuilder.DropTable(
+                name: "TicketsAreaStatus");
+
+            migrationBuilder.DropTable(
+                name: "Venus");
 
             migrationBuilder.DropTable(
                 name: "QuestionType");
@@ -882,10 +869,7 @@ namespace TicketSalesSystem.Migrations
                 name: "Session");
 
             migrationBuilder.DropTable(
-                name: "SeatStatus");
-
-            migrationBuilder.DropTable(
-                name: "TicketsAreaStatus");
+                name: "VenueStatus");
 
             migrationBuilder.DropTable(
                 name: "PaymentStatus");
