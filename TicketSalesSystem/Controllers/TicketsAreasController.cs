@@ -21,7 +21,7 @@ namespace TicketSalesSystem.Controllers
         // GET: TicketsAreas
         public async Task<IActionResult> Index()
         {
-            var ticketsContext = _context.TicketsArea.Include(t => t.Programme).Include(t => t.TicketsAreaStatus).Include(t => t.Venus);
+            var ticketsContext = _context.TicketsArea.Include(t => t.Programme).Include(t => t.TicketsAreaStatus).Include(t => t.Venue);
             return View(await ticketsContext.ToListAsync());
         }
 
@@ -36,7 +36,7 @@ namespace TicketSalesSystem.Controllers
             var ticketsArea = await _context.TicketsArea
                 .Include(t => t.Programme)
                 .Include(t => t.TicketsAreaStatus)
-                .Include(t => t.Venus)
+                .Include(t => t.Venue)
                 .FirstOrDefaultAsync(m => m.TicketsAreaID == id);
             if (ticketsArea == null)
             {
@@ -70,7 +70,7 @@ namespace TicketSalesSystem.Controllers
             }
             ViewData["ProgrammeID"] = new SelectList(_context.Programme, "ProgrammeID", "ProgrammeID", ticketsArea.ProgrammeID);
             ViewData["TicketsAreaStatusID"] = new SelectList(_context.TicketsAreaStatus, "TicketsAreaStatusID", "TicketsAreaStatusID", ticketsArea.TicketsAreaStatusID);
-            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenusID);
+            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
             return View(ticketsArea);
         }
 
@@ -89,7 +89,7 @@ namespace TicketSalesSystem.Controllers
             }
             ViewData["ProgrammeID"] = new SelectList(_context.Programme, "ProgrammeID", "ProgrammeID", ticketsArea.ProgrammeID);
             ViewData["TicketsAreaStatusID"] = new SelectList(_context.TicketsAreaStatus, "TicketsAreaStatusID", "TicketsAreaStatusID", ticketsArea.TicketsAreaStatusID);
-            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenusID);
+            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
             return View(ticketsArea);
         }
 
@@ -127,7 +127,7 @@ namespace TicketSalesSystem.Controllers
             }
             ViewData["ProgrammeID"] = new SelectList(_context.Programme, "ProgrammeID", "ProgrammeID", ticketsArea.ProgrammeID);
             ViewData["TicketsAreaStatusID"] = new SelectList(_context.TicketsAreaStatus, "TicketsAreaStatusID", "TicketsAreaStatusID", ticketsArea.TicketsAreaStatusID);
-            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenusID);
+            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
             return View(ticketsArea);
         }
 
@@ -142,7 +142,7 @@ namespace TicketSalesSystem.Controllers
             var ticketsArea = await _context.TicketsArea
                 .Include(t => t.Programme)
                 .Include(t => t.TicketsAreaStatus)
-                .Include(t => t.Venus)
+                .Include(t => t.Venue)
                 .FirstOrDefaultAsync(m => m.TicketsAreaID == id);
             if (ticketsArea == null)
             {

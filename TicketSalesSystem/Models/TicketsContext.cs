@@ -223,11 +223,27 @@ namespace TicketSalesSystem.Models
                .HasMany(s => s.TicketsArea)
                .WithOne(t => t.Programme)
                .HasForeignKey(t => t.ProgrammeID);
+
+            // Venue相關
             modelBuilder.Entity<Venue>()
                .HasMany(s => s.TicketsArea)
-               .WithOne(t => t.Venus)
-               .HasForeignKey(t => t.VenusID);
+               .WithOne(t => t.Venue)
+               .HasForeignKey(t => t.VenueID);
 
+            modelBuilder.Entity<Venue>()
+              .HasMany(s => s.Session)
+              .WithOne(t => t.Venue)
+              .HasForeignKey(t => t.VenueID);
+
+            modelBuilder.Entity<VenueStatus>()
+              .HasMany(s => s.Venue)
+              .WithOne(t => t.VenueStatus)
+              .HasForeignKey(t => t.VenueStatusID);
+
+            modelBuilder.Entity<Place>()
+              .HasMany(s => s.Venue)
+              .WithOne(t => t.Place)
+              .HasForeignKey(t => t.PlaceID);
 
             // AccountStatus相關
             modelBuilder.Entity<Member>()

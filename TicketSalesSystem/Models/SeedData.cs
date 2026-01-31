@@ -551,38 +551,8 @@ namespace TicketSalesSystem.Models
                     File.Copy(SeatImageFiles[i], SeatImageDestFile, overwrite: true);
                 }
 
-                //場次
-                if (!context.Session.Any())
-                {
-                    context.Session.AddRange(
-                    new Session
-                    {
-                        SessionID = "2026010101",
-                        SaleStartTime = new DateTime(2026, 12, 1, 12, 0, 0),
-                        SaleEndTime = new DateTime(2027, 1, 9, 23, 59, 59),
-                        StartTime = new DateTime(2027, 1, 10, 19, 30, 0),
-                        ProgrammeID = "20260101"
-                    },
-                    new Session
-                    {
-                        SessionID = "2026020101",
-                        SaleStartTime = new DateTime(2026, 12, 2, 12, 0, 0),
-                        SaleEndTime = new DateTime(2027, 1, 10, 23, 59, 59),
-                        StartTime = new DateTime(2027, 1, 11, 19, 30, 0),
-                        ProgrammeID = "20260201"
-                    },
-                    new Session
-                    {
-                        SessionID = "2026030101",
-                        SaleStartTime = new DateTime(2026, 12, 3, 12, 0, 0),
-                        SaleEndTime = new DateTime(2027, 1, 11, 23, 59, 59),
-                        StartTime = new DateTime(2027, 1, 12, 19, 30, 0),
-                        ProgrammeID = "20260301"
-                    }
-                    );
-                    context.SaveChanges();
-                }
-                ////活動說明圖片
+               
+                //活動說明圖片
 
                 string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 if (!context.DescriptionImage.Any())
@@ -812,6 +782,140 @@ namespace TicketSalesSystem.Models
                     );
                     context.SaveChanges();
                 }
+               
+                
+                //區域
+                if (!context.Venue.Any())
+                {
+                    context.Venue.AddRange(
+                    new Venue
+                    {
+                        VenueID = "A01",
+                        VenueName = "搖滾 A 區",
+                        FloorName= "一樓",
+                        AreaColor= "藍區",
+                        RowCount = 20,
+                        SeatCount = 15,
+                        VenueStatusID = "A",
+                        PlaceID = "A"
+                    },
+                    new Venue
+                    {
+                        VenueID = "A02",
+                        VenueName = "看台 B 區",
+                        FloorName = "二樓",
+                        AreaColor = "藍區",
+                        RowCount = 30,
+                        SeatCount = 20,
+                        VenueStatusID = "A",
+                        PlaceID = "A"
+                    },
+                    new Venue
+                    {
+                        VenueID = "A03",
+                        VenueName = "維修封閉區",
+                        FloorName = "五樓",
+                        AreaColor = "藍區",
+                        RowCount = 10,
+                        SeatCount = 10,
+                        VenueStatusID = "U",
+                        PlaceID = "A"
+                    }
+
+                    );
+
+                    try
+                    {
+                        context.SaveChanges();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        // 重點在 InnerException，這會顯示 SQL Server 的原生錯誤
+                        var message = ex.InnerException?.Message ?? ex.Message;
+                        Console.WriteLine("資料庫報錯內容: " + message);
+                    }
+                }
+                //場次
+                if (!context.Session.Any())
+                {
+                    context.Session.AddRange(
+                    new Session
+                    {
+                        SessionID = "2026010101",
+                        SaleStartTime = new DateTime(2026, 12, 1, 12, 0, 0),
+                        SaleEndTime = new DateTime(2027, 1, 9, 23, 59, 59),
+                        StartTime = new DateTime(2027, 1, 10, 19, 30, 0),
+                        ProgrammeID = "20260101",
+                        VenueID = "A01"
+                    },
+                    new Session
+                    {
+                        SessionID = "2026020101",
+                        SaleStartTime = new DateTime(2026, 12, 2, 12, 0, 0),
+                        SaleEndTime = new DateTime(2027, 1, 10, 23, 59, 59),
+                        StartTime = new DateTime(2027, 1, 11, 19, 30, 0),
+                        ProgrammeID = "20260201",
+                        VenueID = "A01"
+                    },
+                    new Session
+                    {
+                        SessionID = "2026030101",
+                        SaleStartTime = new DateTime(2026, 12, 3, 12, 0, 0),
+                        SaleEndTime = new DateTime(2027, 1, 11, 23, 59, 59),
+                        StartTime = new DateTime(2027, 1, 12, 19, 30, 0),
+                        ProgrammeID = "20260301",
+                        VenueID = "A01"
+
+                    }
+                    );
+                    try
+                    {
+                        context.SaveChanges();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        // 重點在 InnerException，這會顯示 SQL Server 的原生錯誤
+                        var message = ex.InnerException?.Message ?? ex.Message;
+                        Console.WriteLine("資料庫報錯內容: " + message);
+                    }
+                }
+
+                //票區
+                if (!context.TicketsArea.Any())
+                {
+                    context.TicketsArea.AddRange(
+                    new TicketsArea
+                    {
+                        TicketsAreaID = "A01",
+                        TicketsAreaName = "搖滾站區",
+                        Price = 4800,
+                        TicketsAreaStatusID = "I",
+                        ProgrammeID = "20260101",
+                        VenueID = "A01"
+                    },
+                    new TicketsArea
+                    {
+                        TicketsAreaID = "B01",
+                        TicketsAreaName = "二樓看台區",
+                        Price = 3200,
+                        TicketsAreaStatusID = "I",
+                        ProgrammeID = "20260101",
+                        VenueID = "A02"
+                    },
+                    new TicketsArea
+                    {
+                        TicketsAreaID = "C01",
+                        TicketsAreaName = "視線加強區",
+                        Price = 1200,
+                        TicketsAreaStatusID = "I",
+                        ProgrammeID = "20260101",
+                        VenueID = "A02"
+                    }
+
+                    );
+
+                    context.SaveChanges();
+                }
                 //訂單
                 if (!context.Order.Any())
                 {
@@ -850,87 +954,6 @@ namespace TicketSalesSystem.Models
                          PaymentTradeNO = guidPayment[2]
                      }
                     );
-                    context.SaveChanges();
-                }
-                //區域
-                if (!context.Venue.Any())
-                {
-                    context.Venue.AddRange(
-                    new Venue
-                    {
-                        VenueID = "V01",
-                        VenueName = "搖滾 A 區",
-                        FloorName= "一樓",
-                        AreaColor= "藍區",
-                        RowCount = 20,
-                        SeatCount = 15,
-                        VenueStatusID = "A",
-                        PlaceID = "A"
-                    },
-                    new Venue
-                    {
-                        VenueID = "V02",
-                        VenueName = "看台 B 區",
-                        FloorName = "二樓",
-                        AreaColor = "藍區",
-                        RowCount = 30,
-                        SeatCount = 20,
-                        VenueStatusID = "A",
-                        PlaceID = "A"
-                    },
-                    new Venue
-                    {
-                        VenueID = "V03",
-                        VenueName = "維修封閉區",
-                        FloorName = "五樓",
-                        AreaColor = "藍區",
-                        RowCount = 10,
-                        SeatCount = 10,
-                        VenueStatusID = "U",
-                        PlaceID = "A"
-                    }
-
-                    );
-
-                    context.SaveChanges();
-                }
-
-                //票區
-                if (!context.TicketsArea.Any())
-                {
-                    context.TicketsArea.AddRange(
-                    new TicketsArea
-                    {
-                        TicketsAreaID = "A01",
-                        TicketsAreaName = "搖滾站區",
-                        Price = 4800,
-                        TicketsAreaStatusID = "I",
-                        ProgrammeID = "20260101",
-                        VenusID = "V01"
-
-                    },
-                    new TicketsArea
-                    {
-                        TicketsAreaID = "B01",
-                        TicketsAreaName = "二樓看台區",
-                        Price = 3200,
-                        TicketsAreaStatusID = "I",
-                        ProgrammeID = "20260101",
-                        VenusID = "V02"
-
-                    },
-                    new TicketsArea
-                    {
-                        TicketsAreaID = "C01",
-                        TicketsAreaName = "視線加強區",
-                        Price = 1200,
-                        TicketsAreaStatusID = "I",
-                        ProgrammeID = "20260101",
-                        VenusID = "V02"
-                    }
-
-                    );
-
                     context.SaveChanges();
                 }
 

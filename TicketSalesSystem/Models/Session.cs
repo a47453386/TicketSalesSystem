@@ -7,7 +7,7 @@ namespace TicketSalesSystem.Models
     public class Session
     {
         [Key]
-        [Column(TypeName = "nchar(10)")]
+            
         public string SessionID { get; set; }= null!;
 
         [Display(Name = "開賣時間")]
@@ -31,9 +31,12 @@ namespace TicketSalesSystem.Models
 
         //FK區
         public string ProgrammeID { get; set; } = null!;
+        public string VenueID { get; set; } = null!;
 
         //關聯區
         public virtual Programme? Programme { get; set; }
+
+        public virtual Venue? Venue { get; set; }
 
         public virtual List<Order>? Order { get; set; }
     }

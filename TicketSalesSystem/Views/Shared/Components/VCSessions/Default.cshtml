@@ -1,0 +1,42 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Session>
+@{
+    Layout = null;
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.StartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SaleStartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SaleEndTime)
+            </th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SaleStartTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SaleEndTime)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.SessionID">更新</a> |
+                    <a asp-action="Delete" asp-route-id="@item.SessionID">刪除</a>
+                </td>
+            </tr>
+        }   
+    </tbody>
+</table>

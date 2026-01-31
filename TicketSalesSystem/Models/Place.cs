@@ -29,7 +29,7 @@ namespace TicketSalesSystem.Models
 
         //關聯
         public virtual List<Programme>? Programme { get; set; } 
-        public virtual List<Venue>? Venus { get; set; }
+        public virtual List<Venue>? Venue { get; set; }
     }
 
 }

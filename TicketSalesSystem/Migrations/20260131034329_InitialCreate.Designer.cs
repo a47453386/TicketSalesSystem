@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260130124045_InitialCreate")]
+    [Migration("20260131034329_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -330,7 +330,7 @@ namespace TicketSalesSystem.Migrations
 
                     b.Property<string>("SessionID")
                         .IsRequired()
-                        .HasColumnType("nchar(10)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("OrderID");
 
@@ -672,7 +672,7 @@ namespace TicketSalesSystem.Migrations
             modelBuilder.Entity("TicketSalesSystem.Models.Session", b =>
                 {
                     b.Property<string>("SessionID")
-                        .HasColumnType("nchar(10)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProgrammeID")
                         .IsRequired()
@@ -687,9 +687,15 @@ namespace TicketSalesSystem.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("VenueID")
+                        .IsRequired()
+                        .HasColumnType("nchar(3)");
+
                     b.HasKey("SessionID");
 
                     b.HasIndex("ProgrammeID");
+
+                    b.HasIndex("VenueID");
 
                     b.ToTable("Session");
                 });
@@ -746,7 +752,7 @@ namespace TicketSalesSystem.Migrations
                         .IsRequired()
                         .HasColumnType("nchar(1)");
 
-                    b.Property<string>("VenusID")
+                    b.Property<string>("VenueID")
                         .IsRequired()
                         .HasColumnType("nchar(3)");
 
@@ -756,7 +762,7 @@ namespace TicketSalesSystem.Migrations
 
                     b.HasIndex("TicketsAreaStatusID");
 
-                    b.HasIndex("VenusID");
+                    b.HasIndex("VenueID");
 
                     b.ToTable("TicketsArea");
                 });
@@ -1079,7 +1085,15 @@ namespace TicketSalesSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TicketSalesSystem.Models.Venue", "Venue")
+                        .WithMany("Session")
+                        .HasForeignKey("VenueID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Programme");
+
+                    b.Navigation("Venue");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Tickets", b =>
@@ -1115,9 +1129,9 @@ namespace TicketSalesSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TicketSalesSystem.Models.Venue", "Venus")
+                    b.HasOne("TicketSalesSystem.Models.Venue", "Venue")
                         .WithMany("TicketsArea")
-                        .HasForeignKey("VenusID")
+                        .HasForeignKey("VenueID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1125,13 +1139,13 @@ namespace TicketSalesSystem.Migrations
 
                     b.Navigation("TicketsAreaStatus");
 
-                    b.Navigation("Venus");
+                    b.Navigation("Venue");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Venue", b =>
                 {
                     b.HasOne("TicketSalesSystem.Models.Place", "Place")
-                        .WithMany("Venus")
+                        .WithMany("Venue")
                         .HasForeignKey("PlaceID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1215,7 +1229,7 @@ namespace TicketSalesSystem.Migrations
                 {
                     b.Navigation("Programme");
 
-                    b.Navigation("Venus");
+                    b.Navigation("Venue");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Programme", b =>
@@ -1269,6 +1283,8 @@ namespace TicketSalesSystem.Migrations
 
             modelBuilder.Entity("TicketSalesSystem.Models.Venue", b =>
                 {
+                    b.Navigation("Session");
+
                     b.Navigation("TicketsArea");
                 });
 
