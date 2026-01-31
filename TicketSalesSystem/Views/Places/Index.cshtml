@@ -1,0 +1,56 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Place>
+
+@{
+    ViewData["Title"] = "場館設定";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create">新增場館</a>
+</p>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PlaceName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PlaceAddress)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VenueImage)
+            </th>
+            <th>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PlaceName)
+                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.PlaceAddress)
+                </th>
+                <th>    
+                    @if (item.VenueImage != null)
+                    {
+                        <img src="~/Photos/VenueImage/@item.VenueImage" alt="@item.PlaceName" class="img-fluid" />
+                    }
+                </th>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.PlaceID">更新</a> |
+                    <a asp-action="Details" asp-route-id="@item.PlaceID">詳細資料</a> |
+                    <a asp-action="Delete" asp-route-id="@item.PlaceID">刪除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

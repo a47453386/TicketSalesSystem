@@ -21,6 +21,11 @@ namespace TicketSalesSystem.Models
         [StringLength(50, ErrorMessage = "場地地址最多50個字")]
         public string PlaceAddress { get; set; } = null!;
 
+        [Display(Name = "場內平面圖")]
+        [Required(ErrorMessage = "必填")]
+        [StringLength(5, MinimumLength = 5)]
+        public string? VenueImage { get; set; }
+
 
         //關聯
         public virtual List<Programme>? Programme { get; set; } 

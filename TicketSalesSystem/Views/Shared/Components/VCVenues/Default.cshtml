@@ -1,0 +1,43 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Venue>
+@{
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col">
+        <div class="col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueID)
+        </div>
+        <div class="col-sm-3">
+            @Html.DisplayFor(model => model.FirstOrDefault().VenueID)
+        </div>
+        <div class="col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueName)
+        </div>
+        <div class="col-sm-3">
+            @Html.DisplayFor(model => model.FirstOrDefault().VenueName)
+        </div>
+        <div class="col-sm-3">
+            @Html.DisplayFor(model => model.FirstOrDefault().AreaColor)
+        </div>
+        <div class="col-sm-2">
+            @Html.DisplayNameFor(model => model.FloorName)
+        </div>
+        <div class="col-sm-3">
+            @Html.DisplayFor(model => model.FirstOrDefault().FloorName)
+        </div>             
+        <div class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalSeats)
+        </div>
+        <div class="col-sm-3">
+            @Html.DisplayFor(model => model.FirstOrDefault().TotalSeats)
+        </div>
+        <div class="col-sm-2">
+            @Html.DisplayNameFor(model => model.VenueStatusID)
+        </div>
+        <div class="col-sm-3">
+            @Html.DisplayFor(model => model.FirstOrDefault().VenueStatus)
+        </div>
+    </div>
+    
+</div>

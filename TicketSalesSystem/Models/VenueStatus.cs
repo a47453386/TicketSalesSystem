@@ -11,11 +11,11 @@ namespace TicketSalesSystem.Models
 
         [Display(Name = "區域狀態名稱")]
         [Required(ErrorMessage = "必填")]
-        [StringLength(30, ErrorMessage = "場地狀態名稱最多30個字")]
+        [StringLength(30, ErrorMessage = "區域狀態名稱最多30個字")]
         public string VenueStatusName { get; set; } = null!;
 
 
         //關聯
-        public virtual List<Venue>? Venus { get; set; }
+        public virtual List<Venue>? Venue { get; set; }
     }
 }

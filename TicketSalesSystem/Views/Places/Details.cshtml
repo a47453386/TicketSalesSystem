@@ -1,0 +1,40 @@
+﻿@model TicketSalesSystem.Models.Place
+
+@{
+    ViewData["Title"] = "詳細資訊";
+}
+
+<h1>@Model.PlaceName@ViewData["Title"]</h1>
+
+<div>    
+    <div class="row">
+        <div class="col-5">
+            <div class="col-sm-2">
+                @Html.DisplayNameFor(model => model.PlaceName)
+            </div>
+            <div class="col-sm-3">
+                @Html.DisplayFor(model => model.PlaceName)
+            </div>
+            <div class="col-sm-2">
+                @Html.DisplayNameFor(model => model.PlaceAddress)
+            </div>
+            <div class="col-sm-3">
+                @Html.DisplayFor(model => model.PlaceAddress)
+            </div>
+            <div >
+                @await Component.InvokeAsync("VCVenues", new { placeID = Model.PlaceID })
+            </div>
+        </div>
+        <div class="col-7">
+            @if (Model.VenueImage != null)
+            {
+                <img src="~/Photos/VenueImage/@Model.VenueImage" alt="@Model.PlaceName" class="img-fluid" />
+            }
+        </div>
+        
+    </div>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.PlaceID">更新</a> |
+    <a asp-action="Index">回場館地設定</a>
+</div>

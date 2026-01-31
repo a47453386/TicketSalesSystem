@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260130051027_InitialCreate")]
+    [Migration("20260130124045_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -429,6 +429,11 @@ namespace TicketSalesSystem.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("VenueImage")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
                     b.HasKey("PlaceID");
 
                     b.ToTable("Place");
@@ -791,6 +796,16 @@ namespace TicketSalesSystem.Migrations
                     b.Property<string>("VenueID")
                         .HasColumnType("nchar(3)");
 
+                    b.Property<string>("AreaColor")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("FloorName")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("PlaceID")
                         .IsRequired()
                         .HasColumnType("nchar(1)");
@@ -807,11 +822,8 @@ namespace TicketSalesSystem.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("VenueStatusID")
-                        .HasColumnType("nchar(1)");
-
-                    b.Property<string>("VenueStausID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nchar(1)");
 
                     b.HasKey("VenueID");
 
@@ -819,7 +831,7 @@ namespace TicketSalesSystem.Migrations
 
                     b.HasIndex("VenueStatusID");
 
-                    b.ToTable("Venus");
+                    b.ToTable("Venue");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.VenueStatus", b =>
@@ -1125,8 +1137,10 @@ namespace TicketSalesSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("TicketSalesSystem.Models.VenueStatus", "VenueStatus")
-                        .WithMany("Venus")
-                        .HasForeignKey("VenueStatusID");
+                        .WithMany("Venue")
+                        .HasForeignKey("VenueStatusID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Place");
 
@@ -1260,7 +1274,7 @@ namespace TicketSalesSystem.Migrations
 
             modelBuilder.Entity("TicketSalesSystem.Models.VenueStatus", b =>
                 {
-                    b.Navigation("Venus");
+                    b.Navigation("Venue");
                 });
 #pragma warning restore 612, 618
         }

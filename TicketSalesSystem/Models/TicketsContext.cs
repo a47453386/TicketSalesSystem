@@ -49,7 +49,7 @@ namespace TicketSalesSystem.Models
         public DbSet<TicketsArea> TicketsArea { get; set; }
         public DbSet<TicketsAreaStatus> TicketsAreaStatus { get; set; }
         public DbSet<TicketsStatus> TicketsStatus { get; set; }       
-        public DbSet<Venue>Venus { get; set; }
+        public DbSet<Venue> Venue { get; set; }
         public DbSet<VenueStatus> VenueStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

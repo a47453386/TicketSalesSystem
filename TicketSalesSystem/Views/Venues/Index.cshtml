@@ -1,0 +1,83 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Venue>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.VenueID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VenueName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FloorName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AreaColor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RowCount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SeatCount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalSeats)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VenueStatusID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PlaceID)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.VenueID)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.VenueName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FloorName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AreaColor)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RowCount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SeatCount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TotalSeats)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.VenueStatus.VenueStatusName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Place.PlaceName)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.VenueID">更新</a>
+                    <a asp-action="Delete" asp-route-id="@item.VenueID">刪除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

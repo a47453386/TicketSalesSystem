@@ -271,6 +271,7 @@ namespace TicketSalesSystem.Models
 
 
                 //場地
+                string[] VImage = { "A", "B" };
                 if (!context.Place.Any())
                 {
                     context.Place.AddRange(
@@ -278,18 +279,32 @@ namespace TicketSalesSystem.Models
                     {
                         PlaceID = "A",
                         PlaceName = "台北小巨蛋",
-                        PlaceAddress = "台北市松山區南京東路四段2號"
+                        PlaceAddress = "台北市松山區南京東路四段2號",
+                        VenueImage= VImage[0]+ ".jpg"
                     },
                     new Place
                     {
                         PlaceID = "B",
                         PlaceName = "高雄巨蛋",
-                        PlaceAddress = "高雄市左營區博愛二路757號"
+                        PlaceAddress = "高雄市左營區博愛二路757號",
+                        VenueImage = VImage[1] + ".jpg"
                     }
                     );
                     context.SaveChanges();
                 }
+                //場內平面圖
 
+                string VenueImageSeedPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedPhotos", "VenueImage");
+                string VenueImagePhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "photos", "VenueImage");
+
+                string[] VenueImageFiles = Directory.GetFiles(VenueImageSeedPhotoPath);
+
+                for (int i = 0; i < VenueImageFiles.Length; i++)
+                {
+                    var VenueImageFileName = VImage[i] + ".jpg";
+                    var VenueImageDestFile = Path.Combine(VenueImagePhotoPath, VenueImageFileName);
+                    File.Copy(VenueImageFiles[i], VenueImageDestFile, overwrite: true);
+                }
 
 
                 //員工
@@ -838,34 +853,40 @@ namespace TicketSalesSystem.Models
                     context.SaveChanges();
                 }
                 //區域
-                if (!context.Venus.Any())
+                if (!context.Venue.Any())
                 {
-                    context.Venus.AddRange(
+                    context.Venue.AddRange(
                     new Venue
                     {
                         VenueID = "V01",
                         VenueName = "搖滾 A 區",
+                        FloorName= "一樓",
+                        AreaColor= "藍區",
                         RowCount = 20,
                         SeatCount = 15,
-                        VenueStausID = "A",
+                        VenueStatusID = "A",
                         PlaceID = "A"
                     },
                     new Venue
                     {
                         VenueID = "V02",
                         VenueName = "看台 B 區",
+                        FloorName = "二樓",
+                        AreaColor = "藍區",
                         RowCount = 30,
                         SeatCount = 20,
-                        VenueStausID = "A",
+                        VenueStatusID = "A",
                         PlaceID = "A"
                     },
                     new Venue
                     {
                         VenueID = "V03",
                         VenueName = "維修封閉區",
+                        FloorName = "五樓",
+                        AreaColor = "藍區",
                         RowCount = 10,
                         SeatCount = 10,
-                        VenueStausID = "U",
+                        VenueStatusID = "U",
                         PlaceID = "A"
                     }
 

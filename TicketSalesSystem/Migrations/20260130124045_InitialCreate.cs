@@ -89,7 +89,8 @@ namespace TicketSalesSystem.Migrations
                 {
                     PlaceID = table.Column<string>(type: "nchar(1)", nullable: false),
                     PlaceName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    PlaceAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    PlaceAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    VenueImage = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -266,31 +267,33 @@ namespace TicketSalesSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Venus",
+                name: "Venue",
                 columns: table => new
                 {
                     VenueID = table.Column<string>(type: "nchar(3)", nullable: false),
                     VenueName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    FloorName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    AreaColor = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     RowCount = table.Column<int>(type: "int", nullable: false),
                     SeatCount = table.Column<int>(type: "int", nullable: false),
-                    VenueStausID = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PlaceID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    VenueStatusID = table.Column<string>(type: "nchar(1)", nullable: true)
+                    VenueStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
+                    PlaceID = table.Column<string>(type: "nchar(1)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Venus", x => x.VenueID);
+                    table.PrimaryKey("PK_Venue", x => x.VenueID);
                     table.ForeignKey(
-                        name: "FK_Venus_Place_PlaceID",
+                        name: "FK_Venue_Place_PlaceID",
                         column: x => x.PlaceID,
                         principalTable: "Place",
                         principalColumn: "PlaceID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Venus_VenueStatus_VenueStatusID",
+                        name: "FK_Venue_VenueStatus_VenueStatusID",
                         column: x => x.VenueStatusID,
                         principalTable: "VenueStatus",
-                        principalColumn: "VenueStatusID");
+                        principalColumn: "VenueStatusID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -555,9 +558,9 @@ namespace TicketSalesSystem.Migrations
                         principalColumn: "TicketsAreaStatusID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TicketsArea_Venus_VenusID",
+                        name: "FK_TicketsArea_Venue_VenusID",
                         column: x => x.VenusID,
-                        principalTable: "Venus",
+                        principalTable: "Venue",
                         principalColumn: "VenueID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -789,13 +792,13 @@ namespace TicketSalesSystem.Migrations
                 column: "VenusID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Venus_PlaceID",
-                table: "Venus",
+                name: "IX_Venue_PlaceID",
+                table: "Venue",
                 column: "PlaceID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Venus_VenueStatusID",
-                table: "Venus",
+                name: "IX_Venue_VenueStatusID",
+                table: "Venue",
                 column: "VenueStatusID");
         }
 
@@ -848,7 +851,7 @@ namespace TicketSalesSystem.Migrations
                 name: "TicketsAreaStatus");
 
             migrationBuilder.DropTable(
-                name: "Venus");
+                name: "Venue");
 
             migrationBuilder.DropTable(
                 name: "QuestionType");

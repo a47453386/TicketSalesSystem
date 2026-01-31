@@ -1,0 +1,48 @@
+﻿@model TicketSalesSystem.Models.TicketsArea
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>TicketsArea</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketsAreaName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketsAreaName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketsAreaStatus)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketsAreaStatus.TicketsAreaStatusID)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Venus)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Venus.VenueID)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Programme)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Programme.ProgrammeID)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.TicketsAreaID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
