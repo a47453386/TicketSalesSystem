@@ -539,40 +539,6 @@ namespace TicketSalesSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TicketsArea",
-                columns: table => new
-                {
-                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
-                    TicketsAreaName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Price = table.Column<decimal>(type: "money", nullable: false),
-                    TicketsAreaStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    VenueID = table.Column<string>(type: "nchar(3)", nullable: false),
-                    ProgrammeID = table.Column<string>(type: "nchar(8)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TicketsArea", x => x.TicketsAreaID);
-                    table.ForeignKey(
-                        name: "FK_TicketsArea_Programme_ProgrammeID",
-                        column: x => x.ProgrammeID,
-                        principalTable: "Programme",
-                        principalColumn: "ProgrammeID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TicketsArea_TicketsAreaStatus_TicketsAreaStatusID",
-                        column: x => x.TicketsAreaStatusID,
-                        principalTable: "TicketsAreaStatus",
-                        principalColumn: "TicketsAreaStatusID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TicketsArea_Venue_VenueID",
-                        column: x => x.VenueID,
-                        principalTable: "Venue",
-                        principalColumn: "VenueID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Order",
                 columns: table => new
                 {
@@ -621,6 +587,46 @@ namespace TicketSalesSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TicketsArea",
+                columns: table => new
+                {
+                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
+                    TicketsAreaName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    TicketsAreaStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
+                    VenueID = table.Column<string>(type: "nchar(3)", nullable: false),
+                    ProgrammeID = table.Column<string>(type: "nchar(8)", nullable: false),
+                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketsArea", x => x.TicketsAreaID);
+                    table.ForeignKey(
+                        name: "FK_TicketsArea_Programme_ProgrammeID",
+                        column: x => x.ProgrammeID,
+                        principalTable: "Programme",
+                        principalColumn: "ProgrammeID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TicketsArea_Session_SessionID",
+                        column: x => x.SessionID,
+                        principalTable: "Session",
+                        principalColumn: "SessionID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TicketsArea_TicketsAreaStatus_TicketsAreaStatusID",
+                        column: x => x.TicketsAreaStatusID,
+                        principalTable: "TicketsAreaStatus",
+                        principalColumn: "TicketsAreaStatusID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TicketsArea_Venue_VenueID",
+                        column: x => x.VenueID,
+                        principalTable: "Venue",
+                        principalColumn: "VenueID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tickets",
                 columns: table => new
                 {
@@ -646,6 +652,31 @@ namespace TicketSalesSystem.Migrations
                         principalTable: "TicketsStatus",
                         principalColumn: "TicketsStatusID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SessionArea",
+                columns: table => new
+                {
+                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
+                    Price = table.Column<decimal>(type: "money", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SessionArea", x => new { x.SessionID, x.TicketsAreaID });
+                    table.ForeignKey(
+                        name: "FK_SessionArea_Session_SessionID",
+                        column: x => x.SessionID,
+                        principalTable: "Session",
+                        principalColumn: "SessionID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SessionArea_TicketsArea_TicketsAreaID",
+                        column: x => x.TicketsAreaID,
+                        principalTable: "TicketsArea",
+                        principalColumn: "TicketsAreaID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -779,6 +810,11 @@ namespace TicketSalesSystem.Migrations
                 column: "VenueID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SessionArea_TicketsAreaID",
+                table: "SessionArea",
+                column: "TicketsAreaID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tickets_OrderID",
                 table: "Tickets",
                 column: "OrderID");
@@ -792,6 +828,11 @@ namespace TicketSalesSystem.Migrations
                 name: "IX_TicketsArea_ProgrammeID",
                 table: "TicketsArea",
                 column: "ProgrammeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketsArea_SessionID",
+                table: "TicketsArea",
+                column: "SessionID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketsArea_TicketsAreaStatusID",
@@ -836,10 +877,10 @@ namespace TicketSalesSystem.Migrations
                 name: "Reply");
 
             migrationBuilder.DropTable(
-                name: "Tickets");
+                name: "SessionArea");
 
             migrationBuilder.DropTable(
-                name: "TicketsArea");
+                name: "Tickets");
 
             migrationBuilder.DropTable(
                 name: "FAQPublishStatus");
@@ -854,16 +895,19 @@ namespace TicketSalesSystem.Migrations
                 name: "ReplyStatus");
 
             migrationBuilder.DropTable(
+                name: "TicketsArea");
+
+            migrationBuilder.DropTable(
                 name: "Order");
 
             migrationBuilder.DropTable(
                 name: "TicketsStatus");
 
             migrationBuilder.DropTable(
-                name: "TicketsAreaStatus");
+                name: "QuestionType");
 
             migrationBuilder.DropTable(
-                name: "QuestionType");
+                name: "TicketsAreaStatus");
 
             migrationBuilder.DropTable(
                 name: "Member");

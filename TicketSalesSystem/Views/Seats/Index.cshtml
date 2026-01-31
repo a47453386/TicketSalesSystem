@@ -1,0 +1,62 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Seats>
+
+@{
+    // 取得最大列數，確保 Grid 寬度正確
+    var maxSeatCount = Model.Any() ? Model.Max(s => s.SeatIndex) + 1 : 0;
+}
+
+<h2>@ViewBag.VenueName - 座位選擇</h2>
+
+@* 使用動態欄位數量來設定 grid-template-columns *@
+<div class="seat-container"
+     style="display: grid;
+            grid-template-columns: repeat(@maxSeatCount, 50px);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;">
+
+    @foreach (var seat in Model)
+    {
+        @* 注意：你的 Controller 裡 Status 是 "已售" 或 "可售" (字串) *@
+        <div class="seat @(seat.Status == "已售" ? "sold" : "available")"
+             style="grid-row: @(seat.rowIndex + 1);
+                        grid-column: @(seat.SeatIndex + 1);
+                        width: 50px; height: 50px;
+                        border: 1px solid #ccc;
+                        text-align: center;
+                        font-size: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-direction: column;">
+
+            <span>@seat.RowName</span>
+            <span>@seat.SeatName</span>
+        </div>
+    }
+</div>
+
+<style>
+    .seat {
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+
+    .available {
+        background-color: #90ee90;
+        cursor: pointer;
+        color: #000;
+    }
+
+        .available:hover {
+            background-color: #2ecc71;
+            color: white;
+            transform: scale(1.1);
+        }
+
+    .sold {
+        background-color: #ffcccb;
+        cursor: not-allowed;
+        color: #777;
+    }
+</style>

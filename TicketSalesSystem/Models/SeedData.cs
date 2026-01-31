@@ -280,7 +280,7 @@ namespace TicketSalesSystem.Models
                         PlaceID = "A",
                         PlaceName = "台北小巨蛋",
                         PlaceAddress = "台北市松山區南京東路四段2號",
-                        VenueImage= VImage[0]+ ".jpg"
+                        VenueImage = VImage[0] + ".jpg"
                     },
                     new Place
                     {
@@ -551,7 +551,7 @@ namespace TicketSalesSystem.Models
                     File.Copy(SeatImageFiles[i], SeatImageDestFile, overwrite: true);
                 }
 
-               
+
                 //活動說明圖片
 
                 string[] guidDescriptionImage = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
@@ -782,8 +782,8 @@ namespace TicketSalesSystem.Models
                     );
                     context.SaveChanges();
                 }
-               
-                
+
+
                 //區域
                 if (!context.Venue.Any())
                 {
@@ -792,8 +792,8 @@ namespace TicketSalesSystem.Models
                     {
                         VenueID = "A01",
                         VenueName = "搖滾 A 區",
-                        FloorName= "一樓",
-                        AreaColor= "藍區",
+                        FloorName = "一樓",
+                        AreaColor = "藍區",
                         RowCount = 20,
                         SeatCount = 15,
                         VenueStatusID = "A",
@@ -888,34 +888,61 @@ namespace TicketSalesSystem.Models
                     {
                         TicketsAreaID = "A01",
                         TicketsAreaName = "搖滾站區",
-                        Price = 4800,
                         TicketsAreaStatusID = "I",
                         ProgrammeID = "20260101",
-                        VenueID = "A01"
+                        VenueID = "A01",
+                        SessionID = "2026010101"
                     },
                     new TicketsArea
                     {
                         TicketsAreaID = "B01",
                         TicketsAreaName = "二樓看台區",
-                        Price = 3200,
                         TicketsAreaStatusID = "I",
                         ProgrammeID = "20260101",
-                        VenueID = "A02"
+                        VenueID = "A02",
+                        SessionID = "2026010101"
                     },
                     new TicketsArea
                     {
                         TicketsAreaID = "C01",
                         TicketsAreaName = "視線加強區",
-                        Price = 1200,
                         TicketsAreaStatusID = "I",
                         ProgrammeID = "20260101",
-                        VenueID = "A02"
+                        VenueID = "A02",
+                        SessionID = "2026010101"
                     }
 
                     );
 
                     context.SaveChanges();
                 }
+                if (!context.SessionArea.Any())
+                {
+                    context.SessionArea.AddRange(
+                    new SessionArea
+                    {
+                        SessionID = "2026010101",
+                        TicketsAreaID = "A01",
+                        Price = 4800
+                    },                     
+                     new SessionArea
+                     {
+                         SessionID = "2026010101",
+                         TicketsAreaID = "B01",
+                         Price = 2800
+                     },
+                    new SessionArea
+                    {
+                        SessionID = "2026010101",
+                        TicketsAreaID = "C01",
+                        Price = 2000
+                    }
+                    );
+
+                    context.SaveChanges();
+                }
+
+
                 //訂單
                 if (!context.Order.Any())
                 {
@@ -966,7 +993,7 @@ namespace TicketSalesSystem.Models
                         TicketsID = "T000001",
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 10, 16, 30, 0),
-                        RefundTime = null,    
+                        RefundTime = null,
                         TicketsStatusID = "N",
                         OrderID = "202612000001"
                     },
@@ -984,7 +1011,7 @@ namespace TicketSalesSystem.Models
                         TicketsID = "T000003",
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 12, 17, 30, 0),
-                        RefundTime = null,                        
+                        RefundTime = null,
                         TicketsStatusID = "N",
                         OrderID = "202612000003"
                     }

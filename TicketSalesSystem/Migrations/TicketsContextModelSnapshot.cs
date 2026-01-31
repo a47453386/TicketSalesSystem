@@ -697,6 +697,24 @@ namespace TicketSalesSystem.Migrations
                     b.ToTable("Session");
                 });
 
+            modelBuilder.Entity("TicketSalesSystem.Models.SessionArea", b =>
+                {
+                    b.Property<string>("SessionID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TicketsAreaID")
+                        .HasColumnType("nchar(3)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("money");
+
+                    b.HasKey("SessionID", "TicketsAreaID");
+
+                    b.HasIndex("TicketsAreaID");
+
+                    b.ToTable("SessionArea");
+                });
+
             modelBuilder.Entity("TicketSalesSystem.Models.Tickets", b =>
                 {
                     b.Property<string>("TicketsID")
@@ -733,12 +751,13 @@ namespace TicketSalesSystem.Migrations
                     b.Property<string>("TicketsAreaID")
                         .HasColumnType("nchar(3)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("money");
-
                     b.Property<string>("ProgrammeID")
                         .IsRequired()
                         .HasColumnType("nchar(8)");
+
+                    b.Property<string>("SessionID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("TicketsAreaName")
                         .IsRequired()
@@ -756,6 +775,8 @@ namespace TicketSalesSystem.Migrations
                     b.HasKey("TicketsAreaID");
 
                     b.HasIndex("ProgrammeID");
+
+                    b.HasIndex("SessionID");
 
                     b.HasIndex("TicketsAreaStatusID");
 
@@ -1093,6 +1114,25 @@ namespace TicketSalesSystem.Migrations
                     b.Navigation("Venue");
                 });
 
+            modelBuilder.Entity("TicketSalesSystem.Models.SessionArea", b =>
+                {
+                    b.HasOne("TicketSalesSystem.Models.Session", "Session")
+                        .WithMany("SessionArea")
+                        .HasForeignKey("SessionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TicketSalesSystem.Models.TicketsArea", "TicketsArea")
+                        .WithMany("SessionArea")
+                        .HasForeignKey("TicketsAreaID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+
+                    b.Navigation("TicketsArea");
+                });
+
             modelBuilder.Entity("TicketSalesSystem.Models.Tickets", b =>
                 {
                     b.HasOne("TicketSalesSystem.Models.Order", "Order")
@@ -1117,7 +1157,13 @@ namespace TicketSalesSystem.Migrations
                     b.HasOne("TicketSalesSystem.Models.Programme", "Programme")
                         .WithMany("TicketsArea")
                         .HasForeignKey("ProgrammeID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TicketSalesSystem.Models.Session", "Session")
+                        .WithMany("TicketsArea")
+                        .HasForeignKey("SessionID")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TicketSalesSystem.Models.TicketsAreaStatus", "TicketsAreaStatus")
@@ -1133,6 +1179,8 @@ namespace TicketSalesSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Programme");
+
+                    b.Navigation("Session");
 
                     b.Navigation("TicketsAreaStatus");
 
@@ -1266,6 +1314,15 @@ namespace TicketSalesSystem.Migrations
             modelBuilder.Entity("TicketSalesSystem.Models.Session", b =>
                 {
                     b.Navigation("Order");
+
+                    b.Navigation("SessionArea");
+
+                    b.Navigation("TicketsArea");
+                });
+
+            modelBuilder.Entity("TicketSalesSystem.Models.TicketsArea", b =>
+                {
+                    b.Navigation("SessionArea");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.TicketsAreaStatus", b =>

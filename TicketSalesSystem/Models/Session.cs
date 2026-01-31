@@ -39,5 +39,12 @@ namespace TicketSalesSystem.Models
         public virtual Venue? Venue { get; set; }
 
         public virtual List<Order>? Order { get; set; }
+
+
+        public virtual List<SessionArea>? SessionArea { get; set; }
+        public virtual List<TicketsArea>? TicketsArea { get; set; }
+
+        public virtual List<Seats>? Seats { get; set; }
+
     }
 }

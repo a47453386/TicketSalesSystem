@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Diagnostics;
+using TicketSalesSystem.Models;
 
 namespace TicketSalesSystem.Models
 {
@@ -13,9 +14,7 @@ namespace TicketSalesSystem.Models
         public DbSet<Programme> Programme { get; set; }
         public DbSet<ProgrammeStatus> ProgrammeStatus { get; set; }
         public DbSet<DescriptionImage> DescriptionImage { get; set; }
-        public DbSet<Session> Session { get; set; }
-        public DbSet<Place> Place { get; set; }
-
+       
         // ===== Member =====
         public DbSet<Member> Member { get; set; }
         public DbSet<MemberLogin> MemberLogin { get; set; }
@@ -38,6 +37,12 @@ namespace TicketSalesSystem.Models
         public DbSet<PublicNotice> PublicNotice { get; set; }
         public DbSet<FAQPublishStatus> FAQPublishStatus { get; set; }
 
+        // ===== Area =====
+        public DbSet<Session> Session { get; set; }
+        public DbSet<Place> Place { get; set; }
+        public DbSet<SessionArea> SessionArea { get; set; }
+        public DbSet<TicketsArea> TicketsArea { get; set; }
+
         // ===== Order / Payment =====
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderStatus> OrderStatus { get; set; }
@@ -45,12 +50,12 @@ namespace TicketSalesSystem.Models
         public DbSet<PaymentMethod> PaymentMethod { get; set; }
         public DbSet<PaymentStatus> PaymentStatus { get; set; }
         // ===== Ticket / Seat =====
-        public DbSet<Tickets> Tickets { get; set; }
-        public DbSet<TicketsArea> TicketsArea { get; set; }
+        public DbSet<Tickets> Tickets { get; set; }        
         public DbSet<TicketsAreaStatus> TicketsAreaStatus { get; set; }
         public DbSet<TicketsStatus> TicketsStatus { get; set; }       
         public DbSet<Venue> Venue { get; set; }
         public DbSet<VenueStatus> VenueStatus { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -222,9 +227,12 @@ namespace TicketSalesSystem.Models
             modelBuilder.Entity<Programme>()
                .HasMany(s => s.TicketsArea)
                .WithOne(t => t.Programme)
-               .HasForeignKey(t => t.ProgrammeID);
+               .HasForeignKey(t => t.ProgrammeID)
+               .OnDelete(DeleteBehavior.Restrict);
 
-            // Venue相關
+
+
+            // Area相關
             modelBuilder.Entity<Venue>()
                .HasMany(s => s.TicketsArea)
                .WithOne(t => t.Venue)
@@ -245,6 +253,12 @@ namespace TicketSalesSystem.Models
               .WithOne(t => t.Place)
               .HasForeignKey(t => t.PlaceID);
 
+            modelBuilder.Entity<Session>()
+              .HasMany(s => s.TicketsArea)
+              .WithOne(t => t.Session)
+              .HasForeignKey(t => t.SessionID)
+              .OnDelete(DeleteBehavior.Restrict);
+
             // AccountStatus相關
             modelBuilder.Entity<Member>()
                .HasOne(m => m.AccountStatus)
@@ -258,10 +272,34 @@ namespace TicketSalesSystem.Models
                 .HasForeignKey(e => e.AccountStatusID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+
+            // =========================
+            // Many-to-Many
+            // =========================
+            // 1. 設定複合主鍵 (Composite Key)            
+            modelBuilder.Entity<SessionArea>()
+                .HasKey(sa => new { sa.SessionID, sa.TicketsAreaID });
+
+            // 2. 設定 Session 與 SessionArea 的一對多關係
+            modelBuilder.Entity<SessionArea>()
+                .HasOne(sa => sa.Session)
+                .WithMany(s => s.SessionArea) // 請確保 Session Model 裡有 ICollection<SessionArea> SessionAreas
+                .HasForeignKey(sa => sa.SessionID)
+                .OnDelete(DeleteBehavior.Cascade); // 如果刪除場次，對應的票價區域設定也一起刪除
+
+            // 3. 設定 TicketsArea 與 SessionArea 的一對多關係
+            modelBuilder.Entity<SessionArea>()
+                .HasOne(sa => sa.TicketsArea)
+                .WithMany(ta => ta.SessionArea) // 請確保 TicketsArea Model 裡有 ICollection<SessionArea> SessionAreas
+                .HasForeignKey(sa => sa.TicketsAreaID)
+                .OnDelete(DeleteBehavior.Restrict); // 為了安全，如果票區還在使用中，限制刪除
+
+
             // =========================
             // Column Type Override
             // =========================
-            modelBuilder.Entity<TicketsArea>()
+            modelBuilder.Entity<SessionArea>()
                 .Property(t => t.Price)
                 .HasColumnType("money");
 
@@ -270,5 +308,6 @@ namespace TicketSalesSystem.Models
             base.OnModelCreating(modelBuilder);
 
         }
+        public DbSet<TicketSalesSystem.Models.Seats> Seats { get; set; } = default!;
     }
 }

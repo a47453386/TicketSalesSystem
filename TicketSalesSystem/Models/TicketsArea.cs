@@ -13,12 +13,7 @@ namespace TicketSalesSystem.Models
         [Required(ErrorMessage = "必填")]
         [StringLength(20, MinimumLength = 2, ErrorMessage = "請輸入2~20個字")]
         public string TicketsAreaName { get; set; } = null!;
-
-        [Display(Name = "票價")]
-        [Required(ErrorMessage = "必填")]
-        [Column(TypeName = "Money")]
-        [Range(0, 100000, ErrorMessage = "票價必須在 0 到 100,000 之間")]
-        public decimal Price { get; set; } 
+        
 
 
         //FK
@@ -26,9 +21,15 @@ namespace TicketSalesSystem.Models
         public string VenueID { get; set; } = null!;
         public string ProgrammeID { get; set; } = null!;
 
+        public string SessionID { get; set; } = null!;
+
         //關聯
         public virtual TicketsAreaStatus? TicketsAreaStatus { get; set; }        
         public virtual Venue? Venue { get; set; }
         public virtual Programme? Programme { get; set; }
+
+        public virtual Session? Session { get; set; }
+
+        public virtual List<SessionArea>? SessionArea { get; set; }
     }
 }
