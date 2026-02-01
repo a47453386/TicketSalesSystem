@@ -1,62 +1,157 @@
-﻿@model IEnumerable<TicketSalesSystem.Models.Seats>
+﻿@model List<TicketSalesSystem.ViewModel.Seats>
 
 @{
-    // 取得最大列數，確保 Grid 寬度正確
-    var maxSeatCount = Model.Any() ? Model.Max(s => s.SeatIndex) + 1 : 0;
+    ViewData["Title"] = "選擇座位";
+    // 假設你在 Controller 有傳入每一排有幾個座位
+    int seatsPerRow = ViewBag.SeatCount ?? 10;
 }
 
-<h2>@ViewBag.VenueName - 座位選擇</h2>
-
-@* 使用動態欄位數量來設定 grid-template-columns *@
-<div class="seat-container"
-     style="display: grid;
-            grid-template-columns: repeat(@maxSeatCount, 50px);
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;">
-
-    @foreach (var seat in Model)
-    {
-        @* 注意：你的 Controller 裡 Status 是 "已售" 或 "可售" (字串) *@
-        <div class="seat @(seat.Status == "已售" ? "sold" : "available")"
-             style="grid-row: @(seat.rowIndex + 1);
-                        grid-column: @(seat.SeatIndex + 1);
-                        width: 50px; height: 50px;
-                        border: 1px solid #ccc;
-                        text-align: center;
-                        font-size: 12px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        flex-direction: column;">
-
-            <span>@seat.RowName</span>
-            <span>@seat.SeatName</span>
-        </div>
-    }
-</div>
-
 <style>
-    .seat {
-        border-radius: 5px;
-        transition: 0.3s;
+    /* 座位圖外框，使用 Grid 布局 */
+    .seating-layout {
+        display: grid;
+        grid-template-columns: repeat( @seatsPerRow, 35px); /* 動態設定列數 */
+        gap: 8px;
+        justify-content: center;
+        margin: 20px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        overflow-x: auto;
     }
 
-    .available {
-        background-color: #90ee90;
+    /* 基本座位樣式 */
+    .seat {
+        width: 35px;
+        height: 35px;
+        border-radius: 5px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        color: #000;
+        transition: 0.2s;
+        user-select: none;
+    }
+
+    /* 狀態顏色 */
+    .available {
+        background-color: #28a745;
+        color: white;
+        border: 1px solid #1e7e34;
     }
 
         .available:hover {
-            background-color: #2ecc71;
-            color: white;
+            background-color: #218838;
             transform: scale(1.1);
         }
 
     .sold {
-        background-color: #ffcccb;
+        background-color: #6c757d;
+        color: #dee2e6;
         cursor: not-allowed;
-        color: #777;
+        opacity: 0.6;
+    }
+
+    .selected {
+        background-color: #ffc107;
+        color: #212529;
+        border: 2px solid #e0a800;
+        font-weight: bold;
+    }
+
+    .screen {
+        width: 60%;
+        height: 20px;
+        background: #ddd;
+        margin: 0 auto 30px;
+        text-align: center;
+        font-size: 12px;
+        border-radius: 0 0 50% 50%;
     }
 </style>
+
+<div class="container mt-4">
+    <div class="text-center">
+        <h3>@ViewBag.AreaName</h3>
+        <div class="screen">舞台方向</div>
+    </div>
+
+    <div class="seating-layout" id="seatingChart">
+        @foreach (var seat in Model)
+        {
+            <div class="seat @(seat.Status == "已售" ? "sold" : "available")"
+                 data-id="@seat.SeatID"
+                 data-status="@seat.Status"
+                 title="@seat.Label">
+                @seat.SeatIndex
+            </div>
+        }
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body shadow-sm">
+            <h5 class="card-title">自動配位測試</h5>
+            <div class="input-group mb-3" style="max-width: 300px;">
+                <input type="number" id="ticketCount" class="form-control" value="2" min="1" max="10">
+                <button class="btn btn-primary" onclick="handleAutoAssign()">自動找連號</button>
+            </div>
+            <p>已選擇座位 ID: <span id="selectedDisplay" class="badge bg-warning text-dark">-</span></p>
+            <button class="btn btn-success btn-lg w-100" id="btnConfirm">確認購票</button>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // 手動點擊選位
+        document.getElementById('seatingChart').addEventListener('click', function(e) {
+            const seat = e.target;
+            if (seat.classList.contains('available')) {
+                seat.classList.toggle('selected');
+                updateSelection();
+            }
+        });
+
+        // 呼叫後端自動配位
+        async function handleAutoAssign() {
+            const count = document.getElementById('ticketCount').value;
+            const requestBody = {
+                venueID: "@ViewBag.VenueID",
+                sessionID: "@ViewBag.SessionID",
+                areaID: "@ViewBag.AreaID",
+                count: parseInt(count)
+            };
+
+            const response = await fetch('/Seats/AutoAssign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // 先清除所有已選
+                document.querySelectorAll('.seat.selected').forEach(s => s.classList.remove('selected'));
+                // 標記新分配的座位
+                result.seats.forEach(id => {
+                    const el = document.querySelector(`[data-id="${id}"]`);
+                    if (el) el.classList.add('selected');
+                });
+                updateSelection();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        function updateSelection() {
+            const selected = Array.from(document.querySelectorAll('.seat.selected'))
+                                  .map(el => el.getAttribute('data-id'));
+            document.getElementById('selectedDisplay').innerText = selected.join(', ') || '-';
+        }
+    </script>
+}

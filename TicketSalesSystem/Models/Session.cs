@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
+using TicketSalesSystem.ViewModel;
 
 namespace TicketSalesSystem.Models
 {
@@ -31,20 +32,19 @@ namespace TicketSalesSystem.Models
 
         //FK區
         public string ProgrammeID { get; set; } = null!;
-        public string VenueID { get; set; } = null!;
+        
 
         //關聯區
-        public virtual Programme? Programme { get; set; }
-
-        public virtual Venue? Venue { get; set; }
-
-        public virtual List<Order>? Order { get; set; }
-
-
-        public virtual List<SessionArea>? SessionArea { get; set; }
+        public virtual Programme? Programme { get; set; }   
+        public virtual List<Order>? Order { get; set; }      
         public virtual List<TicketsArea>? TicketsArea { get; set; }
+        public virtual List<Tickets>? Tickets { get; set; }
 
-        public virtual List<Seats>? Seats { get; set; }
 
+
+
+
+        
+       
     }
 }

@@ -1,0 +1,63 @@
+﻿@model TicketSalesSystem.Models.Order
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Order</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="OrderID" class="control-label"></label>
+                <input asp-for="OrderID" class="form-control" />
+                <span asp-validation-for="OrderID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="OrderCreatedTime" class="control-label"></label>
+                <input asp-for="OrderCreatedTime" class="form-control" />
+                <span asp-validation-for="OrderCreatedTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PaidTime" class="control-label"></label>
+                <input asp-for="PaidTime" class="form-control" />
+                <span asp-validation-for="PaidTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MemberID" class="control-label"></label>
+                <select asp-for="MemberID" class ="form-control" asp-items="ViewBag.MemberID"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="PaymentMethodID" class="control-label"></label>
+                <select asp-for="PaymentMethodID" class ="form-control" asp-items="ViewBag.PaymentMethodID"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="OrderStatusID" class="control-label"></label>
+                <select asp-for="OrderStatusID" class ="form-control" asp-items="ViewBag.OrderStatusID"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="SessionID" class="control-label"></label>
+                <select asp-for="SessionID" class ="form-control" asp-items="ViewBag.SessionID"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="PaymentTradeNO" class="control-label"></label>
+                <select asp-for="PaymentTradeNO" class ="form-control" asp-items="ViewBag.PaymentTradeNO"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

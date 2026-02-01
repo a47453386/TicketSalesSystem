@@ -1,0 +1,83 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Tickets>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.RowIndex)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SeatIndex)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RefundTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ScannedTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TicketsStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Order)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Session)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TicketsArea)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.RowIndex)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SeatIndex)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RefundTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ScannedTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TicketsStatus.TicketsStatusID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Order.OrderID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Session.SessionID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TicketsArea.TicketsAreaID)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.TicketsID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.TicketsID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.TicketsID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -54,7 +54,7 @@ namespace TicketSalesSystem.Models
 
         public virtual List<TicketsArea>? TicketsArea { get; set; }
 
-        public virtual List<Session>? Session { get; set; }
+       
 
 
         //計算區

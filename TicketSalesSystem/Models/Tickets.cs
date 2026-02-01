@@ -7,9 +7,12 @@ namespace TicketSalesSystem.Models
     {
         [Key]
         [Display(Name = "票券號碼")]
-        [Column(TypeName = "nchar(7)")]        
+        [StringLength(36, MinimumLength = 36)]
         public string TicketsID { get; set; } = null!;
    
+        public int RowIndex { get; set; }
+
+        public int SeatIndex { get; set; }
 
         [Display(Name = "退票處理時間")]
         [DataType(DataType.DateTime)]
@@ -33,13 +36,15 @@ namespace TicketSalesSystem.Models
         
         public string TicketsStatusID { get; set; } = null!;   
         public string OrderID { get; set; } = null!;
-        
+        public string SessionID { get; set; } = null!;
+        public string TicketsAreaID { get; set; } = null!;
 
         //關聯區       
-      
-        public virtual TicketsStatus? TicketsStatus { get; set; }
-        public virtual Order? Order { get; set; }        
-     
+        public virtual TicketsStatus? TicketsStatus { get; set; }       
+        public virtual Order? Order { get; set; }
+        public virtual Session? Session { get; set; }
+        public virtual TicketsArea? TicketsArea { get; set; }
+
 
     }
 }

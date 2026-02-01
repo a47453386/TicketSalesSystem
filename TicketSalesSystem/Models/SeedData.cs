@@ -791,7 +791,7 @@ namespace TicketSalesSystem.Models
                     new Venue
                     {
                         VenueID = "A01",
-                        VenueName = "搖滾 A 區",
+                        VenueName = "一樓平面",
                         FloorName = "一樓",
                         AreaColor = "藍區",
                         RowCount = 20,
@@ -802,7 +802,7 @@ namespace TicketSalesSystem.Models
                     new Venue
                     {
                         VenueID = "A02",
-                        VenueName = "看台 B 區",
+                        VenueName = "二樓看台",
                         FloorName = "二樓",
                         AreaColor = "藍區",
                         RowCount = 30,
@@ -813,7 +813,7 @@ namespace TicketSalesSystem.Models
                     new Venue
                     {
                         VenueID = "A03",
-                        VenueName = "維修封閉區",
+                        VenueName = "五樓頂層",
                         FloorName = "五樓",
                         AreaColor = "藍區",
                         RowCount = 10,
@@ -845,8 +845,7 @@ namespace TicketSalesSystem.Models
                         SaleStartTime = new DateTime(2026, 12, 1, 12, 0, 0),
                         SaleEndTime = new DateTime(2027, 1, 9, 23, 59, 59),
                         StartTime = new DateTime(2027, 1, 10, 19, 30, 0),
-                        ProgrammeID = "20260101",
-                        VenueID = "A01"
+                        ProgrammeID = "20260101"        
                     },
                     new Session
                     {
@@ -854,8 +853,7 @@ namespace TicketSalesSystem.Models
                         SaleStartTime = new DateTime(2026, 12, 2, 12, 0, 0),
                         SaleEndTime = new DateTime(2027, 1, 10, 23, 59, 59),
                         StartTime = new DateTime(2027, 1, 11, 19, 30, 0),
-                        ProgrammeID = "20260201",
-                        VenueID = "A01"
+                        ProgrammeID = "20260201"
                     },
                     new Session
                     {
@@ -863,11 +861,8 @@ namespace TicketSalesSystem.Models
                         SaleStartTime = new DateTime(2026, 12, 3, 12, 0, 0),
                         SaleEndTime = new DateTime(2027, 1, 11, 23, 59, 59),
                         StartTime = new DateTime(2027, 1, 12, 19, 30, 0),
-                        ProgrammeID = "20260301",
-                        VenueID = "A01"
-
-                    }
-                    );
+                        ProgrammeID = "20260301"
+                    });
                     try
                     {
                         context.SaveChanges();
@@ -887,9 +882,9 @@ namespace TicketSalesSystem.Models
                     new TicketsArea
                     {
                         TicketsAreaID = "A01",
-                        TicketsAreaName = "搖滾站區",
+                        TicketsAreaName = "搖滾區",
                         TicketsAreaStatusID = "I",
-                        ProgrammeID = "20260101",
+                        Price = 3500,
                         VenueID = "A01",
                         SessionID = "2026010101"
                     },
@@ -898,7 +893,7 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "B01",
                         TicketsAreaName = "二樓看台區",
                         TicketsAreaStatusID = "I",
-                        ProgrammeID = "20260101",
+                        Price = 2500,
                         VenueID = "A02",
                         SessionID = "2026010101"
                     },
@@ -907,40 +902,13 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "C01",
                         TicketsAreaName = "視線加強區",
                         TicketsAreaStatusID = "I",
-                        ProgrammeID = "20260101",
+                        Price= 1500,
                         VenueID = "A02",
                         SessionID = "2026010101"
-                    }
-
-                    );
-
+                    });
                     context.SaveChanges();
                 }
-                if (!context.SessionArea.Any())
-                {
-                    context.SessionArea.AddRange(
-                    new SessionArea
-                    {
-                        SessionID = "2026010101",
-                        TicketsAreaID = "A01",
-                        Price = 4800
-                    },                     
-                     new SessionArea
-                     {
-                         SessionID = "2026010101",
-                         TicketsAreaID = "B01",
-                         Price = 2800
-                     },
-                    new SessionArea
-                    {
-                        SessionID = "2026010101",
-                        TicketsAreaID = "C01",
-                        Price = 2000
-                    }
-                    );
-
-                    context.SaveChanges();
-                }
+                
 
 
                 //訂單
@@ -985,34 +953,47 @@ namespace TicketSalesSystem.Models
                 }
 
                 //票券
+                string[] guidTickets = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
                 if (!context.Tickets.Any())
                 {
                     context.Tickets.AddRange(
                     new Tickets
                     {
-                        TicketsID = "T000001",
+                        TicketsID = guidTickets[0],
+                        RowIndex= 1,
+                        SeatIndex= 1,
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 10, 16, 30, 0),
                         RefundTime = null,
+                        TicketsAreaID = "A01",
+                        SessionID = "2026010101",
                         TicketsStatusID = "N",
                         OrderID = "202612000001"
                     },
                     new Tickets
                     {
-                        TicketsID = "T000002",
+                        TicketsID = guidTickets[1],
+                        RowIndex = 2,
+                        SeatIndex = 2,
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 11, 16, 30, 0),
                         RefundTime = null,
+                        TicketsAreaID = "A01",
+                        SessionID = "2026020101",
                         TicketsStatusID = "N",
                         OrderID = "202612000002"
                     },
                     new Tickets
                     {
-                        TicketsID = "T000003",
+                        TicketsID = guidTickets[2],
+                        RowIndex = 3,
+                        SeatIndex = 3,
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 12, 17, 30, 0),
                         RefundTime = null,
+                        TicketsAreaID = "A01",
                         TicketsStatusID = "N",
+                        SessionID = "2026030101",
                         OrderID = "202612000003"
                     }
                     );

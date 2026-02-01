@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260131074522_InitialCreate")]
+    [Migration("20260201071145_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -687,41 +687,18 @@ namespace TicketSalesSystem.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("VenueID")
-                        .IsRequired()
-                        .HasColumnType("nchar(3)");
-
                     b.HasKey("SessionID");
 
                     b.HasIndex("ProgrammeID");
 
-                    b.HasIndex("VenueID");
-
                     b.ToTable("Session");
-                });
-
-            modelBuilder.Entity("TicketSalesSystem.Models.SessionArea", b =>
-                {
-                    b.Property<string>("SessionID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("TicketsAreaID")
-                        .HasColumnType("nchar(3)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("money");
-
-                    b.HasKey("SessionID", "TicketsAreaID");
-
-                    b.HasIndex("TicketsAreaID");
-
-                    b.ToTable("SessionArea");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Tickets", b =>
                 {
                     b.Property<string>("TicketsID")
-                        .HasColumnType("nchar(7)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<DateTime>("CreatedTime")
                         .HasColumnType("datetime2");
@@ -733,8 +710,22 @@ namespace TicketSalesSystem.Migrations
                     b.Property<DateTime?>("RefundTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("RowIndex")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ScannedTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("SeatIndex")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SessionID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TicketsAreaID")
+                        .IsRequired()
+                        .HasColumnType("nchar(3)");
 
                     b.Property<string>("TicketsStatusID")
                         .IsRequired()
@@ -743,6 +734,10 @@ namespace TicketSalesSystem.Migrations
                     b.HasKey("TicketsID");
 
                     b.HasIndex("OrderID");
+
+                    b.HasIndex("SessionID");
+
+                    b.HasIndex("TicketsAreaID");
 
                     b.HasIndex("TicketsStatusID");
 
@@ -754,9 +749,8 @@ namespace TicketSalesSystem.Migrations
                     b.Property<string>("TicketsAreaID")
                         .HasColumnType("nchar(3)");
 
-                    b.Property<string>("ProgrammeID")
-                        .IsRequired()
-                        .HasColumnType("nchar(8)");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("money");
 
                     b.Property<string>("SessionID")
                         .IsRequired()
@@ -776,8 +770,6 @@ namespace TicketSalesSystem.Migrations
                         .HasColumnType("nchar(3)");
 
                     b.HasKey("TicketsAreaID");
-
-                    b.HasIndex("ProgrammeID");
 
                     b.HasIndex("SessionID");
 
@@ -1106,34 +1098,7 @@ namespace TicketSalesSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TicketSalesSystem.Models.Venue", "Venue")
-                        .WithMany("Session")
-                        .HasForeignKey("VenueID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Programme");
-
-                    b.Navigation("Venue");
-                });
-
-            modelBuilder.Entity("TicketSalesSystem.Models.SessionArea", b =>
-                {
-                    b.HasOne("TicketSalesSystem.Models.Session", "Session")
-                        .WithMany("SessionArea")
-                        .HasForeignKey("SessionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TicketSalesSystem.Models.TicketsArea", "TicketsArea")
-                        .WithMany("SessionArea")
-                        .HasForeignKey("TicketsAreaID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Session");
-
-                    b.Navigation("TicketsArea");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Tickets", b =>
@@ -1141,6 +1106,18 @@ namespace TicketSalesSystem.Migrations
                     b.HasOne("TicketSalesSystem.Models.Order", "Order")
                         .WithMany("Tickets")
                         .HasForeignKey("OrderID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TicketSalesSystem.Models.Session", "Session")
+                        .WithMany("Tickets")
+                        .HasForeignKey("SessionID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TicketSalesSystem.Models.TicketsArea", "TicketsArea")
+                        .WithMany("Tickets")
+                        .HasForeignKey("TicketsAreaID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1152,27 +1129,25 @@ namespace TicketSalesSystem.Migrations
 
                     b.Navigation("Order");
 
+                    b.Navigation("Session");
+
+                    b.Navigation("TicketsArea");
+
                     b.Navigation("TicketsStatus");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.TicketsArea", b =>
                 {
-                    b.HasOne("TicketSalesSystem.Models.Programme", "Programme")
-                        .WithMany("TicketsArea")
-                        .HasForeignKey("ProgrammeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("TicketSalesSystem.Models.Session", "Session")
                         .WithMany("TicketsArea")
                         .HasForeignKey("SessionID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TicketSalesSystem.Models.TicketsAreaStatus", "TicketsAreaStatus")
                         .WithMany("TicketsArea")
                         .HasForeignKey("TicketsAreaStatusID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TicketSalesSystem.Models.Venue", "Venue")
@@ -1180,8 +1155,6 @@ namespace TicketSalesSystem.Migrations
                         .HasForeignKey("VenueID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Programme");
 
                     b.Navigation("Session");
 
@@ -1285,8 +1258,6 @@ namespace TicketSalesSystem.Migrations
                     b.Navigation("DescriptionImage");
 
                     b.Navigation("Session");
-
-                    b.Navigation("TicketsArea");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.ProgrammeStatus", b =>
@@ -1318,14 +1289,14 @@ namespace TicketSalesSystem.Migrations
                 {
                     b.Navigation("Order");
 
-                    b.Navigation("SessionArea");
+                    b.Navigation("Tickets");
 
                     b.Navigation("TicketsArea");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.TicketsArea", b =>
                 {
-                    b.Navigation("SessionArea");
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.TicketsAreaStatus", b =>
@@ -1340,8 +1311,6 @@ namespace TicketSalesSystem.Migrations
 
             modelBuilder.Entity("TicketSalesSystem.Models.Venue", b =>
                 {
-                    b.Navigation("Session");
-
                     b.Navigation("TicketsArea");
                 });
 

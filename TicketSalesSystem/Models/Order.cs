@@ -6,14 +6,14 @@ namespace TicketSalesSystem.Models
     public class Order
     {
         [Key]
-        [StringLength(12,MinimumLength =12)]
+        [StringLength(14,MinimumLength =14)]
         public string OrderID { get; set; } = null!;
 
         [Display(Name = "訂單建立時間")]
         [Required(ErrorMessage = "必填")]
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 hh:mm:ss}")]
-        public DateTime OrderCreatedTime { get; set; }
+        public DateTime OrderCreatedTime { get; set; }= DateTime.Now;
 
         //[Display(Name = "訂單保留時間")]
         //[Required(ErrorMessage = "必填")]
@@ -35,7 +35,8 @@ namespace TicketSalesSystem.Models
         public string SessionID { get; set; } = null!;
         public string PaymentTradeNO { get; set; } = null!;
         
-       
+        
+
 
 
 
@@ -47,9 +48,9 @@ namespace TicketSalesSystem.Models
         public virtual Session? Session { get; set; }
 
         public virtual Payment? Payment { get; set; }//金流
-
-        
+                
         public virtual List<Tickets>? Tickets { get; set; }
+      
 
     }
 }
