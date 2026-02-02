@@ -21,7 +21,7 @@ namespace TicketSalesSystem.Controllers
         // GET: TicketsAreas
         public async Task<IActionResult> Index()
         {
-            var ticketsContext = _context.TicketsArea.Include(t => t.TicketsAreaStatus).Include(t => t.Venue);
+            var ticketsContext = _context.TicketsArea.Include(t => t.Session).Include(t => t.TicketsAreaStatus).Include(t => t.Venue);
             return View(await ticketsContext.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace TicketSalesSystem.Controllers
             }
 
             var ticketsArea = await _context.TicketsArea
-                
+                .Include(t => t.Session)
                 .Include(t => t.TicketsAreaStatus)
                 .Include(t => t.Venue)
                 .FirstOrDefaultAsync(m => m.TicketsAreaID == id);
@@ -49,9 +49,9 @@ namespace TicketSalesSystem.Controllers
         // GET: TicketsAreas/Create
         public IActionResult Create()
         {
-            
+            ViewData["SessionID"] = new SelectList(_context.Session, "SessionID", "SessionID");
             ViewData["TicketsAreaStatusID"] = new SelectList(_context.TicketsAreaStatus, "TicketsAreaStatusID", "TicketsAreaStatusID");
-            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID");
+            ViewData["VenueID"] = new SelectList(_context.Venue, "VenueID", "VenueID");
             return View();
         }
 
@@ -60,7 +60,7 @@ namespace TicketSalesSystem.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TicketsAreaID,TicketsAreaName,Price,TicketsAreaStatusID,VenusID")] TicketsArea ticketsArea)
+        public async Task<IActionResult> Create([Bind("TicketsAreaID,TicketsAreaName,Price,TicketsAreaStatusID,VenueID,SessionID")] TicketsArea ticketsArea)
         {
             if (ModelState.IsValid)
             {
@@ -68,9 +68,9 @@ namespace TicketSalesSystem.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            
+            ViewData["SessionID"] = new SelectList(_context.Session, "SessionID", "SessionID", ticketsArea.SessionID);
             ViewData["TicketsAreaStatusID"] = new SelectList(_context.TicketsAreaStatus, "TicketsAreaStatusID", "TicketsAreaStatusID", ticketsArea.TicketsAreaStatusID);
-            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
+            ViewData["VenueID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
             return View(ticketsArea);
         }
 
@@ -87,9 +87,9 @@ namespace TicketSalesSystem.Controllers
             {
                 return NotFound();
             }
-           
+            ViewData["SessionID"] = new SelectList(_context.Session, "SessionID", "SessionID", ticketsArea.SessionID);
             ViewData["TicketsAreaStatusID"] = new SelectList(_context.TicketsAreaStatus, "TicketsAreaStatusID", "TicketsAreaStatusID", ticketsArea.TicketsAreaStatusID);
-            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
+            ViewData["VenueID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
             return View(ticketsArea);
         }
 
@@ -98,7 +98,7 @@ namespace TicketSalesSystem.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("TicketsAreaID,TicketsAreaName,Price,TicketsAreaStatusID,VenusID")] TicketsArea ticketsArea)
+        public async Task<IActionResult> Edit(string id, [Bind("TicketsAreaID,TicketsAreaName,Price,TicketsAreaStatusID,VenueID,SessionID")] TicketsArea ticketsArea)
         {
             if (id != ticketsArea.TicketsAreaID)
             {
@@ -125,9 +125,9 @@ namespace TicketSalesSystem.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-           
+            ViewData["SessionID"] = new SelectList(_context.Session, "SessionID", "SessionID", ticketsArea.SessionID);
             ViewData["TicketsAreaStatusID"] = new SelectList(_context.TicketsAreaStatus, "TicketsAreaStatusID", "TicketsAreaStatusID", ticketsArea.TicketsAreaStatusID);
-            ViewData["VenusID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
+            ViewData["VenueID"] = new SelectList(_context.Venue, "VenueID", "VenueID", ticketsArea.VenueID);
             return View(ticketsArea);
         }
 
@@ -140,7 +140,7 @@ namespace TicketSalesSystem.Controllers
             }
 
             var ticketsArea = await _context.TicketsArea
-                
+                .Include(t => t.Session)
                 .Include(t => t.TicketsAreaStatus)
                 .Include(t => t.Venue)
                 .FirstOrDefaultAsync(m => m.TicketsAreaID == id);

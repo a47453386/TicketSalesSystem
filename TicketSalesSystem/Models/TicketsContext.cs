@@ -46,9 +46,9 @@ namespace TicketSalesSystem.Models
         // ===== Order / Payment =====
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderStatus> OrderStatus { get; set; }
-        public DbSet<Payment> Payment { get; set; }
+        
         public DbSet<PaymentMethod> PaymentMethod { get; set; }
-        public DbSet<PaymentStatus> PaymentStatus { get; set; }
+       
         // ===== Ticket / Seat =====
         public DbSet<Tickets> Tickets { get; set; }        
         public DbSet<TicketsAreaStatus> TicketsAreaStatus { get; set; }
@@ -89,10 +89,7 @@ namespace TicketSalesSystem.Models
                 .WithOne(l => l.Employee)
                 .HasForeignKey<EmployeeLogin>(l => l.EmployeeID);           
 
-            modelBuilder.Entity<Payment>()
-                .HasOne(o => o.Order)
-                .WithOne(p => p.Payment)
-                .HasForeignKey<Order>(l => l.PaymentTradeNO);
+           
 
             // =========================
             // One-to-Many
@@ -198,13 +195,7 @@ namespace TicketSalesSystem.Models
             modelBuilder.Entity<PaymentMethod>()
                 .HasMany(p => p.Order)
                 .WithOne(o => o.PaymentMethod)
-                .HasForeignKey(o => o.PaymentMethodID);
-
-        
-            modelBuilder.Entity<PaymentStatus>()
-                .HasMany(p => p.Payment)
-                .WithOne(o => o.PaymentStatus)
-                .HasForeignKey(o => o.PaymentStatusID);
+                .HasForeignKey(o => o.PaymentMethodID);                 
 
 
             // Ticket / Seat相關

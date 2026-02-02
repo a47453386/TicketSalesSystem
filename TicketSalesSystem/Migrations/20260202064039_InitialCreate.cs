@@ -52,7 +52,7 @@ namespace TicketSalesSystem.Migrations
                 columns: table => new
                 {
                     OrderStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    OrderStatusName = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false)
+                    OrderStatusName = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,18 +69,6 @@ namespace TicketSalesSystem.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PaymentMethod", x => x.PaymentMethodID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PaymentStatus",
-                columns: table => new
-                {
-                    PaymentStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    PaymentStatusName = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentStatus", x => x.PaymentStatusID);
                 });
 
             migrationBuilder.CreateTable(
@@ -208,25 +196,6 @@ namespace TicketSalesSystem.Migrations
                         principalTable: "AccountStatus",
                         principalColumn: "AccountStatusID",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Payment",
-                columns: table => new
-                {
-                    PaymentTradeNO = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    PaymentDescription = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    PaymentStatusID = table.Column<string>(type: "nchar(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payment", x => x.PaymentTradeNO);
-                    table.ForeignKey(
-                        name: "FK_Payment_PaymentStatus_PaymentStatusID",
-                        column: x => x.PaymentStatusID,
-                        principalTable: "PaymentStatus",
-                        principalColumn: "PaymentStatusID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -535,14 +504,16 @@ namespace TicketSalesSystem.Migrations
                 name: "Order",
                 columns: table => new
                 {
-                    OrderID = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: false),
+                    OrderID = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
                     OrderCreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PaymentTradeNO = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true),
+                    PaymentDescription = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    PaymentStatus = table.Column<bool>(type: "bit", nullable: false),
                     PaidTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     MemberID = table.Column<string>(type: "nvarchar(36)", nullable: false),
                     PaymentMethodID = table.Column<string>(type: "nchar(1)", nullable: false),
                     OrderStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PaymentTradeNO = table.Column<string>(type: "nvarchar(36)", nullable: false)
+                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -564,12 +535,6 @@ namespace TicketSalesSystem.Migrations
                         column: x => x.PaymentMethodID,
                         principalTable: "PaymentMethod",
                         principalColumn: "PaymentMethodID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Order_Payment_PaymentTradeNO",
-                        column: x => x.PaymentTradeNO,
-                        principalTable: "Payment",
-                        principalColumn: "PaymentTradeNO",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Order_Session_SessionID",
@@ -623,7 +588,7 @@ namespace TicketSalesSystem.Migrations
                     CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ScannedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     TicketsStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    OrderID = table.Column<string>(type: "nvarchar(12)", nullable: false),
+                    OrderID = table.Column<string>(type: "nvarchar(14)", nullable: false),
                     SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false)
                 },
@@ -714,20 +679,9 @@ namespace TicketSalesSystem.Migrations
                 column: "PaymentMethodID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_PaymentTradeNO",
-                table: "Order",
-                column: "PaymentTradeNO",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Order_SessionID",
                 table: "Order",
                 column: "SessionID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Payment_PaymentStatusID",
-                table: "Payment",
-                column: "PaymentStatusID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Programme_EmployeeID",
@@ -883,9 +837,6 @@ namespace TicketSalesSystem.Migrations
                 name: "PaymentMethod");
 
             migrationBuilder.DropTable(
-                name: "Payment");
-
-            migrationBuilder.DropTable(
                 name: "Session");
 
             migrationBuilder.DropTable(
@@ -893,9 +844,6 @@ namespace TicketSalesSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "Venue");
-
-            migrationBuilder.DropTable(
-                name: "PaymentStatus");
 
             migrationBuilder.DropTable(
                 name: "Programme");

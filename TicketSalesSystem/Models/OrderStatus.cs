@@ -12,10 +12,11 @@ namespace TicketSalesSystem.Models
 
         [Display(Name = "訂單狀態")]
         [Required(ErrorMessage = "必填")]
-        [StringLength(6, MinimumLength = 2, ErrorMessage = "訂單狀態2~6個字")]
+        [StringLength(10, MinimumLength = 2, ErrorMessage = "訂單狀態2~10個字")]
         public string OrderStatusName { get; set; } = null!;
 
         
+
 
 
         //關聯

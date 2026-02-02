@@ -184,28 +184,7 @@ namespace TicketSalesSystem.Models
                     );
                     context.SaveChanges();
                 }
-                //金流狀態
-                if (!context.PaymentStatus.Any())
-                {
-                    context.PaymentStatus.AddRange(
-                    new PaymentStatus
-                    {
-                        PaymentStatusID = "W",
-                        PaymentStatusName = "待付款"
-                    },
-                    new PaymentStatus
-                    {
-                        PaymentStatusID = "Y",
-                        PaymentStatusName = "付款成功"
-                    },
-                    new PaymentStatus
-                    {
-                        PaymentStatusID = "N",
-                        PaymentStatusName = "付款失敗"
-                    }
-                    );
-                    context.SaveChanges();
-                }
+                
                 //票券狀態
                 if (!context.TicketsStatus.Any())
                 {
@@ -755,33 +734,7 @@ namespace TicketSalesSystem.Models
 
                 }
 
-                //金流
-                string[] guidPayment = { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
-                if (!context.Payment.Any())
-                {
-                    context.Payment.AddRange(
-                    new Payment
-                    {
-                        PaymentTradeNO = guidPayment[0],
-                        PaymentDescription = "信用卡付款成功",
-                        PaymentStatusID = "Y",
-                    },
-                    new Payment
-                    {
-                        PaymentTradeNO = guidPayment[1],
-                        PaymentDescription = "ATM 轉帳等待付款中",
-                        PaymentStatusID = "W",
-                    },
-                    new Payment
-                    {
-                        PaymentTradeNO = guidPayment[2],
-                        PaymentDescription = "ATM轉帳失敗",
-                        PaymentStatusID = "N",
-                    }
-
-                    );
-                    context.SaveChanges();
-                }
+               
 
 
                 //區域
@@ -912,41 +865,51 @@ namespace TicketSalesSystem.Models
 
 
                 //訂單
+
                 if (!context.Order.Any())
                 {
                     context.Order.AddRange(
                      new Order
                      {
-                         OrderID = "202612000001",
+                         OrderID = "20261201000001",
                          OrderCreatedTime = DateTime.Now,
+                         PaymentTradeNO=Guid.NewGuid().ToString(),
+                         PaymentDescription="信用卡付款成功",
+                         PaymentStatus=true,
                          PaidTime = new DateTime(2026, 12, 1, 16, 00, 00),
                          MemberID = guidMember[0],
                          PaymentMethodID = "A",
                          OrderStatusID = "Y",
                          SessionID = "2026010101",
-                         PaymentTradeNO = guidPayment[0]
+                         
                      },
                      new Order
                      {
-                         OrderID = "202612000002",
+                         OrderID = "20261201000002",
                          OrderCreatedTime = DateTime.Now,
+                         PaymentTradeNO=Guid.NewGuid().ToString(),
+                         PaymentDescription=null,
+                         PaymentStatus=false,
                          PaidTime = null,
                          MemberID = guidMember[1],
                          PaymentMethodID = "A",
                          OrderStatusID = "N",
                          SessionID = "2026020101",
-                         PaymentTradeNO = guidPayment[1]
+                         
                      },
                      new Order
                      {
-                         OrderID = "202612000003",
+                         OrderID = "20261201000003",
                          OrderCreatedTime = DateTime.Now,
                          PaidTime = new DateTime(2026, 12, 3, 14, 20, 00),
+                         PaymentTradeNO=Guid.NewGuid().ToString(),
+                         PaymentDescription="信用卡付款成功",
+                         PaymentStatus=true,
                          MemberID = guidMember[2],
                          PaymentMethodID = "C",
                          OrderStatusID = "Y",
                          SessionID = "2026030101",
-                         PaymentTradeNO = guidPayment[2]
+                         
                      }
                     );
                     context.SaveChanges();
@@ -968,7 +931,7 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "A01",
                         SessionID = "2026010101",
                         TicketsStatusID = "N",
-                        OrderID = "202612000001"
+                        OrderID = "20261201000001"
                     },
                     new Tickets
                     {
@@ -981,7 +944,7 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "A01",
                         SessionID = "2026020101",
                         TicketsStatusID = "N",
-                        OrderID = "202612000002"
+                        OrderID = "20261201000002"
                     },
                     new Tickets
                     {
@@ -994,7 +957,7 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "A01",
                         TicketsStatusID = "N",
                         SessionID = "2026030101",
-                        OrderID = "202612000003"
+                        OrderID = "20261201000003"
                     }
                     );
                     context.SaveChanges();

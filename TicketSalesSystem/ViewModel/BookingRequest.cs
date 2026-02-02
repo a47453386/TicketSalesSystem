@@ -10,9 +10,11 @@
 
         public string PaymentMethodID { get; set; } = null!;
 
-        public decimal TotalAmount { get; set; }
+        //public decimal TotalAmount { get; set; }
+
+        public int Count { get; set; }
 
 
-        public List<Seats> Seats { get; set; } 
+        public List<string> Seats { get; set; } 
     }
 }

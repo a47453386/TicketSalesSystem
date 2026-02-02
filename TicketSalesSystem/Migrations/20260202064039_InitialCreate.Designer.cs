@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260201071145_InitialCreate")]
+    [Migration("20260202064039_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -303,8 +303,8 @@ namespace TicketSalesSystem.Migrations
             modelBuilder.Entity("TicketSalesSystem.Models.Order", b =>
                 {
                     b.Property<string>("OrderID")
-                        .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                        .HasMaxLength(14)
+                        .HasColumnType("nvarchar(14)");
 
                     b.Property<string>("MemberID")
                         .IsRequired()
@@ -320,12 +320,19 @@ namespace TicketSalesSystem.Migrations
                     b.Property<DateTime?>("PaidTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("PaymentDescription")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("PaymentMethodID")
                         .IsRequired()
                         .HasColumnType("nchar(1)");
 
+                    b.Property<bool>("PaymentStatus")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PaymentTradeNO")
-                        .IsRequired()
+                        .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("SessionID")
@@ -340,9 +347,6 @@ namespace TicketSalesSystem.Migrations
 
                     b.HasIndex("PaymentMethodID");
 
-                    b.HasIndex("PaymentTradeNO")
-                        .IsUnique();
-
                     b.HasIndex("SessionID");
 
                     b.ToTable("Order");
@@ -355,33 +359,12 @@ namespace TicketSalesSystem.Migrations
 
                     b.Property<string>("OrderStatusName")
                         .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("nvarchar(6)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("OrderStatusID");
 
                     b.ToTable("OrderStatus");
-                });
-
-            modelBuilder.Entity("TicketSalesSystem.Models.Payment", b =>
-                {
-                    b.Property<string>("PaymentTradeNO")
-                        .HasMaxLength(36)
-                        .HasColumnType("nvarchar(36)");
-
-                    b.Property<string>("PaymentDescription")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PaymentStatusID")
-                        .IsRequired()
-                        .HasColumnType("nchar(1)");
-
-                    b.HasKey("PaymentTradeNO");
-
-                    b.HasIndex("PaymentStatusID");
-
-                    b.ToTable("Payment");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.PaymentMethod", b =>
@@ -397,21 +380,6 @@ namespace TicketSalesSystem.Migrations
                     b.HasKey("PaymentMethodID");
 
                     b.ToTable("PaymentMethod");
-                });
-
-            modelBuilder.Entity("TicketSalesSystem.Models.PaymentStatus", b =>
-                {
-                    b.Property<string>("PaymentStatusID")
-                        .HasColumnType("nchar(1)");
-
-                    b.Property<string>("PaymentStatusName")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.HasKey("PaymentStatusID");
-
-                    b.ToTable("PaymentStatus");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Place", b =>
@@ -705,7 +673,7 @@ namespace TicketSalesSystem.Migrations
 
                     b.Property<string>("OrderID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(12)");
+                        .HasColumnType("nvarchar(14)");
 
                     b.Property<DateTime?>("RefundTime")
                         .HasColumnType("datetime2");
@@ -978,12 +946,6 @@ namespace TicketSalesSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TicketSalesSystem.Models.Payment", "Payment")
-                        .WithOne("Order")
-                        .HasForeignKey("TicketSalesSystem.Models.Order", "PaymentTradeNO")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TicketSalesSystem.Models.Session", "Session")
                         .WithMany("Order")
                         .HasForeignKey("SessionID")
@@ -994,22 +956,9 @@ namespace TicketSalesSystem.Migrations
 
                     b.Navigation("OrderStatus");
 
-                    b.Navigation("Payment");
-
                     b.Navigation("PaymentMethod");
 
                     b.Navigation("Session");
-                });
-
-            modelBuilder.Entity("TicketSalesSystem.Models.Payment", b =>
-                {
-                    b.HasOne("TicketSalesSystem.Models.PaymentStatus", "PaymentStatus")
-                        .WithMany("Payment")
-                        .HasForeignKey("PaymentStatusID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PaymentStatus");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Programme", b =>
@@ -1231,19 +1180,9 @@ namespace TicketSalesSystem.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("TicketSalesSystem.Models.Payment", b =>
-                {
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("TicketSalesSystem.Models.PaymentMethod", b =>
                 {
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("TicketSalesSystem.Models.PaymentStatus", b =>
-                {
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("TicketSalesSystem.Models.Place", b =>

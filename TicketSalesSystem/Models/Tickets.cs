@@ -9,9 +9,10 @@ namespace TicketSalesSystem.Models
         [Display(Name = "票券號碼")]
         [StringLength(36, MinimumLength = 36)]
         public string TicketsID { get; set; } = null!;
-   
-        public int RowIndex { get; set; }
 
+        [Display(Name = "排")]
+        public int RowIndex { get; set; }
+        [Display(Name = "號")]
         public int SeatIndex { get; set; }
 
         [Display(Name = "退票處理時間")]
@@ -22,7 +23,7 @@ namespace TicketSalesSystem.Models
         [Display(Name = "建立時間")]
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd  hh:mm:ss}")]
-        public DateTime CreatedTime { get; set; }
+        public DateTime CreatedTime { get; set; }= DateTime.Now;
 
         [Display(Name = "核銷進場時間")]
         [DataType(DataType.DateTime)]

@@ -1,0 +1,91 @@
+﻿@model List<TicketSalesSystem.ViewModel.Seats>
+
+
+<div class="container mt-5">
+    <h3>測試購票流程</h3>
+    <div class="card p-3 mb-3">
+        <p>場次：<span class="badge bg-secondary">@ViewBag.SessionID</span></p>
+        <p>票區：<span class="badge bg-info">@ViewBag.AreaID</span></p>
+    </div>
+
+    <div class="mb-3">
+        <button id="autoBtn" class="btn btn-outline-success">自動配位 (2張)</button>
+        <button id="submitBtn" class="btn btn-danger" disabled>送出訂單</button>
+    </div>
+
+    <div id="statusMsg" class="mt-3"></div>
+    <div id="receipt" class="mt-3 border p-3" style="display:none;">
+        <h5>訂單明細</h5>
+        <hr>
+        <div id="receiptContent"></div>
+    </div>
+</div>
+
+<style>
+    .btn-seat { width: 45px; height: 45px; font-size: 10px; }
+    .btn-seat.selected { background-color: #ffc107 !important; color: black !important; border-color: #ffc107 !important; }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let selectedSeats = [];
+
+        // 1. 自動配位功能
+        document.getElementById('autoBtn').onclick = async function() {
+            const response = await fetch('/Seats/AutoAssign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    SessionID: "@ViewBag.SessionID",
+                    AreaID: "@ViewBag.AreaID",
+                    VenueID: "V001", // 這裡要改為你資料庫實際有的 VenueID
+                    Count: 2
+                })
+            });
+            const result = await response.json();
+            if(result.success) {
+                selectedSeats = result.seats;
+                document.getElementById('statusMsg').innerHTML = `<div class="alert alert-success">已自動選位：${selectedSeats.join(', ')}</div>`;
+                document.getElementById('submitBtn').disabled = false;
+            } else {
+                alert(result.message);
+            }
+        };
+
+        // 2. 送出訂單並產出明細
+        document.getElementById('submitBtn').onclick = async function() {
+            const data = {
+                SessionID: "@ViewBag.SessionID",
+                AreaID: "@ViewBag.AreaID",
+                MemberID: "M001", // ⚠️ 重要：請確認資料庫 Member 表是否有 M001
+                PaymentMethodID: "P01", // ⚠️ 重要：請確認資料庫 PaymentMethod 表是否有 P01
+                Seats: selectedSeats
+            };
+
+            const response = await fetch('/Seats/ConfirmBooking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('receipt').style.display = 'block';
+                let itemsHtml = result.details.items.map(i => `<li>${i.seat} - $${i.price}</li>`).join('');
+                document.getElementById('receiptContent').innerHTML = `
+                    <p>訂單編號：<b>${result.orderID}</b></p>
+                    <p>區域：${result.details.areaName}</p>
+                    <ul>${itemsHtml}</ul>
+                    <h4 class="text-danger">總金額：$${result.details.total}</h4>
+                `;
+            } else {
+                alert(result.message);
+            }
+        };
+    </script>
+}

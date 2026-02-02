@@ -14,6 +14,17 @@ namespace TicketSalesSystem.Models
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 hh:mm:ss}")]
         public DateTime OrderCreatedTime { get; set; }= DateTime.Now;
+              
+
+        [StringLength(36, MinimumLength = 36)]
+        public string? PaymentTradeNO { get; set; }//採用GUID     
+
+        [Display(Name = "金流內容")]
+        [StringLength(100, ErrorMessage = "最多100個字")]
+        public string? PaymentDescription { get; set; }
+
+        [Display(Name = "金流狀態")]             
+        public bool PaymentStatus { get; set; }= false;//false未付款 true已付款
 
         //[Display(Name = "訂單保留時間")]
         //[Required(ErrorMessage = "必填")]
@@ -33,7 +44,8 @@ namespace TicketSalesSystem.Models
         public  string PaymentMethodID { get; set; } = null!;        
         public string OrderStatusID { get; set; } = null!;     
         public string SessionID { get; set; } = null!;
-        public string PaymentTradeNO { get; set; } = null!;
+
+
         
         
 
@@ -47,8 +59,7 @@ namespace TicketSalesSystem.Models
         public virtual OrderStatus? OrderStatus { get; set; }
         public virtual Session? Session { get; set; }
 
-        public virtual Payment? Payment { get; set; }//金流
-                
+       
         public virtual List<Tickets>? Tickets { get; set; }
       
 

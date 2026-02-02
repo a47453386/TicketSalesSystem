@@ -1,0 +1,137 @@
+﻿@{
+    ViewData["Title"] = "IndexTest";
+}
+
+<div class="container mt-5">
+    <h2>1. 選擇場次</h2>
+    <div class="list-group mb-4" id="sessionList">
+        @foreach (var s in ViewBag.Sessions)
+        {
+            <button class="list-group-item list-group-item-action session-item"
+                    data-id="@s.SessionID">
+                @s.StartTime.ToString("yyyy/MM/dd HH:mm")
+            </button>
+        }
+    </div>
+
+    <div id="areaSection" style="display:none;">
+        <h2>2. 選擇票區</h2>
+        <div class="row" id="areaList">
+        </div>
+    </div>
+
+    <div id="bookingSection" class="mt-4" style="display:none;">
+        <div class="card bg-light p-3">
+            <h4>3. 確認選擇並自動配位</h4>
+            <p id="selectedInfo"></p>
+            <div class="mb-3" style="max-width: 200px;">
+                <label class="form-label">購買張數：</label>
+                <select id="ticketCount" class="form-select">
+                    <option value="1">1 張</option>
+                    <option value="2">2 張</option>
+                    <option value="3">3 張</option>
+                    <option value="4">4 張</option>
+                </select>
+            </div>
+            <button id="autoAndConfirmBtn" class="btn btn-primary btn-lg">一鍵自動配位並購票</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let currentSession = "";
+        let currentArea = "";
+        let currentVenue = "";
+
+        // 1. 點選場次
+        document.querySelectorAll('.session-item').forEach(btn => {
+            btn.onclick = async function() {
+                currentSession = this.dataset.id;
+
+                // 切換樣式
+                document.querySelectorAll('.session-item').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                // 抓取票區
+                const res = await fetch(`/Seats/GetAreasBySession?sessionId=${currentSession}`);
+                const areas = await res.json();
+
+                console.log(areas);
+
+                let areaHtml = areas.map(a => `
+                    <div class="col-md-4 mb-3">
+                        <div class="card area-card p-3 border-primary" style="cursor:pointer"
+                             onclick="selectArea(
+                                '${a.ticketsAreaID}',
+                                '${a.ticketsAreaName}',
+                                ${a.price},
+                                '${a.venueID}'
+                             )">
+                            <h5>${a.ticketsAreaName}</h5>
+                            <p class="text-danger">$${a.price}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+
+                document.getElementById('areaList').innerHTML = areaHtml;
+                document.getElementById('areaSection').style.display = 'block';
+                document.getElementById('bookingSection').style.display = 'none';
+            };
+        });
+
+        // 2. 選擇票區
+        function selectArea(id, name, price, venueId) {
+            currentArea = id;
+            currentVenue = venueId;
+
+            document.getElementById('selectedInfo').innerText = `已選場次：${currentSession} | 票區：${name} ($${price})`;
+            document.getElementById('bookingSection').style.display = 'block';
+        }
+
+               // 3. 一鍵配位並購票 (直接呼叫整合了配位邏輯的 ConfirmBooking)
+        document.getElementById('autoAndConfirmBtn').onclick = async function() {
+
+            const count =parseInt(document.getElementById('ticketCount').value);
+
+            // 建立請求物件：現在改為傳送「張數」而不是「座位清單」
+            const bookingData = {
+                SessionID: currentSession,
+                AreaID: currentArea,
+                MemberID: "816bc06b-19f3-4bf1-9ef1-fdcc097b78dc",           // 測試用，之後可改為動態
+                PaymentMethodID: "A",     // 測試用
+                Count: count             // 也可以從畫面上的 input 抓取
+            };
+
+            try {
+                const res = await fetch('/Seats/ConfirmBooking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    // 成功：顯示訂單號與系統分配的座位
+                    alert(`訂購成功！\n訂單編號：${result.orderID}\n分配座位：${result.seats.join(', ')}`);
+                    // 跳轉到成功頁面或訂單查詢
+                    window.location.href = "/Order/Success?id=" + result.orderID;
+                } else {
+                    // 失敗：例如「找不到連續座位」或「字串截斷錯誤」
+                    alert("訂購失敗：" + result.message);
+                }
+            } catch (error) {
+                console.error("發生錯誤:", error);
+                alert("系統連線失敗，請檢查網路狀態");
+            }
+        };
+    </script>
+}
+
