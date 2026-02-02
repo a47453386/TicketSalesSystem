@@ -1,0 +1,102 @@
+<div class="container mt-5">
+    <h2>1. 選擇場次</h2>
+    <div class="list-group mb-4" id="sessionList">
+        @foreach (var s in ViewBag.Sessions)
+        {
+            <button class="list-group-item list-group-item-action session-item" 
+                    data-id="@s.SessionID">
+                @s.SessionName - @s.SessionTime.ToString("yyyy/MM/dd HH:mm")
+            </button>
+        }
+    </div>
+
+    <div id="areaSection" style="display:none;">
+        <h2>2. 選擇票區</h2>
+        <div class="row" id="areaList">
+            </div>
+    </div>
+
+    <div id="bookingSection" class="mt-4" style="display:none;">
+        <div class="card bg-light p-3">
+            <h4>3. 確認選擇並自動配位</h4>
+            <p id="selectedInfo"></p>
+            <button id="autoAndConfirmBtn" class="btn btn-primary btn-lg">一鍵自動配位並購票</button>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        let currentSession = "";
+        let currentArea = "";
+        let currentVenue = "";
+
+        // 1. 點選場次
+        document.querySelectorAll('.session-item').forEach(btn => {
+            btn.onclick = async function() {
+                currentSession = this.dataset.id;
+                
+                // 切換樣式
+                document.querySelectorAll('.session-item').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                // 抓取票區
+                const res = await fetch(`/Seats/GetAreasBySession?sessionId=${currentSession}`);
+                const areas = await res.json();
+
+                let areaHtml = areas.map(a => `
+                    <div class="col-md-4 mb-3">
+                        <div class="card area-card p-3 border-primary" style="cursor:pointer" 
+                             onclick="selectArea('${a.ticketsAreaID}', '${a.areaName}', ${a.price}, '${a.venueID}')">
+                            <h5>${a.areaName}</h5>
+                            <p class="text-danger">$${a.price}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('areaList').innerHTML = areaHtml;
+                document.getElementById('areaSection').style.display = 'block';
+                document.getElementById('bookingSection').style.display = 'none';
+            };
+        });
+
+        // 2. 選擇票區
+        function selectArea(id, name, price, venueId) {
+            currentArea = id;
+            currentVenue = venueId;
+            
+            document.getElementById('selectedInfo').innerText = `已選場次：${currentSession} | 票區：${name} ($${price})`;
+            document.getElementById('bookingSection').style.display = 'block';
+        }
+
+        // 3. 一鍵配位並購票 (串接 AutoAssign + ConfirmBooking)
+        document.getElementById('autoAndConfirmBtn').onclick = async function() {
+            // 先配位
+            const assignRes = await fetch('/Seats/AutoAssign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ SessionID: currentSession, AreaID: currentArea, VenueID: currentVenue, Count: 1 })
+            });
+            const assignResult = await assignRes.json();
+
+            if(!assignResult.success) {
+                alert(assignResult.message);
+                return;
+            }
+
+            // 配位成功，直接呼叫 ConfirmBooking
+            const confirmRes = await fetch('/Seats/ConfirmBooking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    SessionID: currentSession,
+                    AreaID: currentArea,
+                    MemberID: "M001",
+                    PaymentMethodID: "P01",
+                    Seats: assignResult.seats
+                })
+            });
+            const finalResult = await confirmRes.json();
+            alert(finalResult.message + (finalResult.success ? "\n訂單號：" + finalResult.orderID : ""));
+        };
+    </script>
+}
