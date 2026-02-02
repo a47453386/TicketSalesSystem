@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260202064039_InitialCreate")]
+    [Migration("20260202123515_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

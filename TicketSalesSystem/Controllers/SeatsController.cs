@@ -104,7 +104,7 @@ namespace TicketSalesSystem.Controllers
 
             // 2. 呼叫你的 Helper 產生佈局 (假設你的票區固定是 10x10)
             // 如果你有不同的區有不同排數，可以在這裡寫判斷
-            var allSeats = SeatHelper.GenerateSeatLayout(10, 10, soldTickets);
+            var allSeats = SeatHelper.GenerateSeatLayout(20, 15, soldTickets);
 
             // 3. 呼叫你的 Helper 演算法找「最佳連號座位」
             var bestSeatIDs = SeatHelper.FindBestSeats(allSeats, request.Count);
@@ -129,7 +129,7 @@ namespace TicketSalesSystem.Controllers
                     PaymentTradeNO = Guid.NewGuid().ToString(),
                     PaymentDescription = null,
                     PaymentStatus = false,
-                    MemberID = "008783c7-31da-4d39-bba4-70ceed5939e4",
+                    MemberID = "06a540b0-e768-4e8e-bb05-39288e3c5a3f",
                     SessionID = request.SessionID,
                     OrderStatusID = "Y", // 注意：SQL 長度要夠
                     PaymentMethodID = "A", // 注意：SQL 長度要夠

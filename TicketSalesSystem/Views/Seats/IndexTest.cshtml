@@ -96,40 +96,49 @@
         }
 
                // 3. 一鍵配位並購票 (直接呼叫整合了配位邏輯的 ConfirmBooking)
-        document.getElementById('autoAndConfirmBtn').onclick = async function() {
-
-            const count =parseInt(document.getElementById('ticketCount').value);
-
-            // 建立請求物件：現在改為傳送「張數」而不是「座位清單」
-            const bookingData = {
-                SessionID: currentSession,
-                AreaID: currentArea,
-                MemberID: "816bc06b-19f3-4bf1-9ef1-fdcc097b78dc",           // 測試用，之後可改為動態
-                PaymentMethodID: "A",     // 測試用
-                Count: count             // 也可以從畫面上的 input 抓取
-            };
-
+               document.getElementById('autoAndConfirmBtn').onclick = async function() {
             try {
+                // 1. 抓取畫面上選單的張數 (這行一定要加！)
+                const ticketCountElement = document.getElementById('ticketCount');
+                const countValue = parseInt(ticketCountElement.value);
+
+                // 2. 建立請求物件
+                const bookingData = {
+                    SessionID: currentSession,
+                    AreaID: currentArea,
+                    MemberID: "06a540b0-e768-4e8e-bb05-39288e3c5a3f",
+                    PaymentMethodID: "A",
+                    Count:countValue, // 確保名稱與後端 ViewModel 一致
+                    Seat:[]
+                };
+
+                // 3. 發送請求
                 const res = await fetch('/Seats/ConfirmBooking', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingData)
                 });
 
+                // 如果伺服器回傳 404 或 500
+                if (!res.ok) {
+                    alert(`伺服器錯誤: ${res.status}`);
+                    return;
+                }
+
                 const result = await res.json();
 
                 if (result.success) {
-                    // 成功：顯示訂單號與系統分配的座位
-                    alert(`訂購成功！\n訂單編號：${result.orderID}\n分配座位：${result.seats.join(', ')}`);
-                    // 跳轉到成功頁面或訂單查詢
+                    // 將 1-1, 1-2 格式優化為 1排1號, 1排2號
+                    const seatDisplay = result.seats.map(s => s.replace('-', '排') + '號').join(', ');
+                    alert(`訂購成功！\n訂單編號：${result.orderID}\n分配座位：${seatDisplay}`);
                     window.location.href = "/Order/Success?id=" + result.orderID;
                 } else {
-                    // 失敗：例如「找不到連續座位」或「字串截斷錯誤」
                     alert("訂購失敗：" + result.message);
                 }
             } catch (error) {
-                console.error("發生錯誤:", error);
-                alert("系統連線失敗，請檢查網路狀態");
+                // 在控制台印出真正的錯誤原因，方便我們除錯
+                console.error("詳細錯誤訊息:", error);
+                alert("執行過程發生錯誤，請按 F12 查看 Console 控制台");
             }
         };
     </script>
