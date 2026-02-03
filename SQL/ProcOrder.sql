@@ -22,9 +22,9 @@ alter function funGetOrderID ()
 
 
 
--- ²Ä¤@¨B¡G¥ý§R°£©Ò¦³ÃöÁp¨ì³oµ§­q³æªº²¼¨é
+-- ï¿½Ä¤@ï¿½Bï¿½Gï¿½ï¿½ï¿½Rï¿½ï¿½ï¿½Ò¦ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½oï¿½ï¿½ï¿½qï¿½æªºï¿½ï¿½ï¿½ï¿½
 DELETE FROM Tickets WHERE OrderID like '20260203%'; 
 go
--- ²Ä¤G¨B¡G¦A§R°£­q³æ¥»¨­
+-- ï¿½Ä¤Gï¿½Bï¿½Gï¿½Aï¿½Rï¿½ï¿½ï¿½qï¿½æ¥»ï¿½ï¿½
 DELETE FROM [Order] WHERE OrderID like '20260203%';
 go
