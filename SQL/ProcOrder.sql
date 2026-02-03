@@ -6,7 +6,7 @@ alter function funGetOrderID ()
 
 	 set @DatePrefix =convert(nvarchar(8),getdate(),112)
 
-	 select @LastOID= isnull (max(cast(right(OrderID,8) as int)),0) 
+	 select @LastOID= isnull (max(cast(right(OrderID,6) as int)),0) 
 	 from [Order]
 	 where left(OrderID,8)=@DatePrefix
 
@@ -20,4 +20,11 @@ alter function funGetOrderID ()
 
 	 SELECT dbo.funGetOrderID();
 
-	 
+
+
+-- 第一步：先刪除所有關聯到這筆訂單的票券
+DELETE FROM Tickets WHERE OrderID like '20260203%'; 
+go
+-- 第二步：再刪除訂單本身
+DELETE FROM [Order] WHERE OrderID like '20260203%';
+go

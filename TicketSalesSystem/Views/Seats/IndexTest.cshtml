@@ -2,6 +2,10 @@
     ViewData["Title"] = "IndexTest";
 }
 
+<div id="timerContainer" style="display:none;" class="alert alert-warning">
+    請於 <span id="countdownTimer" class="fw-bold text-danger">10:00</span> 內完成付款，逾時位置將被釋出。
+</div>
+
 <div class="container mt-5">
     <h2>1. 選擇場次</h2>
     <div class="list-group mb-4" id="sessionList">
@@ -48,6 +52,41 @@
         let currentSession = "";
         let currentArea = "";
         let currentVenue = "";
+        let currentPrice=0;
+
+        //倒數計時
+        function startTimer(duration, display) {
+            let timer = parseInt(duration);
+            if (isNaN(timer))
+            {
+            timer = 600;
+            }
+            // 如果之前已經有計時器在跑，先清掉它以免疊加
+            if (window.bookingInterval) clearInterval(window.bookingInterval);
+
+            function updateDisplay()
+            {
+            let minutes = Math.floor(timer / 60);
+            let seconds = timer%10;
+             minutes = minutes < 10 ? "0" + minutes : minutes;
+             seconds = seconds < 10 ? "0" + seconds : seconds;
+             display.textContent = `${minutes}:${seconds}`;
+            }
+
+            updateDisplay();
+
+            window.bookingInterval = setInterval(function () {
+            if (timer-- < 0)
+            {
+                 clearInterval(window.bookingInterval);
+                 display.textContent = "00:00";
+                 alert("⏰ 時間到！您的訂位已被取消，請重新選擇座位。");
+                 location.reload();
+                 return;
+            }
+            updateDisplay();
+            }, 1000);
+        }
 
         // 1. 點選場次
         document.querySelectorAll('.session-item').forEach(btn => {
@@ -57,7 +96,7 @@
                 // 切換樣式
                 document.querySelectorAll('.session-item').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-
+                try {
                 // 抓取票區
                 const res = await fetch(`/Seats/GetAreasBySession?sessionId=${currentSession}`);
                 const areas = await res.json();
@@ -83,6 +122,9 @@
                 document.getElementById('areaList').innerHTML = areaHtml;
                 document.getElementById('areaSection').style.display = 'block';
                 document.getElementById('bookingSection').style.display = 'none';
+                } catch (err) {
+                console.error("抓取票區失敗:", err);
+            }
             };
         });
 
@@ -90,6 +132,8 @@
         function selectArea(id, name, price, venueId) {
             currentArea = id;
             currentVenue = venueId;
+            currentPrice = price;
+
 
             document.getElementById('selectedInfo').innerText = `已選場次：${currentSession} | 票區：${name} ($${price})`;
             document.getElementById('bookingSection').style.display = 'block';
@@ -106,9 +150,10 @@
                 const bookingData = {
                     SessionID: currentSession,
                     AreaID: currentArea,
-                    MemberID: "06a540b0-e768-4e8e-bb05-39288e3c5a3f",
+                    MemberID: "008783c7-31da-4d39-bba4-70ceed5939e4",
                     PaymentMethodID: "A",
                     Count:countValue, // 確保名稱與後端 ViewModel 一致
+                    TotalAmount:currentPrice*countValue,
                     Seat:[]
                 };
 
@@ -127,20 +172,52 @@
 
                 const result = await res.json();
 
-                if (result.success) {
-                    // 將 1-1, 1-2 格式優化為 1排1號, 1排2號
-                    const seatDisplay = result.seats.map(s => s.replace('-', '排') + '號').join(', ');
-                    alert(`訂購成功！\n訂單編號：${result.orderID}\n分配座位：${seatDisplay}`);
-                    window.location.href = "/Order/Success?id=" + result.orderID;
-                } else {
-                    alert("訂購失敗：" + result.message);
+            if (result.success) {
+                console.log("後端回傳資料:", result);
+
+                // 1. 將座位格式優化 (例如 1-1 變成 1排1號)
+                const seatDisplay = result.seats.map(s => s.replace('-', '排') + '號').join(', ');
+
+                // 2. 取得後端計算出的總金額 (假設後端回傳欄位名為 totalAmount)
+                const formattedAmount = new Intl.NumberFormat('zh-TW',
+                {
+                    style: 'currency',
+                    currency: 'TWD',
+                    maximumFractionDigits: 0
+                })
+                .format(result.finalAmount);
+
+                // 3. 在 Alert 中加入金額資訊
+                alert(`🎉訂購成功！座位已為您保留 10 分鐘。\n\n` +
+                      `📌 訂單編號：${result.OrderID}\n` +
+                      `💺 分配座位：${seatDisplay}\n` +
+                      `💰 應付總額：${formattedAmount}`+`請在倒數結束前完成付款。`);
+
+                //倒數計時器
+                const timeDiv=document.getElementById('timerContainer');
+                const display=document.querySelector('#countdownTimer');
+
+                if(timeDiv&&display)
+                {
+                    timeDiv.style.display = 'block';
+                    startTimer(result.RemainingSeconds, display);
                 }
-            } catch (error) {
-                // 在控制台印出真正的錯誤原因，方便我們除錯
-                console.error("詳細錯誤訊息:", error);
-                alert("執行過程發生錯誤，請按 F12 查看 Console 控制台");
+
+                // // 4. 跳轉至成功頁面
+                // window.location.href = "/Orders/Details/" + result.orderID;
+
+            } else {
+                // 如果後端回傳失敗 (例如：連續座位不足、資料庫錯誤)
+                alert("❌ 訂購失敗：" + result.message);
             }
+        } catch (error) {
+            // 捕捉 fetch 過程中的網路錯誤或程式執行錯誤
+            console.error("詳細錯誤訊息:", error);
+            alert("⚠️ 系統連線發生異常，請檢查網路狀態或聯繫管理員。");
+        }
         };
+
+
     </script>
 }
 
