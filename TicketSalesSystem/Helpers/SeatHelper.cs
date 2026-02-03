@@ -5,9 +5,10 @@ using TicketSalesSystem.ViewModel;
 namespace TicketSalesSystem.Helpers
 {
 
-    //產生座位表
+   
     public static class SeatHelper
     {
+        //產生座位表
         public static List<VMSeats> GenerateSeatLayout(int rowCount, int seatCount, List<Tickets> soldTickets)
         {
             var activeTickets = soldTickets
@@ -96,6 +97,7 @@ namespace TicketSalesSystem.Helpers
         }
 
 
+        
 
     }
 }
