@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<TicketsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TicketsConnection")));
 
-
+//µù¥U­I´ºªA°È
+builder.Services.AddHostedService<TicketCleanupService>();
 
 
 
