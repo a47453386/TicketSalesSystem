@@ -20,4 +20,11 @@ alter function funGetOrderID ()
 
 	 SELECT dbo.funGetOrderID();
 
-	 
+
+
+-- �Ĥ@�B�G���R���Ҧ����p��o���q�檺����
+DELETE FROM Tickets WHERE OrderID like '20260203%'; 
+go
+-- �ĤG�B�G�A�R���q�楻��
+DELETE FROM [Order] WHERE OrderID like '20260203%';
+go

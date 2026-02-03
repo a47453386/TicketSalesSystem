@@ -2,7 +2,7 @@
 
 namespace TicketSalesSystem.ViewModel
 {
-    public class AssignRequest
+    public class VMAssignRequest
     {
         [Key]
         public string ProgramID { get; set; }

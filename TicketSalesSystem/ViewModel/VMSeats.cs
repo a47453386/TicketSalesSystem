@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TicketSalesSystem.ViewModel
 {
-    public class Seats
+    public class VMSeats
     {
         [Key]
         public string SeatID { get; set; } = null;
