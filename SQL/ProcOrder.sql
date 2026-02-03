@@ -6,7 +6,7 @@ alter function funGetOrderID ()
 
 	 set @DatePrefix =convert(nvarchar(8),getdate(),112)
 
-	 select @LastOID= isnull (max(cast(right(OrderID,8) as int)),0) 
+	 select @LastOID= isnull (max(cast(right(OrderID,6) as int)),0) 
 	 from [Order]
 	 where left(OrderID,8)=@DatePrefix
 
