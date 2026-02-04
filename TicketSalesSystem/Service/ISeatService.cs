@@ -10,6 +10,8 @@ namespace TicketSalesSystem.Service
         //取得特定票區的座位圖
         Task<List<VMSeats>> GetAreaLayoutAsync(string areaId);
 
+        //取得場次的所有票區
+        Task<IEnumerable<object>> GetAreasBySession(string sessionId);
 
     }
 }

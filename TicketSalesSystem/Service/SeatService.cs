@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
@@ -43,7 +44,7 @@ namespace TicketSalesSystem.Service
             await _context.SaveChangesAsync();
         }
 
-        //取得特定票區的座位區
+        //取得特定票區的座位
         public async Task<List<VMSeats>> GetAreaLayoutAsync(string areaId)
         {
             var area = await _context.TicketsArea.FindAsync(areaId);
@@ -61,6 +62,25 @@ namespace TicketSalesSystem.Service
             return layout;
 
         }
+
+        public async Task<IEnumerable<object>> GetAreasBySession(string sessionId)
+        {
+            var areas = await _context.TicketsArea
+                .Where(a => a.SessionID == sessionId)
+                .Select(a => new {
+                    a.TicketsAreaID,
+                    a.TicketsAreaName,
+                    a.RowCount,
+                    a.SeatCount,
+                    a.Price,
+                    a.VenueID,
+                    a.TicketsAreaStatusID
+                })
+                .ToListAsync();
+
+            return areas;
+        }
+
 
     }
 }

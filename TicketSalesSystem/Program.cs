@@ -14,6 +14,8 @@ builder.Services.AddDbContext<TicketsContext>(options =>
 //註冊背景服務:清理過期位子
 builder.Services.AddHostedService<TicketCleanupService>();
 
+//註冊ISeatService及SeatService
+builder.Services.AddScoped<ISeatService, SeatService>();
 
 
 
