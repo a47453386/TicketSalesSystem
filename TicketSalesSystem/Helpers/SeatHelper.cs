@@ -107,20 +107,7 @@ namespace TicketSalesSystem.Helpers
 
         }
 
-        //取得最佳連續座位
-       public static List<string> GetBestAvailableSeats(int rows, int cols, List<Tickets> soldTickets, int count)
-        {
-            // 呼叫你的 Helper 產生佈局 (假設你的票區固定是 10x10)
-            // 如果你有不同的區有不同排數，可以在這裡寫判斷
-            var allSeats = GenerateSeatLayout(rows, cols, soldTickets,"I");
-
-            // 呼叫你的 Helper 演算法找「最佳連號座位」
-            var bestSeatIDs = FindBestSeats(allSeats, count);
-
-            return bestSeatIDs?? new List<string>();
-
-        }
-
+       
 
         
 

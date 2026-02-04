@@ -1,9 +1,13 @@
-﻿using TicketSalesSystem.ViewModel;
+﻿using TicketSalesSystem.Models;
+using TicketSalesSystem.ViewModel;
 
 namespace TicketSalesSystem.Service
 {
     public interface ISeatService
     {
+        //取得場次列表
+        Task<List<Session>> GetSessionsAsync();
+
         //同步票區狀態(檢查是否售罄或需重新開放)
         Task SyncAreaStatusAaync(string areaId);
 
@@ -12,6 +16,9 @@ namespace TicketSalesSystem.Service
 
         //取得場次的所有票區
         Task<IEnumerable<object>> GetAreasBySession(string sessionId);
+
+        //建立訂單與票券
+        Task<VMBookingResponse> CreateOrderAndTicketsAsync(VMBookingRequest request, string memberID);
 
     }
 }
