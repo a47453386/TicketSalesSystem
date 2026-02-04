@@ -8,17 +8,34 @@ namespace TicketSalesSystem.Helpers
    
     public static class SeatHelper
     {
+        static string ticketStatusCode = "N";
+
         //產生座位表
         public static List<VMSeats> GenerateSeatLayout(int rowCount, int seatCount, List<Tickets> soldTickets)
         {
+            //篩選出有效的已售票券 (已售出或佔位中，或是10分鐘內剛建立的)
             var activeTickets = soldTickets
                 .Where(t => t.TicketsStatusID == "S" || t.TicketsStatusID == "P" || t.CreatedTime.AddMinutes(10) > DateTime.Now)
                 .ToList();
 
+
+            //var soldSet = new HashSet<string>(
+            //    soldTickets.Select(t => $"{t.RowIndex}-{t.SeatIndex}")
+            //    );
+            //準備好「有人坐」的名單，此段我試著加，但失敗也沒關係
+            var soldDict = new Dictionary<string, string>();
+            foreach (var t in activeTickets)
+            {
+                string key = $"{t.RowIndex}-{t.SeatIndex}";
+                if (!soldDict.ContainsKey(key))
+                {
+                    soldDict.Add(key, t.TicketsStatusID);
+                }
+            }
+
             var seatList = new List<VMSeats>();
-            var soldSet = new HashSet<string>(
-                soldTickets.Select(t => $"{t.RowIndex}-{t.SeatIndex}")
-                );
+
+            //開始畫所有的位子 (rowCount * seatCount)
             for (int r = 1; r <= rowCount; r++)
             {
                 for (int s = 1; s <= seatCount; s++)
@@ -26,13 +43,21 @@ namespace TicketSalesSystem.Helpers
                     var seatid = $"{r}-{s}";
                     var label = $"{r}排{s}號";
 
+                    //比對名單，決定該格座位的狀態
+                    string statusText = "可售";                    
+                    if (soldDict.TryGetValue(seatid, out string statusId))//out string statusId嘗試抓取值，如果抓到了就順便把它存進這個變數裡
+                    {
+                        var ticketStatusCode = statusId;
+                        statusText = (ticketStatusCode == "S") ? "已售" : "保留中";
+                    }
+
                     seatList.Add(new VMSeats
                     {
                         SeatID = seatid,
                         RowIndex = r,
                         SeatIndex = s,
                         Label = label,
-                        Status = soldSet.Contains(seatid) ? "已售" : "可售"
+                        Status = ticketStatusCode,
                     });
                 }
             }
@@ -45,7 +70,7 @@ namespace TicketSalesSystem.Helpers
         {
 
             var rowGroups = allSeats
-                .Where(s => s.Status == "可售")
+                .Where(s => s.Status == ticketStatusCode)
                 .GroupBy(s => s.RowIndex)
                 .OrderBy(g => g.Key);// 依照排數排序
 

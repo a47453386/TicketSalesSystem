@@ -11,7 +11,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<TicketsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TicketsConnection")));
 
-//註冊背景服務
+//註冊背景服務:清理過期位子
 builder.Services.AddHostedService<TicketCleanupService>();
 
 

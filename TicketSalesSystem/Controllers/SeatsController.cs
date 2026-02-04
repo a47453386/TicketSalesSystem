@@ -150,7 +150,7 @@ namespace TicketSalesSystem.Controllers
                         PaymentStatus = false,
                         MemberID = "008783c7-31da-4d39-bba4-70ceed5939e4",
                         SessionID = request.SessionID,
-                        OrderStatusID = "Y", // 注意：SQL 長度要夠
+                        OrderStatusID = "P", // 注意：SQL 長度要夠
                         PaymentMethodID = "A", // 注意：SQL 長度要夠
                         PaidTime = null
                     };
