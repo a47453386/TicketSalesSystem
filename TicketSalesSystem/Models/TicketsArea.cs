@@ -13,6 +13,16 @@ namespace TicketSalesSystem.Models
         [Required(ErrorMessage = "必填")]
         [StringLength(20, MinimumLength = 2, ErrorMessage = "請輸入2~20個字")]
         public string TicketsAreaName { get; set; } = null!;
+              
+        [Display(Name = "每區總排數")]
+        [Required(ErrorMessage = "必填")]
+        [Range(0, 50, ErrorMessage = ("排數為0~50之間"))]
+        public int RowCount { get; set; }
+
+        [Display(Name = "每排總座位數")]
+        [Required(ErrorMessage = "必填")]
+        [Range(0, 50, ErrorMessage = ("排數為0~50之間"))]
+        public int SeatCount { get; set; }
 
         [Display(Name = "票價")]
         [Required(ErrorMessage = "必填")]

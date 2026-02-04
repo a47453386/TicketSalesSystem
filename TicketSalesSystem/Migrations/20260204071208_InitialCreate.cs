@@ -550,6 +550,8 @@ namespace TicketSalesSystem.Migrations
                 {
                     TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
                     TicketsAreaName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    RowCount = table.Column<int>(type: "int", nullable: false),
+                    SeatCount = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "money", nullable: false),
                     TicketsAreaStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
                     VenueID = table.Column<string>(type: "nchar(3)", nullable: false),

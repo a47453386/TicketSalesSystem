@@ -22,9 +22,9 @@ alter function funGetOrderID ()
 
 
 
--- �Ĥ@�B�G���R���Ҧ����p��o���q�檺����
-DELETE FROM Tickets WHERE OrderID like '20260203%'; 
+
+DELETE FROM Tickets WHERE OrderID like '20260204%'; 
 go
--- �ĤG�B�G�A�R���q�楻��
-DELETE FROM [Order] WHERE OrderID like '20260203%';
+
+DELETE FROM [Order] WHERE OrderID like '20260204%';
 go

@@ -148,7 +148,7 @@ namespace TicketSalesSystem.Controllers
                         PaymentTradeNO = Guid.NewGuid().ToString(),
                         PaymentDescription = null,
                         PaymentStatus = false,
-                        MemberID = "008783c7-31da-4d39-bba4-70ceed5939e4",
+                        MemberID = "36e5a04b-8ba2-4996-8179-10ae5d0cd08f",
                         SessionID = request.SessionID,
                         OrderStatusID = "P", // 注意：SQL 長度要夠
                         PaymentMethodID = "A", // 注意：SQL 長度要夠

@@ -717,6 +717,12 @@ namespace TicketSalesSystem.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("money");
 
+                    b.Property<int>("RowCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SeatCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("SessionID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");

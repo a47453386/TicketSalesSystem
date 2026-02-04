@@ -157,12 +157,17 @@ namespace TicketSalesSystem.Models
                     new OrderStatus
                     {
                         OrderStatusID = "N",
-                        OrderStatusName = "未付款"
+                        OrderStatusName = "逾期付款"
                     },
                     new OrderStatus
                     {
                         OrderStatusID = "Y",
                         OrderStatusName = "已付款"
+                    },
+                    new OrderStatus
+                    {
+                        OrderStatusID = "P",
+                        OrderStatusName = "待付款"
                     }
                 );
                     context.SaveChanges();
@@ -191,13 +196,33 @@ namespace TicketSalesSystem.Models
                     context.TicketsStatus.AddRange(
                      new TicketsStatus
                      {
+                         TicketsStatusID = "C",
+                         TicketsStatusName = "取消"
+                     },
+                     new TicketsStatus
+                     {
                          TicketsStatusID = "N",
-                         TicketsStatusName = "未使用"
+                         TicketsStatusName = "可售"
+                     },
+                     new TicketsStatus
+                     {
+                         TicketsStatusID = "P",
+                         TicketsStatusName = "暫鎖中"
+                     },
+                     new TicketsStatus
+                     {
+                         TicketsStatusID = "S",
+                         TicketsStatusName = "已售出"
                      },
                      new TicketsStatus
                      {
                          TicketsStatusID = "Y",
                          TicketsStatusName = "已使用"
+                     },
+                     new TicketsStatus
+                     {
+                         TicketsStatusID = "A",
+                         TicketsStatusName = "未使用"
                      }
                     );
                     context.SaveChanges();
@@ -236,12 +261,32 @@ namespace TicketSalesSystem.Models
                     new TicketsAreaStatus
                     {
                         TicketsAreaStatusID = "O",
-                        TicketsAreaStatusName = "售完"
+                        TicketsAreaStatusName = "已完售"
                     },
                     new TicketsAreaStatus
                     {
                         TicketsAreaStatusID = "S",
-                        TicketsAreaStatusName = "停止販售"
+                        TicketsAreaStatusName = "已售出"
+                    },
+                    new TicketsAreaStatus
+                    {
+                        TicketsAreaStatusID = "A",
+                        TicketsAreaStatusName = "可售"
+                    },
+                    new TicketsAreaStatus
+                    {
+                        TicketsAreaStatusID = "R",
+                        TicketsAreaStatusName = "保留"
+                    },
+                    new TicketsAreaStatus
+                    {
+                        TicketsAreaStatusID = "L",
+                        TicketsAreaStatusName = "鎖定"
+                    },
+                    new TicketsAreaStatus
+                    {
+                        TicketsAreaStatusID = "B",
+                        TicketsAreaStatusName = "封鎖"
                     }
                      );
                     context.SaveChanges();
@@ -837,6 +882,8 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "A01",
                         TicketsAreaName = "搖滾區",
                         TicketsAreaStatusID = "I",
+                        RowCount=10,
+                        SeatCount=10,
                         Price = 3500,
                         VenueID = "A01",
                         SessionID = "2026010101"
@@ -846,6 +893,8 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "B01",
                         TicketsAreaName = "二樓看台區",
                         TicketsAreaStatusID = "I",
+                        RowCount = 10,
+                        SeatCount = 10,
                         Price = 2500,
                         VenueID = "A02",
                         SessionID = "2026010101"
@@ -855,7 +904,9 @@ namespace TicketSalesSystem.Models
                         TicketsAreaID = "C01",
                         TicketsAreaName = "視線加強區",
                         TicketsAreaStatusID = "I",
-                        Price= 1500,
+                        RowCount = 10,
+                        SeatCount = 10,
+                        Price = 1500,
                         VenueID = "A02",
                         SessionID = "2026010101"
                     });

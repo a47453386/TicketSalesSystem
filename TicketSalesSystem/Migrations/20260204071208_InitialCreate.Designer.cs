@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260202123515_InitialCreate")]
+    [Migration("20260204071208_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -719,6 +719,12 @@ namespace TicketSalesSystem.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("money");
+
+                    b.Property<int>("RowCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SeatCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("SessionID")
                         .IsRequired()

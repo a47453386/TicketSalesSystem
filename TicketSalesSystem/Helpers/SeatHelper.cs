@@ -11,7 +11,7 @@ namespace TicketSalesSystem.Helpers
         static string ticketStatusCode = "N";
 
         //產生座位表
-        public static List<VMSeats> GenerateSeatLayout(int rowCount, int seatCount, List<Tickets> soldTickets)
+        public static List<VMSeats> GenerateSeatLayout(int rowCount, int seatCount, List<Tickets> soldTickets,string ticketsAreaStatus)
         {
             //篩選出有效的已售票券 (已售出或佔位中，或是10分鐘內剛建立的)
             var activeTickets = soldTickets
@@ -112,7 +112,7 @@ namespace TicketSalesSystem.Helpers
         {
             // 呼叫你的 Helper 產生佈局 (假設你的票區固定是 10x10)
             // 如果你有不同的區有不同排數，可以在這裡寫判斷
-            var allSeats = GenerateSeatLayout(rows, cols, soldTickets);
+            var allSeats = GenerateSeatLayout(rows, cols, soldTickets,"I");
 
             // 呼叫你的 Helper 演算法找「最佳連號座位」
             var bestSeatIDs = FindBestSeats(allSeats, count);
