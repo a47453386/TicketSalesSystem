@@ -378,7 +378,7 @@ namespace TicketSalesSystem.Migrations
                     CoverImage = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     SeatImage = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     LimitPerOrder = table.Column<int>(type: "int", nullable: false),
-                    OnShelfTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    OnShelfTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EmployeeID = table.Column<string>(type: "nchar(6)", nullable: true),
                     PlaceID = table.Column<string>(type: "nchar(1)", nullable: true),
                     ProgrammeStatusID = table.Column<string>(type: "nchar(1)", nullable: true)

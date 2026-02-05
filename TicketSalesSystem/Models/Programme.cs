@@ -50,7 +50,10 @@ namespace TicketSalesSystem.Models
         public int? LimitPerOrder { get; set; }
 
         [Display(Name = "預計上架時間")]
-        public DateTime? OnShelfTime { get; set; }
+        [Required(ErrorMessage = "必填")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd hh:mm:ss}")]
+        public DateTime OnShelfTime { get; set; } 
 
 
 

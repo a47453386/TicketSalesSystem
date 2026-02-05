@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260205080155_InitialCreate")]
+    [Migration("20260205140242_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -426,7 +426,7 @@ namespace TicketSalesSystem.Migrations
                     b.Property<int>("LimitPerOrder")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("OnShelfTime")
+                    b.Property<DateTime>("OnShelfTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PlaceID")

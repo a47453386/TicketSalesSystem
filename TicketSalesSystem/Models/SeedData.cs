@@ -60,13 +60,38 @@ namespace TicketSalesSystem.Models
                     context.ProgrammeStatus.AddRange(
                     new ProgrammeStatus
                     {
-                        ProgrammeStatusID = "A",
-                        ProgrammeStatusName = "未上架"
+                        ProgrammeStatusID = "D",
+                        ProgrammeStatusName = "草稿"
                     },
                     new ProgrammeStatus
                     {
-                        ProgrammeStatusID = "B",
-                        ProgrammeStatusName = "上架中"
+                        ProgrammeStatusID = "R",
+                        ProgrammeStatusName = "設定完成"
+                    },
+                    new ProgrammeStatus
+                    {
+                        ProgrammeStatusID = "O",
+                        ProgrammeStatusName = "開賣中"
+                    },
+                    new ProgrammeStatus
+                    {
+                        ProgrammeStatusID = "S",
+                        ProgrammeStatusName = "已完售"
+                    },
+                    new ProgrammeStatus
+                    {
+                        ProgrammeStatusID = "E",
+                        ProgrammeStatusName = "已結束"
+                    },
+                    new ProgrammeStatus
+                    {
+                        ProgrammeStatusID = "C",
+                        ProgrammeStatusName = "已取消"
+                    },
+                    new ProgrammeStatus
+                    {
+                        ProgrammeStatusID = "H",
+                        ProgrammeStatusName = "已下架"
                     }
                     );
                     context.SaveChanges();
@@ -514,7 +539,8 @@ namespace TicketSalesSystem.Models
                         LimitPerOrder = 4,
                         EmployeeID = "P23001",
                         PlaceID = "B",
-                        ProgrammeStatusID = "B"
+                        ProgrammeStatusID = "O",
+                        OnShelfTime= new DateTime(2026, 2, 5, 09, 0, 0)
                     },
                     new Programme
                     {
@@ -528,7 +554,8 @@ namespace TicketSalesSystem.Models
                         LimitPerOrder = 6,
                         EmployeeID = "P23001",
                         PlaceID = "A",
-                        ProgrammeStatusID = "B"
+                        ProgrammeStatusID = "R",
+                        OnShelfTime = new DateTime(2026, 2, 6, 05, 0, 0)
                     },
                     new Programme
                     {
@@ -542,7 +569,8 @@ namespace TicketSalesSystem.Models
                         LimitPerOrder = 2,
                         EmployeeID = "P23001",
                         PlaceID = "A",
-                        ProgrammeStatusID = "A"
+                        ProgrammeStatusID = "R",
+                        OnShelfTime = new DateTime(2026, 3, 5, 09, 0, 0)
                     }
                 );
                     context.SaveChanges();

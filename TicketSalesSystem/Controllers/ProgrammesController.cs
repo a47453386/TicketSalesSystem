@@ -58,31 +58,53 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
+
+
+        private void PopulateDropdownLists(Programme p = null)
+        {
+            ViewData["EmployeeID"] = new SelectList(_context.Employee.ToList(), "EmployeeID", "Name", p?.EmployeeID);
+            ViewData["PlaceID"] = new SelectList(_context.Place.ToList(), "PlaceID", "PlaceName", p?.PlaceID);
+            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus.ToList(), "ProgrammeStatusID", "ProgrammeStatusName", p?.ProgrammeStatusID);
+        }
+
+
         // GET: Programmes/Create
         public IActionResult Create()
         {
-            ViewData["EmployeeID"] = new SelectList(_context.Employee, "EmployeeID", "EmployeeID");
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceID");
-            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusID");
+            PopulateDropdownLists();
             return View();
         }
 
-        // POST: Programmes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Programmes/Create      
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProgrammeID,ProgrammeName,ProgrammeDescription,CreatedTime,UpdatedAt,CoverImage,SeatImage,LimitPerOrder,EmployeeID,PlaceID,ProgrammeStatusID")] Programme programme)
+        public async Task<IActionResult> Create(Programme programme, IFormFile newCoverImage, IFormFile newSeatImage,DateTime OnShelfTime)
         {
+            //手動檢查檔案（因為我們在下個步驟會移除 Model 的圖片驗證）
+            if (newCoverImage == null) ModelState.AddModelError("newCoverImage", "請選擇封面圖");
+            if (newSeatImage == null) ModelState.AddModelError("newSeatImage", "請選擇座位圖");
+
+            // 2. 關鍵：移除 ModelState 中對字串欄位的驗證(要先在資料庫設定)
+            // 因為這兩個欄位在 SaveChanges 之前一定是空的，會導致 IsValid 永遠為 false
+            ModelState.Remove("ProgrammeID"); // ID 是自動生成的
+            ModelState.Remove("CoverImage");  // 檔名是存檔後才產生的
+            ModelState.Remove("SeatImage");   // 檔名是存檔後才產生的
+            ModelState.Remove("CreatedTime"); // 時間在下面會給
+            ModelState.Remove("Employee");     // 導覽屬性不需驗證
+            ModelState.Remove("Place");
+            ModelState.Remove("ProgrammeStatus");
+
+
+
+
+
             if (ModelState.IsValid)
             {
                 _context.Add(programme);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmployeeID"] = new SelectList(_context.Employee, "EmployeeID", "EmployeeID", programme.EmployeeID);
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceID", programme.PlaceID);
-            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusID", programme.ProgrammeStatusID);
+            PopulateDropdownLists(programme);
             return View(programme);
         }
 
@@ -105,9 +127,7 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
-        // POST: Programmes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Programmes/Edit/5        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("ProgrammeID,ProgrammeName,ProgrammeDescription,CreatedTime,UpdatedAt,CoverImage,SeatImage,LimitPerOrder,EmployeeID,PlaceID,ProgrammeStatusID")] Programme programme)

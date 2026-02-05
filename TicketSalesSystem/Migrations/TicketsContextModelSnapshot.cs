@@ -423,7 +423,7 @@ namespace TicketSalesSystem.Migrations
                     b.Property<int>("LimitPerOrder")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("OnShelfTime")
+                    b.Property<DateTime>("OnShelfTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PlaceID")

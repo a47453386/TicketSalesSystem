@@ -1,4 +1,4 @@
-alter function funGetOrderID ()
+create function funGetOrderID ()
 	returns nvarchar(14)
 	as
 	begin
