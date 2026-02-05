@@ -1,11 +1,13 @@
 ﻿@model TicketSalesSystem.Models.Venue
 
 @{
-    ViewData["Title"] = "區域更新";
+    ViewData["Title"] = "Edit";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1>Edit</h1>
 
+<h4>Venue</h4>
+<hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
@@ -15,6 +17,16 @@
                 <label asp-for="VenueName" class="control-label"></label>
                 <input asp-for="VenueName" class="form-control" />
                 <span asp-validation-for="VenueName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FloorName" class="control-label"></label>
+                <input asp-for="FloorName" class="form-control" />
+                <span asp-validation-for="FloorName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AreaColor" class="control-label"></label>
+                <input asp-for="AreaColor" class="form-control" />
+                <span asp-validation-for="AreaColor" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="RowCount" class="control-label"></label>

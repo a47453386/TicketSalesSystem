@@ -148,8 +148,9 @@
 
                 // 2. 建立請求物件
                 const bookingData = {
+                    VenueID:currentVenue,
                     SessionID: currentSession,
-                    AreaID: currentArea,
+                    TicketsAreaID: currentArea,
                     MemberID: "008783c7-31da-4d39-bba4-70ceed5939e4",
                     PaymentMethodID: "A",
                     Count:countValue, // 確保名稱與後端 ViewModel 一致

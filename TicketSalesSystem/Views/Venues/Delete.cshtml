@@ -18,6 +18,18 @@
             @Html.DisplayFor(model => model.VenueName)
         </dd>
         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.FloorName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.FloorName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.AreaColor)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.AreaColor)
+        </dd>
+        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.RowCount)
         </dt>
         <dd class = "col-sm-10">
@@ -30,10 +42,10 @@
             @Html.DisplayFor(model => model.SeatCount)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VenueStatusID)
+            @Html.DisplayNameFor(model => model.VenueStatus)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VenueStatusID)
+            @Html.DisplayFor(model => model.VenueStatus.VenueStatusID)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Place)

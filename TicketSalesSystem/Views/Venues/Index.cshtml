@@ -13,9 +13,6 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.VenueID)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.VenueName)
             </th>
             <th>
@@ -31,53 +28,44 @@
                 @Html.DisplayNameFor(model => model.SeatCount)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.TotalSeats)
+                @Html.DisplayNameFor(model => model.VenueStatus)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.VenueStatusID)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PlaceID)
+                @Html.DisplayNameFor(model => model.Place)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.VenueID)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.VenueName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FloorName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.AreaColor)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.RowCount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.SeatCount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TotalSeats)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.VenueStatus.VenueStatusName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Place.PlaceName)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.VenueID">更新</a>
-                    <a asp-action="Delete" asp-route-id="@item.VenueID">刪除</a>
-                </td>
-            </tr>
-        }
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.VenueName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FloorName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AreaColor)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RowCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SeatCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.VenueStatus.VenueStatusID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Place.PlaceID)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.VenueID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.VenueID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.VenueID">Delete</a>
+            </td>
+        </tr>
+}
     </tbody>
 </table>

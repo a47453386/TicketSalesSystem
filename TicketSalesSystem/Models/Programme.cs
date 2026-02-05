@@ -49,6 +49,9 @@ namespace TicketSalesSystem.Models
         [Range(0, 6,ErrorMessage ="請輸入0-6數字")]
         public int? LimitPerOrder { get; set; }
 
+        [Display(Name = "預計上架時間")]
+        public DateTime? OnShelfTime { get; set; }
+
 
 
         //FK區
@@ -58,7 +61,6 @@ namespace TicketSalesSystem.Models
         public string? PlaceID { get; set; }
         [Display(Name = "活動狀態")]
         public string? ProgrammeStatusID { get; set; }
-
         
 
 

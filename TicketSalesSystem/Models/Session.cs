@@ -15,7 +15,7 @@ namespace TicketSalesSystem.Models
         [Required(ErrorMessage = "必填")]
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 hh:mm:ss}")]
-        public DateTime SaleStartTime { get; set; }
+        public DateTime SaleStartTime { get; set; } 
 
         [Display(Name = "停售時間")]
         [Required(ErrorMessage = "必填")]

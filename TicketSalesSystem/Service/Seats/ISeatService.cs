@@ -1,7 +1,7 @@
 ﻿using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
 
-namespace TicketSalesSystem.Service
+namespace TicketSalesSystem.Service.Seats
 {
     public interface ISeatService
     {

@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.ViewModel;
 
 namespace TicketSalesSystem.Models
 {
@@ -264,6 +265,7 @@ namespace TicketSalesSystem.Models
             base.OnModelCreating(modelBuilder);
 
         }
+        
         
     }
 }

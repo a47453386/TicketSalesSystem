@@ -18,10 +18,10 @@ namespace TicketSalesSystem.Controllers
             _context = context;
         }
 
-        //GET: Venue
+        // GET: Venues
         public async Task<IActionResult> Index()
         {
-            var ticketsContext = _context.Venue.Include(v => v.Place).Include(vs => vs.VenueStatus);
+            var ticketsContext = _context.Venue.Include(v => v.Place).Include(v => v.VenueStatus);
             return View(await ticketsContext.ToListAsync());
         }
 
@@ -35,6 +35,7 @@ namespace TicketSalesSystem.Controllers
 
             var venue = await _context.Venue
                 .Include(v => v.Place)
+                .Include(v => v.VenueStatus)
                 .FirstOrDefaultAsync(m => m.VenueID == id);
             if (venue == null)
             {
@@ -47,8 +48,8 @@ namespace TicketSalesSystem.Controllers
         // GET: Venues/Create
         public IActionResult Create()
         {
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName");
-            ViewData["VenueStatusID"] = new SelectList(_context.VenueStatus, "VenueStatusID", "VenueStatusName");
+            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceID");
+            ViewData["VenueStatusID"] = new SelectList(_context.VenueStatus, "VenueStatusID", "VenueStatusID");
             return View();
         }
 
@@ -57,7 +58,7 @@ namespace TicketSalesSystem.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( Venue venue)
+        public async Task<IActionResult> Create([Bind("VenueID,VenueName,FloorName,AreaColor,RowCount,SeatCount,VenueStatusID,PlaceID")] Venue venue)
         {
             if (ModelState.IsValid)
             {
@@ -65,8 +66,8 @@ namespace TicketSalesSystem.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", venue.PlaceID);
-            ViewData["VenueStatusID"] = new SelectList(_context.VenueStatus, "VenueStatusID", "VenueStatusName", venue.VenueStatusID);
+            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceID", venue.PlaceID);
+            ViewData["VenueStatusID"] = new SelectList(_context.VenueStatus, "VenueStatusID", "VenueStatusID", venue.VenueStatusID);
             return View(venue);
         }
 
@@ -84,6 +85,7 @@ namespace TicketSalesSystem.Controllers
                 return NotFound();
             }
             ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceID", venue.PlaceID);
+            ViewData["VenueStatusID"] = new SelectList(_context.VenueStatus, "VenueStatusID", "VenueStatusID", venue.VenueStatusID);
             return View(venue);
         }
 
@@ -92,7 +94,7 @@ namespace TicketSalesSystem.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("VenueID,VenueName,RowCount,SeatCount,VenueStausID,PlaceID")] Venue venue)
+        public async Task<IActionResult> Edit(string id, [Bind("VenueID,VenueName,FloorName,AreaColor,RowCount,SeatCount,VenueStatusID,PlaceID")] Venue venue)
         {
             if (id != venue.VenueID)
             {
@@ -120,6 +122,7 @@ namespace TicketSalesSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceID", venue.PlaceID);
+            ViewData["VenueStatusID"] = new SelectList(_context.VenueStatus, "VenueStatusID", "VenueStatusID", venue.VenueStatusID);
             return View(venue);
         }
 
@@ -133,6 +136,7 @@ namespace TicketSalesSystem.Controllers
 
             var venue = await _context.Venue
                 .Include(v => v.Place)
+                .Include(v => v.VenueStatus)
                 .FirstOrDefaultAsync(m => m.VenueID == id);
             if (venue == null)
             {

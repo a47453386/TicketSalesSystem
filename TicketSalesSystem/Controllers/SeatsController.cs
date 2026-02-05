@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
-using TicketSalesSystem.Service;
+using TicketSalesSystem.Service.Seats;
+using TicketSalesSystem.Service.Validation.NewFolder;
 using TicketSalesSystem.ViewModel;
 
 namespace TicketSalesSystem.Controllers
@@ -12,11 +13,13 @@ namespace TicketSalesSystem.Controllers
     public class SeatsController : Controller
 
     {
-        private readonly ISeatService _context;
+        private readonly ISeatService _seatService;
+        private readonly IBookingValidationService _bookingValidation;
 
-        public SeatsController(ISeatService seatService)
+        public SeatsController(ISeatService seatService, IBookingValidationService bookingValidation)
         {
-            _context = seatService;
+            _seatService = seatService;
+            _bookingValidation = bookingValidation;
         }
 
         //使用者訂購頁面
@@ -24,7 +27,7 @@ namespace TicketSalesSystem.Controllers
         //選擇場次(顯示)
         public async Task<IActionResult> IndexTest(string id)
         {
-            var session = await _context.GetSessionsAsync();
+            var session = await _seatService.GetSessionsAsync();
             ViewBag.Sessions = session;
             return View();
         }
@@ -33,7 +36,7 @@ namespace TicketSalesSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAreasBySession(string sessionId)
         {
-            var areas = await _context.GetAreasBySession(sessionId);
+            var areas = await _seatService.GetAreasBySession(sessionId);
 
             return Json(areas);
         }
@@ -43,10 +46,16 @@ namespace TicketSalesSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmBooking([FromBody] VMBookingRequest request)
         {
+            var (isValid, message) = await _bookingValidation.ValidateAllAsync(request);
+            if (!isValid) 
+            {
+                return Json(new VMBookingResponse { Success = false, Message = message });
+            }
+
             try
             {
-                string memberId = "19f0cbe2-88b2-4d73-b285-93dad697a1b8";
-                var response = await _context.CreateOrderAndTicketsAsync(request, memberId);
+                string memberId = "72efc442-e093-4cbb-af04-f3903057871b";
+                var response = await _seatService.CreateOrderAndTicketsAsync(request, memberId);
                 return Json(response);
 
             }

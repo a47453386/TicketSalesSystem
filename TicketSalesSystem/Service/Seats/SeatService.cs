@@ -7,7 +7,7 @@ using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
 
-namespace TicketSalesSystem.Service
+namespace TicketSalesSystem.Service.Seats
 {
     public class SeatService : ISeatService
     {
@@ -151,7 +151,7 @@ namespace TicketSalesSystem.Service
         public async Task<VMBookingResponse> CreateOrderAndTicketsAsync(VMBookingRequest request, string memberID)
         {
             //驗證區域狀態
-            var area = await _context.TicketsArea.FindAsync(request.AreaID);
+            var area = await _context.TicketsArea.FindAsync(request.TicektsAreaID);
             if (area == null || area.TicketsAreaStatusID != "A")
             {
                 return new VMBookingResponse
@@ -210,7 +210,7 @@ namespace TicketSalesSystem.Service
                             TicketsID = Guid.NewGuid().ToString(),
                             OrderID = newOrderID,
                             SessionID = request.SessionID,
-                            TicketsAreaID = request.AreaID,
+                            TicketsAreaID = request.TicektsAreaID,
                             RowIndex = int.Parse(parts[0]),
                             SeatIndex = int.Parse(parts[1]),
                             TicketsStatusID = "P", // 注意：SQL 長度要夠
@@ -224,7 +224,7 @@ namespace TicketSalesSystem.Service
 
 
                     //更新票區狀態
-                    await SyncAreaStatusAaync(request.AreaID);
+                    await SyncAreaStatusAaync(request.TicektsAreaID);
 
                     //保留時間
                     return TimeResponse(bestSeatIDs, Amount);
