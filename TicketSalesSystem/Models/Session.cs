@@ -7,8 +7,7 @@ namespace TicketSalesSystem.Models
 {
     public class Session
     {
-        [Key]
-            
+        [Key]            
         public string SessionID { get; set; }= null!;
 
         [Display(Name = "開賣時間")]

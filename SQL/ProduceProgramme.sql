@@ -20,14 +20,15 @@ create function funGetProgrammeID ()
 
 	 print dbo.funGetProgrammeID();
 	 go
-
+--------------------------------------------------------------------------------------------------------
 	create PROCEDURE CreateProgramme
-            @Name nvarchar(50),      -- {0}
-            @Desc nvarchar(max),     -- {1}
-             @Limit int,             -- {2}
-             @EmpID nchar(8),        -- {3}
-            @PlaceID nchar(8),       -- {4}
-            @StatusID nchar(8)       -- {5}
+            @Name nvarchar(50),      
+            @Desc nvarchar(max),     
+            @Limit int,             
+            @ShelfTime datetime.... 
+            @EmpID nchar(8),        
+            @PlaceID nchar(8),      
+            @StatusID nchar(8)      
                           
         AS
         BEGIN
@@ -38,20 +39,26 @@ create function funGetProgrammeID ()
             SET @NewID = dbo.funGetProgrammeID(); 
 
             INSERT INTO Programme (
-                ProgrammeID, ProgrammeName, ProgrammeDescription,
-                CoverImage,SeatImage, LimitPerOrder,EmployeeID, PlaceID, ProgrammeStatusID, 
-                CreatedTime, UpdatedAt
+                ProgrammeID, ProgrammeName, ProgrammeDescription,CreatedTime, UpdatedAt,CoverImage,SeatImage,
+                 LimitPerOrder,OnShelfTime,EmployeeID, PlaceID, ProgrammeStatusID
             )
             VALUES (
-                @NewID, @Name, @Desc, '','',
-                @Limit,@EmpID, @PlaceID, @StatusID, 
-                GETDATE(),GETDATE()
-            );
+                @NewID, @Name, @Desc,GETDATE(),GETDATE(), '','',
+                @Limit,@ShelfTime,@EmpID, @PlaceID, @StatusID
+                );
 
             -- 回傳結果供 VS 接收
             SELECT * FROM Programme WHERE ProgrammeID = @NewID;
         END
 go
+
+ 
+
+
+
+
+
+
 ALTER TABLE Programme ALTER COLUMN CoverImage nvarchar(13) NULL;
 ALTER TABLE Programme ALTER COLUMN SeatImage nvarchar(13) NULL;
 
