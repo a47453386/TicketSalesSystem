@@ -467,7 +467,8 @@ namespace TicketSalesSystem.Migrations
                 {
                     DescriptionImageID = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
                     ProgrammeID = table.Column<string>(type: "nchar(8)", nullable: false),
-                    DescriptionImageName = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false)
+                    DescriptionImageName = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -484,7 +485,7 @@ namespace TicketSalesSystem.Migrations
                 name: "Session",
                 columns: table => new
                 {
-                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SessionID = table.Column<string>(type: "char(10)", nullable: false),
                     SaleStartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SaleEndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -514,7 +515,7 @@ namespace TicketSalesSystem.Migrations
                     MemberID = table.Column<string>(type: "nvarchar(36)", nullable: false),
                     PaymentMethodID = table.Column<string>(type: "nchar(1)", nullable: false),
                     OrderStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
-                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    SessionID = table.Column<string>(type: "char(10)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -549,14 +550,14 @@ namespace TicketSalesSystem.Migrations
                 name: "TicketsArea",
                 columns: table => new
                 {
-                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false),
+                    TicketsAreaID = table.Column<string>(type: "nchar(12)", nullable: false),
                     TicketsAreaName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     RowCount = table.Column<int>(type: "int", nullable: false),
                     SeatCount = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "money", nullable: false),
                     TicketsAreaStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
                     VenueID = table.Column<string>(type: "nchar(3)", nullable: false),
-                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    SessionID = table.Column<string>(type: "char(10)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -592,8 +593,8 @@ namespace TicketSalesSystem.Migrations
                     ScannedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     TicketsStatusID = table.Column<string>(type: "nchar(1)", nullable: false),
                     OrderID = table.Column<string>(type: "nvarchar(14)", nullable: false),
-                    SessionID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    TicketsAreaID = table.Column<string>(type: "nchar(3)", nullable: false)
+                    SessionID = table.Column<string>(type: "char(10)", nullable: false),
+                    TicketsAreaID = table.Column<string>(type: "nchar(12)", nullable: false)
                 },
                 constraints: table =>
                 {

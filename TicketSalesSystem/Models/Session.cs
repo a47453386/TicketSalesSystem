@@ -7,7 +7,9 @@ namespace TicketSalesSystem.Models
 {
     public class Session
     {
-        [Key]            
+        [Key]
+        [Column(TypeName = "char(10)")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)] // 告訴 EF：ID 是由 SQL 函數算好傳進來的字串
         public string SessionID { get; set; }= null!;
 
         [Display(Name = "開賣時間")]

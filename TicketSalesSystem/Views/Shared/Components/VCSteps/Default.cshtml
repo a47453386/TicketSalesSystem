@@ -1,0 +1,39 @@
+﻿@model int
+
+<div class="container mb-5">
+    <div class="d-flex justify-content-between position-relative mt-4">
+        <div class="progress position-absolute start-0 top-50 translate-middle-y w-100" style="height: 2px; z-index: -1;">
+            <div class="progress-bar bg-primary" style="width: @((Model - 1) * 33)%;"></div>
+        </div>
+
+        @for (int i = 1; i <= 4; i++)
+        {
+            var isActive = i <= Model;
+            var isCurrent = i == Model;
+
+            <div class="text-center">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center @(isActive ? "bg-primary text-white" : "bg-light border text-muted")"
+                     style="width: 40px; height: 40px; font-weight: bold; border-width: 2px !important;">
+                    @i
+                </div>
+                <div class="mt-2 small @(isCurrent ? "fw-bold text-primary" : "text-muted")">
+                    @GetStepName(i)
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    string GetStepName(int step)
+    {
+        return step switch
+        {
+            1 => "基本資料",
+            2 => "場次設定",
+            3 => "票區設定",
+            4 => "圖片上傳",
+            5 => "最後確認"
+        };
+    }
+}

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.ViewModel;
 
 namespace TicketSalesSystem.Controllers
@@ -13,6 +14,7 @@ namespace TicketSalesSystem.Controllers
     public class ProgrammesController : Controller
     {
         private readonly TicketsContext _context;
+        
 
         public ProgrammesController(TicketsContext context)
         {

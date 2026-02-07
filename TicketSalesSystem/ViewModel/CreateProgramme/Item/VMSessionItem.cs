@@ -10,10 +10,6 @@ namespace TicketSalesSystem.ViewModel.CreateProgramme.Item
         public DateTime SaleStartTime { get; set; }
         public DateTime SaleEndTime { get; set; }      
 
-        [Required]
-        [Display(Name = "地點")]
-        public string PlaceID { get; set; } = null!;
-
         // 可以在這裡加一個 TempId，方便前端刪除特定場次時使用
         public string TempId { get; set; } = Guid.NewGuid().ToString();
     }

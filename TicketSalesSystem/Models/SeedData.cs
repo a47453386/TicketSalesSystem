@@ -614,18 +614,21 @@ namespace TicketSalesSystem.Models
                     {
                         DescriptionImageID = guidDescriptionImage[0],
                         DescriptionImageName = guidDescriptionImage[0] + ".jpg",
+                        ImagePath = "",
                         ProgrammeID = "20260101"
                     },
                     new DescriptionImage
                     {
                         DescriptionImageID = guidDescriptionImage[1],
                         DescriptionImageName = guidDescriptionImage[1] + ".jpg",
+                        ImagePath = "",
                         ProgrammeID = "20260201"
                     },
                     new DescriptionImage
                     {
                         DescriptionImageID = guidDescriptionImage[2],
                         DescriptionImageName = guidDescriptionImage[2] + ".jpg",
+                        ImagePath = "",
                         ProgrammeID = "20260301"
                     }
                     );
@@ -907,7 +910,7 @@ namespace TicketSalesSystem.Models
                     context.TicketsArea.AddRange(
                     new TicketsArea
                     {
-                        TicketsAreaID = "A01",
+                        TicketsAreaID = "202601010101",
                         TicketsAreaName = "搖滾區",
                         TicketsAreaStatusID = "I",
                         RowCount=10,
@@ -918,7 +921,7 @@ namespace TicketSalesSystem.Models
                     },
                     new TicketsArea
                     {
-                        TicketsAreaID = "B01",
+                        TicketsAreaID = "202601010102",
                         TicketsAreaName = "二樓看台區",
                         TicketsAreaStatusID = "I",
                         RowCount = 10,
@@ -929,7 +932,7 @@ namespace TicketSalesSystem.Models
                     },
                     new TicketsArea
                     {
-                        TicketsAreaID = "C01",
+                        TicketsAreaID = "202601010103",
                         TicketsAreaName = "視線加強區",
                         TicketsAreaStatusID = "I",
                         RowCount = 10,
@@ -1007,7 +1010,7 @@ namespace TicketSalesSystem.Models
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 10, 16, 30, 0),
                         RefundTime = null,
-                        TicketsAreaID = "A01",
+                        TicketsAreaID = "202601010101",
                         SessionID = "2026010101",
                         TicketsStatusID = "N",
                         OrderID = "20261201000001"
@@ -1020,8 +1023,8 @@ namespace TicketSalesSystem.Models
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 11, 16, 30, 0),
                         RefundTime = null,
-                        TicketsAreaID = "A01",
-                        SessionID = "2026020101",
+                        TicketsAreaID = "202601010101",
+                        SessionID = "2026010101",
                         TicketsStatusID = "N",
                         OrderID = "20261201000002"
                     },
@@ -1033,9 +1036,9 @@ namespace TicketSalesSystem.Models
                         CreatedTime = DateTime.Now,
                         ScannedTime = new DateTime(2027, 1, 12, 17, 30, 0),
                         RefundTime = null,
-                        TicketsAreaID = "A01",
+                        TicketsAreaID = "202601010101",
                         TicketsStatusID = "N",
-                        SessionID = "2026030101",
+                        SessionID = "2026010101",
                         OrderID = "20261201000003"
                     }
                     );

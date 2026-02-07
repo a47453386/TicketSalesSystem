@@ -6,7 +6,8 @@ namespace TicketSalesSystem.Models
     public class TicketsArea
     {
         [Key]
-        [Column(TypeName = "nchar(3)")]
+        [Column(TypeName = "nchar(12)")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)] // 告訴 EF：ID 是由 SQL 函數算好傳進來的字串
         public string TicketsAreaID { get; set; } = null!;
 
         [Display(Name = "票區")]

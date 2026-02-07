@@ -7,6 +7,7 @@ namespace TicketSalesSystem.Models
     {
         [Key]
         [Column(TypeName = "nchar(8)")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)] // 告訴 EF：ID 是由 SQL 函數算好傳進來的字串
         public string ProgrammeID { get; set; } = null!;
 
         [Display(Name = "活動名稱")]        

@@ -9,15 +9,17 @@ namespace TicketSalesSystem.DTOs
         public string ProgrammeID { get; set; } = null!;     
         public string ProgrammeName { get; set; } = null!;      
         public string ProgrammeDescription { get; set; } = null!;          
-        public IFormFile? CoverImage { get; set; }
-        public IFormFile? SeatImage { get; set; }
+        public string? CoverImage { get; set; }
+        public string? SeatImage { get; set; }
         public int? LimitPerOrder { get; set; }
         public DateTime OnShelfTime { get; set; }
         public string? PlaceID { get; set; }
 
         public string? ProgrammeStatusID { get; set; }
+        public string VenueID { get; set; }= null!;
+        public string TicketsAreaStatusID { get; set; } = null!;
 
-        public virtual List<DescriptionImage>? DescriptionImage { get; set; }
+        public List<DescriptionImageDTO> DescriptionImages { get; set; } = new List<DescriptionImageDTO>();
         public List<SessionDTO> Sessions { get; set; } = new List<SessionDTO>();
         public List<TicketsAreaDTO> TicketsAreas { get; set; } = new List<TicketsAreaDTO>();
 

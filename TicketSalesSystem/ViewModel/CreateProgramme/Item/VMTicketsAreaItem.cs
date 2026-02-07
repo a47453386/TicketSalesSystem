@@ -10,7 +10,8 @@
 
         public decimal Price { get; set; }
 
-
+       
         public string TempId { get; set; } = Guid.NewGuid().ToString();
     }
+        
 }

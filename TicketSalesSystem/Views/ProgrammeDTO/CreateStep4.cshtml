@@ -1,0 +1,108 @@
+﻿@model TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep.VMProgrammeStep4
+
+<div class="container mt-4">
+    @await Component.InvokeAsync("VCSteps", new { currentStep = 4 })
+
+    <form asp-action="CreateStep4" method="post" enctype="multipart/form-data" id="uploadForm">
+        @Html.AntiForgeryToken()
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white"><h5>1. 活動封面圖</h5></div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div id="coverPreviewContainer" class="mb-2">
+                        @if (!string.IsNullOrEmpty(Model.CoverImage))
+                        {
+                            <img src="@Model.CoverImage" class="img-thumbnail" style="max-height: 200px;" />
+                            <input type="hidden" asp-for="CoverImage" />
+                        }
+                    </div>
+                    <input type="file" asp-for="CoverImageFile" class="form-control" accept="image/*" onchange="previewSingle(this, 'coverPreviewContainer')" />
+                    <small class="text-muted">建議尺寸：1200 x 600 px</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white"><h5>2. 場地座位圖</h5></div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div id="seatPreviewContainer" class="mb-2">
+                        @if (!string.IsNullOrEmpty(Model.SeatImage))
+                        {
+                            <img src="@Model.SeatImage" class="img-thumbnail" style="max-height: 200px;" />
+                            <input type="hidden" asp-for="SeatImage" />
+                        }
+                    </div>
+                    <input type="file" asp-for="SeatImageFile" class="form-control" accept="image/*" onchange="previewSingle(this, 'seatPreviewContainer')" />
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white"><h5>3. 活動描述圖片 (多選)</h5></div>
+            <div class="card-body">
+                <div id="descPreviewContainer" class="row g-2 mb-3">
+                    @* 顯示已有的圖片 *@
+                    @if (Model.DescriptionImages != null)
+                    {
+                        foreach (var img in Model.DescriptionImages)
+                        {
+                            <div class="col-md-2 position-relative">
+                                <img src="@img.TempUrl" class="img-thumbnail w-100" style="height: 100px; object-fit: cover;" />
+                                @* 這裡可以加一個 Hidden 存 ID，代表這些是舊有的圖 *@
+                            </div>
+                        }
+                    }
+                </div>
+                <input type="file" asp-for="DescriptionImageFiles" class="form-control" accept="image/*" multiple onchange="previewMultiple(this, 'descPreviewContainer')" />
+                <p class="mt-2 small text-danger">* 再次選擇圖片將會預覽新選取的檔案。</p>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mb-5">
+            <a asp-action="CreateStep3" class="btn btn-outline-secondary px-4">上一步</a>
+            <button type="submit" class="btn btn-primary px-5">下一步：最後確認</button>
+        </div>
+    </form>
+    <div asp-validation-summary="All" class="text-danger"></div>
+</div>
+
+@section Scripts {
+    <script>
+               // 單張圖片預覽 (封面圖 & 座位圖)
+        function previewSingle(input, containerId) {
+            const container = document.getElementById(containerId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    container.innerHTML = `<img src="${e.target.result}" class="img-thumbnail" style="max-height: 200px;" />`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 多張圖片預覽 (描述圖)
+        function previewMultiple(input, containerId) {
+            const container = document.getElementById(containerId);
+            // 每次選新檔案時，通常會清空原本的預覽內容 (視你的邏輯而定)
+            container.innerHTML = "";
+
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const div = document.createElement("div");
+                        div.className = "col-md-2";
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="img-thumbnail w-100" style="height: 100px; object-fit: cover;" />
+                            <div class="small text-truncate text-muted">${file.name}</div>
+                        `;
+                        container.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+    </script>
+}

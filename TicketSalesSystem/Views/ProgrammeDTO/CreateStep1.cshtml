@@ -1,0 +1,79 @@
+﻿@model TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep.VMProgrammeStep1
+
+@{
+    ViewData["Title"] = "建立活動 - 第一步";
+}
+
+<div class="container mt-4">
+    @await Component.InvokeAsync("VCSteps", new { currentStep = 1 })
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom py-3">
+            <h4 class="card-title mb-0 text-primary"><i class="bi bi-info-circle me-2"></i>基本資料設定</h4>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="CreateStep1" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="ProgrammeName" class="form-label fw-bold">活動名稱</label>
+                        <input asp-for="ProgrammeName" class="form-control form-control-lg" placeholder="請輸入活動完整名稱" />
+                        <span asp-validation-for="ProgrammeName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-">
+                        <label asp-for="PlaceID" class="form-label fw-bold">活動場地</label>
+                        <select asp-for="PlaceID" class="form-select" asp-items="ViewBag.PlaceID">
+                            <option value="">-- 請選擇場地 --</option>                           
+                        </select>
+                        <span asp-validation-for="PlaceID" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="LimitPerOrder" class="form-label fw-bold">單筆購票上限</label>
+                        <div class="input-group">
+                            <input asp-for="LimitPerOrder" class="form-control" type="number" min="1" />
+                            <span class="input-group-text">張</span>
+                        </div>
+                        <span asp-validation-for="LimitPerOrder" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="OnShelfTime" class="form-label fw-bold">官網預計上架時間</label>
+                        <input asp-for="OnShelfTime" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="OnShelfTime" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="ProgrammeStatusID" class="form-label fw-bold">活動狀態</label>
+                        <select asp-for="ProgrammeStatusID" class="form-select" asp-items="ViewBag.ProgrammeStatusID">
+                            <option value="">-- 請選擇狀態 --</option>
+                        </select>
+                        <span asp-validation-for="ProgrammeStatusID" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="ProgrammeDescription" class="form-label fw-bold">活動詳細描述</label>
+                        <textarea asp-for="ProgrammeDescription" class="form-control" rows="5" placeholder="請填寫活動介紹、注意事項等..."></textarea>
+                        <span asp-validation-for="ProgrammeDescription" class="text-danger small"></span>
+                    </div>
+                </div>
+
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                        下一步：設定場次 <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

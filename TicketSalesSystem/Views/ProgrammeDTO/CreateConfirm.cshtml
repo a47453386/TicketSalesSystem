@@ -1,0 +1,126 @@
+﻿@model TicketSalesSystem.DTOs.ProgrammeDTO
+
+@{
+    ViewData["Title"] = "最後確認 - 建立活動";
+}
+
+<div class="container mt-4">
+    @await Component.InvokeAsync("VCSteps", new { currentStep = 5 }) @* 假設你進度條有第五步 *@
+
+    <div class="alert alert-info shadow-sm d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-3 fs-3"></i>
+        <div>
+            請再次確認以下資訊是否正確。一旦按下「正式發布」，系統將會建立活動並開放購票設定。
+        </div>
+    </div>
+
+    @* 1. 基本資料確認 *@
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white"><h5>1. 基本資料</h5></div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-2">活動名稱</dt>
+                <dd class="col-sm-10">@Model.ProgrammeName</dd>
+
+                <dt class="col-sm-2">場地 ID</dt>
+                <dd class="col-sm-4">@ViewData["PlaceName"]</dd>
+
+                <dt class="col-sm-2">單筆限購</dt>
+                <dd class="col-sm-4">@Model.LimitPerOrder 張</dd>
+
+                <dt class="col-sm-2">上架時間</dt>
+                <dd class="col-sm-10">@Model.OnShelfTime.ToString("yyyy-MM-dd HH:mm")</dd>
+            </dl>
+        </div>
+    </div>
+
+    @* 2. 場次與票區彙整 *@
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4 h-100">
+                <div class="card-header bg-secondary text-white"><h5>2. 場次清單</h5></div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>#</th><th>開始時間</th></tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Sessions.Count; i++)
+                            {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@Model.Sessions[i].StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4 h-100">
+                <div class="card-header bg-secondary text-white"><h5>3. 票區設定</h5></div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>區域</th><th>價格</th><th>總座位</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var area in Model.TicketsAreas)
+                            {
+                                <tr>
+                                    <td>@area.TicketsAreaName</td>
+                                    <td>@ViewData["VenueName"]</td>
+                                    <td class="text-danger fw-bold">$@area.Price.ToString("N0")</td>
+                                    <td>@(area.RowCount* area.SeatCount)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* 3. 圖片預覽 *@
+    @* 4. 已上傳圖片 *@
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-secondary text-white"><h5>4. 已上傳圖片</h5></div>
+        <div class="card-body">
+            <div class="row g-2">
+                @* 🚩 這裡加上 null 檢查 *@
+                @if (Model.DescriptionImages != null && Model.DescriptionImages.Any())
+                {
+                    @foreach (var img in Model.DescriptionImages)
+                    {
+                        <div class="col-md-2 text-center">
+                            @* 檢查 TempUrl 是否有值，否則顯示預設圖 *@
+                            <img src="@(string.IsNullOrEmpty(img.TempUrl) ? "/images/no-image.png" : img.TempUrl)"
+                                 class="img-thumbnail" style="height: 100px; width: 100%; object-fit: cover;" />
+                            <div class="small text-muted text-truncate">@img.DescriptionImageName</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center py-4">
+                        <p class="text-muted">（此活動未上傳描述圖片）</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* 最後提交表單 *@
+    <form asp-action="CreateConfirm" method="post">
+        <div class="d-flex justify-content-between align-items-center mb-5 border-top pt-4">
+            <a asp-action="CreateStep4" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-arrow-left"></i> 回上一步修改
+            </a>
+
+            <button type="submit" class="btn btn-success btn-lg px-5 shadow">
+                <i class="bi bi-check-circle-fill me-2"></i> 確認無誤，正式發布
+            </button>
+        </div>
+    </form>
+</div>

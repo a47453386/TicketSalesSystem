@@ -12,7 +12,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20260205140242_InitialCreate")]
+    [Migration("20260207160519_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,6 +53,10 @@ namespace TicketSalesSystem.Migrations
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProgrammeID", "DescriptionImageID");
 
@@ -337,7 +341,7 @@ namespace TicketSalesSystem.Migrations
 
                     b.Property<string>("SessionID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("char(10)");
 
                     b.HasKey("OrderID");
 
@@ -643,7 +647,7 @@ namespace TicketSalesSystem.Migrations
             modelBuilder.Entity("TicketSalesSystem.Models.Session", b =>
                 {
                     b.Property<string>("SessionID")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("char(10)");
 
                     b.Property<string>("ProgrammeID")
                         .IsRequired()
@@ -692,11 +696,11 @@ namespace TicketSalesSystem.Migrations
 
                     b.Property<string>("SessionID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("char(10)");
 
                     b.Property<string>("TicketsAreaID")
                         .IsRequired()
-                        .HasColumnType("nchar(3)");
+                        .HasColumnType("nchar(12)");
 
                     b.Property<string>("TicketsStatusID")
                         .IsRequired()
@@ -718,7 +722,7 @@ namespace TicketSalesSystem.Migrations
             modelBuilder.Entity("TicketSalesSystem.Models.TicketsArea", b =>
                 {
                     b.Property<string>("TicketsAreaID")
-                        .HasColumnType("nchar(3)");
+                        .HasColumnType("nchar(12)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("money");
@@ -731,7 +735,7 @@ namespace TicketSalesSystem.Migrations
 
                     b.Property<string>("SessionID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("char(10)");
 
                     b.Property<string>("TicketsAreaName")
                         .IsRequired()

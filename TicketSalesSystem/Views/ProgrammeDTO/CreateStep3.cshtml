@@ -1,0 +1,138 @@
+﻿@model TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep.VMProgrammeStep3
+
+<div class="container mt-4">
+    @await Component.InvokeAsync("VCSteps", new { currentStep = 3 })
+
+    <form asp-action="CreateStep3" method="post" id="step3Form">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>第一步：選擇場館</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label asp-for="VenueID" class="form-label fw-bold">活動場館</label>
+                        <select asp-for="VenueID" asp-items="ViewBag.VenueID" class="form-select form-select-lg" required>
+                            <option value="">-- 請選擇場館 --</option>
+                        </select>
+                        <span asp-validation-for="VenueID" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="TicketsAreaStatusID" class="form-label fw-bold">票區狀態</label>
+                        <select asp-for="TicketsAreaStatusID" asp-items="ViewBag.TicketsAreaStatusID" class="form-select form-select-lg" required>
+                            <option value="">-- 請選擇狀態 --</option>
+                        </select>
+                        <span asp-validation-for="TicketsAreaStatusID" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-tags-fill me-2"></i>第二步：設定票區名稱與價格</h5>
+                <button type="button" class="btn btn-light btn-sm" id="btnAddArea">
+                    <i class="bi bi-plus-lg"></i> 新增票區
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="areaContainer">
+                    @for (int i = 0; i < Model.TicketsAreas.Count; i++)
+                    {
+                        <div class="area-item border rounded p-3 mb-3 bg-light position-relative">
+                            @if (i > 0)
+                            {
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-area"></button>
+                            }
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">票區名稱</label>
+                                    <input asp-for="TicketsAreas[i].TicketsAreaName" class="form-control" placeholder="如：搖滾A區" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">票價</label>
+                                    <input asp-for="TicketsAreas[i].Price" class="form-control" type="number" min="0" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">總排數</label>
+                                    <input asp-for="TicketsAreas[i].RowCount" class="form-control" type="number" min="1" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">每排座位</label>
+                                    <input asp-for="TicketsAreas[i].SeatCount" class="form-control" type="number" min="1" required />
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4 mb-5">
+            <a asp-action="CreateStep2" class="btn btn-outline-secondary px-4">上一步</a>
+            <button type="submit" class="btn btn-primary btn-lg px-5 shadow">下一步：上傳圖片</button>
+        </div>
+    </form>
+    <div asp-validation-summary="All" class="text-danger"></div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            let areaIndex = $('.area-item').length;
+
+            // 新增票區
+            $('#btnAddArea').click(function () {
+                const html = `
+                    <div class="area-item border rounded p-3 mb-3 bg-light position-relative" style="display:none;">
+                        <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-area"></button>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">票區名稱</label>
+                                <input name="TicketsAreas[${areaIndex}].TicketsAreaName" class="form-control" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">票價</label>
+                                <input name="TicketsAreas[${areaIndex}].Price" class="form-control" type="number" min="0" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">總排數</label>
+                                <input name="TicketsAreas[${areaIndex}].RowCount" class="form-control" type="number" min="1" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">每排座位</label>
+                                <input name="TicketsAreas[${areaIndex}].SeatCount" class="form-control" type="number" min="1" required />
+                            </div>
+                        </div>
+                    </div>`;
+
+                const $newRow = $(html);
+                $('#areaContainer').append($newRow);
+                $newRow.slideDown(200);
+                areaIndex++;
+            });
+
+            // 刪除票區
+            $('#areaContainer').on('click', '.remove-area', function () {
+                $(this).closest('.area-item').slideUp(200, function() {
+                    $(this).remove();
+                    reIndex();
+                });
+            });
+
+            function reIndex() {
+                $('.area-item').each(function (i, el) {
+                    $(el).find('input').each(function () {
+                        const name = $(this).attr('name');
+                        if (name) {
+                            $(this).attr('name', name.replace(/\[\d+\]/, `[${i}]`));
+                        }
+                    });
+                });
+                areaIndex = $('.area-item').length;
+            }
+        });
+    </script>
+}

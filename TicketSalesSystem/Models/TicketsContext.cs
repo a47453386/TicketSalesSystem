@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
+using TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep;
 
 namespace TicketSalesSystem.Models
 {
@@ -265,6 +266,7 @@ namespace TicketSalesSystem.Models
             base.OnModelCreating(modelBuilder);
 
         }
+       
         
         
     }
