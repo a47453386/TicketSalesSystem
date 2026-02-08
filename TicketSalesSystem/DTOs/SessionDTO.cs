@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.ViewModel.CreateProgramme.Item;
 
 namespace TicketSalesSystem.DTOs
 {
@@ -12,8 +13,8 @@ namespace TicketSalesSystem.DTOs
 
         public string ProgrammeID { get; set; } = null!;
 
-        public virtual List<TicketsArea>? TicketsArea { get; set; }
+        public List<VMTicketsAreaItem> TicketsArea { get; set; } = new List<VMTicketsAreaItem>();
 
-       
+
     }
 }

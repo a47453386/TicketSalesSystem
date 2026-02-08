@@ -1,0 +1,344 @@
+﻿@model TicketSalesSystem.ViewModel.EditProgramme.VMProgrammeEdit
+
+@{
+    ViewData["Title"] = "編輯活動項目";
+}
+
+<div class="container mt-4 pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-pencil-square"></i> 編輯活動</h2>
+        <a asp-controller="Programmes" asp-action="Index" class="btn btn-secondary">返回列表</a>
+    </div>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editForm">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="ProgrammeID" />
+
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">活動封面圖</div>
+                    <div class="card-body text-center">
+                        <img id="coverPreview" src="/Photos/CoverImage/@Model.CoverImage" class="img-fluid rounded mb-3 shadow-sm" style="max-height: 300px; width: 100%; object-fit: cover;" />
+                        <div class="input-group">
+                            <input type="file" asp-for="CoverImageFile" class="form-control" accept="image/*" onchange="previewImage(this, 'coverPreview')" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">座位參考圖</div>
+                    <div class="card-body text-center">
+                        <img id="seatPreview" src="/Photos/SeatImage/@Model.SeatImage" class="img-fluid rounded mb-3 shadow-sm" style="max-height: 200px; width: 100%; object-fit: contain;" />
+                        <div class="input-group">
+                            <input type="file" asp-for="SeatImageFile" class="form-control" accept="image/*" onchange="previewImage(this, 'seatPreview')" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">基本資訊</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label asp-for="ProgrammeName" class="form-label fw-bold">活動名稱</label>
+                                <input asp-for="ProgrammeName" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">地區</label>
+                                <select asp-for="PlaceID" class="form-select" id="PlaceID" asp-items="ViewBag.PlaceID">
+                                    <option value="">-- 請選擇地區 --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">活動狀態</label>
+                                <select asp-for="ProgrammeStatusID" class="form-select" asp-items="ViewBag.ProgrammeStatusID"></select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="OnShelfTime" class="form-label fw-bold">上架時間</label>
+                                <input asp-for="OnShelfTime" class="form-control" type="datetime-local" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LimitPerOrder" class="form-label fw-bold">每單限購</label>
+                                <input asp-for="LimitPerOrder" class="form-control" type="number" min="1" />
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label asp-for="ProgrammeDescription" class="form-label fw-bold">活動簡介</label>
+                                <textarea asp-for="ProgrammeDescription" class="form-control" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">場次與票區管理</h5>
+                <button type="button" class="btn btn-light btn-sm fw-bold" id="add-session">+ 新增場次</button>
+            </div>
+            <div class="card-body p-0" id="session-container">
+                @for (int i = 0; i < Model.Sessions.Count; i++)
+                {
+                    <div class="session-item border-bottom p-4" data-index="@i">
+                        <input type="hidden" name="Sessions[@i].ProgrammeID" value="@Model.ProgrammeID" />
+                        <input type="hidden" name="Sessions[@i].SessionID" value="@Model.Sessions[i].SessionID" class="session-id-input" />
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="text-success"><i class="bi bi-calendar-event"></i> 場次 #<span class="session-num">@(i + 1)</span></h5>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-session">刪除此場次</button>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="small fw-bold">演出開始時間</label>
+                                <input type="datetime-local" name="Sessions[@i].StartTime" value="@Model.Sessions[i].StartTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control shadow-sm" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small fw-bold">售票開始時間</label>
+                                <input type="datetime-local" name="Sessions[@i].SaleStartTime" value="@Model.Sessions[i].SaleStartTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control shadow-sm" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small fw-bold">售票結束時間</label>
+                                <input type="datetime-local" name="Sessions[@i].SaleEndTime" value="@Model.Sessions[i].SaleEndTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control shadow-sm" required />
+                            </div>
+                        </div>
+
+                        <div class="table-responsive rounded shadow-sm">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr class="small text-center">
+                                        <th style="width: 20%">場館</th>
+                                        <th>票區名稱</th>
+                                        <th style="width: 15%">價格</th>
+                                        <th style="width: 10%">排數</th>
+                                        <th style="width: 10%">座/排</th>
+                                        <th style="width: 5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="area-tbody">
+                                    @if (Model.Sessions[i].TicketsArea != null && Model.Sessions[i].TicketsArea.Any())
+                                    {
+                                        @for (int j = 0; j < Model.Sessions[i].TicketsArea.Count; j++)
+                                        {
+                                            var area = Model.Sessions[i].TicketsArea[j];
+
+                                            <tr>
+                                                @* 隱藏欄位確保 ID 能傳回後端進行更新而非新增 *@
+                                                <input type="hidden" name="Sessions[@i].TicketsArea[@j].TicketsAreaID" value="@area.TicketsAreaID" />
+                                                <input type="hidden" name="Sessions[@i].TicketsArea[@j].TicketsAreaStatusID" value="@(area.TicketsAreaStatusID ?? "A")" />
+                                                <td>
+                                                    <select name="Sessions[@i].TicketsArea[@j].VenueID" class="form-select form-select-sm venue-select" data-init-value="@area.VenueID">
+                                                        @* 這裡預設會由 JS 根據 PlaceID 填入，先留空或顯示目前值 *@
+                                                        <option value="@area.VenueID" selected>@(string.IsNullOrEmpty(area.VenueID) ? "-- 請選擇 --" : "保留目前場館")</option>
+                                                    </select>
+                                                    <span class="text-danger small" data-valmsg-for="Sessions[@i].TicketsArea[@j].VenueID"></span>
+                                                </td>
+                                                <td>
+                                                    <input name="Sessions[@i].TicketsArea[@j].TicketsAreaName" value="@area.TicketsAreaName" class="form-control form-control-sm" />
+                                                </td>
+                                                <td>
+                                                    <input name="Sessions[@i].TicketsArea[@j].Price" value="@area.Price" type="number" class="form-control form-control-sm text-end" />
+                                                </td>
+                                                <td>
+                                                    <input name="Sessions[@i].TicketsArea[@j].RowCount" value="@area.RowCount" type="number" class="form-control form-control-sm" />
+                                                </td>
+                                                <td>
+                                                    <input name="Sessions[@i].TicketsArea[@j].SeatCount" value="@area.SeatCount" type="number" class="form-control form-control-sm" />
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-link text-danger remove-area p-0">×</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-outline-info btn-sm mt-2 add-ticket-area">+ 新增票區</button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="text-center mt-5 mb-5">
+            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-lg">確認更新活動資料</button>
+        </div>
+    </form>
+    <div asp-validation-summary="All" class="text-danger"></div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    @* 加入驗證腳本 *@
+
+    <script>
+        // 使用一個變數存儲 URL，避免在邏輯中頻繁呼叫 Razor
+        const getVenuesUrl = '@Url.Action("GetVenues")';
+        let cachedVenues = [];
+
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) { $('#' + previewId).attr('src', e.target.result); }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $(document).ready(function () {
+            console.log("頁面初始化中...");
+
+            // 1. 初始化
+            const initialPid = $("#PlaceID").val();
+            if (initialPid) {
+                loadVenues(initialPid, true);
+            }
+
+            // 2. 地區切換
+            $("#PlaceID").on("change", function () {
+                loadVenues($(this).val(), false);
+            });
+
+            function loadVenues(placeId, isInitial) {
+                if (!placeId) {
+                    cachedVenues = [];
+                    updateVenueSelects(isInitial);
+                    return;
+                }
+
+                $.ajax({
+                    url: getVenuesUrl,
+                    type: 'GET',
+                    data: { placeId: placeId },
+                    success: function (data) {
+                        cachedVenues = data;
+                        updateVenueSelects(isInitial);
+                    },
+                    error: function(err) {
+                        console.error("無法取得場館資料", err);
+                    }
+                });
+            }
+
+            function updateVenueSelects(isInitial) {
+                $(".venue-select").each(function () {
+                    const $s = $(this);
+                    const savedVal = isInitial ? $s.data("init-value") : $s.val();
+                    let opt = '<option value="">-- 選擇場館 --</option>';
+                    if (cachedVenues && cachedVenues.length > 0) {
+                        cachedVenues.forEach(v => {
+                            const isSelected = v.venueID == savedVal ? 'selected' : '';
+                            opt += `<option value="${v.venueID}" ${isSelected}>${v.venueName}</option>`;
+                        });
+                    }
+                    $s.html(opt);
+                });
+            }
+
+            // 3. 新增場次
+            $("#add-session").on("click", function (e) {
+                e.preventDefault();
+                console.log("點擊新增場次");
+                const sIdx = $(".session-item").length;
+                const html = `
+                <div class="session-item border-bottom p-4" data-index="${sIdx}">
+                    <input type="hidden" name="Sessions[${sIdx}].SessionID" value="" />
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-success"><i class="bi bi-calendar-plus"></i> 新場次 #<span class="session-num">${sIdx + 1}</span></h5>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-session">刪除此場次</button>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4"><label class="small fw-bold">演出時間</label><input type="datetime-local" name="Sessions[${sIdx}].StartTime" class="form-control" required /></div>
+                        <div class="col-md-4"><label class="small fw-bold">開賣時間</label><input type="datetime-local" name="Sessions[${sIdx}].SaleStartTime" class="form-control" required /></div>
+                        <div class="col-md-4"><label class="small fw-bold">結束時間</label><input type="datetime-local" name="Sessions[${sIdx}].SaleEndTime" class="form-control" required /></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light text-center small">
+                                <tr>
+                                    <th style="width: 20%">場館</th>
+                                    <th>票區名稱</th>
+                                    <th style="width: 15%">價格</th>
+                                    <th style="width: 10%">排數</th>
+                                    <th style="width: 10%">座/排</th>
+                                    <th style="width: 5%"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="area-tbody"></tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-outline-info btn-sm mt-2 add-ticket-area">+ 新增票區</button>
+                </div>`;
+                $("#session-container").append(html);
+            });
+
+            // 4. 新增票區
+            $(document).on("click", ".add-ticket-area", function () {
+                const $session = $(this).closest(".session-item");
+                const sIdx = $session.attr("data-index");
+                const $tbody = $session.find(".area-tbody");
+                const tIdx = $tbody.find("tr").length;
+
+                let opts = '<option value="">-- 選擇場館 --</option>'; // 確保這裡 value 是空的
+                cachedVenues.forEach(v => {opts += `<option value="${v.venueID}">${v.venueName}</option>`});
+
+                const row = `
+                <tr>
+                    <input type="hidden" name="Sessions[${sIdx}].TicketsArea[${tIdx}].TicketsAreaID" value="" />
+                    <input type="hidden" name="Sessions[${sIdx}].TicketsArea[${tIdx}].TicketsAreaStatusID" value="A" />
+                    <td><select name="Sessions[${sIdx}].TicketsArea[${tIdx}].VenueID" class="form-select form-select-sm venue-select" required>${opts}</select></td>
+                    <td><input name="Sessions[${sIdx}].TicketsArea[${tIdx}].TicketsAreaName" class="form-control form-control-sm" required /></td>
+                    <td><input type="number" name="Sessions[${sIdx}].TicketsArea[${tIdx}].Price" class="form-control form-control-sm text-end" required /></td>
+                    <td><input type="number" name="Sessions[${sIdx}].TicketsArea[${tIdx}].RowCount" class="form-control form-control-sm text-center" required /></td>
+                    <td><input type="number" name="Sessions[${sIdx}].TicketsArea[${tIdx}].SeatCount" class="form-control form-control-sm text-center" required /></td>
+                    <td class="text-center"><button type="button" class="btn btn-link text-danger remove-area p-0">×</button></td>
+                </tr>`;
+                $tbody.append(row);
+            });
+
+            // 5. 刪除與重整
+            $(document).on("click", ".remove-area", function () {
+                const $tbody = $(this).closest(".area-tbody");
+                $(this).closest("tr").remove();
+                reIndexAreas($tbody);
+            });
+
+            $(document).on("click", ".remove-session", function () {
+                if(confirm("確定要刪除整個場次嗎？")) {
+                    $(this).closest(".session-item").remove();
+                    reIndexSessions();
+                }
+            });
+
+            function reIndexAreas($tbody) {
+                const sIdx = $tbody.closest(".session-item").attr("data-index");
+                $tbody.find("tr").each(function (tIdx) {
+                    $(this).find("input, select").each(function () {
+                        const name = $(this).attr("name");
+                        if (name) {
+                            const newName = name.replace(/TicketsArea\[\d+\]/, `TicketsArea[${tIdx}]`);
+                            $(this).attr("name", newName);
+                        }
+                    });
+                });
+            }
+
+            function reIndexSessions() {
+                $(".session-item").each(function (sIdx) {
+                    $(this).attr("data-index", sIdx);
+                    $(this).find(".session-num").text(sIdx + 1);
+                    $(this).find("input, select, textarea").each(function () {
+                        const name = $(this).attr("name");
+                        if (name) {
+                            const newName = name.replace(/Sessions\[\d+\]/, `Sessions[${sIdx}]`);
+                            $(this).attr("name", newName);
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}
