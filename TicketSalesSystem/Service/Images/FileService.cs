@@ -55,5 +55,15 @@ namespace TicketSalesSystem.Service.Images
             return finalFileName;
 
         }
+
+        public async Task DeleteFileAsync(string fileName, string folderName)
+        {
+            var filePath = Path.Combine(_basePath, folderName, fileName);
+            if (File.Exists(filePath))
+            {
+                
+                await Task.Run(() => File.Delete(filePath));
+            }
+        }
     }
 }

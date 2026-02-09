@@ -8,10 +8,10 @@
         public string PlaceName { get; set; }    // 顯示名稱而非 ID
 
         // Step 2 的場次
-        public List<VMSessionItem> Sessions { get; set; }
+        public List<VMSessionItem> Session { get; set; }
 
         // Step 3 的場地與票區
         public string VenueName { get; set; }    // 顯示名稱而非 ID
-        public List<VMTicketsAreaItem> TicketsAreas { get; set; }
+        public List<VMTicketsAreaItem> TicketsArea { get; set; }
     }
 }

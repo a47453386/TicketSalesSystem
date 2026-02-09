@@ -18,24 +18,24 @@
             <div class="card-body">
                 <div id="sessionContainer">
                     @* 這裡預留給 JS 動態產生，或是顯示已有的資料 *@
-                    @for (int i = 0; i < Model.Sessions.Count; i++)
+                    @for (int i = 0; i < Model.Session.Count; i++)
                     {
                         <div class="session-item border p-3 mb-3 position-relative">
                             <h6>場次 #<span class="row-number">@(i + 1)</span></h6>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label">活動開始時間</label>
-                                    <input asp-for="Sessions[i].StartTime" class="form-control" type="datetime-local" />
-                                    <span asp-validation-for="Sessions[i].StartTime" class="text-danger"></span>
+                                    <input asp-for="Session[i].StartTime" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="Session[i].StartTime" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">啟售時間</label>
-                                    <input asp-for="Sessions[i].SaleStartTime" class="form-control" type="datetime-local" />
-                                    <span asp-validation-for="Sessions[i].SaleStartTime" class="text-danger"></span>
+                                    <input asp-for="Session[i].SaleStartTime" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="Session[i].SaleStartTime" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">截止銷售時間</label>
-                                    <input asp-for="Sessions[i].SaleEndTime" class="form-control" type="datetime-local" />
+                                    <input asp-for="Session[i].SaleEndTime" class="form-control" type="datetime-local" />
                                 </div>
                             </div>
                         </div>
@@ -59,7 +59,7 @@
 
 
     <script>
-        let sessionIndex = @Model.Sessions.Count; // 從現有的筆數開始算
+        let sessionIndex = @Model.Session.Count; // 從現有的筆數開始算
 
         document.getElementById('btnAddSession').addEventListener('click', function () {
             const container = document.getElementById('sessionContainer');
@@ -72,17 +72,17 @@
                     <div class="row g-3">
                                <div class="col-md-4">
                                 <label class="form-label">活動開始時間</label>
-                                <input name="Sessions[${sessionIndex}].StartTime" class="form-control" type="datetime-local" required />
+                                <input name="Session[${sessionIndex}].StartTime" class="form-control" type="datetime-local" required />
                                 @* JS 動態產生的部分，雖然 asp-validation-for 不能直接用，但可以手動留一個 span *@
-                                <span class="field-validation-valid text-danger" data-valmsg-for="Sessions[${sessionIndex}].StartTime" data-valmsg-replace="true"></span>
+                                <span class="field-validation-valid text-danger" data-valmsg-for="Session[${sessionIndex}].StartTime" data-valmsg-replace="true"></span>
                             </div>
         <div class="col-md-4">
                 <label class="form-label">啟售時間</label>
-                <input name="Sessions[${sessionIndex}].SaleStartTime" class="form-control" type="datetime-local" required />
-                <span class="field-validation-valid text-danger" data-valmsg-for="Sessions[${sessionIndex}].SaleStartTime" data-valmsg-replace="true"></span> </div>
+                <input name="Session[${sessionIndex}].SaleStartTime" class="form-control" type="datetime-local" required />
+                <span class="field-validation-valid text-danger" data-valmsg-for="Session[${sessionIndex}].SaleStartTime" data-valmsg-replace="true"></span> </div>
                         <div class="col-md-4">
                             <label class="form-label">截止銷售時間</label>
-                            <input name="Sessions[${sessionIndex}].SaleEndTime" class="form-control" type="datetime-local" required />
+                            <input name="Session[${sessionIndex}].SaleEndTime" class="form-control" type="datetime-local" required />
                         </div>
                     </div>
                 </div>

@@ -24,16 +24,22 @@ namespace TicketSalesSystem.Controllers
         // GET: Programmes
         public async Task<IActionResult> Index()
         {
-            
-            var programme = await _context.Programme 
+            var programme = await _context.Programme
                 .Select(p => new VMProgramme
-                {                    
+                {
                     ProgrammeID = p.ProgrammeID,
                     CoverImage = p.CoverImage,
-                    ProgrammeName = p.ProgrammeName,                                      
-                    PlaceName= p.Place.PlaceName,
-                    StartTime = p.Session.FirstOrDefault().StartTime,
-                    ProgrammeStatusName = p.ProgrammeStatus.ProgrammeStatusName,
+                    ProgrammeName = p.ProgrammeName,
+                    // 🚩 修正 1：加上問號，如果 Place 是 null，則 PlaceName 為 null
+                    PlaceName = p.Place != null ? p.Place.PlaceName : "未設定地點",
+
+                    // 🚩 修正 2：最關鍵！先拿整個 Session 物件，再判斷 StartTime
+                    // 或是使用 Null-conditional operator
+                    StartTime = p.Session.OrderBy(s => s.StartTime).FirstOrDefault() != null
+                        ? p.Session.OrderBy(s => s.StartTime).FirstOrDefault().StartTime
+                        : null, // 注意：VMProgramme 的 StartTime 屬性必須改為 DateTime?// 注意：VMProgramme 的 StartTime 屬性必須改為 DateTime?
+
+                    ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "未知狀態",
                 }).ToListAsync();
 
             return View(programme);

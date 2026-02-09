@@ -19,9 +19,9 @@ namespace TicketSalesSystem.DTOs
         public string VenueID { get; set; }= null!;
         public string TicketsAreaStatusID { get; set; } = null!;
 
-        public List<DescriptionImageDTO> DescriptionImages { get; set; } = new List<DescriptionImageDTO>();
-        public List<SessionDTO> Sessions { get; set; } = new List<SessionDTO>();
-        public List<TicketsAreaDTO> TicketsAreas { get; set; } = new List<TicketsAreaDTO>();
+        public List<DescriptionImageDTO> DescriptionImage { get; set; } = new List<DescriptionImageDTO>();
+        public List<SessionDTO>? Session { get; set; } = new List<SessionDTO>();
+        public List<TicketsAreaDTO> TicketsArea { get; set; } = new List<TicketsAreaDTO>();
 
     }
 }

@@ -8,6 +8,7 @@ using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
+using TicketSalesSystem.Service.IProgramme;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep;
 using TicketSalesSystem.ViewModel.CreateProgramme.Item;
@@ -20,12 +21,14 @@ namespace TicketSalesSystem.Controllers
         private readonly IFileService _fileService;
         private readonly TicketsContext _context;
         private readonly IIDService _iIDService;
-        public ProgrammeDTOController(IFileService fileService, TicketsContext context, IIDService iIDService)
+        private readonly IProgrammeService _programmeService;
+        public ProgrammeDTOController(IFileService fileService, TicketsContext context, IIDService iIDService, IProgrammeService programmeService   )
         {
 
             _fileService = fileService;
             _context = context;
             _iIDService = iIDService;
+            _programmeService = programmeService;
         }
 
 
@@ -102,7 +105,7 @@ namespace TicketSalesSystem.Controllers
         private void MapStep2ToDo(VMProgrammeStep2 vm, ProgrammeDTO dto)
         {
 
-            dto.Sessions = vm.Sessions?
+            dto.Session = vm.Session?
                 .Select(s => new SessionDTO
                 {
                     SaleStartTime = s.SaleStartTime,
@@ -115,7 +118,7 @@ namespace TicketSalesSystem.Controllers
 
         private void MapStep2ToVM(ProgrammeDTO dto, VMProgrammeStep2 vm)
         {
-            vm.Sessions = dto.Sessions?
+            vm.Session = dto.Session?
                 .Select(s => new VMSessionItem
                 {
                     SaleStartTime = s.SaleStartTime,
@@ -138,7 +141,7 @@ namespace TicketSalesSystem.Controllers
 
             vm.PlaceID = dto.PlaceID;
 
-            if (dto.Sessions != null && dto.Sessions.Any())
+            if (dto.Session != null && dto.Session.Any())
             {
                 MapStep2ToVM(dto, vm);
             }
@@ -151,7 +154,7 @@ namespace TicketSalesSystem.Controllers
                     SaleStartTime = DateTime.Now,
                     SaleEndTime = DateTime.Now
                 };
-                vm.Sessions.Add(vmF);
+                vm.Session.Add(vmF);
             }
 
             return View(vm);
@@ -181,7 +184,7 @@ namespace TicketSalesSystem.Controllers
             var dto = GetCurrentDTO();
 
             //將 VM 的資料映射到 DTO
-            if (vm.Sessions == null || !vm.Sessions.Any())
+            if (vm.Session == null || !vm.Session.Any())
             {
                 ModelState.AddModelError("", "請至少新增一個場次");
                 return View(vm);
@@ -199,49 +202,64 @@ namespace TicketSalesSystem.Controllers
             dto.VenueID = vm.VenueID;
             dto.TicketsAreaStatusID = vm.TicketsAreaStatusID;
 
-            // 假設 DTO 層級也有對應的 Sessions
-            dto.Sessions ??= new List<SessionDTO>();
+            dto.Session ??= new List<SessionDTO>();
+            var allTicketsAreas = new List<TicketsAreaDTO>();
 
-
-            foreach (var sessionVM in vm.Sessions)
+            // 🚩 這裡要巡覽的是 vm.Session (前端傳回來的場次)
+            foreach (var sessionVM in vm.Session)
             {
-                var targetSession = dto.Sessions.FirstOrDefault(s => s.SessionID == sessionVM.SessionID);
+                var targetSession = dto.Session.FirstOrDefault(s => s.SessionID == sessionVM.SessionID);
                 if (targetSession != null)
                 {
-                    // 將該場次下的票區清單存入 DTO
-                    targetSession.TicketsArea = sessionVM.TicketsArea.Select(ta => new VMTicketsAreaItem
+                    // 更新該場次的票區清單
+                    targetSession.TicketsArea = sessionVM.TicketsArea.Select(ta => new TicketsAreaDTO
                     {
                         TicketsAreaID = ta.TicketsAreaID,
                         TicketsAreaName = ta.TicketsAreaName,
                         Price = ta.Price,
                         RowCount = ta.RowCount,
                         SeatCount = ta.SeatCount,
-                        VenueID = vm.VenueID, // 統一使用 Step3 選擇的場地
+                        VenueID = vm.VenueID,
                         TicketsAreaStatusID = ta.TicketsAreaStatusID ?? "A"
                     }).ToList();
+
+                    // 收集所有票區到彙整清單中
+                    foreach (var ta in targetSession.TicketsArea)
+                    {
+                        allTicketsAreas.Add(ta);
+                    }
                 }
             }
+
+            // 🚩 這行要放在 foreach 迴圈外面，否則會重複執行多次
+            dto.TicketsArea = allTicketsAreas.GroupBy(x => x.TicketsAreaName)
+                                             .Select(g => g.First())
+                                             .ToList();
         }
         private void MapStep3ToVM(ProgrammeDTO dto, VMProgrammeStep3 vm)
         {
             vm.VenueID = dto.VenueID;
             vm.TicketsAreaStatusID = dto.TicketsAreaStatusID;
 
-            // 從 DTO 的 Sessions 抓取資料倒填回 VM
-            vm.Sessions = dto.Sessions.Select(s => new VMSessionItem
+            if (dto.Session != null)
             {
-                SessionID = s.SessionID,
-                TicketsArea = s.TicketsArea?.Select(ta => new VMTicketsAreaItem
+                vm.Session = dto.Session.Select(s => new VMSessionItem
                 {
-                    TicketsAreaID = ta.TicketsAreaID,
-                    TicketsAreaName = ta.TicketsAreaName,
-                    RowCount = ta.RowCount,
-                    SeatCount = ta.SeatCount,
-                    Price = ta.Price,
-                    VenueID = ta.VenueID,
-                    TicketsAreaStatusID = ta.TicketsAreaStatusID
-                }).ToList() ?? new List<VMTicketsAreaItem> { new VMTicketsAreaItem() } // 若無票區則預設給一筆空白
-            }).ToList();
+                    SessionID = s.SessionID,
+                    StartTime = s.StartTime,
+                    // 將 DTO 裡的票區轉回 VM 格式
+                    TicketsArea = s.TicketsArea?.Select(ta => new VMTicketsAreaItem
+                    {
+                        TicketsAreaID = ta.TicketsAreaID,
+                        TicketsAreaName = ta.TicketsAreaName,
+                        RowCount = ta.RowCount,
+                        SeatCount = ta.SeatCount,
+                        Price = ta.Price,
+                        VenueID = ta.VenueID,
+                        TicketsAreaStatusID = ta.TicketsAreaStatusID
+                    }).ToList() ?? new List<VMTicketsAreaItem>()
+                }).ToList();
+            }
         }
         [HttpGet]
         public IActionResult CreateStep3()
@@ -275,7 +293,7 @@ namespace TicketSalesSystem.Controllers
             //從 Session 取出 DTO，如果沒有就建立一個新的
             var dto = GetCurrentDTO();
             //將 VM 的資料映射到 DTO
-            if (vm.Sessions.Any(s => s.TicketsArea == null || !s.TicketsArea.Any()))
+            if (vm.Session.Any(s => s.TicketsArea == null || !s.TicketsArea.Any()))
             {
                 ModelState.AddModelError("", "每個區域/場次請至少新增一個票區");
                 return View(vm);
@@ -300,7 +318,7 @@ namespace TicketSalesSystem.Controllers
             {
                 CoverImage = dto.CoverImage,
                 SeatImage = dto.SeatImage,
-                DescriptionImages = dto.DescriptionImages?.Select(di => new VMDescriptionImageItem
+                DescriptionImages = dto.DescriptionImage?.Select(di => new VMDescriptionImageItem
                 {
                     DescriptionImageID = di.DescriptionImageID,
                     DescriptionImageName = di.DescriptionImageName,
@@ -351,7 +369,7 @@ namespace TicketSalesSystem.Controllers
 
                 //呼叫多載A
                 var savedPath = await _fileService.SaveFileAsync(file, newID, "DescriptionImage");
-                dto.DescriptionImages.Add(new DescriptionImageDTO
+                dto.DescriptionImage.Add(new DescriptionImageDTO
                 {
                     DescriptionImageID = newID,
                     DescriptionImageName = file.FileName,
@@ -374,9 +392,9 @@ namespace TicketSalesSystem.Controllers
                     return RedirectToAction("CreateStep1");
                 }
 
-                dto.Sessions ??= new List<SessionDTO>();
-                dto.TicketsAreas ??= new List<TicketsAreaDTO>();
-                dto.DescriptionImages ??= new List<DescriptionImageDTO>();
+                dto.Session ??= new List<SessionDTO>();
+                dto.TicketsArea ??= new List<TicketsAreaDTO>();
+                dto.DescriptionImage ??= new List<DescriptionImageDTO>();
 
                 if (!string.IsNullOrEmpty(dto.PlaceID))
                     ViewData["PlaceName"] = _context.Place.Find(dto.PlaceID)?.PlaceName;
@@ -425,7 +443,7 @@ namespace TicketSalesSystem.Controllers
                     _context.Programme.Add(programme);
                     await _context.SaveChangesAsync();
 
-                    foreach (var sDto in dto.Sessions)
+                    foreach (var sDto in dto.Session)
                     {
                         string sid = await _iIDService.GetNextSessionID(pid);
                         var session = new Session
@@ -440,7 +458,7 @@ namespace TicketSalesSystem.Controllers
                         await _context.SaveChangesAsync();
 
 
-                        foreach (var aDto in dto.TicketsAreas)
+                        foreach (var aDto in dto.TicketsArea)
                         {
                             string taid = await _iIDService.GetNextTicketsAreaID(sid);
                             var ticketsArea = new TicketsArea
@@ -459,9 +477,9 @@ namespace TicketSalesSystem.Controllers
                         }
                     }
 
-                    if (dto.DescriptionImages != null)
+                    if (dto.DescriptionImage != null)
                     {
-                        foreach (var diDto in dto.DescriptionImages)
+                        foreach (var diDto in dto.DescriptionImage)
                         {
 
                             var descriptionImage = new DescriptionImage
@@ -481,7 +499,7 @@ namespace TicketSalesSystem.Controllers
                     // 修正：清除正確的 Session Key
                     HttpContext.Session.Remove("programme");
 
-                    return RedirectToAction("Index", "Home", new { msg = "活動建立成功！" });
+                    return RedirectToAction("Programmes", "Index", new { msg = "活動建立成功！" });
 
                 }
                 catch (Exception ex)
@@ -495,6 +513,18 @@ namespace TicketSalesSystem.Controllers
                 }
             }
 
+        }
+
+
+
+
+
+
+        [HttpGet]
+        public IActionResult GetVenues(string placeId) // 🚩 確保 placeId 名稱與 AJAX 傳送的一致
+        {
+            var venues = _context.Venue.Where(v => v.PlaceID == placeId).ToList();
+            return Json(venues);
         }
 
         [HttpGet]
@@ -527,7 +557,7 @@ namespace TicketSalesSystem.Controllers
 
 
                 // 轉換描述圖片清單 (讓前端顯示縮圖)
-                DescriptionImages = programme.DescriptionImage.Select(di => new DescriptionImageDTO
+                DescriptionImage = programme.DescriptionImage.Select(di => new DescriptionImageDTO
                 {
                     DescriptionImageID = di.DescriptionImageID,
                     DescriptionImageName = di.DescriptionImageName,
@@ -535,7 +565,7 @@ namespace TicketSalesSystem.Controllers
                 }).ToList(),
 
                 // 轉換場次與票區
-                Sessions = programme.Session.Select(s => new SessionDTO
+                Session = programme.Session.Select(s => new VMSessionItem
                 {
                     SessionID = s.SessionID,
                     StartTime = s.StartTime,
@@ -554,11 +584,64 @@ namespace TicketSalesSystem.Controllers
                 }).ToList()
             };
             ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", programme.PlaceID);
-
+            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", programme.ProgrammeStatusID);
+            
             return View(vm);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(string id, VMProgrammeEdit vm)
+        {
+            if (id != vm.ProgrammeID) return NotFound();
+             
+            if (ModelState.IsValid)
+            {
+                // 取得包含所有子層的數據
+                var dbProgramme = await _context.Programme
+                    .Include(p => p.Session).ThenInclude(s => s.TicketsArea).Include(p => p.DescriptionImage)
+                    .FirstOrDefaultAsync(p => p.ProgrammeID == id);
 
+                if (dbProgramme == null) return NotFound();
+
+                try
+                {
+                    // 呼叫 Service 執行複雜同步
+                    await _programmeService.SyncProgrammeDetailsAsync(dbProgramme, vm);
+                    await _programmeService.SyncImagesAsync(dbProgramme, vm);
+                    int rowsAffected = await _context.SaveChangesAsync();
+                    Console.WriteLine($"更新了 {rowsAffected} 筆資料");
+
+                    TempData["SuccessMessage"] = "活動資料已成功更新！";
+                    return RedirectToAction("Index", "Programmes");
+                }
+                catch (DbUpdateException ex)
+                {
+                    var innerError = ex.InnerException?.Message ?? ex.Message;
+                    ModelState.AddModelError("", "資料庫存檔失敗！原因：可能是有訂單關聯而無法刪除場次。原始訊息：" + innerError);
+
+                    // 偵錯用
+                    Console.WriteLine("SQL Error: " + innerError);
+
+                    // 返回 View，vm 帶回前端，使用者才不會看到空白或崩潰
+                    return View(vm); ;
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "存檔失敗: " + ex.Message);
+
+                    var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "無底層訊息";
+
+                    return Content($"存檔失敗！<br/>" +
+                                   $"主錯誤：{ex.Message}<br/>" +
+                                   $"底層原因：{innerMessage}");
+
+                }
+            }
+            // 若失敗，重新載入必要的下拉選單資料 (如 PlaceID) 並回傳 View
+            ViewBag.PlaceID = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
+            return RedirectToAction("Index", "Programmes");
+        }
 
 
 
@@ -708,7 +791,7 @@ namespace TicketSalesSystem.Controllers
 
         //            // 同步票區
         //            var vmAreaIds = sessionVM.TicketsArea.Select(a => a.TicketsAreaID).ToList();                   
-                                        
+
         //            // 1. 刪除票區
         //            var areasToRemove = dbSession.TicketsArea.Where(a => !vmAreaIds.Contains(a.TicketsAreaID)).ToList();
         //            _context.TicketsArea.RemoveRange(areasToRemove);
@@ -777,7 +860,7 @@ namespace TicketSalesSystem.Controllers
         //    {
         //        ModelState.AddModelError("", "存檔失敗: " + ex.Message);
         //        ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
-                
+
         //        var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "無底層訊息";
 
         //        return Content($"存檔失敗！<br/>" +
@@ -849,223 +932,5 @@ namespace TicketSalesSystem.Controllers
 
 
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(string id, VMProgrammeEdit vm)
-        //{
-        //    if (id != vm.ProgrammeID) return NotFound();
-
-        //    // 1. 移除那些在 VM 頂層但不該在那裡的驗證 (因為它們在內層 DTO 裡)
-        //    ModelState.Remove("VenueID");
-        //    ModelState.Remove("TicketsAreaStatusID");
-
-        //    // 2. 移除所有 Sessions 內層 ID 的強制驗證 (因為新增的場次還沒 ID)
-        //    // 這是最暴力的解決方式，但也最有效
-        //    var sessionKeys = ModelState.Keys.Where(k => k.Contains("SessionID") || k.Contains("TicketsAreaID") || k.Contains("TicketsAreaStatusID"));
-        //    foreach (var key in sessionKeys)
-        //    {
-        //        ModelState.Remove(key);
-        //    }
-
-
-
-
-        //    if (!ModelState.IsValid)
-        //    {
-        //        // 重新填入下拉選單並回傳 View
-        //        ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
-        //        return View(vm);
-        //    }
-
-        //    // 1. 抓取資料庫現有資料（包含關聯的 Session 和 TicketsArea）
-        //    var programme = await _context.Programme
-        //        .Include(p => p.Session)
-        //        .ThenInclude(s => s.TicketsArea)
-        //        .FirstOrDefaultAsync(p => p.ProgrammeID == id);
-
-        //    if (programme == null) return NotFound();
-
-        //    ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", programme.PlaceID);
-        //    ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", programme.ProgrammeStatusID);
-
-        //    // 2. 更新活動主檔欄位
-        //    programme.ProgrammeName = vm.ProgrammeName;
-        //    programme.ProgrammeDescription = vm.ProgrammeDescription;
-        //    programme.LimitPerOrder = vm.LimitPerOrder;
-        //    programme.OnShelfTime = vm.OnShelfTime;
-        //    programme.PlaceID = vm.PlaceID;
-        //    programme.ProgrammeStatusID = vm.ProgrammeStatusID;
-
-        //    // 3. 處理圖片更新 (如果有上傳新圖才更新)
-        //    string uniqueSuffix = $"{DateTime.Now:HHmmss}{new Random().Next(10, 99)}";
-        //    if (vm.CoverImageFile != null)
-        //    {
-        //        programme.CoverImage = await _fileService.SaveFileAsync(vm.CoverImageFile, $"C{uniqueSuffix}", "CoverImage");
-        //    }
-
-        //    if (vm.SeatImageFile != null) // 如果使用者有上傳新座位圖
-        //    {
-        //        programme.SeatImage = await _fileService.SaveFileAsync(vm.SeatImageFile, $"S{uniqueSuffix}", "SeatImage");
-        //    }
-
-        //    // 1. 處理刪除舊圖片
-        //    if (vm.DeleteImageIds != null && vm.DeleteImageIds.Any())
-        //    {
-        //        var imagesToDelete = await _context.DescriptionImage
-        //            .Where(di => vm.DeleteImageIds.Contains(di.DescriptionImageID))
-        //            .ToListAsync();
-
-        //        // 這裡建議也要呼叫 _fileService 刪除實體檔案，避免浪費空間
-        //        _context.DescriptionImage.RemoveRange(imagesToDelete);
-        //    }
-
-        //    // 2. 處理新增圖片
-        //    if (vm.DescriptionImageFiles != null && vm.DescriptionImageFiles.Any())
-        //    {
-        //        int count = 1;
-        //        foreach (var file in vm.DescriptionImageFiles)
-        //        {
-
-        //            string newID = Guid.NewGuid().ToString();
-
-        //            var filePath = await _fileService.SaveFileAsync(file, newID, "DescriptionImage");
-
-        //            _context.DescriptionImage.Add(new DescriptionImage
-        //            {
-        //                DescriptionImageID = newID,
-        //                ProgrammeID = programme.ProgrammeID,
-        //                DescriptionImageName = file.FileName,
-        //                ImagePath = filePath
-        //            });
-        //            count++;
-        //        }
-        //    }
-
-
-
-
-        //    // 4. 更新場次與票區 (巢狀處理)
-        //    foreach (var sessionVM in vm.Sessions)
-
-        //    {
-        //        var dbSession = programme.Session.FirstOrDefault(s => s.SessionID == sessionVM.SessionID);
-
-        //        if (dbSession != null)
-        //        {
-        //            // 更新場次時間
-        //            dbSession.StartTime = sessionVM.StartTime;
-        //            dbSession.SaleStartTime = sessionVM.SaleStartTime;
-        //            dbSession.SaleEndTime = sessionVM.SaleEndTime;
-
-        //            // --- 處理票區同步 (重點) ---
-        //            // A. 找出被刪除的 (DB 有但 VM 沒有)
-        //            var vmAreaIds = sessionVM.TicketsArea.Select(a => a.TicketsAreaID).ToList();
-        //            var areasToRemove = dbSession.TicketsArea.Where(a => !vmAreaIds.Contains(a.TicketsAreaID)).ToList();
-        //            _context.TicketsArea.RemoveRange(areasToRemove);
-
-        //            // B. 更新或新增
-        //            foreach (var areaVM in sessionVM.TicketsArea)
-        //            {
-        //                var dbArea = dbSession.TicketsArea.FirstOrDefault(a => a.TicketsAreaID == areaVM.TicketsAreaID);
-        //                if (dbArea != null)
-        //                {
-        //                    // 更新現有票區
-        //                    dbArea.TicketsAreaName = areaVM.TicketsAreaName;
-        //                    dbArea.Price = areaVM.Price;
-        //                    dbArea.RowCount = areaVM.RowCount;
-        //                    dbArea.SeatCount = areaVM.SeatCount;
-        //                    dbArea.VenueID = vm.VenueID; // 或是 areaVM.VenueID
-        //                }
-        //                else
-        //                {
-        //                    string taid = await _iIDService.GetNextTicketsAreaID(dbSession.SessionID);
-        //                    // 新增票區 (沒有 ID 的情況)
-        //                    dbSession.TicketsArea.Add(new TicketsArea
-        //                    {
-        //                        TicketsAreaID = taid, // 或是你的編號邏輯
-        //                        TicketsAreaName = areaVM.TicketsAreaName,
-        //                        Price = areaVM.Price,
-        //                        RowCount = areaVM.RowCount,
-        //                        SeatCount = areaVM.SeatCount,
-        //                        VenueID = vm.VenueID,
-        //                        TicketsAreaStatusID = "A"
-        //                    });
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-
-        //            // 產生新的場次 ID
-        //            string sid = await _iIDService.GetNextSessionID(programme.ProgrammeID);
-
-        //            var newSession = new Session
-        //            {
-        //                SessionID = sid,
-        //                ProgrammeID = programme.ProgrammeID, // 記得關聯活動 ID
-        //                StartTime = sessionVM.StartTime,
-        //                SaleStartTime = sessionVM.SaleStartTime,
-        //                SaleEndTime = sessionVM.SaleEndTime,
-        //                TicketsArea = new List<TicketsArea>()
-        //            };
-
-        //            foreach (var areaVM in sessionVM.TicketsArea)
-        //            {
-        //                // 為新場次下的每個新票區產生 ID
-        //                string newTaid = await _iIDService.GetNextTicketsAreaID(sid);
-        //                newSession.TicketsArea.Add(new TicketsArea
-        //                {
-        //                    TicketsAreaID = newTaid,
-        //                    TicketsAreaName = areaVM.TicketsAreaName,
-        //                    Price = areaVM.Price,
-        //                    RowCount = areaVM.RowCount,
-        //                    SeatCount = areaVM.SeatCount,
-        //                    VenueID = vm.VenueID,
-        //                    TicketsAreaStatusID = "A"
-        //                });
-        //            }
-        //            var vmSessionIds = vm.Sessions.Select(s => s.SessionID).ToList();
-        //            // 1. 找出要刪除的場次 ID
-        //            var sessionsToRemove = programme.Session
-        //                .Where(s => !vmSessionIds.Contains(s.SessionID))
-        //                .ToList();
-        //            if (sessionsToRemove.Any())
-        //            {
-        //                // 先手動刪除票區 (防止級聯刪除衝突)
-        //                foreach (var session in sessionsToRemove)
-        //                {
-        //                    var areasToRemove = _context.TicketsArea.Where(a => a.SessionID == session.SessionID);
-        //                    _context.TicketsArea.RemoveRange(areasToRemove);
-        //                }
-        //                _context.Session.RemoveRange(sessionsToRemove);
-        //            }
-
-        //            // 2. 針對這些要刪除的場次，先處理它們底下的票區
-        //            foreach (var session in sessionsToRemove)
-        //            {
-        //                // 找出該場次目前在資料庫中的所有票區並刪除
-        //                var areasToRemove = _context.TicketsArea.Where(a => a.SessionID == session.SessionID);
-        //                _context.TicketsArea.RemoveRange(areasToRemove);
-        //            }
-
-        //            programme.Session.Add(newSession);
-        //        }
-
-        //        var sessionsToRemove = programme.Session.Where(s => !vmSessionIds.Contains(s.SessionID)).ToList();
-        //        _context.ChangeTracker.Clear();
-        //        _context.Session.RemoveRange(sessionsToRemove);
-        //    }
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch (DbUpdateException ex)
-        //    {
-        //        ModelState.AddModelError("", "存檔失敗，請檢查資料長度或關聯性。");
-        //        ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
-        //        return View(vm);
-        //    }
-        //}
     }
 }

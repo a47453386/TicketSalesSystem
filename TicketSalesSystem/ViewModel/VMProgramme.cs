@@ -18,7 +18,7 @@ namespace TicketSalesSystem.ViewModel
         public string SessionID { get; set; } = null!;
         public DateTime SaleStartTime { get; set; }
         public DateTime SaleEndTime { get; set; }
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
 
 
 

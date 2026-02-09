@@ -25,7 +25,7 @@ namespace TicketSalesSystem.Models
         [Required(ErrorMessage = "必填")]
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd hh:mm:ss}")]
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
+        public DateTime? CreatedTime { get; set; } = DateTime.Now;
 
 
         [Display(Name = "更新時間")]

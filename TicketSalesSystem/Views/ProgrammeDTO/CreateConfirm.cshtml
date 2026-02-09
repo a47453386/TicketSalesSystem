@@ -45,11 +45,11 @@
                             <tr><th>#</th><th>開始時間</th></tr>
                         </thead>
                         <tbody>
-                            @for (int i = 0; i < Model.Sessions.Count; i++)
+                            @for (int i = 0; i < Model.Session.Count; i++)
                             {
                                 <tr>
                                     <td>@(i + 1)</td>
-                                    <td>@Model.Sessions[i].StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@Model.Session[i].StartTime.ToString("yyyy-MM-dd HH:mm")</td>
                                 </tr>
                             }
                         </tbody>
@@ -66,7 +66,7 @@
                             <tr><th>區域</th><th>價格</th><th>總座位</th></tr>
                         </thead>
                         <tbody>
-                            @foreach (var area in Model.TicketsAreas)
+                            @foreach (var area in Model.TicketsArea)
                             {
                                 <tr>
                                     <td>@area.TicketsAreaName</td>
@@ -89,9 +89,9 @@
         <div class="card-body">
             <div class="row g-2">
                 @* 🚩 這裡加上 null 檢查 *@
-                @if (Model.DescriptionImages != null && Model.DescriptionImages.Any())
+                @if (Model.DescriptionImage != null && Model.DescriptionImage.Any())
                 {
-                    @foreach (var img in Model.DescriptionImages)
+                    @foreach (var img in Model.DescriptionImage)
                     {
                         <div class="col-md-2 text-center">
                             @* 檢查 TempUrl 是否有值，否則顯示預設圖 *@

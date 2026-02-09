@@ -4,61 +4,71 @@
     @await Component.InvokeAsync("VCSteps", new { currentStep = 3 })
 
 
-<form asp-action="CreateStep3" id="step3Form">
-    <div class="card mb-4">
-        <div class="card-header">設定區域票價</div>
-        <div class="card-body">
-            <div class="form-group mb-3">
-                <label>使用場地</label>
-                <select asp-for="VenueID" class="form-control" asp-items="ViewBag.VenueID"></select>
-            </div>
-
-            @for (int i = 0; i < Model.Sessions.Count; i++)
-            {
-                <div class="session-container border p-3 mb-4" data-session-index="@i">
-                    
-                    <input type="hidden" asp-for="Sessions[i].SessionID" />
-                    
-
-                    <table class="table table-bordered area-table">
-                        <thead>
-                            <tr>
-                                <th>票區名稱</th>
-                                <th>排數</th>
-                                <th>每排座位</th>
-                                <th>價格</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody class="area-tbody">
-                            @for (int j = 0; j < Model.Sessions[i].TicketsArea.Count; j++)
-                            {
-                                <tr class="area-row">
-                                    <td><input name="Sessions[@i].TicketsAreas[@j].TicketsAreaName" class="form-control" value="@Model.Sessions[i].TicketsArea[j].TicketsAreaName" required /></td>
-                                    <td><input name="Sessions[@i].TicketsAreas[@j].RowCount" type="number" class="form-control" value="@Model.Sessions[i].TicketsArea[j].RowCount" /></td>
-                                    <td><input name="Sessions[@i].TicketsAreas[@j].SeatCount" type="number" class="form-control" value="@Model.Sessions[i].TicketsArea[j].SeatCount" /></td>
-                                    <td><input name="Sessions[@i].TicketsAreas[@j].Price" type="number" class="form-control" value="@Model.Sessions[i].TicketsArea[j].Price" /></td>
-                                    <td><button type="button" class="btn btn-danger btn-sm remove-area">刪除</button></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <button type="button" class="btn btn-secondary btn-sm add-area-btn">增加票區</button>
+    <form asp-action="CreateStep3" id="step3Form">
+        <div class="card mb-4">
+            <div class="card-header">設定區域票價</div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label>使用場地</label>
+                    <select asp-for="VenueID" class="form-control" asp-items="ViewBag.VenueID"></select>
                 </div>
-            }
+
+                @for (int i = 0; i < Model.Session.Count; i++)
+                {
+                    <div class="session-container border p-3 mb-4" data-session-index="@i">
+                        <h5 class="text-primary">場次 @(i + 1)：@Model.Session[i].StartTime.ToString("yyyy/MM/dd HH:mm")</h5>
+
+                        @* 隱藏欄位確保場次 ID 或時間等資訊能傳回 *@
+                        <input type="hidden" asp-for="Session[i].SessionID" />
+                        <input type="hidden" asp-for="Session[i].StartTime" />
+
+                        <table class="table table-bordered area-table">
+                            <thead>
+                                <tr>
+                                    <th>票區名稱</th>
+                                    <th>排數</th>
+                                    <th>每排座位</th>
+                                    <th>價格</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="area-tbody">
+                                @* 🚩 修正：務必確認 ViewModel 裡的屬性名是 TicketsArea 還是 TicketsAreas *@
+                                @if (Model.Session[i].TicketsArea != null)
+                                {
+                                    @for (int j = 0; j < Model.Session[i].TicketsArea.Count; j++)
+                                    {
+                                        <tr class="area-row">
+                                            <td><input name="Session[@i].TicketsArea[@j].TicketsAreaName" class="form-control" value="@Model.Session[i].TicketsArea[j].TicketsAreaName" required /></td>
+                                            <td><input name="Session[@i].TicketsArea[@j].RowCount" type="number" class="form-control" value="@Model.Session[i].TicketsArea[j].RowCount" /></td>
+                                            <td><input name="Session[@i].TicketsArea[@j].SeatCount" type="number" class="form-control" value="@Model.Session[i].TicketsArea[j].SeatCount" /></td>
+                                            <td><input name="Session[@i].TicketsArea[@j].Price" type="number" class="form-control" value="@Model.Session[i].TicketsArea[j].Price" /></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm remove-area">刪除</button></td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-secondary btn-sm add-area-btn">+ 增加票區</button>
+                    </div>
+                }
+            </div>
         </div>
-    </div>
-    <button type="submit" class="btn btn-primary">下一步 (Step 4)</button>
-</form>
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="CreateStep2" class="btn btn-outline-secondary">上一步 (Step 2)</a>
+            <button type="submit" class="btn btn-primary">下一步 (Step 4)</button>
+        </div>
+        <button type="submit" class="btn btn-primary">下一步 (Step 4)</button>
+    </form>
     <div asp-validation-summary="All" class="text-danger"></div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-                $(document).ready(function () {
-            // 新增票區
-            $(".add-area-btn").click(function () {
+        $(document).ready(function () {
+            // 🚩 使用事件委託，確保「動態產生」的按鈕也能被點擊
+            $(document).on("click", ".add-area-btn", function () {
                 const container = $(this).closest(".session-container");
                 const sessionIndex = container.data("session-index");
                 const tbody = container.find(".area-tbody");
@@ -66,10 +76,10 @@
 
                 const newRow = `
                     <tr class="area-row">
-                        <td><input name="Sessions[${sessionIndex}].TicketsAreas[${nextIndex}].TicketsAreaName" class="form-control" required /></td>
-                        <td><input name="Sessions[${sessionIndex}].TicketsAreas[${nextIndex}].RowCount" type="number" class="form-control" value="0" /></td>
-                        <td><input name="Sessions[${sessionIndex}].TicketsAreas[${nextIndex}].SeatCount" type="number" class="form-control" value="0" /></td>
-                        <td><input name="Sessions[${sessionIndex}].TicketsAreas[${nextIndex}].Price" type="number" class="form-control" value="0" /></td>
+                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].TicketsAreaName" class="form-control" required /></td>
+                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].RowCount" type="number" class="form-control" value="0" /></td>
+                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].SeatCount" type="number" class="form-control" value="0" /></td>
+                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].Price" type="number" class="form-control" value="0" /></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-area">刪除</button></td>
                     </tr>`;
                 tbody.append(newRow);
@@ -78,23 +88,24 @@
             // 刪除票區
             $(document).on("click", ".remove-area", function () {
                 const tbody = $(this).closest(".area-tbody");
-                const container = $(this).closest(".session-container");
-                const sessionIndex = container.data("session-index");
-
                 $(this).closest(".area-row").remove();
 
-                // 重新排序該場次下的所有票區 Index (非常重要)
+                // 重新排序該場次下的所有票區 Index
                 tbody.find(".area-row").each(function (idx) {
+                    const sessionContainer = $(this).closest(".session-container");
+                    const sessionIndex = sessionContainer.data("session-index");
+
                     $(this).find("input").each(function () {
                         const name = $(this).attr("name");
                         if (name) {
-                            const newName = name.replace(/TicketsAreas\[\d+\]/, `TicketsAreas[${idx}]`);
+                            // 同時修正 Session 和 TicketsArea 的索引
+                            let newName = name.replace(/Session\[\d+\]/, `Session[${sessionIndex}]`)
+                                              .replace(/TicketsArea\[\d+\]/, `TicketsArea[${idx}]`);
                             $(this).attr("name", newName);
                         }
                     });
                 });
             });
         });
-        
     </script>
 }

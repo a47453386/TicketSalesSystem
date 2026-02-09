@@ -3,6 +3,7 @@ using TicketSalesSystem.Models;
 using TicketSalesSystem.Service;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
+using TicketSalesSystem.Service.IProgramme;
 using TicketSalesSystem.Service.Seats;
 using TicketSalesSystem.Service.Validation.IBookingValidation;
 using TicketSalesSystem.Service.Validation.NewFolder;
@@ -34,7 +35,8 @@ builder.Services.AddScoped<IFileService, FileService>();
 //註冊ID編碼服務
 builder.Services.AddScoped<IIDService, IDService>();
 
-
+//註冊活動編輯服務
+builder.Services.AddScoped<IProgrammeService, ProgrammeEditService>();
 
 
 // 1.註冊 Session 服務 加入 Session 服務

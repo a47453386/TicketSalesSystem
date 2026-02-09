@@ -8,7 +8,7 @@ namespace TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep
     public class VMProgrammeStep2
     {
         [Key]
-        public List<VMSessionItem> Sessions { get; set; } = new List<VMSessionItem>();
+        public List<VMSessionItem> Session { get; set; } = new List<VMSessionItem>();
         
         public string PlaceID { get; set; }
     }

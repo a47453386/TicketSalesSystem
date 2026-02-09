@@ -21,17 +21,17 @@ namespace TicketSalesSystem.ViewModel.EditProgramme
         public string? TicketsAreaStatusID { get; set; } = null!;
 
         // --- 關聯資料 (一次全部載入) ---
-        public List<DescriptionImageDTO> DescriptionImages { get; set; } = new List<DescriptionImageDTO>();
-        public List<SessionDTO> Sessions { get; set; } = new List<SessionDTO>();
-        public List<TicketsAreaDTO> TicketsAreas { get; set; } = new List<TicketsAreaDTO>();
+        public List<DescriptionImageDTO> DescriptionImage { get; set; } = new List<DescriptionImageDTO>();
+        public List<VMSessionItem>? Session { get; set; } = new List<VMSessionItem>();
+        public List<TicketsAreaDTO> TicketsArea { get; set; } = new List<TicketsAreaDTO>();
 
         // --- 新增這兩個屬性，前端 <input type="file"> 才能對應到 ---
         public IFormFile? CoverImageFile { get; set; }
         public IFormFile? SeatImageFile { get; set; }
-
+        
 
         public List<string>? DeleteImageIds { get; set; }// 關鍵：用來接收前端勾選「要刪除」的圖片 ID 清單
         public List<IFormFile>? DescriptionImageFiles { get; set; }
-
+        public List<IFormFile>? NewDescriptionFiles { get; set; } 
     }
 }

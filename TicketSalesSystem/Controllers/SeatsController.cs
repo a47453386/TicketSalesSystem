@@ -28,7 +28,7 @@ namespace TicketSalesSystem.Controllers
         public async Task<IActionResult> IndexTest(string id)
         {
             var session = await _seatService.GetSessionsAsync();
-            ViewBag.Sessions = session;
+            ViewBag.Session = session;
             return View();
         }
 

@@ -13,7 +13,7 @@ namespace TicketSalesSystem.DTOs
 
         public string ProgrammeID { get; set; } = null!;
 
-        public List<VMTicketsAreaItem> TicketsArea { get; set; } = new List<VMTicketsAreaItem>();
+        public List<TicketsAreaDTO> TicketsArea { get; set; } = new List<TicketsAreaDTO>();
 
 
     }

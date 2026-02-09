@@ -4,5 +4,8 @@
     {
         Task<string> SaveFileAsync(IFormFile file, string fileName, string folderName);
         Task<string> SaveFileAsync(IFormFile photo, string folderName);
+
+        // 刪除實體檔案
+        Task DeleteFileAsync(string fileName, string folderName);
     }
 }
