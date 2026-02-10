@@ -23,8 +23,8 @@ create function funGetOrderID ()
 
 
 
-DELETE FROM Tickets WHERE OrderID like '20260204%'; 
+DELETE FROM Tickets WHERE OrderID like '20260210%'; 
 go
 
-DELETE FROM [Order] WHERE OrderID like '20260204%';
+DELETE FROM [Order] WHERE OrderID like '20260210%';
 go
