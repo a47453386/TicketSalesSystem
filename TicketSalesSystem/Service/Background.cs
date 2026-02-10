@@ -52,36 +52,30 @@ namespace TicketSalesSystem.Service
 
             //現在時間往前推10分鐘
             var expirationTime = DateTime.Now.AddMinutes(-10);
-            //取得票券狀態
-            var expiredTickets = await context.Tickets
-                .Where(t => t.TicketsStatusID == "P" && t.CreatedTime <= expirationTime)
-                .ToListAsync();
-
-            //當有找到任何票券
-            if (expiredTickets.Any())
+            try
             {
-                //Context.Tickets.RemoveRange(expiredTickets);
-                //所有訂單編號
-                var AllOrderID = expiredTickets.Select(t => t.OrderID).Where(id => id != null).Distinct().ToList();
+                // 1. 直接更新票券狀態 (直接在資料庫執行，不抓取實體)
+                // 回傳的是受影響的資料筆數 (int)
+                var affectedTickets = await context.Tickets
+                    .Where(t => t.TicketsStatusID == "P" && t.CreatedTime <= expirationTime)
+                    .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "N"));
 
-                //更新票券狀態:釋放座位
-                foreach (var ticket in expiredTickets)
+                // 2. 當有票券被釋放時，同步處理相關的訂單
+                if (affectedTickets > 0)
                 {
-                    ticket.TicketsStatusID = "N";//改為可售                                
+                    // 直接更新訂單狀態：將所有「未付款」且「過期」的訂單設為失效
+                    var affectedOrders = await context.Order
+                        .Where(o => o.OrderStatusID != "N" &&
+                                    o.PaymentStatus == false &&
+                                    o.OrderCreatedTime <= expirationTime)
+                        .ExecuteUpdateAsync(s => s.SetProperty(o => o.OrderStatusID, "N"));
+
+                    _logger.LogInformation($"[背景服務] 已釋放 {affectedTickets} 個座位，並將 {affectedOrders} 筆過期訂單設為失效。");
                 }
-
-                //更新訂單狀態
-                //取得所有未付款訂單
-                var orderUpdtae = await context.Order.Where(o => AllOrderID.Contains(o.OrderID) && o.PaymentStatus == false).ToListAsync();
-
-                //更新訂單狀態:付款逾期失效
-                foreach (var order in orderUpdtae)
-                {
-                    order.OrderStatusID = "N"; //逾期未付款                               
-                }
-
-                await context.SaveChangesAsync();
-                _logger.LogInformation($"[背景服務] 已釋放 {expiredTickets.Count} 個座位，並失效訂單: {string.Join(", ", AllOrderID)}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "執行背景清理時發生錯誤");
             }
         }
 
@@ -104,12 +98,12 @@ namespace TicketSalesSystem.Service
 
             foreach (var p in activeProgrammes)
             {
-                var oldStatus = p.ProgrammeStatusID;
+                var newStatus = p.ProgrammeStatusID;
 
                 //是否所有場次都結束了?(B 或 O 都有可能轉 E)
                 if (p.Session.Any() && p.Session.All(s => s.SaleEndTime <= now))
                 {
-                    oldStatus = "E";
+                    newStatus = "E";
                     _logger.LogInformation($"[狀態更新] 活動 {p.ProgrammeName}：售票結束 [E: 已結束]");
                     continue;
                 }
@@ -117,12 +111,12 @@ namespace TicketSalesSystem.Service
                 // 狀態轉移：只有 B (上架中) 且時間到了，才能轉 O (開賣中)
                 if (p.ProgrammeStatusID == "B" && p.Session.Any(s => s.SaleStartTime <= now && s.SaleEndTime > now))
                 {
-                    oldStatus = "O";
+                    newStatus = "O";
                     _logger.LogInformation($"[狀態更新] {p.ProgrammeName}：開賣中(O)");
                 }
-                if (oldStatus != p.ProgrammeStatusID)
+                if (newStatus != p.ProgrammeStatusID)
                 {
-                    _logger.LogInformation($"[狀態更新] 活動: {p.ProgrammeName} 轉移: {oldStatus} -> {p.ProgrammeStatusID}");
+                    _logger.LogInformation($"[狀態更新] 活動: {p.ProgrammeName} 轉移: {newStatus} -> {p.ProgrammeStatusID}");
                     hasChanged = true;
                 }
                 if (hasChanged)

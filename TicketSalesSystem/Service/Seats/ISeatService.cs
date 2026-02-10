@@ -1,5 +1,6 @@
 ﻿using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
+using TicketSalesSystem.ViewModel.Booking;
 
 namespace TicketSalesSystem.Service.Seats
 {

@@ -1,6 +1,6 @@
 ﻿using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Validation.NewFolder;
-using TicketSalesSystem.ViewModel;
+using TicketSalesSystem.ViewModel.Booking;
 
 namespace TicketSalesSystem.Service.Validation.IBookingValidation
 {
@@ -57,9 +57,14 @@ namespace TicketSalesSystem.Service.Validation.IBookingValidation
 
        public async Task<(bool IsValid, string Message)> ValidateAllAsync(VMBookingRequest request) 
         {
+            //if (string.IsNullOrEmpty(request.TicketsAreaID))
+            //{
+            //    return (false, $"偵錯：後端收到的 TicketsAreaID 是空的！目前的 Request 物件裡只抓到 SessionID: {request.SessionID}");
+            //}
+
             if (!await CheckVenueStatus(request.VenueID)) return (false, "區域暫時不開放");
             if (!await CheckSessionStatus(request.SessionID)) return (false, "場次非售票時間");
-            if (!await CheckTicketsAreaStatus(request.TicektsAreaID)) return (false, "票區不可售");
+            if (!await CheckTicketsAreaStatus(request.TicketsAreaID)) return (false, "票區不可售");
 
             return (true, "");
         }

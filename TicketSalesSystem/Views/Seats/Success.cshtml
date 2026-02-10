@@ -1,0 +1,183 @@
+﻿@model TicketSalesSystem.ViewModel.Booking.VMBookingResponse
+
+@{
+    ViewData["Title"] = "訂單成立";
+    // 直接讀取後端傳來的 ISO 時間字串
+}
+
+<div class="alert alert-warning sticky-top shadow-sm border-0 rounded-0">
+    <div class="container d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-exclamation-circle-fill"></i> 請在時限內完成支付，逾時將自動釋出座位。</span>
+        <div class="d-flex align-items-center">
+            <span class="me-2">剩餘時間：</span>
+            <span id="countdownTimer" class="fw-bold fs-3 text-danger">--:--</span>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="text-center mb-5">
+        <div class="display-1 text-success"><i class="bi bi-check-circle-fill"></i></div>
+        <h1 class="fw-bold">訂單已建立成功！</h1>
+        <p class="text-muted">訂單編號：<span class="text-dark fw-bold">@Model.OrderID</span></p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">訂單內容</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small">活動名稱</label>
+                        <p class="fs-5 fw-bold">@Model.ProgrammeName</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">場次時間</label>
+                        <p>@Model.StartTime</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">座位資訊</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var seatInfo in Model.Seats)
+                            {
+                                <span class="badge bg-light text-dark border p-2">
+                                    @seatInfo
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-end">
+                        <span class="fs-5">應付金額</span>
+                        <span class="fs-2 fw-bold text-danger">$@Model.FinalAmount.ToString("N0")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold">選擇支付方式</h5>
+                </div>
+                <div class="card-body">
+                    <div class="payment-options">
+                        @if (ViewData["PaymentMethods"] != null)
+                        {
+                            var first = true;
+                            foreach (var method in (List<TicketSalesSystem.Models.PaymentMethod>)ViewData["PaymentMethods"])
+                            {
+                                <div class="form-check payment-item p-3 border rounded mb-3">
+                                    <input class="form-check-input" type="radio" name="payType"
+                                           id="pay_@method.PaymentMethodID"
+                                           value="@method.PaymentMethodID" @(first ? "checked" : "")>
+                                    <label class="form-check-label d-flex align-items-center" for="pay_@method.PaymentMethodID">
+                                        <i class="bi bi-wallet2 fs-3 me-3"></i>
+                                        <span>@method.PaymentMethodName</span>
+                                    </label>
+                                </div>
+                                first = false;
+                            }
+                        }
+                    </div>
+                    <button type="button" onclick="confirmPayment()" class="btn btn-primary btn-lg w-100 py-3 mt-4 shadow">
+                        確認付款並完成訂購
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 1. 倒數計時邏輯 (立即執行)
+        (function () {
+            const timerDisplay = document.getElementById("countdownTimer");
+            const expireTimeStr = "@Model.ExpireTimeText";
+            const expireTime = new Date(expireTimeStr).getTime();
+
+            if (isNaN(expireTime)) {
+                console.error("Invalid expire time format:", expireTimeStr);
+                return;
+            }
+
+            const timerFunc = setInterval(function () {
+                const now = new Date().getTime();
+                const distance = expireTime - now;
+
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                if (timerDisplay) {
+                    timerDisplay.innerHTML =
+                        (minutes < 10 ? "0" : "") + minutes + ":" +
+                        (seconds < 10 ? "0" : "") + seconds;
+                }
+
+                if (distance < 0) {
+                    clearInterval(timerFunc);
+                    if (timerDisplay) timerDisplay.innerHTML = "00:00";
+                    alert("付款逾時，訂單已自動失效。");
+                    window.location.href = "/Home/Index";
+                }
+            }, 1000);
+        })();
+
+        // 2. 確認付款邏輯 (掛載到全域 window)
+        window.confirmPayment = async function() {
+            const orderId = "@Model.OrderID";
+            const selectedPayType = document.querySelector('input[name="payType"]:checked');
+
+            if (!selectedPayType) {
+                alert("請選擇一種支付方式");
+                return;
+            }
+
+            const payType = selectedPayType.value;
+            console.log("選中的支付方式是:", payType);
+
+            // 抓取觸發事件的按鈕
+            const btn = document.querySelector('button[onclick="confirmPayment()"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.dataset.originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 處理中...';
+            }
+
+            try {
+                const res = await fetch('/Seats/CompletePayment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        OrderID: orderId,
+                        PaymentMethodID: payType
+                    })
+                });
+                console.log(res);
+                const result = await res.json();
+
+                if (result.success) {
+                    alert("✅ 付款成功！");
+                    window.location.href = "/Home/Index";
+                } else {
+                    alert("❌ 付款失敗：" + result.message);
+                    resetBtn(btn);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("⚠️ 系統連線異常，請稍後再試。");
+                resetBtn(btn);
+            }
+        };
+
+        function resetBtn(btn) {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.originalHtml || "確認付款並完成訂購";
+            }
+        }
+    </script>
+}

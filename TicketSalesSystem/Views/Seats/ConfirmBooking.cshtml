@@ -22,8 +22,17 @@
 </div>
 
 <style>
-    .btn-seat { width: 45px; height: 45px; font-size: 10px; }
-    .btn-seat.selected { background-color: #ffc107 !important; color: black !important; border-color: #ffc107 !important; }
+    .btn-seat {
+        width: 45px;
+        height: 45px;
+        font-size: 10px;
+    }
+
+        .btn-seat.selected {
+            background-color: #ffc107 !important;
+            color: black !important;
+            border-color: #ffc107 !important;
+        }
 </style>
 
 @section Scripts {
@@ -33,6 +42,7 @@
 
     <script>
         let selectedSeats = [];
+        let TotalAmount=0;
 
         // 1. 自動配位功能
         document.getElementById('autoBtn').onclick = async function() {
@@ -58,34 +68,38 @@
 
         // 2. 送出訂單並產出明細
         document.getElementById('submitBtn').onclick = async function() {
-            const data = {
+            const bookingData = {
                 SessionID: "@ViewBag.SessionID",
-                AreaID: "@ViewBag.AreaID",
-                MemberID: "M001", // ⚠️ 重要：請確認資料庫 Member 表是否有 M001
-                PaymentMethodID: "P01", // ⚠️ 重要：請確認資料庫 PaymentMethod 表是否有 P01
-                Seats: selectedSeats
+                AreaID: "@ViewBag.TicketsAreaID",
+                MemberID: "83542560-1941-48b9-af77-00fc42536fed", // ⚠️ 重要：請確認資料庫 Member 表是否有 M001
+                PaymentMethodID: "C", // ⚠️ 重要：請確認資料庫 PaymentMethod 表是否有 P01
+                Seats: selectedSeats,
+                TotalAmount=TotalAmount
             };
 
+                try {
+            // 2. 發送請求
             const response = await fetch('/Seats/ConfirmBooking', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify(bookingData) // 確保這裡變數名稱對了
             });
 
+            // 3. 解析 JSON
             const result = await response.json();
 
+            // 4. 根據結果執行跳轉或提示
             if (result.success) {
-                document.getElementById('receipt').style.display = 'block';
-                let itemsHtml = result.details.items.map(i => `<li>${i.seat} - $${i.price}</li>`).join('');
-                document.getElementById('receiptContent').innerHTML = `
-                    <p>訂單編號：<b>${result.orderID}</b></p>
-                    <p>區域：${result.details.areaName}</p>
-                    <ul>${itemsHtml}</ul>
-                    <h4 class="text-danger">總金額：$${result.details.total}</h4>
-                `;
+                // ✅ 既然要跳轉，就直接導向 Success Action
+                // 注意：result.orderID 的大小寫需與後端 VMBookingResponse 定義一致
+                window.location.href = '/Seats/Success/' + result.orderID;
             } else {
-                alert(result.message);
+                alert("訂購失敗：" + result.message);
             }
+        } catch (error) {
+            console.error("發生錯誤:", error);
+            alert("系統發生異常，請開啟 F12 檢查 Console");
+        }
         };
     </script>
 }

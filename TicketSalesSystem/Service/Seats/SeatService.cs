@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
+using TicketSalesSystem.ViewModel.Booking;
 
 namespace TicketSalesSystem.Service.Seats
 {
@@ -126,14 +127,15 @@ namespace TicketSalesSystem.Service.Seats
         }
 
         //保留時間
-        private  VMBookingResponse TimeResponse(List<string> seatIDs, decimal totalAmount)
+        private  VMBookingResponse TimeResponse(List<string> seatIDs, decimal totalAmount, string orderID)
         {
             int holdMinutes = 10;
 
             var response = new VMBookingResponse
             {
                 Success = true,
-                Message = "訂單建立成功",               
+                Message = "訂單建立成功",
+                OrderID= orderID,
                 Seats = seatIDs.Select(s => s.Replace("-", "排") + "號").ToList(),
                 FinalAmount = totalAmount,
                 RemainingSeconds = holdMinutes * 60,
@@ -151,13 +153,13 @@ namespace TicketSalesSystem.Service.Seats
         public async Task<VMBookingResponse> CreateOrderAndTicketsAsync(VMBookingRequest request, string memberID)
         {
             //驗證區域狀態
-            var area = await _context.TicketsArea.FindAsync(request.TicektsAreaID);
+            var area = await _context.TicketsArea.FindAsync(request.TicketsAreaID);
             if (area == null || area.TicketsAreaStatusID != "A")
             {
                 return new VMBookingResponse
                 {
                     Success = false,
-                    Message = "選擇的票區不可售"
+                    Message = $"票區狀態錯誤！資料庫內是 '{area.TicketsAreaStatusID}'，但程式要求必須是 'A'。"
                 };
             }
 
@@ -210,7 +212,7 @@ namespace TicketSalesSystem.Service.Seats
                             TicketsID = Guid.NewGuid().ToString(),
                             OrderID = newOrderID,
                             SessionID = request.SessionID,
-                            TicketsAreaID = request.TicektsAreaID,
+                            TicketsAreaID = request.TicketsAreaID,
                             RowIndex = int.Parse(parts[0]),
                             SeatIndex = int.Parse(parts[1]),
                             TicketsStatusID = "P", // 注意：SQL 長度要夠
@@ -224,10 +226,10 @@ namespace TicketSalesSystem.Service.Seats
 
 
                     //更新票區狀態
-                    await SyncAreaStatusAaync(request.TicektsAreaID);
+                    await SyncAreaStatusAaync(request.TicketsAreaID);
 
                     //保留時間
-                    return TimeResponse(bestSeatIDs, Amount);
+                    return TimeResponse(bestSeatIDs, Amount,newOrderID);
 
 
                 }

@@ -1,4 +1,4 @@
-﻿using TicketSalesSystem.ViewModel;
+﻿using TicketSalesSystem.ViewModel.Booking;
 
 namespace TicketSalesSystem.Service.Validation.NewFolder
 {

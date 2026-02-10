@@ -1,0 +1,207 @@
+﻿@model TicketSalesSystem.Models.Session
+
+@{
+    ViewData["Title"] = "立即購票 - " + Model.Programme.ProgrammeName;
+}
+
+<div id="timerContainer" style="display:none;" class="alert alert-warning sticky-top mt-3 shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history"></i> 請於時限內完成付款，逾時位置將被釋出。</span>
+        <span id="countdownTimer" class="fw-bold fs-4 text-danger">10:00</span>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body bg-dark text-white rounded">
+            <h1 class="h3">@Model.Programme.ProgrammeName</h1>
+            <p class="mb-0 text-info">
+                <i class="bi bi-calendar-event"></i> @Model.StartTime.ToString("yyyy/MM/dd HH:mm")
+                | <i class="bi bi-geo-alt"></i> @Model.Programme.Place?.PlaceName
+            </p>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <div class="alert alert-light border">
+            <strong>當前選擇場次：</strong> @Model.StartTime.ToString("yyyy/MM/dd HH:mm")
+            <input type="hidden" id="currentSessionId" value="@Model.SessionID" />
+        </div>
+    </div>
+
+    <div id="areaSection">
+        <h2 class="h4 mb-3 border-start border-4 border-primary ps-2">2. 選擇票區</h2>
+        <div class="row" id="areaList">
+            @foreach (var area in Model.TicketsArea)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card area-card h-100 border-primary shadow-sm" style="cursor:pointer"
+                         onclick="selectArea('@area.TicketsAreaID', '@area.TicketsAreaName', @area.Price, '@area.VenueID')">
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold">@area.TicketsAreaName</h5>
+                            <p class="text-danger fs-4 mb-1">$@area.Price.ToString("N0")</p>
+                            <small class="text-muted">剩餘座位：@area.SeatCount</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div id="bookingSection" class="mt-5 mb-5" style="display:none;">
+        <div class="card border-primary shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">3. 確認選擇並自動配位</h4>
+            </div>
+            <div class="card-body">
+                <p id="selectedInfo" class="fs-5"></p>
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <label class="form-label fw-bold">購買張數 (上限 4 張)：</label>
+                        <select id="ticketCount" class="form-select form-select-lg">
+                            <option value="1">1 張</option>
+                            <option value="2">2 張</option>
+                            <option value="3">3 張</option>
+                            <option value="4">4 張</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <button id="autoAndConfirmBtn" class="btn btn-danger btn-lg w-100 mt-4 py-3 shadow">
+                            <i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 將 ID 直接從 Model 讀取到 JS 變數
+        let currentSession = "@Model.SessionID";
+        let currentArea = "";
+        let currentVenue = "";
+        let currentPrice = 0;
+
+        // 2. 選擇票區
+        function selectArea(id, name, price, venueId) {
+            currentArea = id;
+            currentVenue = venueId;
+            currentPrice = price;
+
+            // 樣式切換
+            document.querySelectorAll('.area-card').forEach(c => c.classList.remove('bg-primary', 'text-white'));
+            event.currentTarget.classList.add('bg-primary', 'text-white');
+
+            document.getElementById('selectedInfo').innerHTML =
+                `您選擇了：<span class="badge bg-secondary">${name}</span>
+                 單價：<span class="text-danger fw-bold">$${price.toLocaleString()}</span>`;
+            document.getElementById('bookingSection').style.display = 'block';
+
+            // 自動滾動到確認區
+            document.getElementById('bookingSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 3. 一鍵配位並購票 (簡化版：僅處理跳轉)
+        document.getElementById('autoAndConfirmBtn').onclick = async function() {
+            const ticketCountElement = document.getElementById('ticketCount');
+            const countValue = parseInt(ticketCountElement.value);
+
+            if (!currentArea) {
+                alert("請先選擇票區！");
+                return;
+            }
+
+            const bookingData = {
+                VenueID: currentVenue,
+                SessionID: currentSession,
+                TicketsAreaID: currentArea,
+                PaymentMethodID: "A",
+                Count: countValue,
+                TotalAmount: currentPrice * countValue,
+                Seat: []
+            };
+
+            this.disabled = true;
+            this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> 處理中...`;
+
+            try {
+                const res = await fetch('/Seats/ConfirmBooking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    // ✅ 核心改動：直接跳轉，不彈 alert，不啟動計時器
+                    // 因為 Success 頁面會處理這些資訊
+                    window.location.href = '/Seats/Success/' + result.orderID;
+                } else {
+                    alert("❌ 訂購失敗：" + result.message);
+                    this.disabled = false;
+                    this.innerHTML = `<i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票`;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("⚠️ 系統異常，請稍後再試。");
+                this.disabled = false;
+                this.innerHTML = `<i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票`;
+            }
+        };
+
+        //     // 顯示 Loading 狀態
+        //     this.disabled = true;
+        //     this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> 處理中...`;
+
+        //     try {
+        //         const res = await fetch('/Seats/ConfirmBooking', {
+        //             method: 'POST',
+        //             headers: { 'Content-Type': 'application/json' },
+        //             body: JSON.stringify(bookingData)
+        //         });
+
+        //         const result = await res.json();
+
+        //         if (result.success) {
+        //             const seatDisplay = result.seats.map(s => s.replace('-', '排') + '號').join(', ');
+
+        //             alert(`🎉 訂購成功！\n\n📌 訂單編號：${result.orderID}\n💺 分配座位：${seatDisplay}\n💰 總金額：$${result.finalAmount.toLocaleString()}`);
+
+        //             // 啟動倒數
+        //             const timeDiv = document.getElementById('timerContainer');
+        //             const display = document.querySelector('#countdownTimer');
+        //             if(timeDiv && display) {
+        //                 timeDiv.style.display = 'block';
+        //                 startTimer(600, display); // 預設 10 分鐘
+        //             }
+        //         } else {
+        //             alert("❌ 訂購失敗：" + result.message);
+        //         }
+        //     } catch (error) {
+        //         alert("⚠️ 系統異常，請稍後再試。");
+        //     } finally {
+        //         this.disabled = false;
+        //         this.innerHTML = `<i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票`;
+        //     }
+        // };
+
+        // // 倒數計時器邏輯 (保持你原本的 startTimer)
+        // function startTimer(duration, display) {
+        //     let timer = duration;
+        //     if (window.bookingInterval) clearInterval(window.bookingInterval);
+        //     window.bookingInterval = setInterval(function () {
+        //         let minutes = Math.floor(timer / 60);
+        //         let seconds = timer % 60;
+        //         display.textContent = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+        //         if (--timer < 0) {
+        //             clearInterval(window.bookingInterval);
+        //             alert("⏰ 時間到！訂單已失效。");
+        //             location.reload();
+        //         }
+        //     }, 1000);
+        // }
+    </script>
+}
