@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.ViewModel.Booking;
+using TicketSalesSystem.ViewModel.Order;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -25,57 +27,87 @@ namespace TicketSalesSystem.Controllers
             return View(await ticketsContext.ToListAsync());
         }
 
-        // GET: Orders/Details/5
-        public async Task<IActionResult> Details(string id)
+        
+        public async Task<IActionResult> UserIndex()
         {
-            if (id == null)
+            string currentMemberID = "83542560-1941-48b9-af77-00fc42536fed";
+
+            var time=(int)Math.Max(0,(DateTime.Now.AddMinutes(10)-DateTime.Now).TotalSeconds);
+            
+            var odrders= await _context.Order
+                .AsNoTracking()
+                .Include(o=>o.OrderStatus)                
+                .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(s => s.Place)
+                .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
+                .Where(o => o.MemberID == currentMemberID)
+                .OrderByDescending(o => o.OrderCreatedTime)
+                .Select(o=>new VMBookingResponse
+                {
+                    OrderID = o.OrderID,
+                    ProgrammeName = o.Session.Programme.ProgrammeName,
+                    StartTime = o.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                    PlaceName = o.Session.Programme.Place.PlaceName,
+                    FinalAmount= o.Tickets.Sum(t => t.TicketsArea.Price),
+                    OrderStatusName = o.OrderStatus.OrderStatusName,
+                    Seats = o.Tickets.Select(t => $"{t.RowIndex}排{t.SeatIndex}號").ToList(),
+                    //只有在狀態是待付款 (P) 時才需要計算，已完成 (Y) 的話就給 0
+                    RemainingSeconds = o.OrderStatusID=="P"? time:0,
+                    Success=o.OrderStatusID =="Y",
+                    Message=o.OrderStatusID=="Y"?"付款完成": o.OrderStatusID == "N" ? "訂單失效" : "待付款",
+                    
+                })
+                .ToArrayAsync();
+
+
+            if (odrders == null)
             {
                 return NotFound();
             }
 
-            var order = await _context.Order
-                .Include(o => o.Member)
+            return View(odrders);
+        }
+        public async Task<IActionResult> UserDetail(string id)
+        {
+            if (id==null)return BadRequest();
+            var order=await _context.Order
+                .AsNoTracking()
                 .Include(o => o.OrderStatus)
-                .Include(o => o.PaymentMethod)
-                .Include(o => o.Session)
-                .FirstOrDefaultAsync(m => m.OrderID == id);
-            if (order == null)
+                .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(s => s.Place)
+                .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
+                .Include(o => o.Tickets).ThenInclude(t => t.Session)
+                .Where(o => o.OrderID == id)
+                .FirstOrDefaultAsync();
+            if (order == null) return NotFound();
+
+            var isPrintable = DateTime.Now >= order.Session.StartTime.AddDays(0);
+
+            var vm = new VMUserOrderDetail
             {
-                return NotFound();
-            }
+                OrderID = order.OrderID,
+                ProgrammeName = order.Session.Programme.ProgrammeName,
+                StartTime = order.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                PlaceName = order.Session.Programme.Place.PlaceName,
+                FinalAmount = order.Tickets.Sum(t => t.TicketsArea.Price),
+                OrderStatusName = order.OrderStatus.OrderStatusName,
+                Seats = order.Tickets.Select(t => $"{t.RowIndex}排{t.SeatIndex}號").ToList(),
+                IsPrintable = isPrintable,
+                Tickets = order.Tickets.Select(t => new VMUserTicketItem
+                {
+                    OrderID = order.OrderID,
+                    ProgrammeName= order.Session.Programme.ProgrammeName,
+                    StartTime = order.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                    PlaceName = order.Session.Programme.Place.PlaceName,
+                    FinalAmount = t.TicketsArea.Price,
+                    TicketsID = t.TicketsID,
+                    TicketsAreaName= t.TicketsArea.TicketsAreaName,
+                    Seat= $"{t.RowIndex}排{t.SeatIndex}號",
+                    CheckInCode= isPrintable? t.CheckInCode: null
+                }).ToList()
+            };
 
-            return View(order);
+            return View(vm);
         }
 
-        // GET: Orders/Create
-        public IActionResult Create()
-        {
-            ViewData["MemberID"] = new SelectList(_context.Member, "MemberID", "MemberID");
-            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusID");
-            ViewData["PaymentMethodID"] = new SelectList(_context.PaymentMethod, "PaymentMethodID", "PaymentMethodID");
-            ViewData["SessionID"] = new SelectList(_context.Session, "SessionID", "SessionID");
-            return View();
-        }
-
-        // POST: Orders/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OrderID,OrderCreatedTime,PaymentTradeNO,PaymentDescription,PaymentStatus,PaidTime,MemberID,PaymentMethodID,OrderStatusID,SessionID")] Order order)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(order);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["MemberID"] = new SelectList(_context.Member, "MemberID", "MemberID", order.MemberID);
-            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusID", order.OrderStatusID);
-            ViewData["PaymentMethodID"] = new SelectList(_context.PaymentMethod, "PaymentMethodID", "PaymentMethodID", order.PaymentMethodID);
-            ViewData["SessionID"] = new SelectList(_context.Session, "SessionID", "SessionID", order.SessionID);
-            return View(order);
-        }
 
         // GET: Orders/Edit/5
         public async Task<IActionResult> Edit(string id)
@@ -136,42 +168,6 @@ namespace TicketSalesSystem.Controllers
             return View(order);
         }
 
-        // GET: Orders/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var order = await _context.Order
-                .Include(o => o.Member)
-                .Include(o => o.OrderStatus)
-                .Include(o => o.PaymentMethod)
-                .Include(o => o.Session)
-                .FirstOrDefaultAsync(m => m.OrderID == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
-        }
-
-        // POST: Orders/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            var order = await _context.Order.FindAsync(id);
-            if (order != null)
-            {
-                _context.Order.Remove(order);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
         private bool OrderExists(string id)
         {

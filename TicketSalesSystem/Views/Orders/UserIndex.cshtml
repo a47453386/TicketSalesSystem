@@ -1,0 +1,28 @@
+﻿@using TicketSalesSystem.ViewModel.Booking
+@model IEnumerable<VMBookingResponse>
+
+@foreach (var order in Model)
+{
+    <div class="order-card @(order.Success ? "border-success" : "border-warning")">
+        <h4>@order.ProgrammeName</h4>
+        <p>訂單編號：@order.OrderID</p>
+        <p>地點：@order.PlaceName</p>
+        <p>座位：@string.Join(", ", order.Seats)</p>
+        <p>總金額：@order.FinalAmount.ToString("C0")</p>
+
+        @if (order.RemainingSeconds > 0)
+        {
+            <div class="timer" data-seconds="@order.RemainingSeconds">
+                剩餘支付時間：<span class="countdown">@order.RemainingSeconds</span>
+            </div>
+            <a href="/Seats/Payment/@order.OrderID" class="btn btn-primary">前往付款</a>
+        }
+        else
+        {
+            <span class="badge">@order.Message</span>
+        }
+        <a asp-action="UserDetail" asp-route-id="@order.OrderID" class="btn btn-info">詳細資料</a>
+    </div>
+
+    
+}

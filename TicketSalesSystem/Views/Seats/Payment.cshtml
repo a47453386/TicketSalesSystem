@@ -148,7 +148,7 @@
             }
 
             try {
-                const res = await fetch('/Seats/CompletePayment', {
+                const res = await fetch('/Seats/Payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -161,7 +161,7 @@
 
                 if (result.success) {
                     alert("✅ 付款成功！");
-                    window.location.href = "/Home/Index";
+                    window.location.href = "/Orders/UserIndex";
                 } else {
                     alert("❌ 付款失敗：" + result.message);
                     resetBtn(btn);

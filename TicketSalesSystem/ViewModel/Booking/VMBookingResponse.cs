@@ -16,7 +16,7 @@ namespace TicketSalesSystem.ViewModel.Booking
 
             public string ExpireTimeText { get; set; } = "";//倒數計時顯示器
 
-
+            public string OrderStatusName { get; set; }
         
     }
 }

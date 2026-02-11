@@ -30,11 +30,13 @@ namespace TicketSalesSystem.Models
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}")]
         public DateTime? ScannedTime { get; set; }//核銷進場時間
 
-       
+        [Display(Name = "核銷碼")]
+        [StringLength(12)]
+        public string? CheckInCode { get; set; }//核銷碼
 
 
         //FK             
-        
+
         public string TicketsStatusID { get; set; } = null!;   
         public string OrderID { get; set; } = null!;
         public string SessionID { get; set; } = null!;

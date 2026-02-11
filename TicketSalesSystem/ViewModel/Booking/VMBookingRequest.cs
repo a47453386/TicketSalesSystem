@@ -16,6 +16,6 @@
         public decimal TotalAmount { get; set; }
         
 
-        public List<string> Seats { get; set; } 
+        public List<string> Seats { get; set; } = new List<string>();
     }
 }

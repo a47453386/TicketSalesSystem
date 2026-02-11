@@ -12,8 +12,7 @@
 
     <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editForm">
         @Html.AntiForgeryToken()
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input type="hidden" asp-for="ProgrammeID" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>        
         <input type="hidden" asp-for="ProgrammeID" />
         <input type="hidden" asp-for="CoverImage" />
         <input type="hidden" asp-for="SeatImage" />
@@ -163,6 +162,7 @@
                                                             <option value="@area.VenueID" selected>@area.VenueID</option>
                                                         }
                                                         <span class="text-danger small" data-valmsg-for="Session[@i].TicketsArea[@j].VenueID"></span>
+                                                    </select>
                                                 </td>
                                                 <td>
                                                     <input name="Session[@i].TicketsArea[@j].TicketsAreaName" value="@area.TicketsAreaName" class="form-control form-control-sm" />

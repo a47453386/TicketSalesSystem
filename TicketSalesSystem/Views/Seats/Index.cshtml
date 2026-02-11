@@ -120,7 +120,7 @@
                 PaymentMethodID: "A",
                 Count: countValue,
                 TotalAmount: currentPrice * countValue,
-                Seat: []
+                Seats: []
             };
 
             this.disabled = true;
@@ -138,7 +138,7 @@
                 if (result.success) {
                     // ✅ 核心改動：直接跳轉，不彈 alert，不啟動計時器
                     // 因為 Success 頁面會處理這些資訊
-                    window.location.href = '/Seats/Success/' + result.orderID;
+                    window.location.href = '/Seats/Payment/' + result.orderID;
                 } else {
                     alert("❌ 訂購失敗：" + result.message);
                     this.disabled = false;

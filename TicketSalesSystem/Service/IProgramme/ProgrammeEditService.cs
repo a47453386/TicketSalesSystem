@@ -1,6 +1,8 @@
-﻿using TicketSalesSystem.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
+using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.CreateProgramme.Item;
 using TicketSalesSystem.ViewModel.EditProgramme;
 
@@ -24,22 +26,23 @@ namespace TicketSalesSystem.Service.IProgramme
             // --- 階段 1: 更新主表基本資料 ---
             var oldCover = dbProgramme.CoverImage;
             var oldSeat = dbProgramme.SeatImage;
+
+            // 🚩 注意：SetValues 會覆蓋所有同名屬性
             _context.Entry(dbProgramme).CurrentValues.SetValues(vm);
 
-            // 強制還原圖片路徑（除非 vm 裡面有值）
             if (string.IsNullOrEmpty(vm.CoverImage)) dbProgramme.CoverImage = oldCover;
             if (string.IsNullOrEmpty(vm.SeatImage)) dbProgramme.SeatImage = oldSeat;
 
             // --- 階段 2: 處理場次 (Sessions) 的刪除 ---
-            var vmSessionIds = vm.Session.Where(s => !string.IsNullOrEmpty(s.SessionID)).Select(s => s.SessionID).ToList();
-            var sessionsToRemove = dbProgramme.Session.Where(s => !vmSessionIds.Contains(s.SessionID)).ToList();
+            //var vmSessionIds = vm.Session.Where(s => !string.IsNullOrEmpty(s.SessionID)).Select(s => s.SessionID).ToList();
+            //var sessionsToRemove = dbProgramme.Session.Where(s => !vmSessionIds.Contains(s.SessionID)).ToList();
 
-            foreach (var s in sessionsToRemove)
-            {
-                // 必須先刪除子層票區，避免 FK 衝突
-                _context.TicketsArea.RemoveRange(s.TicketsArea);
-                _context.Session.Remove(s);
-            }
+            //foreach (var s in sessionsToRemove)
+            //{
+            //    // 刪除該場次下所有票區
+            //    _context.TicketsArea.RemoveRange(s.TicketsArea);
+            //    _context.Session.Remove(s);
+            //}
 
             // --- 階段 3: 處理場次的更新與新增 ---
             foreach (var sessionVM in vm.Session)
@@ -48,8 +51,11 @@ namespace TicketSalesSystem.Service.IProgramme
 
                 if (dbSession != null)
                 {
-                    // 更新現有場次
-                    _context.Entry(dbSession).CurrentValues.SetValues(sessionVM);
+                    // ✅ 改用手動更新場次屬性，避免 SetValues 觸發導覽屬性的自動追蹤衝突
+                    dbSession.StartTime = sessionVM.StartTime;
+                    dbSession.SaleStartTime = sessionVM.SaleStartTime;
+                    dbSession.SaleEndTime = sessionVM.SaleEndTime;
+
                     // 遞迴處理票區同步
                     await SyncTicketsAreasAsync(dbSession, sessionVM, vm.VenueID);
                 }
@@ -63,28 +69,61 @@ namespace TicketSalesSystem.Service.IProgramme
 
         private async Task SyncTicketsAreasAsync(Session dbSession, VMSessionItem sessionVM, string defaultVenueID)
         {
-            var vmAreaIds = sessionVM.TicketsArea.Where(a => !string.IsNullOrEmpty(a.TicketsAreaID)).Select(a => a.TicketsAreaID).ToList();
+            // 1. 取得前端傳回來的有效 ID
+            var vmAreaIds = sessionVM.TicketsArea
+                .Where(a => !string.IsNullOrEmpty(a.TicketsAreaID))
+                .Select(a => a.TicketsAreaID)
+                .ToList();
 
-            // 刪除前端已移除的票區
-            var areasToRemove = dbSession.TicketsArea.Where(a => !vmAreaIds.Contains(a.TicketsAreaID)).ToList();
-            _context.TicketsArea.RemoveRange(areasToRemove);
+            // 2. 刪除已移除的票區
+            var areasToRemove = dbSession.TicketsArea
+                .Where(a => !vmAreaIds.Contains(a.TicketsAreaID))
+                .ToList();
 
-            // 更新或新增票區
+            if (areasToRemove.Any())
+            {
+                _context.TicketsArea.RemoveRange(areasToRemove);
+            }
+
+            // 3. 更新或新增票區
             foreach (var areaVM in sessionVM.TicketsArea)
             {
-                var dbArea = dbSession.TicketsArea.FirstOrDefault(a => a.TicketsAreaID == areaVM.TicketsAreaID);
-                if (dbArea != null)
+                if (!string.IsNullOrEmpty(areaVM.TicketsAreaID))
                 {
-                    _context.Entry(dbArea).CurrentValues.SetValues(areaVM);
-                    dbArea.VenueID = areaVM.VenueID ?? defaultVenueID;
+                    // 🚩 這裡使用 Local 查找，避免去 Database 觸發新的追蹤
+                    var dbArea = dbSession.TicketsArea
+                        .FirstOrDefault(a => a.TicketsAreaID == areaVM.TicketsAreaID);
+
+                    if (dbArea != null)
+                    {
+                        // 手動更新欄位，不要用 SetValues
+                        dbArea.TicketsAreaName = areaVM.TicketsAreaName;
+                        dbArea.Price = areaVM.Price;
+                        dbArea.RowCount = areaVM.RowCount;
+                        dbArea.SeatCount = areaVM.SeatCount;
+                        dbArea.VenueID = areaVM.VenueID ?? defaultVenueID;
+                    }
+                    else
+                    {
+                        // 🚩 萬一 dbSession 沒 Include 到，但 Context 裡卻有
+                        // 嘗試從 Context.Local 找，並強制讓它跟 dbSession 關聯
+                        var orphanArea = _context.TicketsArea.Local
+                            .FirstOrDefault(a => a.TicketsAreaID == areaVM.TicketsAreaID);
+
+                        if (orphanArea != null)
+                        {
+                            _context.Entry(orphanArea).State = EntityState.Detached; // 強制斷開衝突者
+                        }
+                    }
                 }
                 else
                 {
-                    // 新增票區
+                    // ✅ 新增
                     string taid = await _iIDService.GetNextTicketsAreaID(dbSession.SessionID);
                     dbSession.TicketsArea.Add(new TicketsArea
                     {
                         TicketsAreaID = taid,
+                        SessionID = dbSession.SessionID,
                         TicketsAreaName = areaVM.TicketsAreaName,
                         Price = areaVM.Price,
                         RowCount = areaVM.RowCount,

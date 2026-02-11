@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.Orders;
 using TicketSalesSystem.Service.Seats;
 using TicketSalesSystem.Service.Validation.NewFolder;
 using TicketSalesSystem.ViewModel;
@@ -17,12 +18,14 @@ namespace TicketSalesSystem.Controllers
         private readonly ISeatService _seatService;
         private readonly IBookingValidationService _bookingValidation;
         private readonly TicketsContext _context;
+        private readonly IOrderService _orderService;
 
-        public SeatsController(ISeatService seatService, IBookingValidationService bookingValidation, TicketsContext context)
+        public SeatsController(ISeatService seatService, IBookingValidationService bookingValidation, TicketsContext context, IOrderService orderService)
         {
             _seatService = seatService;
             _bookingValidation = bookingValidation;
             _context = context;
+            _orderService = orderService;
         }
 
         //使用者訂購頁面
@@ -105,7 +108,8 @@ namespace TicketSalesSystem.Controllers
 
         }
 
-        public async Task<IActionResult> Success(string id)
+        //「看」訂單內容並準備付錢
+        public async Task<IActionResult> Payment(string id)
         {
             if (id == null) return NotFound();
 
@@ -135,9 +139,9 @@ namespace TicketSalesSystem.Controllers
             return View(vm);
 
         }
-
+        //是讓你「正式結帳」**並領取票券憑證
         [HttpPost]
-        public async Task<IActionResult> CompletePayment([FromBody] VMPaymentRequest request)
+        public async Task<IActionResult> Payment([FromBody] VMPaymentRequest request)
         {
             // 🚩 防禦性檢查：防止前端傳入空值
             if (string.IsNullOrEmpty(request.OrderID) || string.IsNullOrEmpty(request.PaymentMethodID))
@@ -161,25 +165,14 @@ namespace TicketSalesSystem.Controllers
                 if (currentStatus == "N")
                     return Json(new { success = false, message = "訂單已因超時失效，座位已釋出，請重新購票。" });
 
-                // 2. 執行「原子性更新」(Atomic Update)
-                // 只有在狀態依然是暫存狀態(例如 'W' 或 'O')時才更新，這能完美避開背景服務的競爭
-                var affectedOrders = await _context.Order
-                    .Where(o => o.OrderID == request.OrderID && o.OrderStatusID != "N")
-                    .ExecuteUpdateAsync(s => s
-                        .SetProperty(o => o.OrderStatusID, "Y")// 改為已完成/處理中
-                        .SetProperty(o => o.PaymentStatus, true)// 改為已付款
-                        .SetProperty(o => o.PaymentMethodID, request.PaymentMethodID));
-                Console.WriteLine($"訂單 {request.OrderID} 更新結果：影響了 {affectedOrders} 行");
-                if (affectedOrders > 0)
-                {
-                    await _context.Tickets
-                        .Where(t => t.OrderID == request.OrderID)
-                        .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "S"));
+               var result = await _orderService.ProcessPaymentAsync(request);
 
-                    return Json(new { success = true });
+                if (result.Success)
+                {
+                    return Json(new { success = true, message = "付款成功！" });
                 }
-                
-                return Json(new { success = false, message = "付款請求衝突，請重新整理確認訂單狀態。" });
+
+                return Json(new { success = false, result.Message });
             }
             catch (Exception ex)
             {
