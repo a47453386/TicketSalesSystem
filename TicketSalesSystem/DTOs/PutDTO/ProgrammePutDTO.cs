@@ -18,9 +18,9 @@
   
         
         // 關聯子集合
-        public List<SessionPutDTO> Sessions { get; set; } = new List<SessionPutDTO>();
+        public List<SessionPutDTO> Session { get; set; } = new List<SessionPutDTO>();
 
         // 處理圖片刪除
-        public List<string> DeleteImageIds { get; set; } = new List<string>();
+        public List<string> DeleteImageID { get; set; } = new List<string>();
     }
 }
