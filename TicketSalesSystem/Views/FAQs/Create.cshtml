@@ -1,0 +1,132 @@
+﻿@model TicketSalesSystem.Models.FAQ
+
+@{
+    ViewData["Title"] = "新增常見問題";
+}
+
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-plus-circle me-2"></i>新增常見問題</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">返回列表</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="FAQTitle" class="form-label fw-bold">問題標題</label>
+                        <input asp-for="FAQTitle" class="form-control" placeholder="例如：如何申請退票？" />
+                        <span asp-validation-for="FAQTitle" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="FAQDescription" class="form-label fw-bold">答案內容</label>
+                        <textarea asp-for="FAQDescription" class="form-control" rows="5" placeholder="請輸入詳細解答..."></textarea>
+                        <span asp-validation-for="FAQDescription" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FAQTypeID" class="form-label fw-bold">FAQ 分類</label>
+                        <div class="input-group">
+                            <select asp-for="FAQTypeID" class="form-select" asp-items="ViewBag.FAQTypeID" id="faqTypeSelect">
+                                <option value="">-- 請選擇分類 --</option>
+                            </select>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTypeModal">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="FAQTypeID" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FAQPublishStatusID" class="form-label fw-bold">發佈狀態</label>
+                        <select asp-for="FAQPublishStatusID" class="form-select" asp-items="ViewBag.FAQPublishStatusID"></select>
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EmployeeID" class="form-label fw-bold">建立人員</label>
+                        <select asp-for="EmployeeID" class="form-select" asp-items="ViewBag.EmployeeID"></select>
+                    </div>
+                </div>
+
+                <div class="mt-4 border-top pt-3">
+                    <button type="submit" class="btn btn-success px-5">建立 FAQ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addTypeModal" tabindex="-1" aria-labelledby="addTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addTypeModalLabel">新增分類項目</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newTypeName" class="mb-2">分類名稱</label>
+                    <input type="text" id="newTypeName" class="form-control" placeholder="請輸入新分類，如：購票優惠">
+                    <small class="text-muted">新增後將直接選取該項目。</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveTypeBtn">確認新增</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // 當按下 Modal 裡的確認新增按鈕
+            $('#saveTypeBtn').click(function () {
+                const typeName = $('#newTypeName').val();
+
+                if (!typeName || typeName.trim() === "") {
+                    alert("分類名稱不能為空！");
+                    return;
+                }
+
+                // 發送 AJAX 請求到後台
+                $.ajax({
+                    url: '@Url.Action("CreateTypeQuickly", "FAQs")', // 確保 Controller 方法名稱正確
+                    type: 'POST',
+                    data: { typeName: typeName },
+                    success: function (response) {
+                        if (response.success) {
+                            // 1. 動態加入新的 Option 到下拉選單
+                            $('#faqTypeSelect').append(new Option(response.name, response.id));
+
+                            // 2. 自動選中剛剛新增的那一項
+                            $('#faqTypeSelect').val(response.id);
+
+                            // 3. 關閉 Modal 並清空輸入
+                            $('#addTypeModal').modal('hide');
+                            $('#newTypeName').val('');
+
+                            console.log("新增分類成功：" + response.name);
+                        } else {
+                            alert("新增失敗：" + response.message);
+                        }
+                    },
+                    error: function () {
+                        alert("連線伺服器時發生錯誤。");
+                    }
+                });
+            });
+        });
+    </script>
+}

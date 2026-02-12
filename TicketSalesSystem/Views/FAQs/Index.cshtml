@@ -1,0 +1,59 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.FAQ>
+
+@{
+    ViewData["Title"] = "常見問題後台管理";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create">新增</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FAQTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FAQDescription)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FAQPublishStatusID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FAQTypeID)
+            </th>
+            <th>資訊管理</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.FAQTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FAQDescription)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FAQPublishStatus.FAQPublishStatusName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Employee.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FAQType.FAQTypeName)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.FAQID">編輯</a> |
+                <a asp-action="Details" asp-route-id="@item.FAQID">詳細資訊</a> |
+                <a asp-action="Delete" asp-route-id="@item.FAQID">刪除</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -30,7 +30,7 @@ namespace TicketSalesSystem.ViewModel.EditProgramme
         public IFormFile? SeatImageFile { get; set; }
         
 
-        public List<string>? DeleteImageIds { get; set; }// 關鍵：用來接收前端勾選「要刪除」的圖片 ID 清單
+        public List<string>? DeleteImageID { get; set; }// 關鍵：用來接收前端勾選「要刪除」的圖片 ID 清單
         public List<IFormFile>? DescriptionImageFiles { get; set; }
         public List<IFormFile>? NewDescriptionFiles { get; set; } 
     }

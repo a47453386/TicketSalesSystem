@@ -16,12 +16,14 @@ using TicketSalesSystem.ViewModel.EditProgramme;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Route("ProgrammeDTO/[action]")]
     public class ProgrammeDTOController : Controller
     {
         private readonly IFileService _fileService;
         private readonly TicketsContext _context;
         private readonly IIDService _iIDService;
         private readonly IProgrammeService _programmeService;
+
         public ProgrammeDTOController(IFileService fileService, TicketsContext context, IIDService iIDService, IProgrammeService programmeService   )
         {
 
@@ -381,7 +383,7 @@ namespace TicketSalesSystem.Controllers
             return RedirectToAction("CreateConfirm");
         }
 
-        [HttpGet]
+        
         public IActionResult CreateConfirm()
         {
             try
@@ -518,129 +520,73 @@ namespace TicketSalesSystem.Controllers
 
 
 
-
-
         [HttpGet]
-        public IActionResult GetVenues(string placeId) // 🚩 確保 placeId 名稱與 AJAX 傳送的一致
+        public async Task<IActionResult> GetVenues(string placeId)
         {
-            var venues = _context.Venue.Where(v => v.PlaceID == placeId).ToList();
+            var venues = await _context.Venue
+                .Where(v => v.PlaceID == placeId)
+                .Select(v => new { v.VenueID, v.VenueName })
+                .ToListAsync();
             return Json(venues);
         }
 
-        [HttpGet]
+
+
+        [HttpGet("Edit{id}")]
         public async Task<IActionResult> Edit(string id)
         {
             if(id==null) return NotFound();
 
-            // 1. 關鍵：使用 Include 與 ThenInclude 抓取三層資料
-            var programme = await _context.Programme
-                .Include(p => p.DescriptionImage) // 描述圖片層
-                .Include(p => p.Session)          // 場次層
-                    .ThenInclude(s => s.TicketsArea) // 票區層 (場次底下的票區)
-                .FirstOrDefaultAsync(m => m.ProgrammeID == id);
+            var vm = await _programmeService.GetProgrammeForEditAsync(id);
 
-            if (programme == null) return NotFound();
+            if (vm == null) return NotFound();
 
-            // 2. 將 Entity 轉換為 ViewModel (DTO)
-            var vm = new VMProgrammeEdit
-            {
-                ProgrammeID = programme.ProgrammeID,
-                ProgrammeName = programme.ProgrammeName,
-                ProgrammeDescription = programme.ProgrammeDescription,
-                CoverImage = programme.CoverImage,
-                SeatImage = programme.SeatImage,
-                LimitPerOrder = programme.LimitPerOrder,
-                OnShelfTime = programme.OnShelfTime,
-                PlaceID = programme.PlaceID,
-                ProgrammeStatusID = programme.ProgrammeStatusID,
-                VenueID= programme.Session.FirstOrDefault()?.TicketsArea.FirstOrDefault()?.VenueID, // 從第一個場次的第一個票區抓 VenueID
+            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
+            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", vm.ProgrammeStatusID);
+           
+            var venues = await _context.Venue.Where(v => v.PlaceID == vm.PlaceID).ToListAsync();
+            ViewData["VenueID"] = new SelectList(venues, "VenueID", "VenueName", vm.VenueID);
 
-
-                // 轉換描述圖片清單 (讓前端顯示縮圖)
-                DescriptionImage = programme.DescriptionImage.Select(di => new DescriptionImageDTO
-                {
-                    DescriptionImageID = di.DescriptionImageID,
-                    DescriptionImageName = di.DescriptionImageName,
-                    TempUrl = di.ImagePath
-                }).ToList(),
-
-                // 轉換場次與票區
-                Session = programme.Session.Select(s => new VMSessionItem
-                {
-                    SessionID = s.SessionID,
-                    StartTime = s.StartTime,
-                    SaleStartTime = s.SaleStartTime,
-                    SaleEndTime = s.SaleEndTime,
-                    TicketsArea = s.TicketsArea.Select(ta => new VMTicketsAreaItem
-                    {
-                        TicketsAreaID = ta.TicketsAreaID,
-                        TicketsAreaName = ta.TicketsAreaName,
-                        RowCount = ta.RowCount,
-                        SeatCount = ta.SeatCount,
-                        Price = ta.Price,
-                        VenueID = ta.VenueID,
-                        TicketsAreaStatusID = ta.TicketsAreaStatusID
-                    }).ToList()
-                }).ToList()
-            };
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", programme.PlaceID);
-            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", programme.ProgrammeStatusID);
-            
             return View(vm);
         }
 
-        [HttpPost]
+        [HttpPost("Edit{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, VMProgrammeEdit vm)
         {
             if (id != vm.ProgrammeID) return NotFound();
-             
-            if (ModelState.IsValid)
-            {
-                // 取得包含所有子層的數據
-                var dbProgramme = await _context.Programme
-                    .Include(p => p.Session).ThenInclude(s => s.TicketsArea).Include(p => p.DescriptionImage)
-                    .FirstOrDefaultAsync(p => p.ProgrammeID == id);
+            // 🚩 存檔前先清空目前的追蹤快取，避免 ID 衝突
+            _context.ChangeTracker.Clear(); 
 
-                if (dbProgramme == null) return NotFound();
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
 
                 try
                 {
-                    // 呼叫 Service 執行複雜同步
-                    await _programmeService.SyncProgrammeDetailsAsync(dbProgramme, vm);
-                    await _programmeService.SyncImagesAsync(dbProgramme, vm);
-                    int rowsAffected = await _context.SaveChangesAsync();
-                    Console.WriteLine($"更新了 {rowsAffected} 筆資料");
+                    await _programmeService.UpdateProgrammeAsync(id,vm);
+                    
 
-                    TempData["SuccessMessage"] = "活動資料已成功更新！";
+                    await _programmeService.SyncImagesAsync(id, vm.DescriptionImage);
+
+                    await _programmeService.SyncProgrammeDetailsAsync(id, vm);
+
+
+                    await _context.SaveChangesAsync();  
+
+                    await transaction.CommitAsync();
+
                     return RedirectToAction("Index", "Programmes");
                 }
-                catch (DbUpdateException ex)
+                catch(Exception ex)
                 {
-                    var innerError = ex.InnerException?.Message ?? ex.Message;
-                    ModelState.AddModelError("", "資料庫存檔失敗！原因：可能是有訂單關聯而無法刪除場次。原始訊息：" + innerError);
-
-                    // 偵錯用
-                    Console.WriteLine("SQL Error: " + innerError);
-
-                    // 返回 View，vm 帶回前端，使用者才不會看到空白或崩潰
-                    return View(vm); ;
+                    await transaction.RollbackAsync();
+                    // 偵錯用：建議印出完整的 InnerException，這對 TicketsArea 報錯很有幫助
+                    var fullMessage = ex.InnerException?.Message ?? ex.Message;
+                    return StatusCode(500, $"更新失敗: {fullMessage}");
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", "存檔失敗: " + ex.Message);
 
-                    var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "無底層訊息";
-
-                    return Content($"存檔失敗！<br/>" +
-                                   $"主錯誤：{ex.Message}<br/>" +
-                                   $"底層原因：{innerMessage}");
-
-                }
             }
-            // 若失敗，重新載入必要的下拉選單資料 (如 PlaceID) 並回傳 View
-            ViewBag.PlaceID = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
-            return RedirectToAction("Index", "Programmes");
+
         }
 
 

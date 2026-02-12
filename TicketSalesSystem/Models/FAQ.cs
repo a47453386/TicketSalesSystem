@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TicketSalesSystem.Models
@@ -7,6 +8,7 @@ namespace TicketSalesSystem.Models
     {
         [Key]
         [StringLength(36, MinimumLength = 36)]
+        [HiddenInput]
         public string FAQID { get; set; } = null!;
 
 
@@ -26,8 +28,11 @@ namespace TicketSalesSystem.Models
 
 
         //FK區
-        public string EmployeeID { get; set; } = null!;      
-        public string FAQPublishStatusID { get; set; } = null!;     
+        [Display(Name = "負責人員")]
+        public string EmployeeID { get; set; } = null!;
+        [Display(Name = "發佈狀態")]
+        public string FAQPublishStatusID { get; set; } = null!;
+        [Display(Name = "常見問題種類")]
         public string FAQTypeID { get; set; } = null!;
 
         //關聯區

@@ -79,7 +79,10 @@ namespace TicketSalesSystem.Controllers
                 .FirstOrDefaultAsync();
             if (order == null) return NotFound();
 
-            var isPrintable = DateTime.Now >= order.Session.StartTime.AddDays(0);
+            var isPrintable = true;
+
+                //判斷天數
+                //DateTime.Now >= order.Session.StartTime.AddDays(-15);
 
             var vm = new VMUserOrderDetail
             {
@@ -101,7 +104,7 @@ namespace TicketSalesSystem.Controllers
                     TicketsID = t.TicketsID,
                     TicketsAreaName= t.TicketsArea.TicketsAreaName,
                     Seat= $"{t.RowIndex}排{t.SeatIndex}號",
-                    CheckInCode= isPrintable? t.CheckInCode: null
+                    CheckInCode=t.CheckInCode /*isPrintable? t.CheckInCode: null*/
                 }).ToList()
             };
 

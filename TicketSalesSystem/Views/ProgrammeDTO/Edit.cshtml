@@ -78,6 +78,10 @@
                                         @for (int k = 0; k < Model.DescriptionImage.Count; k++)
                                         {
                                             <div class="col-3 text-center position-relative">
+                                                @* 🚩 必須加入隱藏欄位，後端才知道這張圖已經存在 *@
+                                                <input type="hidden" name="DescriptionImage[@k].DescriptionImageID" value="@Model.DescriptionImage[k].DescriptionImageID" />
+                                                <input type="hidden" name="DescriptionImage[@k].DescriptionImageName" value="@Model.DescriptionImage[k].DescriptionImageName" />
+
                                                 <img src="/Photos/DescriptionImage/@Model.DescriptionImage[k].TempUrl" class="img-thumbnail" style="height: 100px; width: 100%; object-fit: cover;" />
                                                 <div class="mt-1">
                                                     <div class="form-check form-check-inline">
@@ -151,17 +155,16 @@
 
                                             <tr>
                                                 @* 隱藏欄位確保 ID 能傳回後端進行更新而非新增 *@
+                                               
                                                 <input type="hidden" name="Session[@i].TicketsArea[@j].TicketsAreaID" value="@area.TicketsAreaID" class="area-id-input" />
                                                 <input type="hidden" name="Session[@i].TicketsArea[@j].SessionID" value="@Model.Session[i].SessionID" />
                                                 <input type="hidden" name="Session[@i].TicketsArea[@j].TicketsAreaStatusID" value="@(area.TicketsAreaStatusID ?? "A")" />
                                                 <td>
-                                                    <select name="Session[@i].TicketsArea[@j].VenueID" class="form-select form-select-sm venue-select" data-init-value="@area.VenueID">
-                                                        @* 這裡預設會由 JS 根據 PlaceID 填入，先留空或顯示目前值 *@
-                                                        @if (!string.IsNullOrEmpty(area.VenueID))           
-                                                        {
-                                                            <option value="@area.VenueID" selected>@area.VenueID</option>
-                                                        }
-                                                        <span class="text-danger small" data-valmsg-for="Session[@i].TicketsArea[@j].VenueID"></span>
+                                                    <select name="Session[@i].TicketsArea[@j].VenueID"
+                                                            class="form-select form-select-sm venue-select"
+                                                            data-init-value="@area.VenueID"
+                                                            asp-items="@(new SelectList(ViewBag.VenueID as SelectList, "Value", "Text", area.VenueID))">
+                                                        <option value="">-- 選擇場館 --</option>
                                                     </select>
                                                 </td>
                                                 <td>
@@ -247,8 +250,11 @@
 
             // 1. 初始化場館
             const initialPid = $("#PlaceID").val();
+            console.log("初始 PlaceID:", initialPid);
             if (initialPid) {
                 loadVenues(initialPid, true);
+            }else {
+            console.warn("未抓到初始 PlaceID，請檢查 HTML id 是否為 PlaceID");
             }
 
             // 2. 地區切換
@@ -287,10 +293,12 @@
                     let opt = '<option value="">-- 選擇場館 --</option>';
                     if (cachedVenues && cachedVenues.length > 0) {
                         cachedVenues.forEach(v => {
-                            const vID = String(v.venueID || v.VenueID || "").trim();
+                            const vID = String(v.venueID || v.VenueID || "").trim(); // 👈 同時檢查小寫與大寫
+                            const vName = v.venueName || v.VenueName;               // 👈 同時檢查小寫與大寫
+
                             const sVal = String(savedVal || "").trim();
                             const isSelected = (vID === sVal && sVal !== "") ? 'selected' : '';
-                            opt += `<option value="${vID}" ${isSelected}>${v.venueName || v.VenueName}</option>`;
+                            opt += `<option value="${vID}" ${isSelected}>${vName}</option>`;
                         });
                     }
                     $s.html(opt);
@@ -363,6 +371,12 @@
                     reIndexAll();
                 }
             });
+
+            $('#editForm').on('submit', function() {
+            reIndexAll(); // 送出前最後校正一次
+            });
+
+
         }); // Ready 結尾
     </script>
 }

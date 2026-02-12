@@ -16,11 +16,11 @@ namespace TicketSalesSystem.Service.IProgramme
 
         // 取得資料用 (給 Edit 頁面初始顯示)
         Task<VMProgrammeEdit> GetProgrammeForEditAsync(string id);
-                
-        // 修改 (PUT) - 這是你現在要重寫的核心
+
+        // 更新 (PUT)
         Task UpdateProgrammeAsync(string id, VMProgrammeEdit vm);
 
-        // 核心同步邏輯 (這才是被重複呼叫的地方)
+        // 場次票區更新
         Task SyncProgrammeDetailsAsync(string programmeID, VMProgrammeEdit vm);
         //圖片更新
         Task SyncImagesAsync(string programmeID, List<DescriptionImageDTO> image);
