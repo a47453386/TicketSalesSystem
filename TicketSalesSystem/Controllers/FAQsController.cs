@@ -1,21 +1,25 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.ID;
 
 namespace TicketSalesSystem.Controllers
 {
     public class FAQsController : Controller
     {
         private readonly TicketsContext _context;
+        private readonly IIDService _idService;
 
-        public FAQsController(TicketsContext context)
+        public FAQsController(TicketsContext context, IIDService idService)
         {
             _context = context;
+            _idService = idService;
         }
 
         // GET: FAQs
@@ -53,40 +57,57 @@ namespace TicketSalesSystem.Controllers
             return View();
         }
 
-        // POST: FAQs/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( FAQ fAQ,string typename)
+        public async Task<IActionResult> CreateTypeQuickly(string typeName)
         {
-            if(typename==null)
+            if (typeName == null)
             {
                 return Json(new { success = false, message = "名稱不能為空" });
             }
 
             try
             {
-                var newType=new FAQType
+                string ftI = await _idService.GetNextFAQTypeID();
+                var newType = new FAQType
                 {
-                    FAQTypeID=Guid.NewGuid().ToString(),
-                    FAQTypeName= typename
-                }
-            }
-
-
-
-
-
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(fAQ);
+                    FAQTypeID = ftI,
+                    FAQTypeName = typeName
+                };
+                _context.FAQType.Add(newType);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                return Json(new { success = true, message = "新增成功", faqTypeId = ftI, faqTypeName = typeName });
             }
-            PopulateDropdownLists(fAQ);
-            return View(fAQ);
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "新增失敗，可能是編號已達上限(F9)" });
+            }
         }
 
+
+
+        // POST: FAQs/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(FAQ fAQ)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    _context.Add(fAQ);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                PopulateDropdownLists(fAQ);
+                return View(fAQ);
+            }
+            catch (Exception ex)
+            {
+                var fullMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(500, $"更新失敗: {fullMessage}");
+            }
+        }
         // GET: FAQs/Edit/5
         public async Task<IActionResult> Edit(string id)
         {

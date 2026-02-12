@@ -25,5 +25,11 @@ namespace TicketSalesSystem.Service.ID
             var nextId = _context.Database.SqlQueryRaw<string>($"SELECT [dbo].[funGetTicketsAreaID](@p0)", sid).AsEnumerable().FirstOrDefault();
             return nextId;
         }
+
+        public async Task<string> GetNextFAQTypeID()
+        {
+            var faqtypeId = _context.Database.SqlQueryRaw<string>($"SELECT dbo.funGetFAQTypeID() as value").AsEnumerable().FirstOrDefault();
+            return faqtypeId;
+        }
     }
 }

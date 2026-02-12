@@ -43,7 +43,7 @@ create function funGetSessionID (@ProID nchar(8))
 ----------------------------------------------------------------------------------------------------------
 --FAQType
 
-alter function funGetFAQTypeID ()
+create function funGetFAQTypeID ()
 	returns nchar(2)
 	as
 	begin

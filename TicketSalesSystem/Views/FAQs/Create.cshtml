@@ -15,8 +15,11 @@
         <div class="card-body p-4">
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+                <input asp-for="FAQID" type="hidden" value="@Guid.NewGuid().ToString()" />
                 <div class="row">
+                    <div class="col-md-12 mb-3">
+                        
+                    </div>
                     <div class="col-md-12 mb-3">
                         <label asp-for="FAQTitle" class="form-label fw-bold">問題標題</label>
                         <input asp-for="FAQTitle" class="form-control" placeholder="例如：如何申請退票？" />
@@ -83,7 +86,7 @@
         </div>
     </div>
 </div>
-
+<div asp-validation-summary="All" class="text-danger"></div>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -96,7 +99,7 @@
                 const typeName = $('#newTypeName').val();
 
                 if (!typeName || typeName.trim() === "") {
-                    alert("分類名稱不能為空！");
+                    alert("請輸入名稱！");
                     return;
                 }
 
@@ -106,18 +109,23 @@
                     type: 'POST',
                     data: { typeName: typeName },
                     success: function (response) {
+                        console.log("伺服器回傳內容:", response);
+                       var newId = response.faqTypeId;
+                       var newName = response.faqTypeName;
+
                         if (response.success) {
-                            // 1. 動態加入新的 Option 到下拉選單
-                            $('#faqTypeSelect').append(new Option(response.name, response.id));
+                           //動態產生一個新的Option
+                           var newOption= new Option(newName, newId);
 
-                            // 2. 自動選中剛剛新增的那一項
-                            $('#faqTypeSelect').val(response.id);
+                           //塞入下拉式選單並直接選取
+                            $('#faqTypeSelect').append(newOption).val(newId).trigger('change');
 
-                            // 3. 關閉 Modal 並清空輸入
-                            $('#addTypeModal').modal('hide');
+                            //清除輸入框並關閉彈窗
                             $('#newTypeName').val('');
+                            $('#addTypeModal').modal('hide');
 
-                            console.log("新增分類成功：" + response.name);
+                            alert("新分類「" + newName+ "」已新增並選取！");
+
                         } else {
                             alert("新增失敗：" + response.message);
                         }
