@@ -1,3 +1,4 @@
+--SessionID
 create function funGetSessionID (@ProID nchar(8))
 	returns nchar(10)
 	as
@@ -15,7 +16,8 @@ create function funGetSessionID (@ProID nchar(8))
 	end
 
 	go
-
+----------------------------------------------------------------------------------------------------------
+--TicketsAreaID
 	create function funGetTicketsAreaID (@Sess nchar(10))
 	returns nchar(12)
 	as
@@ -37,3 +39,28 @@ create function funGetSessionID (@ProID nchar(8))
 
 	 print dbo.funGetTicketsAreaID(2026020101);
 	 go
+
+----------------------------------------------------------------------------------------------------------
+--FAQType
+
+alter function funGetFAQTypeID ()
+	returns nchar(2)
+	as
+	begin
+	 declare @DatePrefix nchar(2),@LastOID int,@NewOrderID nchar(2)
+
+	 
+
+	 select @LastOID= isnull (max(cast(right(FAQTypeID,1) as int)),0) 
+	 from FAQType
+	 where FAQTypeID like 'F%';
+
+	 set @LastOID+=1
+
+	 set @NewOrderID='F'+cast(@LastOID as nchar(1))
+
+	 return @NewOrderID
+	 end
+	 go
+
+	 SELECT dbo.funGetFAQTypeID();
