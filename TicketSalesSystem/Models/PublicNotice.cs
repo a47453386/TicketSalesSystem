@@ -29,6 +29,12 @@ namespace TicketSalesSystem.Models
         [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日}")]
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
+
+        [Display(Name = "下架時間")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日}")]
+        public DateTime? RemovalTime { get; set; } 
+
         [Display(Name = "發佈狀態")]
         public bool PublicNoticeStatus { get; set; } =false;
 
