@@ -1,0 +1,58 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Question>
+
+@{
+    ViewData["Title"] = "我的諮詢紀錄";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0 text-dark">@ViewData["Title"]</h2>
+        <a asp-action="Create" class="btn btn-primary rounded-pill shadow-sm">
+            <i class="bi bi-chat-dots-fill me-1"></i> 我要提問
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 bg-light rounded shadow-sm">
+            <div class="mb-3 display-4 text-muted"><i class="bi bi-inbox"></i></div>
+            <p class="text-muted">目前沒有諮詢紀錄</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 transition-hover">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-info text-dark bg-opacity-10 px-3 py-2">
+                                    @item.QuestionType?.QuestionTypeName
+                                </span>
+                                <small class="text-muted">@item.CreatedTime.ToString("yyyy/MM/dd")</small>
+                            </div>
+
+                            <h5 class="card-title fw-bold text-truncate">@item.QuestionTitle</h5>
+                            <p class="card-text text-muted small mb-3 text-truncate-2">@item.QuestionDescription</p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                @{
+                                    // 判斷最後一個回覆的狀態
+                                    var latestReply = item.Reply?.OrderByDescending(r => r.CreatedTime).FirstOrDefault();
+                                    var statusLabel = latestReply?.ReplyStatus?.ReplyStatusName ?? "等待處理";
+                                    var statusClass = latestReply?.ReplyStatusID == "2" ? "bg-success" : "bg-warning text-dark";
+                                }
+                                <span class="badge @statusClass rounded-pill">@statusLabel</span>
+                                <a asp-action="Details" asp-route-id="@item.QuestionID" class="btn btn-sm btn-outline-primary">
+                                    查看詳情 <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

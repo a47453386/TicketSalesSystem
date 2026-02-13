@@ -138,7 +138,8 @@ namespace TicketSalesSystem.Models
             modelBuilder.Entity<Question>()
                .HasMany(q => q.Reply)
                .WithOne(r => r.Question)
-               .HasForeignKey(r => r.QuestionID);
+               .HasForeignKey(r => r.QuestionID)
+               .OnDelete(DeleteBehavior.Cascade); ;
 
             modelBuilder.Entity<ReplyStatus>()
                 .HasMany(s => s.Reply)

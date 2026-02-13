@@ -1,54 +1,127 @@
 ﻿@model TicketSalesSystem.Models.PublicNotice
-
+@Html.AntiForgeryToken()
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "公告詳細資訊";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><i class="bi bi-info-circle me-2"></i>@ViewData["Title"]</h1>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model?.PublicNoticeID" class="btn btn-warning shadow-sm">
+                <i class="bi bi-pencil-square"></i> 編輯
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary ms-2 shadow-sm">
+                <i class="bi bi-arrow-left"></i> 返回列表
+            </a>
+        </div>
+    </div>
 
-<div>
-    <h4>PublicNotice</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PublicNoticeTitle)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PublicNoticeTitle)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PublicNoticeDescription)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PublicNoticeDescription)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PublicNoticeStatus)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PublicNoticeStatus)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.EmployeeID)
-        </dd>
-    </dl>
+    <div class="row">
+        @* 左側：公告核心內容 *@
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0 text-primary">公告主體內容</h5>
+                </div>
+                <div class="card-body p-4">
+                    <h2 class="h4 fw-bold mb-3">@Model.PublicNoticeTitle</h2>
+                    <hr />
+                    <div class="p-3 bg-light rounded" style="min-height: 250px; white-space: pre-wrap; line-height: 1.6;">
+                        @Model.PublicNoticeDescription
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* 右側：狀態、時間與負責人資訊 *@
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0 text-primary">發佈管理資訊</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted">目前狀態</span>
+                        <div class="form-check form-switch">
+                            @* 注意：這裡只有一筆，不需要 foreach，直接用 Model *@
+                            <input class="form-check-input status-toggle" type="checkbox"
+                                   id="statusSwitch"
+                                   data-id="@Model.PublicNoticeID"
+                                   @(Model.PublicNoticeStatus ? "checked" : "")>
+
+                            <label class="form-check-label small ms-2" for="statusSwitch" id="label_@Model.PublicNoticeID">
+                                @(Model.PublicNoticeStatus ? "已發佈" : "待發佈")
+                            </label>
+                        </div>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block mb-1">負責員工</small>
+                        <div class="fw-bold"><i class="bi bi-person-badge me-2"></i>@Model.Employee?.EmployeeID</div>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block mb-1">上架排程</small>
+                        <div class="text-dark"><i class="bi bi-calendar-event me-2"></i>@(Model.PublishTime?.ToString("yyyy-MM-dd HH:mm") ?? "立即上架")</div>
+                    </li>
+                    <li class="list-group-item py-3">
+                        <small class="text-muted d-block mb-1">自動下架</small>
+                        <div class="@(Model.RemovalTime < DateTime.Now ? "text-danger" : "text-dark")">
+                            <i class="bi bi-calendar-x me-2"></i>@(Model.RemovalTime?.ToString("yyyy-MM-dd HH:mm") ?? "手動控制")
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0 text-primary">系統日誌</h5>
+                </div>
+                <div class="card-body small text-muted">
+                    <div class="mb-2">
+                        <strong>建立時間：</strong><br />
+                        @Model.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")
+                    </div>
+                    <div>
+                        <strong>最後更新：</strong><br />
+                        @(Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "尚無更新紀錄")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.PublicNoticeID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+@section Scripts {
+    <script>
+
+        // 狀態切換 AJAX (承接之前的邏輯)
+        $('.status-toggle').change(function () {
+            const checkbox = $(this);
+            const noticeId = checkbox.data('id');
+            const label = $('#label_' + noticeId);
+            const token = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: '@Url.Action("ToggleStatus", "PublicNotices")',
+                type: 'POST',
+                data: { id: noticeId, __RequestVerificationToken: token },
+                success: function (res) {
+                    if (res.success) {
+                        label.text(res.newStatus ? "已發佈" : "待發佈");
+                        if(res.newStatus) {
+                                label.addClass('text-success').removeClass('text-muted');
+                            } else {
+                                label.addClass('text-muted').removeClass('text-success');
+                            }
+                    } else {
+                        alert(res.message);
+                        checkbox.prop('checked', !checkbox.prop('checked'));
+                    }
+                },
+                error: function () {
+                    alert("連線失敗");
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+                }
+            });
+        });
+    </script>
+}

@@ -18,22 +18,29 @@ namespace TicketSalesSystem.Models
         [DataType(DataType.MultilineText)]
         public string PublicNoticeDescription { get; set; } = null!;
 
-        [Display(Name = "發佈時間")]
+        [Display(Name = "建立時間")]
         [Required(ErrorMessage = "必填")]
         [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日}")]
+        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 HH:mm}")]
         public DateTime CreatedTime { get; set; } = DateTime.Now;
 
         [Display(Name = "更新時間")]
         [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日}")]
+        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 HH:mm}")]
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
 
         [Display(Name = "下架時間")]
         [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日}")]
-        public DateTime? RemovalTime { get; set; } 
+        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 HH:mm}")]
+        public DateTime? RemovalTime { get; set; }
+
+
+        [Display(Name = "發佈時間")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 HH:mm}")]
+        public DateTime? PublishTime { get; set; }
+        
 
         [Display(Name = "發佈狀態")]
         public bool PublicNoticeStatus { get; set; } =false;

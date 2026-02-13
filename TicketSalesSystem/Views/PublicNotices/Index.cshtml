@@ -1,76 +1,139 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.PublicNotice>
+@Html.AntiForgeryToken()
 
 @{
-    ViewData["Title"] = "公告管理後台";
+    ViewData["Title"] = "公告後台管理";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center my-4">
+        <h1 class="h3 m-0">@ViewData["Title"]</h1>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg"></i> 新增公告
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create">新增公告</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.PublicNoticeTitle)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PublicNoticeDescription)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PublicNoticeStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EmployeeID)
-            </th>
-            <th>資訊管理</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PublicNoticeTitle)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PublicNoticeDescription)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CreatedTime)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UpdatedAt)
-                </td>
-                <td>
-                    @if (item.PublicNoticeStatus)
-                    {
-                        <span class="badge bg-success">已發佈</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">未發佈</span>
-                    }
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Employee.Name)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.PublicNoticeID">更新公告</a> |
-                    <a asp-action="Details" asp-route-id="@item.PublicNoticeID">公告詳細資訊</a> |
-                    <form asp-action="Delete">
-                        <input type="hidden" name="id" value="@item.PublicNoticeID" />
-                        <input type="submit" class="btn btn-danger" value="刪除" onclick="return confirm('你確定要刪除【@(item.PublicNoticeTitle)】這筆資料嗎?')" />
-                    </form>
-                </td>
-            </tr>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-muted">
+                        <tr>
+                            <th class="ps-4">公告標題</th>
+                            <th style="width: 25%;">摘要</th>
+                            <th>排程期間</th>
+                            <th>系統紀錄</th>
+                            <th class="text-center">狀態</th>
+                            <th class="text-center">負責人</th>
+                            <th class="text-end pe-4">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark">@item.PublicNoticeTitle</span>
+                                </td>
+                                <td>
+                                    <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;">
+                                        @item.PublicNoticeDescription
+                                    </p>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <div class="text-primary">
+                                            <i class="bi bi-calendar-check"></i> 上：@(item.PublishTime?.ToString("yyyy/MM/dd") ?? "未設定")
+                                        </div>
+                                        <div class="text-danger">
+                                            <i class="bi bi-calendar-x"></i> 下：@(item.RemovalTime?.ToString("yyyy/MM/dd") ?? "永久")
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small text-muted">
+                                        <div>建：@item.CreatedTime.ToString("yyyy/MM/dd HH:mm")</div>
+                                        @if (item.UpdatedAt.HasValue)
+                                        {
+                                            <div class="fst-italic text-info">更：@item.UpdatedAt.Value.ToString("yyyy/MM/dd HH:mm")</div>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch d-inline-block">
+                                        <input class="form-check-input status-toggle" type="checkbox"
+                                               id="switch_@item.PublicNoticeID"
+                                               data-id="@item.PublicNoticeID"
+                                               @(item.PublicNoticeStatus ? "checked" : "")>
+                                        <label class="form-check-label small" for="switch_@item.PublicNoticeID" id="label_@item.PublicNoticeID">
+                                            @(item.PublicNoticeStatus ? "已發佈" : "待發佈")
+                                        </label>
+                                    </div>
+                                </td>
+                                <td class="text-center text-muted small">
+                                    @item.Employee?.EmployeeID
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Edit" asp-route-id="@item.PublicNoticeID" class="btn btn-outline-secondary" title="編輯">
+                                            編輯
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.PublicNoticeID" class="btn btn-outline-secondary" title="詳情">
+                                            詳情
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger"
+                                                onclick="deleteNotice('@item.PublicNoticeID', '@item.PublicNoticeTitle')">
+                                            刪除
+                                        </button>
+                                    </div>
+
+                                    @* 隱藏的刪除 Form *@
+                                    <form id="delete-form-@item.PublicNoticeID" asp-action="Delete" method="post" class="d-none">
+                                        <input type="hidden" name="id" value="@item.PublicNoticeID" />
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 刪除確認
+        function deleteNotice(id, title) {
+            if (confirm(`你確定要刪除【${title}】嗎？`)) {
+                document.getElementById(`delete-form-${id}`).submit();
+            }
         }
-    </tbody>
-</table>
+
+        // 狀態切換 AJAX (承接之前的邏輯)
+        $('.status-toggle').change(function () {
+            const checkbox = $(this);
+            const noticeId = checkbox.data('id');
+            const label = $('#label_' + noticeId);
+            const token = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: '@Url.Action("ToggleStatus", "PublicNotices")',
+                type: 'POST',
+                data: { id: noticeId, __RequestVerificationToken: token },
+                success: function (res) {
+                    if (res.success) {
+                        label.text(res.newStatus ? "已發佈" : "待發佈");
+                    } else {
+                        alert(res.message);
+                        checkbox.prop('checked', !checkbox.prop('checked'));
+                    }
+                },
+                error: function () {
+                    alert("連線失敗");
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+                }
+            });
+        });
+    </script>
+}

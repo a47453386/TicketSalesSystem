@@ -1,0 +1,62 @@
+﻿@model TicketSalesSystem.Models.Question
+
+@{
+    ViewData["Title"] = "提交新諮詢";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-pencil-square me-2"></i>填寫諮詢內容</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="QuestionTypeID" class="form-label fw-bold">問題種類</label>
+                            <select asp-for="QuestionTypeID" class="form-select" asp-items="ViewBag.QuestionTypeID">
+                                <option value="">-- 請選擇問題類別 --</option>
+                            </select>
+                            <span asp-validation-for="QuestionTypeID" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="QuestionTitle" class="form-label fw-bold"></label>
+                            <input asp-for="QuestionTitle" class="form-control" placeholder="請簡述您的問題..." />
+                            <span asp-validation-for="QuestionTitle" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="QuestionDescription" class="form-label fw-bold"></label>
+                            <textarea asp-for="QuestionDescription" class="form-control" rows="5" placeholder="請詳細描述您的狀況，以便客服人員協助。"></textarea>
+                            <span asp-validation-for="QuestionDescription" class="text-danger"></span>
+                        </div>
+
+                        @* 如果你有處理上傳檔案的邏輯 *@
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">附件上傳 (可選)</label>
+                            <input type="file" name="upload" class="form-control" />
+                            <div class="form-text text-muted small">支援 JPG, PNG, PDF，檔案大小上限 5MB。</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                                <i class="bi bi-send-fill me-1"></i> 送出諮詢
+                            </button>
+                            <a asp-action="MyList" class="btn btn-link text-muted">返回我的紀錄</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
