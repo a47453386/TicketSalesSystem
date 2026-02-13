@@ -1,48 +1,47 @@
 ﻿@model TicketSalesSystem.Models.FAQ
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "常見問題詳細資訊";
 }
 
-<h1>Details</h1>
+<h1>@ViewData["Title"]</h1>
 
 <div>
-    <h4>FAQ</h4>
-    <hr />
+    
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-4">
             @Html.DisplayNameFor(model => model.FAQTitle)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-8">
             @Html.DisplayFor(model => model.FAQTitle)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-4">
             @Html.DisplayNameFor(model => model.FAQDescription)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-8">
             @Html.DisplayFor(model => model.FAQDescription)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FAQPublishStatus)
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.FAQPublishStatusID)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FAQPublishStatus.FAQPublishStatusID)
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.FAQPublishStatus.FAQPublishStatusName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.EmployeeID)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.EmployeeID)
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.Employee.Name)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FAQType)
+        <dt class = "col-sm-4">
+            @Html.DisplayNameFor(model => model.FAQType.FAQTypeName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FAQType.FAQTypeID)
+        <dd class = "col-sm-8">
+            @Html.DisplayFor(model => model.FAQType.FAQTypeName)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.FAQID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.FAQID">更新</a> |
+    <a asp-action="Index">回到FAQ後管理總攬</a>
 </div>

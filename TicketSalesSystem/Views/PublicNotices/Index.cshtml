@@ -1,0 +1,76 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.PublicNotice>
+
+@{
+    ViewData["Title"] = "公告管理後台";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create">新增公告</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PublicNoticeTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PublicNoticeDescription)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PublicNoticeStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeID)
+            </th>
+            <th>資訊管理</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PublicNoticeTitle)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PublicNoticeDescription)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UpdatedAt)
+                </td>
+                <td>
+                    @if (item.PublicNoticeStatus)
+                    {
+                        <span class="badge bg-success">已發佈</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">未發佈</span>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Employee.Name)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.PublicNoticeID">更新公告</a> |
+                    <a asp-action="Details" asp-route-id="@item.PublicNoticeID">公告詳細資訊</a> |
+                    <form asp-action="Delete">
+                        <input type="hidden" name="id" value="@item.PublicNoticeID" />
+                        <input type="submit" class="btn btn-danger" value="刪除" onclick="return confirm('你確定要刪除【@(item.PublicNoticeTitle)】這筆資料嗎?')" />
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

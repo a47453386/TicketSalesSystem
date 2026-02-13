@@ -51,7 +51,10 @@
             <td>
                 <a asp-action="Edit" asp-route-id="@item.FAQID">編輯</a> |
                 <a asp-action="Details" asp-route-id="@item.FAQID">詳細資訊</a> |
-                <a asp-action="Delete" asp-route-id="@item.FAQID">刪除</a>
+                <form asp-action="Delete">
+                        <input type="hidden" name="id" value="@item.FAQID" />
+                        <input type="submit" class="btn btn-danger" value="刪除" onclick="return confirm('你確定要刪除【@(item.FAQTitle)】這筆資料嗎?')" />
+                 </form>
             </td>
         </tr>
 }

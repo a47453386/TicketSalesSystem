@@ -36,6 +36,7 @@ namespace TicketSalesSystem.Models
 
 
         //FK區
+        [Display(Name = "負責人")]
         public virtual string EmployeeID { get; set; } = null!;
 
 

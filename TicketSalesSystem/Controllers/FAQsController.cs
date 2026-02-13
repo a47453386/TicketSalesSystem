@@ -25,17 +25,18 @@ namespace TicketSalesSystem.Controllers
         // GET: FAQs
         public async Task<IActionResult> Index()
         {
-            var ticketsContext = _context.FAQ.Include(f => f.Employee).Include(f => f.FAQPublishStatus).Include(f => f.FAQType);
+            var ticketsContext = _context.FAQ
+                .Include(f => f.Employee)
+                .Include(f => f.FAQPublishStatus)
+                .Include(f => f.FAQType)
+                .OrderBy(f=>f.FAQPublishStatus);
             return View(await ticketsContext.ToListAsync());
         }
 
         // GET: FAQs/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if(!FAQExists(id)) return NotFound();
 
             var fAQ = await _context.FAQ
                 .Include(f => f.Employee)
@@ -50,12 +51,7 @@ namespace TicketSalesSystem.Controllers
             return View(fAQ);
         }
 
-        // GET: FAQs/Create
-        public IActionResult Create()
-        {
-            PopulateDropdownLists();
-            return View();
-        }
+        
 
         [HttpPost]
         public async Task<IActionResult> CreateTypeQuickly(string typeName)
@@ -85,6 +81,29 @@ namespace TicketSalesSystem.Controllers
         }
 
 
+        [HttpPost]
+        public async Task<IActionResult> EditTypeQuickly(string typeId, string typeName)
+        {
+            var faqType = await _context.FAQType.FindAsync(typeId);
+            if (faqType == null) return Json(new { success = false, message = "找不到該分類" });
+
+            faqType.FAQTypeName = typeName;
+            _context.Update(faqType);
+            await _context.SaveChangesAsync();
+
+            return Json(new{success = true, faqTypeId = faqType.FAQTypeID,faqTypeName = faqType.FAQTypeName});
+        }
+
+
+
+
+
+        // GET: FAQs/Create
+        public IActionResult Create()
+        {
+            PopulateDropdownLists();
+            return View();
+        }
 
         // POST: FAQs/Create
         [HttpPost]
@@ -108,13 +127,18 @@ namespace TicketSalesSystem.Controllers
                 return StatusCode(500, $"更新失敗: {fullMessage}");
             }
         }
+
+
+
+
+
+
+
+
         // GET: FAQs/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!FAQExists(id)) return NotFound();
 
             var fAQ = await _context.FAQ.FindAsync(id);
             if (fAQ == null)
@@ -128,12 +152,18 @@ namespace TicketSalesSystem.Controllers
         // POST: FAQs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("FAQID,FAQTitle,FAQDescription,EmployeeID,FAQPublishStatusID,FAQTypeID")] FAQ fAQ)
+        public async Task<IActionResult> Edit(string id, FAQ fAQ)
         {
             if (id != fAQ.FAQID)
             {
                 return NotFound();
             }
+
+            // 移除不需要驗證的導覽屬性錯誤
+            // 有時候系統會抱怨 FAQType 或 FAQPublishStatus 是必填的
+            ModelState.Remove("FAQType");
+            ModelState.Remove("FAQPublishStatus");
+            ModelState.Remove("Employee");
 
             if (ModelState.IsValid)
             {
@@ -155,46 +185,36 @@ namespace TicketSalesSystem.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmployeeID"] = new SelectList(_context.Employee, "EmployeeID", "EmployeeID", fAQ.EmployeeID);
-            ViewData["FAQPublishStatusID"] = new SelectList(_context.FAQPublishStatus, "FAQPublishStatusID", "FAQPublishStatusID", fAQ.FAQPublishStatusID);
-            ViewData["FAQTypeID"] = new SelectList(_context.FAQType, "FAQTypeID", "FAQTypeID", fAQ.FAQTypeID);
+
+            PopulateDropdownLists(fAQ);
+
             return View(fAQ);
         }
 
-        // GET: FAQs/Delete/5
+
+
+
+
+
+
+
+
+
+        
+        // POST: FAQs/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var fAQ = await _context.FAQ
-                .Include(f => f.Employee)
-                .Include(f => f.FAQPublishStatus)
-                .Include(f => f.FAQType)
-                .FirstOrDefaultAsync(m => m.FAQID == id);
-            if (fAQ == null)
-            {
-                return NotFound();
-            }
-
-            return View(fAQ);
-        }
-
-        // POST: FAQs/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
             var fAQ = await _context.FAQ.FindAsync(id);
+
             if (fAQ != null)
             {
                 _context.FAQ.Remove(fAQ);
             }
-
+ 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));            
         }
 
         private bool FAQExists(string id)

@@ -151,57 +151,6 @@
                 this.innerHTML = `<i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票`;
             }
         };
-
-        //     // 顯示 Loading 狀態
-        //     this.disabled = true;
-        //     this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> 處理中...`;
-
-        //     try {
-        //         const res = await fetch('/Seats/ConfirmBooking', {
-        //             method: 'POST',
-        //             headers: { 'Content-Type': 'application/json' },
-        //             body: JSON.stringify(bookingData)
-        //         });
-
-        //         const result = await res.json();
-
-        //         if (result.success) {
-        //             const seatDisplay = result.seats.map(s => s.replace('-', '排') + '號').join(', ');
-
-        //             alert(`🎉 訂購成功！\n\n📌 訂單編號：${result.orderID}\n💺 分配座位：${seatDisplay}\n💰 總金額：$${result.finalAmount.toLocaleString()}`);
-
-        //             // 啟動倒數
-        //             const timeDiv = document.getElementById('timerContainer');
-        //             const display = document.querySelector('#countdownTimer');
-        //             if(timeDiv && display) {
-        //                 timeDiv.style.display = 'block';
-        //                 startTimer(600, display); // 預設 10 分鐘
-        //             }
-        //         } else {
-        //             alert("❌ 訂購失敗：" + result.message);
-        //         }
-        //     } catch (error) {
-        //         alert("⚠️ 系統異常，請稍後再試。");
-        //     } finally {
-        //         this.disabled = false;
-        //         this.innerHTML = `<i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票`;
-        //     }
-        // };
-
-        // // 倒數計時器邏輯 (保持你原本的 startTimer)
-        // function startTimer(duration, display) {
-        //     let timer = duration;
-        //     if (window.bookingInterval) clearInterval(window.bookingInterval);
-        //     window.bookingInterval = setInterval(function () {
-        //         let minutes = Math.floor(timer / 60);
-        //         let seconds = timer % 60;
-        //         display.textContent = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-        //         if (--timer < 0) {
-        //             clearInterval(window.bookingInterval);
-        //             alert("⏰ 時間到！訂單已失效。");
-        //             location.reload();
-        //         }
-        //     }, 1000);
-        // }
+              
     </script>
 }
