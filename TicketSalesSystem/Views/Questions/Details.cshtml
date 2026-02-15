@@ -42,7 +42,7 @@
                     {
                         <div class="mt-3 p-2 bg-light rounded border">
                             <small class="d-block text-muted mb-1"><i class="bi bi-paperclip"></i> 附件檔案</small>
-                            <a href="~/uploads/@Model.UploadFile" target="_blank" class="text-decoration-none small">查看上傳附件</a>
+                            <a href="~/Docs/Questions/@Model.UploadFile" target="_blank" class="text-decoration-none small">查看上傳附件</a>
                         </div>
                     }
                 </div>
@@ -52,42 +52,67 @@
         @* 右側：回覆對話紀錄 *@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0"><i class="bi bi-chat-left-dots me-2"></i>回覆紀錄</h5>
-                </div>
-                <div class="card-body bg-light" style="max-height: 600px; overflow-y: auto;">
-                    @if (Model.Reply == null || !Model.Reply.Any())
+                    @* 顯示 TempData 訊息 *@
+                    @if (TempData["SuccessMessage"] != null)
                     {
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <p class="text-muted">客服人員正在準備回覆中，請稍候...</p>
-                        </div>
+                        <span class="badge bg-success">@TempData["SuccessMessage"]</span>
                     }
-                    else
+                </div>
+
+                <div class="card-body bg-light" style="max-height: 500px; overflow-y: auto;">
+                    @if (Model.Reply != null && Model.Reply.Any())
                     {
                         @foreach (var reply in Model.Reply)
                         {
-                            <div class="mb-4 d-flex flex-column align-items-start">
-                                <div class="d-flex align-items-center mb-1">
-                                    <span class="fw-bold me-2 text-primary">客服人員 @reply.Employee?.EmployeeID</span>
-                                    <small class="text-muted">@reply.CreatedTime.ToString("yyyy-MM-dd HH:mm")</small>
-                                    <span class="badge bg-success ms-2 small">@reply.ReplyStatus?.ReplyStatusName</span>
-                                </div>
-                                <div class="bg-white p-3 rounded shadow-sm border-start border-4 border-success" style="max-width: 90%; white-space: pre-wrap;">
-                                    @reply.ReplyDescription
-                                </div>
-                                @if (!string.IsNullOrEmpty(reply.Note))
-                                {
-                                    <small class="text-muted mt-1 italic">備註：@reply.Note</small>
-                                }
+                            <div class="mb-3 p-2 bg-white rounded shadow-sm">
+                                <strong>客服人員 @reply.Employee.Name</strong>
+                                <small class="text-muted">@reply.CreatedTime</small>
+                                <p class="mb-0">@reply.ReplyDescription</p>
                             </div>
                         }
                     }
+                    else
+                    {
+                        <p class="text-muted text-center py-3">目前尚無回覆紀錄</p>
+                    }
                 </div>
-                @* 如果消費者可以追問，可以在這裡加一個簡易表單（非必要） *@
-                <div class="card-footer bg-white py-3">
+
+                @* 🚩 新增：管理員回覆區塊 *@
+                <div class="card-footer bg-white border-top-0 py-3">
+                    <form asp-controller="Reply" asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="questionId" value="@Model.QuestionID" />
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-primary">撰寫管理員回覆</label>
+                            <textarea name="replyDescription" class="form-control" rows="4"
+                                      placeholder="請輸入回覆內容..." required></textarea>
+                            @if (TempData["ErrorMessage"] != null)
+                            {
+                                <div class="text-danger small mt-1">@TempData["ErrorMessage"]</div>
+                            }
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">目前處理進度</label>
+                                <select name="replyStatusId" class="form-select form-select-sm" asp-items="ViewBag.ReplyStatusID">
+                                        <option>請選擇處理進度</option>
+                                </select>
+                               
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-send-fill me-1"></i> 送出回覆
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-white py-2">
                     <p class="small text-muted mb-0 text-center">
-                        <i class="bi bi-info-circle"></i> 若對回覆內容有疑問，請撥打客服專線 0800-xxx-xxx。
+                        <i class="bi bi-shield-check"></i> 此回覆將即時同步給提問會員。
                     </p>
                 </div>
             </div>

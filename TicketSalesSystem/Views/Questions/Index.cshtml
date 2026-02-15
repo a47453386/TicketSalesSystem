@@ -1,0 +1,175 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Question>
+
+@{
+    ViewData["Title"] = "諮詢管理中心";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-patch-question"></i> 使用者諮詢管理</h2>
+    <div>
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#typeManagerModal">
+            <i class="bi bi-tags"></i> 管理分類項目
+        </button>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>提問時間</th>
+                    <th>會員</th>
+                    <th>分類</th>
+                    <th>問題標題</th>
+                    <th>附件</th>
+                    <th>狀態</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.CreatedTime.ToString("yyyy/MM/dd HH:mm")</td>
+                        <td>@item.Member?.Name <br /><small class="text-muted">@item.MemberID</small></td>
+                        <td>
+                            <span class="badge bg-info text-dark">@item.QuestionType?.QuestionTypeName</span>
+                        </td>
+                        <td class="text-truncate" style="max-width: 250px;">
+                            <strong>@item.QuestionTitle</strong>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.UploadFile))
+                            {
+                                <i class="bi bi-file-earmark-pdf text-danger" title="有附件"></i>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @{
+                                // 1. 抓取最後一筆回覆
+                                var latestReply = item.Reply?.OrderByDescending(r => r.CreatedTime).FirstOrDefault();
+
+                                // 2. 設定標籤文字 (根據你的資料庫 ID，假設 "2" 是已完成)
+                                string statusText = "待處理";
+                                string badgeClass = "bg-warning text-dark";
+
+                                if (latestReply != null)
+                                {
+                                    if (latestReply.ReplyStatusID == "Y")
+                                    {
+                                        statusText = "已結案";
+                                        badgeClass = "bg-success";
+                                    }
+                                    else // 其他狀態如 "N" 或 "A" (處理中)
+                                    {
+                                        statusText = latestReply.ReplyStatus?.ReplyStatusName ?? "處理中";
+                                        badgeClass = "bg-info text-dark";
+                                    }
+                                }
+                            }                                                                                                                                                                                  
+                                @* 3. 顯示標籤 *@
+                                <span class="badge @badgeClass">@statusText</span>
+                            
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.QuestionID" class="btn btn-sm btn-primary">
+                                <i class="bi bi-chat-dots"></i> 回覆
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="typeManagerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">分類管理</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="typeManagerContent">
+                載入中...
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        // 初始化：Modal 顯示時抓資料
+        $('#typeManagerModal').on('show.bs.modal', function () {
+            refreshTypeList();
+        });
+
+        // 載入清單
+        function refreshTypeList() {
+            // 讓 ASP.NET 自動產生路徑，它會自動處理 Port 號
+            var targetUrl = "@Url.Action("GetPartialList", "QuestionTypes")";
+            console.log("正在嘗試連線至: " + targetUrl); // 檢查這行輸出的網址是否正確
+
+            $("#typeManagerContent").load(targetUrl, function(response, status, xhr) {
+                if (status == "error") {
+                    alert("連線失敗！請確認伺服器是否正常執行。");
+                }
+            });
+        }
+
+        // 新增分類：
+
+        function addNewType() {
+            var name = $("#newTypeName").val(); // 取得輸入框內容
+            if (!name) {
+                alert("請輸入分類名稱");
+                return;
+            }
+
+            // 發送 POST 請求
+            $.post("@Url.Action("QuickCreate", "QuestionTypes")", { name: name }, function (data) {
+                if (data.success) {
+                    // 1. 清空輸入框
+                    $("#newTypeName").val("");
+                    // 2. 呼叫之前的 refreshTypeList() 重新整理 Modal 內的列表
+                    refreshTypeList();
+                } else {
+                    alert("新增失敗：" + data.message);
+                }
+            }).fail(function() {
+                alert("系統連線錯誤，請稍後再試");
+            });
+        }
+
+        // 修改分類名稱
+        function editType(id, oldName) {
+            var newName = prompt("請輸入新的分類名稱：", oldName);
+            if (newName && newName !== oldName) {
+                $.post("@Url.Action("Edit", "QuestionTypes")", { id: id, name:newName  }, function(data) {
+                    if (data.success) refreshTypeList();
+                    else alert("修改失敗");
+                });
+            }
+        }
+
+        // 刪除分類 (如果沒設狀態欄位，就直接刪除)
+        function deleteType(id) {
+            if (confirm("確定要刪除此分類嗎？（若已有諮詢使用此分類將無法刪除）")) {
+                // 這裡對應你 Controller 內建的 DeleteConfirmed 或自訂一個 AjaxDelete
+                $.post("/QuestionTypes/Delete", { id: id }, function(data) {
+                    if (data.success) refreshTypeList();
+                    else alert("刪除失敗，可能已有資料關聯。");
+                });
+            }
+        }
+
+
+    </script>
+}

@@ -1,57 +1,34 @@
 [HttpPost]
-public async Task<IActionResult> ConfirmBooking([FromBody] BookingRequest request)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create(Question question, IFormFile? upload)
 {
-    // 1. 修復 TotalAmount 紅線：先查單價
-    var area = await _context.TicketsArea.FindAsync(request.AreaID);
-    if (area == null) return Json(new { success = false, message = "票區不存在" });
-    
-    decimal totalAmount = area.Price * request.SelectedSeats.Count;
+    // 1. 補足後端自動生成的資料
+    question.QuestionID = Guid.NewGuid().ToString();
+    question.CreatedTime = DateTime.Now;
 
-    // 2. 呼叫你的 SQL Function 取得新編號
-    // 注意：SqlQueryRaw 在 EF Core 7+ 建議用法如下
-    var newOrderId = _context.Database.SqlQueryRaw<string>("SELECT dbo.funGetOrderID()")
-                              .AsEnumerable()
-                              .FirstOrDefault();
-
-    using var transaction = await _context.Database.BeginTransactionAsync();
-    try
+    // 2. 處理檔案上傳
+    if (upload != null && upload.Length > 0)
     {
-        // 3. 在 VS 建立 Order
-        var order = new Order {
-            OrderID = newOrderId,
-            MemberID = request.MemberID,
-            SessionID = request.SessionID,
-            OrderDate = DateTime.Now,
-            TotalAmount = totalAmount,
-            OrderStatusID = "Pending"
-        };
-        _context.Order.Add(order);
+        // 呼叫你的 FileService
+        // 它會自動根據副檔名存到 Photos/Questions 或 Docs/Questions
+        // 並回傳路徑如 "Docs/Questions/guid.pdf"
+        string dbPath = await _fileService.SaveFileAsync(upload, "Questions");
+        question.UploadFile = dbPath;
+    }
 
-        // 4. 修復 Split 紅線：對單一字串 seatId 進行處理
-        foreach (var seatId in request.SelectedSeats)
-        {
-            var parts = seatId.Split('-'); // 這裡不會紅線了，因為 seatId 是字串
-            if (parts.Length == 2)
-            {
-                _context.Tickets.Add(new Tickets {
-                    TicketsID = Guid.NewGuid().ToString(),
-                    OrderID = newOrderId,
-                    SessionID = request.SessionID,
-                    TicketsAreaID = request.AreaID,
-                    RowIndex = int.Parse(parts[0]),
-                    SeatIndex = int.Parse(parts[1]),
-                    TicketsStatusID = "Sold"
-                });
-            }
-        }
+    // 3. 移除不需要驗證的欄位（因為 ID 和時間是後端產生的）
+    ModelState.Remove("QuestionID");
+    ModelState.Remove("CreatedTime");
+    ModelState.Remove("MemberID"); // 假設從 Session 抓
 
+    if (ModelState.IsValid)
+    {
+        _context.Add(question);
         await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
-        return Json(new { success = true, orderId = newOrderId });
+        return RedirectToAction(nameof(MyList));
     }
-    catch (Exception ex)
-    {
-        await transaction.RollbackAsync();
-        return Json(new { success = false, message = ex.Message });
-    }
+
+    // 如果失敗，重新載入下拉選單
+    ViewBag.QuestionTypeID = new SelectList(_context.QuestionType, "QuestionTypeID", "QuestionTypeName", question.QuestionTypeID);
+    return View(question);
 }

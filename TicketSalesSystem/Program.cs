@@ -66,6 +66,7 @@ using (var scope = app.Services.CreateScope())
 
 
 // ... 其他中間件 (如 StaticFiles, Routing)
+app.UseStaticFiles();
 
 app.UseRouting();
 

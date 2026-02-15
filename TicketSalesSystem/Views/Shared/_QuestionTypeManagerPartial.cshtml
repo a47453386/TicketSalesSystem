@@ -1,0 +1,38 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.QuestionType>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>分類名稱</th>
+            <th style="width: 80px">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <span id="name-@item.QuestionTypeID">@item.QuestionTypeName</span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary p-1" onclick="editType('@item.QuestionTypeID', '@item.QuestionTypeName')">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger p-1" onclick="deleteType('@item.QuestionTypeID')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="input-group mt-3">
+    @* 移除了 onkeyup，現在按 Enter 不會發生任何事 *@
+    <input type="text" id="newTypeName" class="form-control" placeholder="輸入新分類名稱...">
+
+    @* 只有點擊這個按鈕才會觸發 addNewType *@
+    <button class="btn btn-primary" type="button" onclick="addNewType()">
+        <i class="bi bi-plus-lg"></i> 新增
+    </button>
+</div>

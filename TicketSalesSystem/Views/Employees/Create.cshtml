@@ -1,0 +1,140 @@
+﻿@model TicketSalesSystem.ViewModel.EmployeeCreateVM
+
+@{
+    ViewData["Title"] = "新增員工";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-person-plus-fill"></i> 新增員工資料</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-7 border-end">
+                        <h5 class="text-primary mb-3"><i class="bi bi-info-circle"></i> 基本資訊</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label fw-bold"></label>
+                                <input asp-for="Name" class="form-control" placeholder="請輸入全名" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="NationalID" class="form-label fw-bold"></label>
+                                <input asp-for="NationalID" class="form-control" placeholder="A123456789" />
+                                <span asp-validation-for="NationalID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Birthday" class="form-label fw-bold"></label>
+                                <input asp-for="Birthday" type="date" class="form-control" />
+                                <span asp-validation-for="Birthday" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Gender" class="form-label fw-bold"></label>
+                                <div class="mt-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" asp-for="Gender" value="true" id="male" checked>
+                                        <label class="form-check-label" for="male">男</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" asp-for="Gender" value="false" id="female">
+                                        <label class="form-check-label" for="female">女</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control" placeholder="example@mail.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="Tel" class="form-label fw-bold"></label>
+                                <input asp-for="Tel" class="form-control" placeholder="0912345678" />
+                                <span asp-validation-for="Tel" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Extension" class="form-label fw-bold"></label>
+                                <input asp-for="Extension" class="form-control" placeholder="101" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-bold"></label>
+                            <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5 bg-light p-4 rounded">
+                        <h5 class="text-success mb-3"><i class="bi bi-shield-lock"></i> 帳號安全與權限</h5>
+
+                        <div class="mb-3">
+                            <label asp-for="Account" class="form-label fw-bold">登入帳號</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="Account" class="form-control" placeholder="設定唯一帳號" />
+                            </div>
+                            <span asp-validation-for="Account" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-bold">初始密碼</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input asp-for="Password" class="form-control" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <div class="mb-3">
+                            <label asp-for="RoleID" class="form-label fw-bold">職位分配</label>
+                            <select asp-for="RoleID" class="form-select border-primary" asp-items="ViewBag.RoleID">
+                                <option value="">-- 請選擇職位 --</option>
+                            </select>
+                            <span asp-validation-for="RoleID" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">帳號初始狀態</label>
+                            <div class="form-control-plaintext text-success fw-bold">
+                                <i class="bi bi-check-circle-fill"></i> 預設啟用
+                            </div>
+                            @* 偷偷把值送回後端 *@
+                            <input type="hidden" asp-for="AccountStatusID" value="A" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="HireDate" class="form-label fw-bold"></label>
+                            <input asp-for="HireDate" type="date" class="form-control" />
+                            <span asp-validation-for="HireDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <hr />
+                    <a asp-action="Index" class="btn btn-secondary me-2">返回列表</a>
+                    <button type="submit" class="btn btn-primary px-5">確認新增員工</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div asp-validation-summary="All" class="text-danger"></div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

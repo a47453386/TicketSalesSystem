@@ -40,7 +40,7 @@ namespace TicketSalesSystem.Models
         public virtual QuestionType? QuestionType { get; set; } = null!;
 
 
-        public virtual List<Reply> Reply { get; set; } = null!;
+        public virtual List<Reply>? Reply { get; set; }
 
 
 

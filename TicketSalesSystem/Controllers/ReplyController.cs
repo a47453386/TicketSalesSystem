@@ -18,38 +18,50 @@ namespace TicketSalesSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendReply(string questionId, string replyDescription)
+        public async Task<IActionResult> Create(string questionId, string replyDescription, string replyStatusId)
         {
-            if (string.IsNullOrEmpty(replyDescription)) return BadRequest("回覆內容不可為空");
+            // 1. 內容驗證
+            if (string.IsNullOrWhiteSpace(replyDescription))
+            {
+                TempData["ErrorMessage"] = "回覆內容不能為空！";
+                // 確保這裡的參數名稱與路由匹配
+                return RedirectToAction("Details", "Questions", new { id = questionId });
+            }
 
-            // 1. 建立回覆資料
-            var newReply = new Reply
+            // 2. 檢查問題是否存在
+            var question = await _context.Question.FindAsync(questionId);
+            if (question == null)
+            {
+                TempData["ErrorMessage"] = "問題不存在！";
+                return RedirectToAction("Index", "Questions");
+            }
+
+            // 3. 建立回覆資料
+            var reply = new Reply
             {
                 ReplyID = Guid.NewGuid().ToString(),
                 QuestionID = questionId,
                 ReplyDescription = replyDescription,
-                EmployeeID = "A23025", // 應抓取登入員工
+                EmployeeID = "A23025",
                 CreatedTime = DateTime.Now,
-                ReplyStatusID = "2", // 🚩 假設 "2" 代表「已回覆」
+                ReplyStatusID = replyStatusId,
                 Note = ""
             };
 
             try
             {
-                _context.Add(newReply);
-
-                // 💡 可以在這裡同時更新 Question 的狀態（如果 Question 表有狀態欄位的話）
-                // 或者透過 ReplyStatusID 關聯來判斷
-
+                _context.Add(reply);
                 await _context.SaveChangesAsync();
-
-                // 回覆完後回到該問題的詳細頁面
-                return RedirectToAction("Details", "Questions", new { id = questionId });
+                TempData["SuccessMessage"] = "回覆成功！";
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return View("Error");
+                
+                TempData["ErrorMessage"] = "發生錯誤：" + ex.Message;
             }
+
+            
+            return RedirectToAction("Details", "Questions", new { id = questionId });
         }
     }
 }
