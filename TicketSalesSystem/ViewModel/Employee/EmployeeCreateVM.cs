@@ -2,15 +2,16 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ValidationAttributes;
+using static TicketSalesSystem.ValidationAttributes.MyValidator;
 
-namespace TicketSalesSystem.ViewModel
+namespace TicketSalesSystem.ViewModel.Employee
 {
     public class EmployeeCreateVM
     {
         [Key]
         [Display(Name = "員工編號")]
         [Column(TypeName = "nchar(6)")]
-        public string EmployeeID { get; set; } 
+        public string? EmployeeID { get; set; } 
 
         [Display(Name = "員工姓名")]
         [Required(ErrorMessage = "必填")]
@@ -65,39 +66,42 @@ namespace TicketSalesSystem.ViewModel
         public string? Extension { get; set; }
 
         [Display(Name = "照片")]
-        [StringLength(10)]
         public IFormFile? PhotoFile { get; set; }
 
         // 🚩 用來存放最後存入資料庫的「檔名路徑」(字串)
         public string? Photo { get; set; }
 
-        [Display(Name = "建立時間")]
-        [Required(ErrorMessage = "必填")]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 hh:mm:ss}")]
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
-
-        [Display(Name = "最後登入時間")]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:yyyy年MM月dd日 hh:mm:ss}")]
-        public DateTime? LastLoginTime { get; set; } = DateTime.Now;
-
         [Display(Name = "帳號")]
         [Required(ErrorMessage = "必填")]
         [StringLength(30, MinimumLength = 8, ErrorMessage = "帳號長度需介於 8 到 30 個字元")]
         [RegularExpression("[a-zA-Z0-9]*$", ErrorMessage = "帳號只能包含英文字母、數字")]
+        [AccountDuplicateCheck]
         public string Account { get; set; } 
 
         [Display(Name = "密碼")]
         [Required(ErrorMessage = "必填")]
         [DataType(DataType.Password)]
         [StringLength(200, MinimumLength = 8, ErrorMessage = "密碼長度至少需 8 位")]
-        [RegularExpression("(?=.*[a-z])(?=.*[A-Z])(?=.[0-9]){8,}$", ErrorMessage = "密碼必須包含至少一個大寫字母、一個小寫字母與一個數字")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$",
+         ErrorMessage = "密碼必須包含至少一個大寫字母、一個小寫字母與一個數字，且長度至少 8 碼")]
         public string Password { get; set; } 
 
-        public string AccountStatusID { get; set; }
+        public string? AccountStatusID { get; set; }
 
-        public string RoleID { get; set; } 
+        public string? RoleID { get; set; }
+
+
+        [Display(Name = "手動新增角色編號")]
+        public string? NewRoleID { get; set; }
+
+        [Display(Name = "手動新增角色名稱")]
+        public string? NewRoleName { get; set; }
+
+        [Display(Name = "手動新增帳號狀態編號")]
+        public string? NewAccountStatusID { get; set; }
+
+        [Display(Name = "手動新增帳號狀態名稱")]
+        public string? NewAccountStatusName { get; set; }
 
 
     }

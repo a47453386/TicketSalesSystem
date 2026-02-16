@@ -24,5 +24,10 @@ namespace TicketSalesSystem.Models
         //關聯區
         public virtual List<Employee>? Employee { get; set; }
 
+
+
+        //顯示用
+        [NotMapped]
+        public string FullDisplayName => $"{RoleID} - {RoleName}";
     }
 }

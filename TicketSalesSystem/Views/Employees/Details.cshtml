@@ -1,102 +1,103 @@
 ﻿@model TicketSalesSystem.Models.Employee
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "員工詳細資訊";
 }
 
-<h1>Details</h1>
+<div class="container mt-4">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-person-badge"></i> 員工個人檔案</h4>
+            <span class="badge bg-primary">建立日期：@Model.CreatedTime.ToString("yyyy/MM/dd")</span>
+        </div>
 
-<div>
-    <h4>Employee</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HireDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HireDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Birthday)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Birthday)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Tel)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Tel)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Gender)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Gender)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NationalID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NationalID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Extension)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Extension)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Photo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Photo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastLoginTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastLoginTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Role)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Role.RoleID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AccountStatus)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AccountStatus.AccountStatusID)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.EmployeeID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-4 text-center border-end">
+                    <div class="mb-3">
+                        @if (!string.IsNullOrEmpty(Model.Photo))
+                        {
+                            <img src="~/Photos/employeePhotos/@Model.Photo"
+                                 class="img-thumbnail rounded-circle shadow"
+                                 style="width: 180px; height: 180px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <img src="~/images/default-avatar.png"
+                                 class="img-thumbnail rounded-circle shadow"
+                                 style="width: 180px; height: 180px;" />
+                        }
+                    </div>
+                    <h3 class="fw-bold">@Model.Name</h3>
+                    <p class="text-muted">@Model.EmployeeID</p>
+                    <hr />
+                    <div class="d-grid gap-2">
+                        <div class="p-2 border rounded bg-light">
+                            <small class="text-muted d-block">目前職位</small>
+                            <span class="fw-bold">@Model.Role?.RoleName</span>
+                        </div>
+                        <div class="p-2 border rounded bg-light">
+                            <small class="text-muted d-block">帳號狀態</small>
+                            @if (Model.AccountStatusID == "A")
+                            {
+                                <span class="badge bg-success">@Model.AccountStatus?.AccountStatusName</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">@Model.AccountStatus?.AccountStatusName</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8 ps-md-5">
+                    <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-card-list"></i> 基本資料</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4 text-muted">身分證字號</dt>
+                        <dd class="col-sm-8 fw-bold">@Model.NationalID</dd>
+
+                        <dt class="col-sm-4 text-muted">性別</dt>
+                        <dd class="col-sm-8">@(Model.Gender ? "男" : "女")</dd>
+
+                        <dt class="col-sm-4 text-muted">生日</dt>
+                        <dd class="col-sm-8">@Model.Birthday.ToString("yyyy年MM月dd日")</dd>
+
+                        <dt class="col-sm-4 text-muted">到職日期</dt>
+                        <dd class="col-sm-8">@Model.HireDate.ToString("yyyy年MM月dd日")</dd>
+                    </dl>
+
+                    <h5 class="text-primary border-bottom pb-2 mb-3 mt-4"><i class="bi bi-telephone-inbound"></i> 聯絡資訊</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4 text-muted">電子郵件</dt>
+                        <dd class="col-sm-8"><a href="mailto:@Model.Email">@Model.Email</a></dd>
+
+                        <dt class="col-sm-4 text-muted">手機電話</dt>
+                        <dd class="col-sm-8">@Model.Tel</dd>
+
+                        <dt class="col-sm-4 text-muted">公司分機</dt>
+                        <dd class="col-sm-8">@Model.Extension</dd>
+
+                        <dt class="col-sm-4 text-muted">通訊地址</dt>
+                        <dd class="col-sm-8">@Model.Address</dd>
+                    </dl>
+
+                    <h5 class="text-primary border-bottom pb-2 mb-3 mt-4"><i class="bi bi-shield-lock"></i> 帳號資訊</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4 text-muted">登入帳號</dt>
+                        <dd class="col-sm-8 fw-bold">@Model.EmployeeLogin?.Account</dd>
+
+                        <dt class="col-sm-4 text-muted">最後登入時間</dt>
+                        <dd class="col-sm-8">@(Model.LastLoginTime?.ToString("yyyy/MM/dd HH:mm") ?? "尚未登入過")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light text-end p-3">
+            <a asp-action="Index" class="btn btn-secondary me-2">返回列表</a>
+            <a asp-action="Edit" asp-route-id="@Model.EmployeeID" class="btn btn-primary px-4">
+                <i class="bi bi-pencil-square"></i> 編輯此員工
+            </a>
+        </div>
+    </div>
 </div>

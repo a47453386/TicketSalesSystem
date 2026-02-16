@@ -19,6 +19,11 @@ namespace TicketSalesSystem.Models
         //關聯
         public List<Member>? Member { get; set; }
         public List<Employee>? Employee { get; set; }
+
+
+        //顯示用
+        [NotMapped]
+        public string FullDisplayName => $"{AccountStatusID} - {AccountStatusName}";
     }
 
 }

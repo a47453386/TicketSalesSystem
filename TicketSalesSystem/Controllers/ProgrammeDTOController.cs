@@ -10,9 +10,9 @@ using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IProgramme;
 using TicketSalesSystem.ViewModel;
-using TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep;
-using TicketSalesSystem.ViewModel.CreateProgramme.Item;
-using TicketSalesSystem.ViewModel.EditProgramme;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
+using TicketSalesSystem.ViewModel.Programme.EditProgramme;
 
 namespace TicketSalesSystem.Controllers
 {

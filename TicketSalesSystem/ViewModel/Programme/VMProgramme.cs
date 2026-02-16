@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TicketSalesSystem.ViewModel
+namespace TicketSalesSystem.ViewModel.Programme
 {
     public class VMProgramme
     {

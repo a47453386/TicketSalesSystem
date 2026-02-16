@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
-using TicketSalesSystem.ViewModel;
+using TicketSalesSystem.ViewModel.Employee;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -26,10 +26,29 @@ namespace TicketSalesSystem.Controllers
         }
 
         // GET: Employees
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var ticketsContext = _context.Employee.Include(e => e.AccountStatus).Include(e => e.Role);
-            return View(await ticketsContext.ToListAsync());
+            //包含關聯資料
+            var employees = _context.Employee
+                .Include(e => e.AccountStatus)
+                .Include(e => e.Role)
+                .AsQueryable();//暫時轉成可查詢物件，方便後續加條件
+
+            //實作搜尋邏輯 (姓名或編號)
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                employees = employees.Where(s => s.Name.Contains(searchString)
+                                             || s.EmployeeID.Contains(searchString));
+            }
+
+            //排序
+            var result = await employees.OrderByDescending(e => e.RoleID).ToListAsync();
+
+            //將搜尋字串傳回 View，讓搜尋框保留文字
+            ViewData["CurrentFilter"] = searchString;
+
+
+            return View(result);
         }
 
         // GET: Employees/Details/5
@@ -43,6 +62,7 @@ namespace TicketSalesSystem.Controllers
             var employee = await _context.Employee
                 .Include(e => e.AccountStatus)
                 .Include(e => e.Role)
+                .Include(e => e.EmployeeLogin)
                 .FirstOrDefaultAsync(m => m.EmployeeID == id);
             if (employee == null)
             {
@@ -66,14 +86,50 @@ namespace TicketSalesSystem.Controllers
         {
             if (!ModelState.IsValid)
             {
-                PopulateDropdownLists(vm);
+                PopulateDropdownLists(vm.AccountStatusID, vm.RoleID);
                 return View(vm);
             }
+
+            //檢查帳號重複
+            if (await _context.EmployeeLogin.AnyAsync(a => a.Account == vm.Account))
+            {
+                ModelState.AddModelError("Account", "帳號已被註冊。");
+                PopulateDropdownLists(vm.AccountStatusID, vm.RoleID);
+                return View(vm);
+            }
+
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
+                    //處理角色新增
+                    if(!string.IsNullOrEmpty(vm.NewRoleID) && !string.IsNullOrEmpty(vm.NewRoleName))
+                    {
+                        // 檢查重複 (避免編號衝突)
+                        if (await _context.Role.AnyAsync(r => r.RoleID == vm.NewRoleID))
+                        {
+                            ModelState.AddModelError("NewRoleID", "此角色編號已存在");
+                            throw new Exception("Duplicate RoleID");
+                        }
+                        _context.Role.Add(new Role { RoleID = vm.NewRoleID, RoleName = vm.NewRoleName });
+                        vm.RoleID = vm.NewRoleID; // 🚩 強制將員工關聯到新角色
+                    }
+
+                    //處理帳號狀態新增
+                    if (!string.IsNullOrEmpty(vm.NewAccountStatusID) && !string.IsNullOrEmpty(vm.NewAccountStatusName))
+                    {
+                        if (await _context.AccountStatus.AnyAsync(s => s.AccountStatusID == vm.NewAccountStatusID))
+                        {
+                            ModelState.AddModelError("NewAccountStatusID", "此狀態編號已存在");
+                            throw new Exception("Duplicate StatusID");
+                        }
+                        _context.AccountStatus.Add(new AccountStatus { AccountStatusID = vm.NewAccountStatusID, AccountStatusName = vm.NewAccountStatusName });
+                        vm.AccountStatusID = vm.NewAccountStatusID; // 🚩 強制將員工關聯到新狀態
+                    }
+                    // 先儲存主檔變動，確保外鍵關聯正確
+                    await _context.SaveChangesAsync();
+
                     //產生新的 EmployeeID
                     var emID = await _idService.GetNextEmployeeID(vm.RoleID);
 
@@ -82,7 +138,7 @@ namespace TicketSalesSystem.Controllers
                     string? fileName = null;
                     if (vm.PhotoFile != null&&vm.PhotoFile.Length>0)
                     {
-                         await _fileService.SaveFileAsync(vm.PhotoFile,emID, "employeePhotos");
+                        fileName= await _fileService.SaveFileAsync(vm.PhotoFile,emID, "employeePhotos");
                         
                     }
 
@@ -134,10 +190,10 @@ namespace TicketSalesSystem.Controllers
                                    $"底層原因：{innerMessage}");
                 }
 
-                PopulateDropdownLists(vm);
-                return View(vm);
             }
         }
+
+
 
         // GET: Employees/Edit/5
         public async Task<IActionResult> Edit(string id)
@@ -147,97 +203,193 @@ namespace TicketSalesSystem.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employee.FindAsync(id);
+            var employee = await _context.Employee
+                .Include(e => e.AccountStatus)
+                .Include(e => e.Role)
+                .Include(e => e.EmployeeLogin)
+                .FirstOrDefaultAsync(e => e.EmployeeID == id);
+
             if (employee == null)
             {
                 return NotFound();
             }
-            ViewData["AccountStatusID"] = new SelectList(_context.AccountStatus, "AccountStatusID", "AccountStatusID", employee.AccountStatusID);
-            ViewData["RoleID"] = new SelectList(_context.Role, "RoleID", "RoleID", employee.RoleID);
-            return View(employee);
+            
+            var vm = new EmployeeEditVM
+            {
+                EmployeeID = employee.EmployeeID,
+                Name = employee.Name,
+                HireDate = employee.HireDate,
+                Address = employee.Address,
+                Birthday = employee.Birthday,
+                Tel = employee.Tel,
+                Gender = employee.Gender,
+                NationalID = employee.NationalID,
+                Email = employee.Email,
+                Extension = employee.Extension,
+                Photo = employee.Photo,
+                Account = employee.EmployeeLogin?.Account??"",//如果 EmployeeLogin 為 null，則給予空字串
+                RoleID = employee.RoleID,
+                AccountStatusID = employee.AccountStatusID
+            };
+            PopulateDropdownLists(employee.AccountStatusID, employee.RoleID);
+            return View(vm);
         }
 
         // POST: Employees/Edit/5
        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("EmployeeID,Name,HireDate,Address,Birthday,Tel,Gender,NationalID,Email,Extension,Photo,CreatedTime,LastLoginTime,RoleID,AccountStatusID")] Employee employee)
+        public async Task<IActionResult> Edit(EmployeeEditVM vm)
         {
-            if (id != employee.EmployeeID)
+            // 🚩 1. 行內新增的驗證排除邏輯
+            if (!string.IsNullOrEmpty(vm.NewRoleID)) ModelState.Remove("RoleID");
+            if (!string.IsNullOrEmpty(vm.NewAccountStatusID)) ModelState.Remove("AccountStatusID");
+
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                PopulateDropdownLists(vm.AccountStatusID, vm.RoleID);
+                return View(vm);
             }
 
-            if (ModelState.IsValid)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    _context.Update(employee);
+                    //取得現有的 Employee 實體
+                    var employee = await _context.Employee
+                        .Include(e => e.AccountStatus)
+                        .Include(e => e.Role)
+                        .Include(e => e.EmployeeLogin)
+                        .FirstOrDefaultAsync(e => e.EmployeeID == vm.EmployeeID);
+
+                    if(employee == null) return NotFound();
+
+                    //新增角色
+                    if (!string.IsNullOrEmpty(vm.NewRoleID) && !string.IsNullOrEmpty(vm.NewRoleName))
+                    {
+                        if (!await _context.Role.AnyAsync(r => r.RoleID == vm.NewRoleID))
+                        {
+                            _context.Role.Add(new Role { RoleID = vm.NewRoleID, RoleName = vm.NewRoleName });
+                            vm.RoleID = vm.NewRoleID;
+                        }
+                    }
+
+                    // 新增狀態
+                    if (!string.IsNullOrEmpty(vm.NewAccountStatusID) && !string.IsNullOrEmpty(vm.NewAccountStatusName))
+                    {
+                        if (!await _context.AccountStatus.AnyAsync(s => s.AccountStatusID == vm.NewAccountStatusID))
+                        {
+                            _context.AccountStatus.Add(new AccountStatus { AccountStatusID = vm.NewAccountStatusID, AccountStatusName = vm.NewAccountStatusName });
+                            vm.AccountStatusID = vm.NewAccountStatusID;
+                        }
+                    }
+
                     await _context.SaveChangesAsync();
+
+                    //處裡照片更新
+                    if (vm.PhotoFile != null && vm.PhotoFile.Length > 0)
+                    {
+                        //刪除舊照片
+                        if (!string.IsNullOrEmpty(employee.Photo))
+                        {
+                            await _fileService.DeleteFileAsync(employee.Photo, "employeePhotos");
+                        }
+                        //儲存新照片
+                        var newFileName = await _fileService.SaveFileAsync(vm.PhotoFile, employee.EmployeeID, "employeePhotos");
+                        employee.Photo = newFileName;
+                    }
+
+
+                    //更新 EmployeeLogin 資料
+                    employee.Name = vm.Name;
+                    employee.HireDate = vm.HireDate;
+                    employee.Address = vm.Address;
+                    employee.Birthday = vm.Birthday;
+                    employee.Tel = vm.Tel;
+                    employee.Gender = vm.Gender;
+                    employee.NationalID = vm.NationalID;
+                    employee.Email = vm.Email;
+                    employee.Extension = vm.Extension;
+                    employee.RoleID= vm.RoleID;
+                    employee.AccountStatusID = vm.AccountStatusID;
+
+
+                    //如果有輸入新密碼，則更新密碼
+                    if (employee.EmployeeLogin != null)
+                    { 
+                        if(!string.IsNullOrEmpty(vm.Password))
+                        {
+                            var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<string>();
+                            employee.EmployeeLogin.Password = hasher.HashPassword(employee.EmployeeLogin.Account, vm.Password);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return RedirectToAction(nameof(Index));
+
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
-                    if (!EmployeeExists(employee.EmployeeID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    await transaction.RollbackAsync();
+                    ModelState.AddModelError(string.Empty, $"更新失敗：{ex.Message}");
+                    PopulateDropdownLists(vm.AccountStatusID, vm.RoleID);
+                    var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "無底層訊息";
+                    return Content($"更新失敗！<br/>" +
+                                   $"主錯誤：{ex.Message}<br/>" +
+                                   $"底層原因：{innerMessage}");
+                    
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["AccountStatusID"] = new SelectList(_context.AccountStatus, "AccountStatusID", "AccountStatusID", employee.AccountStatusID);
-            ViewData["RoleID"] = new SelectList(_context.Role, "RoleID", "RoleID", employee.RoleID);
-            return View(employee);
+            
+            
         }
 
-        // GET: Employees/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var employee = await _context.Employee
-                .Include(e => e.AccountStatus)
-                .Include(e => e.Role)
-                .FirstOrDefaultAsync(m => m.EmployeeID == id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
-            return View(employee);
-        }
+       
 
         // POST: Employees/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id)) return NotFound();
             var employee = await _context.Employee.FindAsync(id);
-            if (employee != null)
+            if (employee == null) return NotFound();
+
+            try 
             {
+                var login = await _context.EmployeeLogin.FirstOrDefaultAsync(l => l.EmployeeID == id);
+                if (login != null)
+                {
+                    _context.EmployeeLogin.Remove(login);
+                }
+
                 _context.Employee.Remove(employee);
+                _context.SaveChangesAsync();
+
+                if (!string.IsNullOrEmpty(employee.Photo))
+                {
+                    await _fileService.DeleteFileAsync(employee.Photo, "employeePhotos");
+                }
+                
+                return RedirectToAction("Index");
+            }
+            catch(Exception ex)
+            {
+                return RedirectToAction(nameof(Index), new { error = "刪除失敗" });
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            
         }
 
-        private bool EmployeeExists(string id)
-        {
-            return _context.Employee.Any(e => e.EmployeeID == id);
-        }
+     
 
-
-        private void PopulateDropdownLists(EmployeeCreateVM p = null)
+        private void PopulateDropdownLists(string? selectedStatus = null, string? selectedRole = null)
         {
-            ViewData["AccountStatusID"] = new SelectList(_context.AccountStatus, "AccountStatusID", "AccountStatusName", p?.AccountStatusID);
-            ViewData["RoleID"] = new SelectList(_context.Role, "RoleID", "RoleName", p?.RoleID);
+
+            ViewData["AccountStatusID"] = new SelectList(_context.AccountStatus, "AccountStatusID", "FullDisplayName", selectedStatus);
+            ViewData["RoleID"] = new SelectList(_context.Role, "RoleID", "FullDisplayName", selectedRole);
         }
 
 

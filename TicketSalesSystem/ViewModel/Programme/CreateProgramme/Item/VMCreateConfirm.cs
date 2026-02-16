@@ -1,4 +1,4 @@
-﻿namespace TicketSalesSystem.ViewModel.CreateProgramme.Item
+﻿namespace TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item
 {
     public class VMCreateConfirm
     {

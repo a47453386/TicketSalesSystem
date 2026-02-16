@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TicketSalesSystem.Models;
 
 namespace TicketSalesSystem.ValidationAttributes
 {
@@ -57,6 +58,29 @@ namespace TicketSalesSystem.ValidationAttributes
                 return ValidationResult.Success;
             }
         }
+
+        public class AccountDuplicateCheck : ValidationAttribute
+        {
+            protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+            {
+                // 1. 取得資料庫上下文
+                var _context = (TicketsContext)validationContext.GetService(typeof(TicketsContext))!;
+
+                string account = value?.ToString() ?? "";
+
+                // 2. 檢查資料庫是否已存在該帳號
+                // 🚩 注意：如果是編輯 (Edit)，要排除掉「自己」原本的帳號，但新增 (Create) 不需要
+                bool isExist = _context.EmployeeLogin.Any(x => x.Account == account);
+
+                if (isExist)
+                {
+                    return new ValidationResult("此帳號已被使用，請更換其他名稱。");
+                }
+
+                return ValidationResult.Success;
+            }
+        }
+
 
 
 

@@ -21,6 +21,7 @@
     <Folder Include="SeedPhotos\SeatImage\" />
     <Folder Include="wwwroot\Photos\CoverImage\" />
     <Folder Include="wwwroot\Photos\DescriptionImage\" />
+    <Folder Include="wwwroot\Photos\employeePhotos\" />
     <Folder Include="wwwroot\Photos\SeatImage\" />
   </ItemGroup>
 

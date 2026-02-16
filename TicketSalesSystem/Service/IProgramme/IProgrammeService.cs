@@ -1,7 +1,7 @@
 ﻿using TicketSalesSystem.DTOs;
 using TicketSalesSystem.Models;
-using TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep;
-using TicketSalesSystem.ViewModel.EditProgramme;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
+using TicketSalesSystem.ViewModel.Programme.EditProgramme;
 
 namespace TicketSalesSystem.Service.IProgramme
 {

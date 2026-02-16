@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Images;
-using TicketSalesSystem.ViewModel;
+using TicketSalesSystem.ViewModel.Programme;
 
 namespace TicketSalesSystem.Controllers
 {

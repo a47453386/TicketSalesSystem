@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using TicketSalesSystem.Models;
 
-namespace TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep
+namespace TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep
 {
     public class VMProgrammeStep1
     {

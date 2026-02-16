@@ -1,99 +1,176 @@
-﻿@model TicketSalesSystem.Models.Employee
+﻿@model TicketSalesSystem.ViewModel.Employee.EmployeeEditVM
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "編輯員工資料";
 }
 
-<h1>Edit</h1>
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-pencil-square"></i> 編輯員工：@Model.Name</h4>
+            <span class="badge bg-light text-success">ID: @Model.EmployeeID</span>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                @* 🚩 隱藏欄位：確保 ID 與 舊檔名 能送回後端 *@
+                <input type="hidden" asp-for="EmployeeID" />
+                <input type="hidden" asp-for="Photo" />
 
-<h4>Employee</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="EmployeeID" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HireDate" class="control-label"></label>
-                <input asp-for="HireDate" class="form-control" />
-                <span asp-validation-for="HireDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Birthday" class="control-label"></label>
-                <input asp-for="Birthday" class="form-control" />
-                <span asp-validation-for="Birthday" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Tel" class="control-label"></label>
-                <input asp-for="Tel" class="form-control" />
-                <span asp-validation-for="Tel" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Gender" /> @Html.DisplayNameFor(model => model.Gender)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="NationalID" class="control-label"></label>
-                <input asp-for="NationalID" class="form-control" />
-                <span asp-validation-for="NationalID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Extension" class="control-label"></label>
-                <input asp-for="Extension" class="form-control" />
-                <span asp-validation-for="Extension" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Photo" class="control-label"></label>
-                <input asp-for="Photo" class="form-control" />
-                <span asp-validation-for="Photo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedTime" class="control-label"></label>
-                <input asp-for="CreatedTime" class="form-control" />
-                <span asp-validation-for="CreatedTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastLoginTime" class="control-label"></label>
-                <input asp-for="LastLoginTime" class="form-control" />
-                <span asp-validation-for="LastLoginTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RoleID" class="control-label"></label>
-                <select asp-for="RoleID" class="form-control" asp-items="ViewBag.RoleID"></select>
-                <span asp-validation-for="RoleID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AccountStatusID" class="control-label"></label>
-                <select asp-for="AccountStatusID" class="form-control" asp-items="ViewBag.AccountStatusID"></select>
-                <span asp-validation-for="AccountStatusID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-4 text-center">
+                    <div class="position-relative d-inline-block">
+                        @if (!string.IsNullOrEmpty(Model.Photo))
+                        {
+                            <img id="imgPreview" src="~/Photos/employeePhotos/@Model.Photo"
+                                 class="rounded-circle border shadow-sm"
+                                 style="width: 140px; height: 140px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <img id="imgPreview" src="~/images/default-avatar.png"
+                                 class="rounded-circle border shadow-sm"
+                                 style="width: 140px; height: 140px; object-fit: cover;" />
+                        }
+                        <label for="PhotoFile" class="position-absolute bottom-0 end-0 bg-success text-white rounded-circle p-2 shadow" style="cursor: pointer;">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                    </div>
+                    <div class="mt-2">
+                        <input asp-for="PhotoFile" type="file" class="d-none" accept="image/*" onchange="previewImage(this)" id="PhotoFile" />
+                        <small class="text-muted d-block">點擊綠色圖示更換新照片</small>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7 border-end">
+                        <h5 class="text-success mb-3 border-bottom pb-2">基本資訊</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label fw-bold"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="NationalID" class="form-label fw-bold"></label>
+                                <input asp-for="NationalID" class="form-control" />
+                                <span asp-validation-for="NationalID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Birthday" class="form-label fw-bold"></label>
+                                <input asp-for="Birthday" type="date" class="form-control"
+                                       value="@Model.Birthday.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Gender" class="form-label fw-bold"></label>
+                                <div class="mt-2">
+                                    <input type="radio" asp-for="Gender" value="true" /> 男
+                                    <input type="radio" asp-for="Gender" value="false" class="ms-3" /> 女
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="Tel" class="form-label fw-bold"></label>
+                                <input asp-for="Tel" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Extension" class="form-label fw-bold"></label>
+                                <input asp-for="Extension" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-bold"></label>
+                            <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5 bg-light p-3 rounded shadow-sm">
+                        <h5 class="text-secondary mb-3 border-bottom pb-2">帳號與安全</h5>
+
+                        <div class="mb-3">
+                            <label asp-for="Account" class="form-label fw-bold"></label>
+                            @* 🚩 帳號通常不允許修改，設為唯讀 *@
+                            <input asp-for="Account" class="form-control bg-white" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-bold">重設密碼</label>
+                            <input asp-for="Password" class="form-control" type="password" placeholder="若不修改請留白" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">職位變更</label>
+                            <div id="roleSelectArea">
+                                <div class="input-group">
+                                    <select asp-for="RoleID" class="form-select border-success" asp-items="ViewBag.RoleID"></select>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="toggleInput('Role')">新角色</button>
+                                </div>
+                            </div>
+                            <div id="roleInputArea" style="display:none;" class="p-2 border border-success rounded bg-white mt-1">
+                                <div class="d-flex justify-content-between mb-1"><small class="fw-bold text-success">新增角色</small><button type="button" class="btn-close btn-sm" onclick="toggleInput('Role', false)"></button></div>
+                                <div class="row g-1">
+                                    <div class="col-4"><input asp-for="NewRoleID" class="form-control form-control-sm" placeholder="編號" /></div>
+                                    <div class="col-8"><input asp-for="NewRoleName" class="form-control form-control-sm" placeholder="名稱" /></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">帳號狀態</label>
+                            <select asp-for="AccountStatusID" class="form-select" asp-items="ViewBag.AccountStatusID"></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="HireDate" class="form-label fw-bold"></label>
+                            <input asp-for="HireDate" type="date" class="form-control"
+                                   value="@Model.HireDate.ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 border-top pt-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary me-2">返回列表</a>
+                    <button type="submit" class="btn btn-success px-5">儲存修改</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+<div asp-validation-summary="All" class="text-danger"></div>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = e => document.getElementById('imgPreview').src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function toggleInput(type, show = true) {
+            const selectArea = document.getElementById(`${type.toLowerCase()}SelectArea`);
+            const inputArea = document.getElementById(`${type.toLowerCase()}InputArea`);
+            selectArea.style.display = show ? 'none' : 'block';
+            inputArea.style.display = show ? 'block' : 'none';
+        }
+    </script>
 }

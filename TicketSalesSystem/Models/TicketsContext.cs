@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
-using TicketSalesSystem.ViewModel.CreateProgramme.CreateProgrammeStep;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
 
 namespace TicketSalesSystem.Models
 {

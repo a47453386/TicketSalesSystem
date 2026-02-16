@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using TicketSalesSystem.DTOs;
-using TicketSalesSystem.ViewModel.CreateProgramme.Item;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
 
-namespace TicketSalesSystem.ViewModel.EditProgramme
+namespace TicketSalesSystem.ViewModel.Programme.EditProgramme
 {
     public class VMProgrammeEdit
     {

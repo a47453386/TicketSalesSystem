@@ -1,113 +1,132 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.Employee>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "員工管理系統";
 }
 
-<h1>Index</h1>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-people-fill text-primary"></i> 員工列表</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> 新增員工
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HireDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Birthday)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Tel)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Gender)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NationalID)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Extension)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Photo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastLoginTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Role)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AccountStatus)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HireDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Birthday)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Tel)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Gender)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NationalID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Extension)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Photo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastLoginTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Role.RoleID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccountStatus.AccountStatusID)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.EmployeeID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.EmployeeID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.EmployeeID">Delete</a>
-            </td>
-        </tr>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" name="searchString" class="form-control"
+                               placeholder="輸入姓名或員工編號..." value="@ViewData["CurrentFilter"]" />
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i> 搜尋
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-link text-decoration-none">清除搜尋</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-hover align-middle shadow-sm bg-white">
+        <thead class="table-dark">
+            <tr>
+                <th style="width: 80px;">照片</th>
+                <th>員工編號 / 姓名</th>
+                <th>職位</th>
+                <th>性別</th>
+                <th>聯絡資訊</th>
+                <th>帳號狀態</th>
+                <th class="text-center">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.Photo))
+                        {
+                            <img src="~/Photos/employeePhotos/@item.Photo"
+                                 class="rounded-circle border" width="50" height="50" style="object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <img src="~/images/default-avatar.png"
+                                 class="rounded-circle border" width="50" height="50" />
+                        }
+                    </td>
+                    <td>
+                        <div class="fw-bold text-primary">@item.EmployeeID</div>
+                        <div>@item.Name</div>
+                    </td>
+                    <td>
+                        <span class="badge bg-info text-dark">@item.Role?.RoleName</span>
+                    </td>
+                    <td>
+                        @(item.Gender ? "♂ 男" : "♀ 女")
+                    </td>
+                    <td>
+                        <div class="small"><i class="bi bi-telephone"></i> @item.Tel</div>
+                        <div class="small"><i class="bi bi-envelope"></i> @item.Email</div>
+                    </td>
+                    <td>
+                        @if (item.AccountStatusID == "A") // 假設 A 為啟用
+                        {
+                            <span class="badge bg-success">@item.AccountStatus?.AccountStatusName</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">@item.AccountStatus?.AccountStatusName</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            <a asp-action="Edit" asp-route-id="@item.EmployeeID" class="btn btn-outline-primary" title="編輯">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.EmployeeID" class="btn btn-outline-info" title="詳情">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <form asp-action="Delete" method="post" style="display:inline;">
+                                @* 🚩 確保傳遞的是 EmployeeID *@
+                                <input type="hidden" name="id" value="@item.EmployeeID" />
+
+                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('你確定要刪除員工【@(item.Name)】及其所有資料嗎？')">
+                                    <i class="bi bi-trash"></i> 刪除
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function deleteEmployee(id, name) {
+            Swal.fire({
+                title: '確定要刪除嗎？',
+                text: `員工「${name}」的所有資料將被移除且無法還原！`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '是的，刪除它！',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 使用 JS 送出隱藏表單或 AJAX 呼叫 Delete Action
+                    location.href = `/Employees/DeleteConfirm/${id}`;
+                }
+            })
+        }
+    </script>
 }
-    </tbody>
-</table>

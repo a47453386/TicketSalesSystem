@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TicketSalesSystem.Models;
-using TicketSalesSystem.ViewModel.CreateProgramme.Item;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
 
 namespace TicketSalesSystem.DTOs
 {
