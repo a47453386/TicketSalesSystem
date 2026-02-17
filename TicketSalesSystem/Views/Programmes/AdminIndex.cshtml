@@ -1,0 +1,75 @@
+﻿@model IEnumerable<TicketSalesSystem.ViewModel.Programme.VMProgramme>
+
+@{
+    ViewData["Title"] = "活動管理後台";
+   
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-gear-fill me-2"></i>活動節目管理</h2>
+        <a asp-controller="ProgrammeDTO" asp-action="CreateStep1" class="btn btn-success"><i class="bi bi-plus-lg"></i> 新增活動</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">活動 ID</th>
+                        <th>縮圖</th>
+                        <th style="width: 25%">活動名稱</th>
+                        <th>地點</th>
+                        <th>開演時間</th>
+                        <th>狀態</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4"><code class="fw-bold">@item.ProgrammeID</code></td>
+                            <td>
+                                <img src="@Url.Content("~/Photos/CoverImage/" + item.CoverImage)"
+                                     style="width: 60px; height: 40px; object-fit: cover;"
+                                     class="rounded border"
+                                     onerror="this.src='https://via.placeholder.com/60x40?text=No+Img'">
+                            </td>
+                            <td class="fw-bold">@item.ProgrammeName</td>
+                            <td>@item.PlaceName</td>
+                            <td>@(item.StartTime?.ToString("yyyy-MM-dd HH:mm") ?? "未排定")</td>
+                            <td>
+                                <span class="badge bg-@item.StatusColor">@item.ProgrammeStatusName</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    @* 🚩 這是你測試的重點：編輯按鈕 *@
+                                    <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil-square"></i> 編輯
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.ProgrammeID" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i> 預覽
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('@item.ProgrammeID')">
+                                        <i class="bi bi-trash"></i> 刪除
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            if (confirm("確定要刪除活動 " + id + " 嗎？")) {
+                // 執行刪除邏輯...
+            }
+        }
+    </script>
+}

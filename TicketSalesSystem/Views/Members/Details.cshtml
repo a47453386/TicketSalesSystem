@@ -1,0 +1,187 @@
+﻿@model TicketSalesSystem.Models.Member
+
+@{
+    ViewData["Title"] = "會員詳細資料";
+    Layout = "_UserLayout";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">會員管理</a></li>
+            <li class="breadcrumb-item active">會員詳情</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-center py-5">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                        <i class="bi bi-person-fill display-3"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">@Model.Name</h4>
+                    <p class="text-muted mb-3">@@@ViewData["Account"]</p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">手機認證狀態</label>
+                        <div class="input-group">
+                            <input asp-for="Tel" class="form-control" readonly /> @* 認證時手機通常不讓改 *@
+
+                            @if (Model.IsPhoneVerified)
+                            {
+                                <span class="btn btn-success disabled"><i class="bi bi-check-circle"></i> 已認證</span>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-outline-primary" id="btnSendSMS">發送驗證碼</button>
+                            }
+                        </div>
+
+                        @if (!Model.IsPhoneVerified)
+                        {
+                            <div class="mt-2 card bg-light border-0 shadow-sm" id="verifyBox" style="display:none;">
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <input type="text" id="inputVerifyCode" class="form-control" placeholder="請輸入 6 位驗證碼" maxlength="6">
+                                        <button type="button" class="btn btn-primary" id="btnSubmitSMS">提交驗證</button>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block" id="timerText"></small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <hr />
+                    <div class="text-start px-3">
+                        <small class="text-muted d-block">會員編號 (GUID)</small>
+                        <code class="small text-break">@Model.MemberID</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-card-text me-2"></i>詳細資料</h5>
+                    <div class="btn-group">
+                        <a asp-action="AdminEdit" asp-route-id="@Model.MemberID" class="btn btn-sm btn-dark">
+                            <i class="bi bi-pencil-square me-1"></i>編輯此會員
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="ps-4 py-3 bg-light" style="width: 30%;">身分證字號</th>
+                                <td class="ps-4 py-3">@Model.NationalID</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-4 py-3 bg-light">性別</th>
+                                <td class="ps-4 py-3">@(Model.Gender == true ? "男" : "女")</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-4 py-3 bg-light">出生日期</th>
+                                <td class="ps-4 py-3">@Model.Birthday.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-4 py-3 bg-light">手機號碼</th>
+                                <td class="ps-4 py-3 text-primary fw-bold">@Model.Tel</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-4 py-3 bg-light">電子郵件</th>
+                                <td class="ps-4 py-3">@Model.Email</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-4 py-3 bg-light">通訊地址</th>
+                                <td class="ps-4 py-3">@Model.Address</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-4 py-3 bg-light">註冊時間</th>
+                                <td class="ps-4 py-3 text-muted">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white py-3 text-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary">返回列表</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+            $(function() {
+            // 🚩 建議改用 .on 綁定，確保按鈕狀態切換後事件依然存在
+            $(document).on("click", "#btnSendSMS", function() {
+                var $btn = $(this);
+
+                // 防止重複點擊 (發送中...)
+                $btn.prop('disabled', true).text("處理中...");
+
+                $.post("/Members/SendSmsCode", { id: "@Model.MemberID" }, function(res) {
+                    if (res.success) {
+                        // 🚩 清除舊的輸入內容，讓使用者知道是新的開始
+                        $("#inputVerifyCode").val("");
+                        $("#verifyBox").slideDown();
+                        startTimer(60, $btn);
+                    } else {
+                        alert(res.message);
+                        $btn.prop('disabled', false).text("重新發送驗證碼");
+                    }
+                }).fail(function() {
+                    alert("系統錯誤，請稍後再試");
+                    $btn.prop('disabled', false).text("重新發送驗證碼");
+                });
+            });
+
+            function startTimer(duration, $button) {
+                var timer = duration;
+                $button.prop('disabled', true);
+
+                var interval = setInterval(function () {
+                    var seconds = parseInt(timer % 60, 10);
+                    $button.text(seconds + " 秒後可重發");
+
+                    if (--timer < 0) {
+                        clearInterval(interval);
+                        // 🚩 倒數結束，徹底恢復按鈕
+                        $button.prop('disabled', false).text("重新發送驗證碼");
+                    }
+                }, 1000);
+            }
+
+            $(document).on("click", "#btnSubmitSMS", function() {
+            var code = $("#inputVerifyCode").val(); // 取得輸入框的 6 位數
+            var memberId = "@Model.MemberID";
+
+            if (code.length < 6) {
+                alert("請輸入完整的 6 位驗證碼");
+                return;
+            }
+
+            // 傳送到後端的 VerifySmsCode Action
+            $.post("/Members/SubmitVerifyCode", { id: memberId, inputCode: code }, function(res) {
+                if (res.success) {
+                    alert("✅ " + res.message);
+                    // 驗證成功後，通常會直接重新整理頁面，顯示「已驗證」的標籤
+                    location.reload();
+                } else {
+                    alert("❌ " + res.message);
+                    $("#inputVerifyCode").val(""); // 密碼錯了就清空，讓使用者重打
+                }
+            }).fail(function() {
+                alert("系統連線失敗，請稍後再試");
+            });
+        });
+
+
+        });
+
+
+                
+    </script>
+}

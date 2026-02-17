@@ -93,7 +93,13 @@ namespace TicketSalesSystem.Controllers
 
             try
             {
-                string memberId = "83542560-1941-48b9-af77-00fc42536fed";
+                string memberId = "004bc90a-26fb-48e9-a762-653a232d86e2";
+                var member = await _context.Member.AnyAsync(m => m.MemberID == memberId);
+                if (!member)
+                {
+                    return Json(new VMBookingResponse { Success = false, Message = "會員不存在" });
+                }
+
                 var response = await _seatService.CreateOrderAndTicketsAsync(request, memberId);
                 return Json(response);
 
@@ -157,7 +163,7 @@ namespace TicketSalesSystem.Controllers
                     .Select(o => o.OrderStatusID)
                     .FirstOrDefaultAsync();
 
-               if(currentStatus==null) return Json(new { success = false, message = "找不到此訂單。" });
+              
 
                 if (currentStatus == null)
                     return Json(new { success = false, message = "訂單不存在，可能已被系統徹底移除。" });

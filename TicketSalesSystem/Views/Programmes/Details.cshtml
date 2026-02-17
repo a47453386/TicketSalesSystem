@@ -1,78 +1,177 @@
 ﻿@model TicketSalesSystem.Models.Programme
-
 @{
-    ViewData["Title"] = "Details";
+    Layout = "_UserLayout";
 }
+<style>
+    /* 拓元深藍風格 */
+    :root {
+        --tixcraft-blue: #003a8c;
+        --tixcraft-red: #d9534f;
+    }
 
-<h1>Details</h1>
+    .btn-tixcraft-main {
+        background-color: var(--tixcraft-blue);
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
 
-<div>
-    <h4>Programme</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProgrammeName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProgrammeName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProgrammeDescription)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProgrammeDescription)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CoverImage)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CoverImage)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SeatImage)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SeatImage)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LimitPerOrder)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LimitPerOrder)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.EmployeeID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Place)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Place.PlaceID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProgrammeStatus)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProgrammeStatus.ProgrammeStatusID)
-        </dd>
-    </dl>
+        .btn-tixcraft-main:hover {
+            background-color: #002766;
+            color: white;
+        }
+
+    .alert-custom-danger {
+        background-color: #fff5f5;
+        border-left: 6px solid var(--tixcraft-red) !important;
+    }
+
+    .nav-tabs .nav-link {
+        color: #666;
+        border: none;
+        border-bottom: 3px solid transparent;
+    }
+
+        .nav-tabs .nav-link.active {
+            color: var(--tixcraft-blue);
+            border-bottom: 3px solid var(--tixcraft-blue);
+            background: none;
+        }
+
+    .btn-primary {
+        background-color: var(--tixcraft-blue);
+        border: none;
+    }
+
+    /* 平滑滾動 */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    .programme-description img {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="text-center mb-4">
+        <div class="banner-container shadow-sm rounded overflow-hidden">
+            <img src="@Url.Content("~/Photos/CoverImage/" + Model.CoverImage)"
+                 class="img-fluid w-100"
+                 style="max-height: 500px; object-fit: cover;"
+                 alt="@Model.ProgrammeName">
+        </div>
+        <h2 class="fw-bold mt-4 text-dark">@Model.ProgrammeName</h2>
+    </div>
+
+    <div class="row g-2 justify-content-center my-4">
+        <div class="col-6 col-md-2">
+            @if (Model.ProgrammeStatusID == "O")
+            {
+                @* 🚩 點擊後會滑動到下方的場次區塊 *@
+                <a href="#sessions" class="btn btn-tixcraft-main w-100 py-3 shadow-sm">
+                    <div class="fw-bold fs-5">立即購票</div>
+                    <div class="small opacity-75">Buy Tickets</div>
+                </a>
+            }
+            else
+            {
+                <button class="btn btn-secondary w-100 py-3 disabled">尚未啟售</button>
+            }
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="#intro" class="btn btn-outline-dark w-100 py-3 fw-bold">
+                <div>活動介紹</div>
+                <div class="small text-muted">Introduction</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <button class="btn btn-outline-dark w-100 py-3 fw-bold">
+                <div>購票流程</div>
+                <div class="small text-muted">Procedure</div>
+            </button>
+        </div>
+        <div class="col-6 col-md-2">
+            <button class="btn btn-outline-dark w-100 py-3 fw-bold">
+                <div>退票申請</div>
+                <div class="small text-muted">Refund</div>
+            </button>
+        </div>
+    </div>
+
+    <div class="alert alert-custom-danger border-0 rounded-0 p-4 mb-5 shadow-sm">
+        <h5 class="fw-bold text-danger mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>購票提醒</h5>
+        <ul class="mb-0 small text-dark">
+            <li>欲購票者，請先完成 <span class="text-danger fw-bold">加入會員</span> 及 <span class="text-danger fw-bold">手機號碼驗證</span>。</li>
+            <li>請勿於拍賣網站或執法單位公告之爭議網站購買票券，以免權益受損。</li>
+            <li>每筆訂單限購 @(Model.LimitPerOrder ?? 4) 張。</li>
+        </ul>
+    </div>
+
+    <div id="intro" class="mt-5 pt-3">
+        <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active fw-bold px-4 py-3" data-bs-toggle="tab" data-bs-target="#tab-1">節目介紹</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link fw-bold px-4 py-3" data-bs-toggle="tab" data-bs-target="#tab-2">注意事項</button>
+            </li>
+        </ul>
+        <div class="tab-content border p-4 bg-white shadow-sm">
+            <div class="tab-pane fade show active" id="tab-1">
+                @* 🚩 使用 Html.Raw 渲染資料庫中的 HTML 內容 *@
+                <div class="programme-description">
+                    @Html.Raw(Model.ProgrammeDescription)
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-2">
+                <p>這裡可以放置通用的購票注意事項...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="sessions" class="mt-5 pt-5">
+        <div class="d-flex align-items-center mb-4">
+            <div class="bg-primary" style="width: 8px; height: 35px; border-radius: 4px;"></div>
+            <h3 class="fw-bold mb-0 ms-3">選擇場次</h3>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead class="bg-light text-secondary">
+                        <tr>
+                            <th class="py-3">時間 Time</th>
+                            <th class="py-3">場次名稱 Session</th>
+                            <th class="py-3">地點 Venue</th>
+                            <th class="py-3">操作 Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var session in Model.Session.OrderBy(s => s.StartTime))
+                        {
+                            <tr>
+                                <td class="fw-bold">@session.StartTime.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>@session.Programme.ProgrammeName</td>
+                                <td>@Model.Place?.PlaceName</td>
+                                <td>
+                                    @if (session.Programme.ProgrammeStatusID == "O")
+                                    {
+                                        <a asp-controller="Seats" asp-action="Index" asp-route-id="@session.SessionID"
+                                           class="btn btn-primary btn-sm px-4 fw-bold">立即訂購</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">尚未開放</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ProgrammeID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+

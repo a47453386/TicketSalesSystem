@@ -1,0 +1,107 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Order>
+
+
+<div class="container-fluid">
+    <h3 class="fw-bold mb-4 text-dark">營運數據概況</h3>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-3">
+            <div class="card bg-white border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary-subtle p-3 me-3">
+                        <i class="bi bi-currency-dollar fs-3 text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">總銷售額</h6>
+                        <h4 class="fw-bold mb-0">NT$ @ViewBag.TotalSales.ToString("N0")</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-success-subtle p-3 me-3">
+                        <i class="bi bi-ticket-perforated fs-3 text-success"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">已售出張數</h6>
+                        <h4 class="fw-bold mb-0">@ViewBag.TotalTicketsSold 張</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-info-subtle p-3 me-3">
+                        <i class="bi bi-cart-check fs-3 text-info"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">總訂單數</h6>
+                        <h4 class="fw-bold mb-0">@ViewBag.OrderCount 筆</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-warning-subtle p-3 me-3">
+                        <i class="bi bi-people fs-3 text-warning"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">註冊會員</h6>
+                        <h4 class="fw-bold mb-0">@ViewBag.MemberCount 位</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0">最新成交訂單</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">訂單編號</th>
+                        <th>訂購人</th>
+                        <th>張數</th>
+                        <th>下單時間</th>
+                        <th>狀態</th>
+                        <th class="text-end pe-4">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold">@order.OrderID</td>
+                            <td>@order.Member?.Name <small class="text-muted">(@order.MemberID)</small></td>
+                            <td>@order.Tickets.Count 張</td>
+                            <td class="small">@order.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>
+                                @if (order.PaymentStatus)
+                                {
+                                    <span class="badge bg-success-subtle text-success">已付款</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning">待支付</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-controller="AdminOrders" asp-action="Details" asp-route-id="@order.OrderID" class="btn btn-sm btn-light">
+                                    <i class="bi bi-search"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

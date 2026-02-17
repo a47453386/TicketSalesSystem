@@ -16,8 +16,9 @@ namespace TicketSalesSystem.Models
         [Required(ErrorMessage = "必填")]
         [DataType(DataType.Password)]
         [StringLength(200, MinimumLength = 8, ErrorMessage = "密碼長度至少需 8 位")]
-        
-        [RegularExpression("(?=.*[a-z])(?=.*[A-Z])(?=.[0-9]){8,}$",ErrorMessage = "密碼必須包含至少一個大寫字母、一個小寫字母與一個數字")]
+
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$",
+         ErrorMessage = "密碼必須包含至少一個大寫字母、一個小寫字母與一個數字，且長度至少 8 碼")]
         public string Password { get; set; } = null!;
 
 

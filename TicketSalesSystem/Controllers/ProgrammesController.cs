@@ -24,22 +24,25 @@ namespace TicketSalesSystem.Controllers
         // GET: Programmes
         public async Task<IActionResult> Index()
         {
+            // 🚩 加入 OrderBy 確保每次讀取的順序一致，才不會覺得圖片跳來跳去
             var programme = await _context.Programme
+                .Where(p => p.ProgrammeStatusID == "O") // 照你之前的需求，只看開賣中
+                .OrderBy(p => p.ProgrammeID)            // 🚩 穩定排序
                 .Select(p => new VMProgramme
                 {
                     ProgrammeID = p.ProgrammeID,
-                    CoverImage = p.CoverImage,
                     ProgrammeName = p.ProgrammeName,
-                    // 🚩 修正 1：加上問號，如果 Place 是 null，則 PlaceName 為 null
-                    PlaceName = p.Place != null ? p.Place.PlaceName : "未設定地點",
+                    CoverImage = p.CoverImage, // 這裡拿的是資料庫字串，例如 "C20260101.jpg"
 
-                    // 🚩 修正 2：最關鍵！先拿整個 Session 物件，再判斷 StartTime
-                    // 或是使用 Null-conditional operator
-                    StartTime = p.Session.OrderBy(s => s.StartTime).FirstOrDefault() != null
-                        ? p.Session.OrderBy(s => s.StartTime).FirstOrDefault().StartTime
-                        : null, // 注意：VMProgramme 的 StartTime 屬性必須改為 DateTime?// 注意：VMProgramme 的 StartTime 屬性必須改為 DateTime?
+                    PlaceID = p.PlaceID,
+                    PlaceName = p.Place != null ? p.Place.PlaceName : "尚未公佈地點",
 
-                    ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "未知狀態",
+                    ProgrammeStatusID = p.ProgrammeStatusID ?? "O",
+                    ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "售票中",
+
+                    StartTime = p.Session.OrderBy(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
+                    SaleStartTime = p.Session.OrderBy(s => s.StartTime).Select(s => s.SaleStartTime).FirstOrDefault(),
+                    SessionID = p.Session.OrderBy(s => s.StartTime).Select(s => s.SessionID).FirstOrDefault() ?? ""
                 }).ToListAsync();
 
             return View(programme);
@@ -53,10 +56,10 @@ namespace TicketSalesSystem.Controllers
                 return NotFound();
             }
 
-            var programme = await _context.Programme
-                .Include(p => p.Employee)
+            var programme = await _context.Programme                
                 .Include(p => p.Place)
                 .Include(p => p.ProgrammeStatus)
+                .Include(p => p.Session) 
                 .FirstOrDefaultAsync(m => m.ProgrammeID == id);
             if (programme == null)
             {
@@ -66,38 +69,29 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
-
-
-        private void PopulateDropdownLists(Programme p = null)
+        public async Task<IActionResult> AdminIndex()
         {
-            ViewData["EmployeeID"] = new SelectList(_context.Employee.ToList(), "EmployeeID", "Name", p?.EmployeeID);
-            ViewData["PlaceID"] = new SelectList(_context.Place.ToList(), "PlaceID", "PlaceName", p?.PlaceID);
-            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus.ToList(), "ProgrammeStatusID", "ProgrammeStatusName", p?.ProgrammeStatusID);
+            // 後台通常不進行狀態過濾 (Where)，以便管理所有活動
+            var programmes = await _context.Programme
+                .OrderByDescending(p => p.CreatedTime) // 照建立時間排序，新的在上面
+                .Select(p => new VMProgramme
+                {
+                    ProgrammeID = p.ProgrammeID,
+                    ProgrammeName = p.ProgrammeName,
+                    CoverImage = p.CoverImage,
+                    PlaceName = p.Place != null ? p.Place.PlaceName : "未設定",
+                    ProgrammeStatusID = p.ProgrammeStatusID,
+                    ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "未知",
+                    // 抓最早場次時間
+                    StartTime = p.Session.OrderBy(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault()
+                }).ToListAsync();
+
+            return View(programmes);
         }
 
 
-       
 
-        // GET: Programmes/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var programme = await _context.Programme
-                .Include(p => p.Employee)
-                .Include(p => p.Place)
-                .Include(p => p.ProgrammeStatus)
-                .FirstOrDefaultAsync(m => m.ProgrammeID == id);
-            if (programme == null)
-            {
-                return NotFound();
-            }
-
-            return View(programme);
-        }
 
         // POST: Programmes/Delete/5
         [HttpPost, ActionName("Delete")]

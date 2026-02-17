@@ -1,0 +1,96 @@
+﻿@model TicketSalesSystem.ViewModel.Member.VMMemberUserEdit
+
+@{
+    ViewData["Title"] = "修改個人資料";
+    Layout = "_UserLayout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            @* 成功訊息提示 *@
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+                </div>
+            }
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-person-gear me-2"></i> 個人帳號設定</h5>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="UserEdit" asp-route-id="@Model.MemberID" method="post">
+                        @* 🚩 務必隱藏 MemberID *@
+                        <input type="hidden" asp-for="MemberID" />
+                        <input type="hidden" asp-for="Account" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="bg-light p-3 rounded mb-4">
+                            <h6 class="text-secondary fw-bold mb-3"><i class="bi bi-shield-lock me-1"></i> 基本本資料 (不可修改)</h6>
+                            <span>若需要修改請提出申請，並上傳相關證明</span>
+                            <div class="row">
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">姓名</label>
+                                    <input asp-for="Name" class="form-control-plaintext fw-bold ps-2" readonly />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">生日</label>
+                                    @* 使用 readonly 保持值傳遞，但外觀像純文字 *@
+                                    <input value="@Model.Birthday.ToString("yyyy-MM-dd")" class="form-control-plaintext fw-bold ps-2" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="text-primary fw-bold mb-3"><i class="bi bi-pencil-square me-1"></i> 聯絡資訊</h6>
+
+                        <div class="mb-3">
+                            <label asp-for="Tel" class="form-label fw-bold">手機號碼</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-phone"></i></span>
+                                <input asp-for="Tel" class="form-control" placeholder="0912345678" />
+                            </div>
+                            <span asp-validation-for="Tel" class="text-danger"></span>
+                            <div class="form-text text-warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i> 注意：更換手機後需重新進行簡訊驗證。
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold">電子郵件</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="example@mail.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-bold">聯絡地址</label>
+                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="請輸入您的通訊地址"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-5 border-top pt-3">
+                            <a asp-action="Index" class="text-decoration-none text-muted">取消變更</a>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold">
+                                <i class="bi bi-cloud-arrow-up-fill me-1"></i> 儲存所有變更
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div asp-validation-summary="All" class="text-danger"></div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -532,7 +532,7 @@ namespace TicketSalesSystem.Controllers
 
 
 
-        [HttpGet("Edit{id}")]
+        [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
             if(id==null) return NotFound();
@@ -550,7 +550,7 @@ namespace TicketSalesSystem.Controllers
             return View(vm);
         }
 
-        [HttpPost("Edit{id}")]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, VMProgrammeEdit vm)
         {

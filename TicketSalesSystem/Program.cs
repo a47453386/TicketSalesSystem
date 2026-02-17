@@ -6,6 +6,7 @@ using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IProgramme;
 using TicketSalesSystem.Service.Orders;
 using TicketSalesSystem.Service.Seats;
+using TicketSalesSystem.Service.Sms;
 using TicketSalesSystem.Service.Validation.IBookingValidation;
 using TicketSalesSystem.Service.Validation.NewFolder;
 
@@ -23,14 +24,14 @@ builder.Services.AddDbContext<TicketsContext>(options =>
 //註冊背景服務:清理過期位子
 builder.Services.AddHostedService<Background>();
 
-//註冊ISeatService及SeatService
+//註冊自動配位服務
 builder.Services.AddScoped<ISeatService, SeatService>();
 
-//註冊驗證服務
+//註冊預定服務
 builder.Services.AddScoped<IBookingValidationService, BookingValidationService>();
 
 
-//註冊驗證服務
+//註冊檔案上傳服務
 builder.Services.AddScoped<IFileService, FileService>();
 
 //註冊ID編碼服務
@@ -42,10 +43,12 @@ builder.Services.AddScoped<IProgrammeService, ProgrammeEditService>();
 //註冊訂單服務
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+//註冊虛擬簡訊介面
+builder.Services.AddScoped<ISmsService, MockSmsService>();
 
 
 
-// 1.註冊 Session 服務 加入 Session 服務
+//註冊 Session 服務 加入 Session 服務
 builder.Services.AddDistributedMemoryCache(); // 提供內部記憶體快取
 builder.Services.AddSession(options =>
 {
@@ -70,7 +73,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 2. 啟用 Session (必須放在 UseRouting 之後，UseAuthorization 之前)
+// 啟用 Session (必須放在 UseRouting 之後，UseAuthorization 之前)
 app.UseSession();
 
 app.UseAuthentication();

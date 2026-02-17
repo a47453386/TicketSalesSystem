@@ -4,6 +4,7 @@ using System.Diagnostics;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
+using TicketSalesSystem.ViewModel.Member;
 
 namespace TicketSalesSystem.Models
 {
@@ -267,6 +268,7 @@ namespace TicketSalesSystem.Models
             base.OnModelCreating(modelBuilder);
 
         }
+        public DbSet<TicketSalesSystem.ViewModel.Member.VMMemberCreate> MemberCreateVM { get; set; } = default!;
        
         
         

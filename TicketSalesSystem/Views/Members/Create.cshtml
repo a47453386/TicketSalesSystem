@@ -1,0 +1,131 @@
+﻿@model TicketSalesSystem.ViewModel.Member.VMMemberCreate
+
+@{
+    ViewData["Title"] = "新增會員";
+    Layout = "_UserLayout";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white p-3">
+            <h4 class="mb-0"><i class="bi bi-person-plus-fill"></i> 會員帳號註冊</h4>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                @* 🚩 隱藏欄位：這些值由系統決定，不顯示在畫面上 *@
+                <input type="hidden" asp-for="AccountStatusID" value="A" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-7 border-end pe-md-4">
+                        <h5 class="text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-card-list"></i> 基本資料
+                        </h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label fw-bold">姓名</label>
+                                <input asp-for="Name" class="form-control" placeholder="請輸入全名" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="NationalID" class="form-label fw-bold">身分證字號</label>
+                                <input asp-for="NationalID" class="form-control" placeholder="A123456789" />
+                                <span asp-validation-for="NationalID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Birthday" class="form-label fw-bold">出生日期</label>
+                                <input asp-for="Birthday" type="date" class="form-control" />
+                                <span asp-validation-for="Birthday" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Gender" class="form-label fw-bold">性別</label>
+                                <div class="mt-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" asp-for="Gender" value="true" id="male" checked>
+                                        <label class="form-check-label" for="male">男</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" asp-for="Gender" value="false" id="female">
+                                        <label class="form-check-label" for="female">女</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold">電子郵件</label>
+                            <input asp-for="Email" class="form-control" placeholder="example@mail.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Tel" class="form-label fw-bold">手機號碼</label>
+                            <input asp-for="Tel" class="form-control" placeholder="0912345678" />
+                            <span asp-validation-for="Tel" class="text-danger"></span>
+                            <small class="text-muted"><i class="bi bi-info-circle"></i> 註冊後需進行手機驗證</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-bold">聯絡地址</label>
+                            <textarea asp-for="Address" class="form-control" rows="2" placeholder="請輸入聯絡地址"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5 ps-md-4 bg-light p-3 rounded shadow-sm">
+                        <h5 class="text-success border-bottom pb-2 mb-3">
+                            <i class="bi bi-shield-lock"></i> 登入密碼設定
+                        </h5>
+
+                        <div class="mb-3">
+                            <label asp-for="Account" class="form-label fw-bold">設定帳號</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+                                <input asp-for="Account" class="form-control border-start-0" placeholder="請設定登入帳號" />
+                            </div>
+                            <span asp-validation-for="Account" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Password" class="form-label fw-bold">設定密碼</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-key"></i></span>
+                                <input asp-for="Password" type="password" class="form-control border-start-0" placeholder="建議 8 碼以上混合大小寫" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <div class="p-3 bg-white rounded border border-info mt-4">
+                            <h6 class="fw-bold text-info"><i class="bi bi-lightbulb"></i> 註冊須知</h6>
+                            <ul class="small text-muted mb-0 ps-3">
+                                <li>您的會員編號將由系統自動產生 GUID。</li>
+                                <li>註冊成功後，請至個人中心完成手機驗證。</li>
+                                <li>請務必填寫真實姓名與身分證字號。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5 border-top pt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4 me-2">返回</a>
+                    <button type="submit" class="btn btn-dark px-5 py-2 fw-bold">
+                        <i class="bi bi-check-circle-fill me-1"></i> 確認註冊會員
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @* 🚩 引入前端驗證腳本 *@
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

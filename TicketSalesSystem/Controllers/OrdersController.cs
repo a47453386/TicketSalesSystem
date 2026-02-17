@@ -30,7 +30,7 @@ namespace TicketSalesSystem.Controllers
         
         public async Task<IActionResult> UserIndex()
         {
-            string currentMemberID = "83542560-1941-48b9-af77-00fc42536fed";
+            string currentMemberID = "004bc90a-26fb-48e9-a762-653a232d86e2";
 
             var time=(int)Math.Max(0,(DateTime.Now.AddMinutes(10)-DateTime.Now).TotalSeconds);
             

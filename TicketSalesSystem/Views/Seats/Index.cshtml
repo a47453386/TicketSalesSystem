@@ -1,80 +1,171 @@
 ﻿@model TicketSalesSystem.Models.Session
 
 @{
-    ViewData["Title"] = "立即購票 - " + Model.Programme.ProgrammeName;
+    ViewData["Title"] = "選擇票區 - " + Model.Programme.ProgrammeName;
+    Layout = "_UserLayout";
 }
 
-<div id="timerContainer" style="display:none;" class="alert alert-warning sticky-top mt-3 shadow-sm">
-    <div class="container d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-clock-history"></i> 請於時限內完成付款，逾時位置將被釋出。</span>
-        <span id="countdownTimer" class="fw-bold fs-4 text-danger">10:00</span>
+<style>
+    /* 拓元風格微調 */
+    .bg-tixcraft {
+        background-color: #003a8c !important;
+    }
+
+    .btn-primary {
+        background-color: #003a8c;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #002766;
+        }
+
+    .area-card {
+        border: 1px solid #dee2e6;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-radius: 4px;
+    }
+
+        .area-card:hover:not(.sold-out) {
+            border-color: #003a8c;
+            background-color: #f0f5ff;
+            transform: translateX(5px);
+        }
+
+        .area-card.active {
+            border-color: #003a8c;
+            background-color: #003a8c;
+            color: white;
+        }
+
+            .area-card.active .text-danger, .area-card.active .text-muted {
+                color: #fff !important;
+            }
+
+        .area-card.sold-out {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f8f9fa;
+        }
+
+    .seat-map-img {
+        max-width: 100%;
+        cursor: zoom-in;
+    }
+
+    .area-name {
+        font-size: 1.1rem;
+    }
+
+    @@media (min-width: 992px) {
+        .sticky-bottom-md {
+            position: sticky;
+            bottom: 20px;
+        }
+    }
+</style>
+
+<div class="bg-dark text-white py-3 mb-4 shadow-sm">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h4 mb-1 fw-bold">@Model.Programme.ProgrammeName</h1>
+                <p class="mb-0 small text-light">
+                    <i class="bi bi-calendar3 me-1"></i> @Model.StartTime.ToString("yyyy/MM/dd (ddd) HH:mm")
+                    <span class="mx-2">|</span>
+                    <i class="bi bi-geo-alt-fill me-1"></i> @Model.Programme.Place?.PlaceName
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="badge bg-primary px-3 py-2">步驟 2: 選擇票區</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="container mt-4">
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body bg-dark text-white rounded">
-            <h1 class="h3">@Model.Programme.ProgrammeName</h1>
-            <p class="mb-0 text-info">
-                <i class="bi bi-calendar-event"></i> @Model.StartTime.ToString("yyyy/MM/dd HH:mm")
-                | <i class="bi bi-geo-alt"></i> @Model.Programme.Place?.PlaceName
-            </p>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-map me-2"></i>座位區域圖</div>
+                <div class="card-body text-center bg-light">
+                    @if (!string.IsNullOrEmpty(Model.Programme.SeatImage))
+                    {
+                        <img src="@Url.Content("~/Photos/SeatImage/" + Model.Programme.SeatImage)"
+                             class="img-fluid rounded shadow-sm seat-map-img"
+                             alt="座位圖" />
+                    }
+                    else
+                    {
+                        <div class="py-5 text-muted">暫無座位圖資訊</div>
+                    }
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="mb-4">
-        <div class="alert alert-light border">
-            <strong>當前選擇場次：</strong> @Model.StartTime.ToString("yyyy/MM/dd HH:mm")
-            <input type="hidden" id="currentSessionId" value="@Model.SessionID" />
-        </div>
-    </div>
+        <div class="col-lg-5">
+            <h2 class="h5 mb-3 fw-bold"><i class="bi bi-list-ul me-2"></i>請選擇票區</h2>
+            <div class="area-list-container" id="areaList">
+                @foreach (var area in Model.TicketsArea.OrderByDescending(a => a.Price))
+                {
+                    bool isSoldOut = area.SeatCount <= 0;
 
-    <div id="areaSection">
-        <h2 class="h4 mb-3 border-start border-4 border-primary ps-2">2. 選擇票區</h2>
-        <div class="row" id="areaList">
-            @foreach (var area in Model.TicketsArea)
-            {
-                <div class="col-md-4 mb-3">
-                    <div class="card area-card h-100 border-primary shadow-sm" style="cursor:pointer"
-                         onclick="selectArea('@area.TicketsAreaID', '@area.TicketsAreaName', @area.Price, '@area.VenueID')">
-                        <div class="card-body text-center">
-                            <h5 class="fw-bold">@area.TicketsAreaName</h5>
-                            <p class="text-danger fs-4 mb-1">$@area.Price.ToString("N0")</p>
-                            <small class="text-muted">剩餘座位：@area.SeatCount</small>
+                    <div class="card area-card mb-2 @(isSoldOut ? "sold-out" : "")"
+                         onclick="@(isSoldOut ? "" : $"selectArea('{area.TicketsAreaID}', '{area.TicketsAreaName}', {area.Price}, '{area.VenueID}')")">
+                        <div class="card-body d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <div class="fw-bold area-name">@area.TicketsAreaName</div>
+                                <div class="text-danger fw-bold">TWD $@area.Price.ToString("N0")</div>
+                            </div>
+                            <div class="text-end">
+                                @if (isSoldOut)
+                                {
+                                    <span class="badge bg-secondary">已售罄</span>
+                                }
+                                else if (area.SeatCount < 10)
+                                {
+                                    <span class="badge bg-warning text-dark">最後少數</span>
+                                    <div class="small text-muted mt-1">剩餘 @area.SeatCount</div>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">還有座位</span>
+                                    <div class="small text-muted mt-1">剩餘 @area.SeatCount</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div id="bookingSection" class="mt-4 sticky-bottom-md" style="display:none;">
+                <div class="card border-primary shadow-lg overflow-hidden">
+                    <div class="card-body p-0">
+                        <div class="p-3 bg-light border-bottom">
+                            <p id="selectedInfo" class="mb-0 fw-bold"></p>
+                        </div>
+                        <div class="p-3">
+                            <label class="form-label small fw-bold">購買張數 (每人限購 @Model.Programme.LimitPerOrder 張)：</label>
+                            <div class="input-group mb-3">
+                                <select id="ticketCount" class="form-select border-primary">
+                                    @for (int i = 1; i <= (Model.Programme.LimitPerOrder ?? 4); i++)
+                                    {
+                                        <option value="@i">@i 張</option>
+                                    }
+                                </select>
+                                <button id="autoAndConfirmBtn" class="btn btn-primary px-4 fw-bold">
+                                    下一步，確認座位 <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            }
-        </div>
-    </div>
-
-    <div id="bookingSection" class="mt-5 mb-5" style="display:none;">
-        <div class="card border-primary shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">3. 確認選擇並自動配位</h4>
-            </div>
-            <div class="card-body">
-                <p id="selectedInfo" class="fs-5"></p>
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <label class="form-label fw-bold">購買張數 (上限 4 張)：</label>
-                        <select id="ticketCount" class="form-select form-select-lg">
-                            <option value="1">1 張</option>
-                            <option value="2">2 張</option>
-                            <option value="3">3 張</option>
-                            <option value="4">4 張</option>
-                        </select>
-                    </div>
-                    <div class="col">
-                        <button id="autoAndConfirmBtn" class="btn btn-danger btn-lg w-100 mt-4 py-3 shadow">
-                            <i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script>
@@ -91,16 +182,13 @@
             currentPrice = price;
 
             // 樣式切換
-            document.querySelectorAll('.area-card').forEach(c => c.classList.remove('bg-primary', 'text-white'));
-            event.currentTarget.classList.add('bg-primary', 'text-white');
+           document.querySelectorAll('.area-card').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
 
             document.getElementById('selectedInfo').innerHTML =
-                `您選擇了：<span class="badge bg-secondary">${name}</span>
-                 單價：<span class="text-danger fw-bold">$${price.toLocaleString()}</span>`;
-            document.getElementById('bookingSection').style.display = 'block';
+                `<i class="bi bi-check-circle-fill text-success"></i> 已選：${name} / 單價：$${price.toLocaleString()}`;
 
-            // 自動滾動到確認區
-            document.getElementById('bookingSection').scrollIntoView({ behavior: 'smooth' });
+            $("#bookingSection").fadeIn();
         }
 
         // 3. 一鍵配位並購票 (簡化版：僅處理跳轉)
@@ -150,7 +238,7 @@
                 this.disabled = false;
                 this.innerHTML = `<i class="bi bi-lightning-fill"></i> 一鍵自動配位並購票`;
             }
-        };
+        }; 
               
     </script>
 }

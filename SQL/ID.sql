@@ -176,3 +176,32 @@ END
 GO
 
 	 SELECT dbo.funGetQuestionTypeID();
+
+----------------------------------------------------------------------------------------------------------
+--EmployeeID F21025
+
+create function funGetEmployeeID(@roleID nchar(1))
+returns nchar(6)
+as
+begin 
+    declare @currentYear nchar(2),@lastseq int,@newID nchar(6)
+
+    --取得當年度後2碼，YEAR(GETDATE()) 會抓到 2026
+    set @currentYear=right(CAST(Year(Getdate()) as nchar(4)),2)
+
+    --取得該角色在今年度最大流水號
+    select @lastseq= ISNULL(MAX(CAST(RIGHT(EmployeeID, 3) AS int)), 0)
+    from Employee
+    where EmployeeID like @roleID+@currentYear+'%'--F21%
+
+    --流水號加1
+    set @lastseq+=1
+
+    --組合編號
+    set @newID=@roleID+@currentYear+RIGHT('000' + CAST(@lastSeq AS varchar), 3)
+
+    return @newID
+
+end
+
+SELECT dbo.funGetEmployeeID('A');

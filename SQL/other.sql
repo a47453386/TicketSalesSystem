@@ -44,3 +44,7 @@ SELECT
 FROM sys.triggers tr
 JOIN sys.tables t ON tr.parent_id = t.object_id
 WHERE t.name = 'Order' OR t.name = 'Tickets';
+
+
+ALTER TABLE EmployeeLogin
+ADD CONSTRAINT UQ_Employee_Account UNIQUE (Account);

@@ -1,86 +1,132 @@
-﻿@using TicketSalesSystem.ViewModel.Order
+﻿
+
+@using TicketSalesSystem.ViewModel.Order
 @model VMUserOrderDetail
 
 @{
-    ViewData["Title"] = "訂單詳情";
+    ViewData["Title"] = "我的電子票夾";
+    Layout = "_UserLayout";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2><i class="bi bi-receipt"></i> 訂單詳情</h2>
-        <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-secondary">返回訂單列表</a>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="@Url.Action("UserIndex", "Orders")" class="text-decoration-none">訂單查詢</a></li>
+                <li class="breadcrumb-item active">票券詳情</li>
+            </ol>
+        </nav>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+            <i class="bi bi-printer"></i> 列印本頁
+        </button>
     </div>
 
-    <div class="card shadow-sm mb-4 border-0">
-        <div class="card-body bg-light rounded">
+    <div class="card border-0 shadow-sm mb-5 bg-dark text-white overflow-hidden" style="border-radius: 15px;">
+        <div class="card-body p-4 p-md-5">
             <div class="row">
-                <div class="col-md-6">
-                    <h4 class="text-primary">@Model.ProgrammeName</h4>
-                    <p class="mb-1"><strong>訂單編號：</strong>@Model.OrderID</p>
-                    <p class="mb-1"><strong>演出時間：</strong>@Model.StartTime</p>
-                    <p class="mb-1"><strong>演出地點：</strong>@Model.PlaceName</p>
+                <div class="col-md-8">
+                    <h2 class="fw-bold mb-3">@Model.ProgrammeName</h2>
+                    <div class="d-flex flex-wrap gap-3 opacity-75">
+                        <span><i class="bi bi-calendar3 me-2"></i>@Model.StartTime</span>
+                        <span><i class="bi bi-geo-alt-fill me-2"></i>@Model.PlaceName</span>
+                    </div>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-1"><strong>訂單狀態：</strong><span class="badge bg-success">@Model.OrderStatusName</span></p>
-                    <h3 class="mt-2 text-danger">NT$ @Model.FinalAmount.ToString("N0")</h3>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="small text-white-50">訂單總額</div>
+                    <div class="h2 fw-bold text-warning">NT$ @Model.FinalAmount.ToString("N0")</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <h4 class="mb-3">您的票券</h4>
-
-    <div class="row">
+    <h4 class="fw-bold mb-4 border-start border-primary border-4 ps-3">持票憑證</h4>
+    
+    <div class="row g-4">
         @foreach (var ticket in Model.Tickets)
         {
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 ticket-card shadow-sm border-2">
-                    <div class="card-header bg-dark text-white text-center py-2">
+            <div class="col-md-6 col-lg-4">
+                <div class="ticket-stub shadow-sm bg-white">
+                    @* 票區標題 *@
+                    <div class="ticket-header bg-primary text-white text-center py-2 fw-bold">
                         @ticket.TicketsAreaName
                     </div>
-                    <div class="card-body text-center d-flex flex-column justify-content-center">
-                        <h4 class="card-title fw-bold">@ticket.Seat</h4>
-                        <div class="qr-section py-3">
-                            @* 🚩 修改：移除 Model.IsPrintable，只檢查是否有核銷碼 *@
+
+                    <div class="ticket-body text-center p-4">
+                        <div class="mb-2 text-muted small">座位資訊 SEAT</div>
+                        <h3 class="fw-bold mb-4">@ticket.Seat</h3>
+
+                        <div class="qr-section">
+                            @* 🚩 判斷邏輯：如果有 Code 則顯示 QR，否則顯示鎖定 *@
                             @if (!string.IsNullOrEmpty(ticket.CheckInCode))
                             {
-                                <div class="qrcode-container d-flex justify-content-center" data-code="@ticket.CheckInCode"></div>
-                                <p class="mt-3 mb-0 text-muted">核銷碼：<strong class="text-dark">@ticket.CheckInCode</strong></p>
+                                <div class="qrcode-container d-flex justify-content-center mb-3" data-code="@ticket.CheckInCode"></div>
+                                <div class="bg-light py-2 rounded">
+                                    <small class="text-muted d-block">入場核銷碼</small>
+                                    <code class="fs-5 fw-bold text-dark">@ticket.CheckInCode</code>
+                                </div>
                             }
                             else
                             {
-                                @* 這是預防萬一該票券真的還沒產生 Code 的顯示 *@
-                                <div class="text-center py-4 bg-light rounded">
-                                    <i class="bi bi-hourglass-split text-secondary" style="font-size: 3rem;"></i>
-                                    <p class="mt-2 mb-0 text-secondary">票券核銷碼產生中</p>
+                                <div class="locked-section py-5 bg-light rounded-3 border border-dashed">
+                                    <i class="bi bi-lock-fill text-secondary display-4"></i>
+                                    <p class="mt-3 mb-1 fw-bold text-secondary">票券尚未開放領取</p>
+                                    @* 假設活動當天前 3 天開放，這裡可以放你的邏輯時間 *@
+                                    <small class="text-muted">開放時間：演出前 3 天</small>
                                 </div>
                             }
                         </div>
-                        @* <div class="qr-section py-3">
-                            (Model.IsPrintable && !string.IsNullOrEmpty(ticket.CheckInCode)
-                            @if(!string.IsNullOrEmpty(ticket.CheckInCode))
-                            {
-                                <div class="qrcode-container d-flex justify-content-center" data-code="@ticket.CheckInCode"></div>
-                                <p class="mt-3 mb-0 text-muted">核銷碼：<strong class="text-dark">@ticket.CheckInCode</strong></p>
-                            }
-                            else
-                            {
-                                <div class="text-center py-4 bg-light rounded">
-                                    <i class="bi bi-lock-fill text-secondary" style="font-size: 3rem;"></i>
-                                    <p class="mt-2 mb-0 text-secondary">票券尚未開放領取</p>
-                                    <small class="text-muted">將於 @DateTime.Parse(Model.StartTime).AddDays(0).ToString("yyyy/MM/dd") 開放</small>
-                                </div>
-                            }
-                        </div> *@
                     </div>
-                    <div class="card-footer bg-transparent border-0 text-center pb-3">
-                        <small class="text-muted">Ticket ID: @ticket.TicketsID</small>
+
+                    <div class="ticket-footer d-flex justify-content-between px-3 py-2 bg-light border-top small text-muted">
+                        <span>ID: @ticket.TicketsID.Substring(0,8)...</span>
+                        <span class="text-uppercase">E-Ticket</span>
                     </div>
                 </div>
             </div>
         }
     </div>
 </div>
+
+<style>
+    /* 票券外觀設計 */
+    .ticket-stub {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        transition: 0.3s;
+    }
+    .ticket-stub:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    /* 模擬實體票券的圓孔感 (選加) */
+    .ticket-body {
+        position: relative;
+    }
+    .ticket-body::before, .ticket-body::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        width: 20px;
+        height: 20px;
+        background-color: #f8f9fa; /* 與背景色一致 */
+        border-radius: 50%;
+        z-index: 10;
+    }
+    .ticket-body::before { left: -10px; }
+    .ticket-body::after { right: -10px; }
+
+    .qrcode-container canvas, .qrcode-container img {
+        padding: 8px;
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 4px;
+    }
+</style>
+
+
+
 
 @section Scripts {
     <script>
@@ -104,23 +150,3 @@
         });
     </script>
 }
-
-<style>
-    .ticket-card {
-        border-style: dashed; /* 讓它看起來像票根 */
-        transition: transform 0.2s;
-    }
-
-        .ticket-card:hover {
-            transform: translateY(-5px);
-        }
-
-    .qrcode-container img {
-        margin: 0 auto;
-        padding: 10px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        border: 1px solid #eee;
-    }
-</style>

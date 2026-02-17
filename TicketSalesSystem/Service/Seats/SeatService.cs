@@ -152,6 +152,9 @@ namespace TicketSalesSystem.Service.Seats
         //建立訂單與票券
         public async Task<VMBookingResponse> CreateOrderAndTicketsAsync(VMBookingRequest request, string memberID)
         {
+            
+            
+
             //驗證區域狀態
             var area = await _context.TicketsArea.FindAsync(request.TicketsAreaID);
             if (area == null || area.TicketsAreaStatusID != "A")
@@ -221,6 +224,9 @@ namespace TicketSalesSystem.Service.Seats
                             RefundTime = null
                         });
                     }
+
+                    _context.Order.Add(order);
+
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 

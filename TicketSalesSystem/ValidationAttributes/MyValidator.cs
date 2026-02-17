@@ -1,10 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using TicketSalesSystem.Models;
 
 namespace TicketSalesSystem.ValidationAttributes
 {
     public class MyValidator
     {
+        private readonly TicketsContext _context;
+        public MyValidator(TicketsContext context)
+        {
+            _context = context;
+        }
+        //台灣身分證驗證器
         public class TaiwanIDAttribute: ValidationAttribute
         {
             protected override ValidationResult IsValid(object value, ValidationContext validationContext)
@@ -59,6 +66,7 @@ namespace TicketSalesSystem.ValidationAttributes
             }
         }
 
+        //帳號重複驗證器
         public class AccountDuplicateCheck : ValidationAttribute
         {
             protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
@@ -81,7 +89,39 @@ namespace TicketSalesSystem.ValidationAttributes
             }
         }
 
+        //會員手機號碼重複驗證器
+        public class MemberTelDuplicateCheckAttribute : ValidationAttribute
+        {
+            protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+            {
+                //取得輸入的手機號碼
+                string? tel = value?.ToString();
+                if (string.IsNullOrEmpty(tel))
+                {
+                    return ValidationResult.Success; // 由 [Required] 負責檢查，這裡跳過
+                }
 
+                //從 validationContext 取得資料庫實例 (DbContext)
+                var _context = (TicketsContext?)validationContext.GetService(typeof(TicketsContext));
+
+                if (_context == null)
+                {
+                    throw new Exception("無法取得資料庫連線實例");
+                }
+
+                // 檢查邏輯：判斷資料庫是否已有相同手機號碼
+                bool isExist = _context.Member.Any(m => m.Tel == tel);
+
+                if (isExist)
+                {
+                    // 驗證失敗，回傳錯誤訊息
+                    return new ValidationResult("此手機號碼已被註冊，請換一個。");
+                }
+
+                // 驗證通過
+                return ValidationResult.Success;
+            }
+        }
 
 
 

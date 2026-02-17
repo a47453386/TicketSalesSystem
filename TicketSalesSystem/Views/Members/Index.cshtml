@@ -1,0 +1,128 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Member>
+
+@{
+    ViewData["Title"] = "會員帳號管理";
+
+}
+
+<div class="container-fluid px-4 mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-people-fill me-2"></i>會員清單
+                    </h5>
+                </div>               
+            </div>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="mb-4">
+                <div class="input-group" style="max-width: 400px;">
+                    <input type="text" name="searchString" class="form-control"
+                           placeholder="搜尋姓名、手機或ID..."
+                           value="@ViewData["CurrentFilter"]" />
+                    <button class="btn btn-dark" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary">清除</a>
+                    }
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>會員資訊</th>
+                            <th>聯絡方式</th>
+                            <th>帳號狀態</th>
+                            <th>手機驗證</th>
+                            <th>註冊日期</th>
+                            <th class="text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded-circle p-2 me-3 text-primary">
+                                            <i class="bi bi-person-fill fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">@item.Name</div>
+                                            <small class="text-muted font-monospace">@item.MemberID.Substring(0, 8)...</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div><i class="bi bi-phone me-1"></i>@item.Tel</div>
+                                    <div class="small text-muted text-truncate" style="max-width: 150px;">
+                                        <i class="bi bi-envelope me-1"></i>@item.Email
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.AccountStatusID == "A")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">啟用</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3">停用</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.IsPhoneVerified)
+                                    {
+                                        <span class="text-primary" title="已完成驗證"><i class="bi bi-patch-check-fill fs-5"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-warning" title="尚未驗證"><i class="bi bi-patch-exclamation fs-5"></i></span>
+                                    }
+                                </td>
+                                <td class="text-muted small">
+                                    @item.CreatedDate.ToString("yyyy/MM/dd")
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a asp-action="AdminEdit" asp-route-id="@item.MemberID"
+                                           class="btn btn-sm btn-outline-primary" title="編輯">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.MemberID"
+                                           class="btn btn-sm btn-outline-secondary" title="詳情">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <form asp-action="Delete" method="post" style="display:inline;">
+                                            @* 🚩 確保傳遞的是 MemberID *@
+                                            <input type="hidden" name="id" value="@item.MemberID" />
+
+                                            <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                    onclick="return confirm('你確定要刪除會員【@(item.Name)】及其所有資料嗎？')">
+                                                <i class="bi bi-trash"></i> 
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-search fs-1 text-muted"></i>
+                    <p class="mt-2 text-muted">找不到符合條件的會員</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

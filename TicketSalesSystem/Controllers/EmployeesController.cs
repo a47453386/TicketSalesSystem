@@ -82,7 +82,7 @@ namespace TicketSalesSystem.Controllers
         // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(EmployeeCreateVM vm )
+        public async Task<IActionResult> Create(VMEmployeeCreate vm )
         {
             if (!ModelState.IsValid)
             {
@@ -214,7 +214,7 @@ namespace TicketSalesSystem.Controllers
                 return NotFound();
             }
             
-            var vm = new EmployeeEditVM
+            var vm = new VMEmployeeEdit
             {
                 EmployeeID = employee.EmployeeID,
                 Name = employee.Name,
@@ -239,7 +239,7 @@ namespace TicketSalesSystem.Controllers
        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(EmployeeEditVM vm)
+        public async Task<IActionResult> Edit(VMEmployeeEdit vm)
         {
             // 🚩 1. 行內新增的驗證排除邏輯
             if (!string.IsNullOrEmpty(vm.NewRoleID)) ModelState.Remove("RoleID");
