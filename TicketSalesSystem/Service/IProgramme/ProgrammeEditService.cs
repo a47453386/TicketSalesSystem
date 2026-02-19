@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Scaffolding;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics.Metrics;
 using TicketSalesSystem.DTOs;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
@@ -56,7 +57,9 @@ namespace TicketSalesSystem.Service.IProgramme
                     Price=a.Price,
                     RowCount=a.RowCount,
                     SeatCount=a.SeatCount,
-                    VenueID=a.VenueID
+                    Capacity=a.Capacity,
+                    Remaining=a.Remaining,
+                    VenueID =a.VenueID
                 }).ToList()
             }).ToList();
 
@@ -90,24 +93,23 @@ namespace TicketSalesSystem.Service.IProgramme
         }
 
         // 更新 (PUT)
-        public async Task UpdateProgrammeAsync(string programmeID, VMProgrammeEdit vm)
+        public async Task UpdateProgrammeAsync(Programme programme, VMProgrammeEdit vm)
         {
-            // 1. 先抓取目前資料(含子層)
-            var programmme = await GetProgrammeByIdAsync(programmeID);
+
             //if (programmme == null) return;(控制邏輯)
-           
+
             // 2.更新活動主檔
-            programmme.ProgrammeName = vm.ProgrammeName;
-            programmme.ProgrammeDescription = vm.ProgrammeDescription;
-            programmme.LimitPerOrder = vm.LimitPerOrder;
-            programmme.UpdatedAt=DateTime.Now;
-            programmme.CoverImage=vm.CoverImage;
-            programmme.SeatImage=vm.SeatImage;
-            programmme.LimitPerOrder=vm.LimitPerOrder;
-            programmme.OnShelfTime=vm.OnShelfTime;
-            programmme.PlaceID=vm.PlaceID;
-            programmme.ProgrammeStatusID=vm.ProgrammeStatusID;
-            programmme.EmployeeID = "A23025";
+            programme.ProgrammeName = vm.ProgrammeName;
+            programme.ProgrammeDescription = vm.ProgrammeDescription;
+            programme.LimitPerOrder = vm.LimitPerOrder;
+            programme.UpdatedAt=DateTime.Now;
+            programme.CoverImage=vm.CoverImage;
+            programme.SeatImage=vm.SeatImage;
+            programme.LimitPerOrder=vm.LimitPerOrder;
+            programme.OnShelfTime=vm.OnShelfTime;
+            programme.PlaceID=vm.PlaceID;
+            programme.ProgrammeStatusID=vm.ProgrammeStatusID;
+            programme.EmployeeID = "A23025";
 
             ////3.處理圖片清單同步 (說明圖)
             //if(vm.DescriptionImage!=null)
@@ -129,48 +131,47 @@ namespace TicketSalesSystem.Service.IProgramme
         {
             //取得前端傳過來的所有 票區ID (排除新票區)
             var vmAreaIds = vmTicketsAreas
-                .Where(a => a != null)
-                .Select(a => a.TicketsAreaID)
-                .ToList();
+                 .Where(a => !string.IsNullOrEmpty(a.TicketsAreaID))
+                 .Select(a => a.TicketsAreaID)
+                 .ToList();
 
-            //找出哪些該刪除：DB 有，但 VM 沒給
-            var vmSessionIDs = dbSession.TicketsArea
-                .Select(s => s.TicketsAreaID)
-                .Where(id => id != null)
-                .ToList();
+            //找出哪些該刪除：DB 有，但 VM 沒給            
             var toDelete = dbSession.TicketsArea
-                .Where(s => !vmSessionIDs.Contains(s.TicketsAreaID))
+                .Where(s => !vmAreaIds.Contains(s.TicketsAreaID))
                 .ToList();
             if (toDelete.Any())
             {
                 foreach (var s in toDelete)
                 {
                     //刪除該票區
-                    _context.TicketsArea.RemoveRange(s);
-                    _context.TicketsArea.Remove(s);
+                    _context.TicketsArea.RemoveRange(toDelete);
                 }
             }
 
+            string seedTaid = await _iIDService.GetNextTicketsAreaID(dbSession.SessionID);
+            int startNumber = int.Parse(seedTaid.Substring(seedTaid.Length - 2));
             //更新與新增
             foreach (var vmArea in vmTicketsAreas)
             {
-
-                if (vmArea.TicketsAreaID == null)
+                int newCapacity = vmArea.RowCount * vmArea.SeatCount;
+                if (string.IsNullOrEmpty(vmArea.TicketsAreaID))
                 {
+                    string newId = $"{dbSession.SessionID}{startNumber:D2}";
                     //新增全新場次
-                    var newArea = new TicketsArea
+                    dbSession.TicketsArea.Add(new TicketsArea
                     {
-                        TicketsAreaID = await _iIDService.GetNextTicketsAreaID(dbSession.SessionID),
+                        TicketsAreaID = newId,
                         SessionID = dbSession.SessionID,
                         TicketsAreaName = vmArea.TicketsAreaName,
                         Price = vmArea.Price,
                         RowCount = vmArea.RowCount,
                         SeatCount = vmArea.SeatCount,
+                        Capacity = newCapacity,
+                        Remaining = newCapacity, // 新增票區，剩餘票數 = 總容量
                         VenueID = vmArea.VenueID,
                         TicketsAreaStatusID = "A",
-                    };
-                    _context.TicketsArea.Add(newArea);
-
+                    });
+                    startNumber++;
                 }
                 else
                 {
@@ -179,13 +180,18 @@ namespace TicketSalesSystem.Service.IProgramme
                         .FirstOrDefault(a => a.TicketsAreaID == vmArea.TicketsAreaID);
                     if (dbArea != null)
                     {
+                        // 計算已售出的票數，用來校準 Remaining
+                        int soldCount = await _context.Tickets
+                            .CountAsync(t => t.TicketsAreaID == dbArea.TicketsAreaID && t.Order.OrderStatusID != "N");
                         //手動更新欄位
                         dbArea.TicketsAreaName = vmArea.TicketsAreaName;
                         dbArea.Price = vmArea.Price;
                         dbArea.RowCount = vmArea.RowCount;
                         dbArea.SeatCount = vmArea.SeatCount;
+                        dbArea.Capacity = newCapacity;
+                        dbArea.Remaining = newCapacity - soldCount; ;
                         dbArea.VenueID = vmArea.VenueID;
-                        dbArea.TicketsAreaStatusID = "A";
+                        
 
                         //// 使用 SetValues 自動同步屬性，避免手動賦值的麻煩－另一個寫法
                         //_context.Entry(dbArea).CurrentValues.SetValues(vmArea);                        
@@ -203,65 +209,75 @@ namespace TicketSalesSystem.Service.IProgramme
 
 
         // 場次票區更新
-        public async Task SyncProgrammeDetailsAsync(string programmeID, VMProgrammeEdit vm)
+        public async Task SyncProgrammeDetailsAsync(Programme programme, VMProgrammeEdit vm)
         {
-            //抓取目前資料(含子層)
-            var programmme = await GetProgrammeByIdAsync(programmeID);
-            if (programmme == null) return ;
-
+           
             //找出哪些該刪除：DB 有，但 VM 沒給
             var vmSessionIDs= vm.Session
                 .Select(s=>s.SessionID)
                 .Where(id=>id!=null)
                 .ToList();
-            var toDelete = programmme.Session
+            var toDelete = programme.Session
                 .Where(s=>!vmSessionIDs.Contains(s.SessionID))
                 .ToList();
 
-            //只有在「真的被前端踢除」的情況下才刪除
-            if(toDelete.Any())
+            //刪除場次（EF 會根據 Cascade 規則連動刪除票區，若無，則需手動先刪票區）
+            if (toDelete.Any())
             {
-                foreach(var s in toDelete)
-                {
-                    //刪除該場次下所有票區
-                    _context.Session.RemoveRange(toDelete);
-                    _context.Session.Remove(s);
-                }
+                _context.Session.RemoveRange(toDelete);
+
             }
             //更新與新增
             foreach(var vmSession in vm.Session)
             {
                
-                if (vmSession.SessionID == null)
+                if (string.IsNullOrEmpty(vmSession.SessionID))
                 {
-                    string sid = await _iIDService.GetNextSessionID(programmme.ProgrammeID);
-                    string taid = await _iIDService.GetNextTicketsAreaID(sid);
+                    string sid = await _iIDService.GetNextSessionID(programme.ProgrammeID);
+
+                    //取得該場次的第一個票區種子 ID (例如：202601010101)
+                    string baseTaid = await _iIDService.GetNextTicketsAreaID(sid);
+
+                    // 解析出最後兩位數字作為起始值， 取最後兩位並轉成數字
+                    int startNumber = int.Parse(baseTaid.Substring(baseTaid.Length - 2));
+
                     //新增全新場次
                     var newSession = new Session
                     {
                         SessionID = sid,
-                        ProgrammeID = programmme.ProgrammeID,
+                        ProgrammeID = programme.ProgrammeID,
                         StartTime = vmSession.StartTime,
                         SaleStartTime = vmSession.SaleStartTime,
                         SaleEndTime = vmSession.SaleEndTime,
-                        TicketsArea = vmSession.TicketsArea.Select(a => new TicketsArea
+                        TicketsArea = new List<TicketsArea>()
+                    };
+
+                    
+
+                    foreach (var a in vmSession.TicketsArea)
+                    {
+                        string currentTaid = $"{sid}{startNumber:D2}";
+                        newSession.TicketsArea.Add(new TicketsArea
                         {
-                            TicketsAreaID = taid, 
+                            TicketsAreaID = currentTaid,
                             TicketsAreaName = a.TicketsAreaName,
                             Price = a.Price,
                             RowCount = a.RowCount,
                             SeatCount = a.SeatCount,
+                            Capacity = a.RowCount * a.SeatCount,
+                            Remaining = a.RowCount * a.SeatCount,
                             VenueID = a.VenueID,
                             TicketsAreaStatusID = "A"
-                        }).ToList()
-                    };
-                        _context.Session.Add(newSession);
-                    
+                        });
+                        startNumber++;
+                    }
+
+                    _context.Session.Add(newSession);
                 }
                 else 
                 { 
                     //更新場次
-                    var dbSession= programmme.Session
+                    var dbSession= programme.Session
                         .FirstOrDefault(s=>s.SessionID==vmSession.SessionID);
                     if(dbSession!=null)
                     {
@@ -277,12 +293,10 @@ namespace TicketSalesSystem.Service.IProgramme
         }
 
         // 圖片更新
-        public async Task SyncImagesAsync(string programmeID, List<DescriptionImageDTO> image)
+        public async Task SyncImagesAsync(Programme programme, List<DescriptionImageDTO> image)
         {
             //取得資料庫中該活動目前所有的說明圖片
-            var dbImages = await _context.DescriptionImage
-                    .Where(i => i.ProgrammeID == programmeID)
-                    .ToListAsync();
+            var dbImages = programme.DescriptionImage.ToList();
 
             //找出哪些該刪除：DB 有，但 VM 沒給
             var vmImageIds = image
@@ -321,7 +335,7 @@ namespace TicketSalesSystem.Service.IProgramme
                         {
                             DescriptionImageID = Guid.NewGuid().ToString(),
                             DescriptionImageName = uploadedFileName,
-                            ProgrammeID = programmeID,
+                            ProgrammeID = programme.ProgrammeID,
                             ImagePath = uploadedFileName
 
                         };

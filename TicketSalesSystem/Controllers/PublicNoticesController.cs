@@ -25,6 +25,18 @@ namespace TicketSalesSystem.Controllers
             return View(await ticketsContext.ToListAsync());
         }
 
+
+        public IActionResult UserIndex()
+        {
+            var publicNotices = _context.PublicNotice
+                .Where(p => p.PublicNoticeStatus == true)
+                .ToList();
+            return View(publicNotices);
+        }
+
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(string id)
@@ -75,6 +87,32 @@ namespace TicketSalesSystem.Controllers
 
             return View(publicNotice);
         }
+
+
+        public async Task<IActionResult> UserDetails(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var publicNotices = await _context.PublicNotice
+               .Where(p => p.PublicNoticeStatus == true)
+               .FirstOrDefaultAsync(m => m.PublicNoticeID == id);
+
+            if (publicNotices == null)
+            {
+                return NotFound();
+            }
+
+            return View(publicNotices);
+        }
+
+
+
+
+
+
 
         // GET: PublicNotices1/Create
         public IActionResult Create()

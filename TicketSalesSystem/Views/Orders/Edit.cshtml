@@ -1,71 +1,204 @@
 ﻿@model TicketSalesSystem.Models.Order
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "編輯訂單 - " + Model.OrderID;
 }
 
-<h1>Edit</h1>
-
-<h4>Order</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="OrderID" />
-            <div class="form-group">
-                <label asp-for="OrderCreatedTime" class="control-label"></label>
-                <input asp-for="OrderCreatedTime" class="form-control" />
-                <span asp-validation-for="OrderCreatedTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PaymentTradeNO" class="control-label"></label>
-                <input asp-for="PaymentTradeNO" class="form-control" />
-                <span asp-validation-for="PaymentTradeNO" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PaymentDescription" class="control-label"></label>
-                <input asp-for="PaymentDescription" class="form-control" />
-                <span asp-validation-for="PaymentDescription" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="PaymentStatus" /> @Html.DisplayNameFor(model => model.PaymentStatus)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="PaidTime" class="control-label"></label>
-                <input asp-for="PaidTime" class="form-control" />
-                <span asp-validation-for="PaidTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MemberID" class="control-label"></label>
-                <select asp-for="MemberID" class="form-control" asp-items="ViewBag.MemberID"></select>
-                <span asp-validation-for="MemberID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PaymentMethodID" class="control-label"></label>
-                <select asp-for="PaymentMethodID" class="form-control" asp-items="ViewBag.PaymentMethodID"></select>
-                <span asp-validation-for="PaymentMethodID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="OrderStatusID" class="control-label"></label>
-                <select asp-for="OrderStatusID" class="form-control" asp-items="ViewBag.OrderStatusID"></select>
-                <span asp-validation-for="OrderStatusID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SessionID" class="control-label"></label>
-                <select asp-for="SessionID" class="form-control" asp-items="ViewBag.SessionID"></select>
-                <span asp-validation-for="SessionID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>訂單管理：@Model.OrderID</h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> 返回列表
+        </a>
     </div>
+
+    <hr />
+
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        @* 隱藏欄位：確保 POST 時資料完整 *@
+        <input type="hidden" asp-for="OrderID" />
+        <input type="hidden" asp-for="MemberID" />
+        <input type="hidden" asp-for="SessionID" />
+        <input type="hidden" asp-for="OrderCreatedTime" />
+        @* 🚩 需求 3：因為 Select 設為 disabled，必須加 hidden 確保 PaymentMethodID 會傳回後端 *@
+        <input type="hidden" asp-for="PaymentMethodID" />
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">訂單核心資訊</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @* 🚩 需求 1 & 2：顯示會員帳號與姓名 (來自 Member 表) *@
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">會員帳號</label>
+                                <input class="form-control bg-light" value="@Model.Member?.MemberLogin?.Account" readonly />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">會員姓名</label>
+                                <input class="form-control bg-light" value="@Model.Member?.Name" readonly />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="OrderStatusID" class="form-label fw-bold text-danger">訂單狀態</label>
+                                <select asp-for="OrderStatusID" class="form-select border-danger" asp-items="ViewBag.OrderStatusID"></select>
+                                <span asp-validation-for="OrderStatusID" class="text-danger"></span>
+                                <div class="form-text text-muted">變更為「取消」或「逾期」將釋出庫存。</div>
+                            </div>
+                            @* 🚩 需求 3：付款方式設為唯讀 *@
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">付款方式</label>
+                                <select class="form-select bg-light" asp-items="ViewBag.PaymentMethodID" disabled></select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" asp-for="PaymentStatus">
+                            <label class="form-check-label fw-bold" asp-for="PaymentStatus">已完成金流付款</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PaymentDescription" class="form-label fw-bold">金流備註</label>
+                            <textarea asp-for="PaymentDescription" class="form-control" rows="2" placeholder="輸入退款批號或金流紀錄..."></textarea>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">儲存並執行狀態變更</button>
+                        </div>
+                    </div>
+                </div>
+
+                @* 🚩 需求 4：訂單包含之票券詳情 *@
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">票券明細 (活動/場次/座位)</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>活動名稱 / 場次</th>
+                                    <th>區域</th>
+                                    <th>座位資訊</th>
+                                    <th class="text-center">票券狀態</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Tickets != null && Model.Tickets.Any())
+                                {
+                                    @foreach (var ticket in Model.Tickets)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold text-primary">@ticket.Session?.Programme?.ProgrammeName</div>
+                                                <div class="small text-muted">
+                                                    <i class="bi bi-calendar3"></i> @ticket.Session?.StartTime.ToString("yyyy-MM-dd HH:mm")
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-outline-dark border text-dark">@ticket.TicketsArea?.TicketsAreaName</span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">@ticket.RowIndex 排 @ticket.SeatIndex 號</div>
+                                                <div class="text-muted small">ID: @ticket.TicketsID</div>
+                                            </td>
+                                            <td class="text-center">
+                                                @{
+                                                    var badgeClass = ticket.TicketsStatusID switch
+                                                    {
+                                                        "Y" => "bg-success",
+                                                        "C" => "bg-danger",
+                                                        "N" => "bg-warning text-dark",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass" style="min-width: 60px;">
+                                                    @ticket.TicketsStatus?.TicketsStatusName
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-muted">無票券資料</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> 退票申請 / 客服紀錄</h5>
+                        <span class="badge bg-white text-dark">@Model.Question?.Count 筆</span>
+                    </div>
+                    <div class="card-body" style="max-height: 850px; overflow-y: auto;">
+                        @if (Model.Question != null && Model.Question.Any())
+                        {
+                            @foreach (var q in Model.Question)
+                            {
+                                <div class="card mb-3 border-light shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title fw-bold text-primary mb-0">@q.QuestionTitle</h6>
+                                            <small class="text-muted">@q.CreatedTime.ToString("yyyy/MM/dd")</small>
+                                        </div>
+                                        <p class="card-text small text-secondary p-2 bg-light rounded">@q.QuestionDescription</p>
+
+                                        @if (!string.IsNullOrEmpty(q.UploadFile))
+                                        {
+                                            <div class="mt-3">
+                                                <label class="small fw-bold text-success d-block mb-1">退票證明附件：</label>
+                                                <a href="~/uploads/@q.UploadFile" target="_blank" title="點擊放大圖片">
+                                                    <img src="~/uploads/@q.UploadFile" class="img-thumbnail w-100" style="max-height: 300px; object-fit: contain;" alt="退票證明" />
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bi bi-chat-dots text-muted display-1"></i>
+                                <p class="text-muted mt-3">此訂單目前無任何客服提問或退票申請。</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // 防止誤觸退票狀態
+        const statusSelect = document.querySelector('#OrderStatusID');
+        const originalStatus = statusSelect.value;
 
+        statusSelect.addEventListener('change', function() {
+            if (['C', 'N'].includes(this.value)) {
+                const confirmMsg = "警告：將狀態改為「取消」或「逾期」將會：\n1. 註銷此訂單所有票券\n2. 自動補回系統庫存\n\n此動作不可逆，確定要執行嗎？";
+                if (!confirm(confirmMsg)) {
+                    this.value = originalStatus;
+                }
+            }
+        });
+    </script>
+}

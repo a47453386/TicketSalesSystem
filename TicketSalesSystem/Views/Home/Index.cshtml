@@ -1,9 +1,51 @@
-﻿@{
+﻿@model IEnumerable<TicketSalesSystem.Models.Programme>
+@{
     ViewData["Title"] = "Home Page";
     Layout = "_UserLayout";
 }
+<style>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    /* 設定輪播圖圖片的統一規格 */
+    .carousel-item img {
+        height: 500px; /* 🚩 這裡設定你想要的高度，例如 500px 或 60vh */
+        object-fit: cover; /* 🚩 關鍵：這會讓圖片填滿空間但不變形 */
+        object-position: center; /* 讓圖片中心對準容器 */
+    }
+</style>
+
+<div id="carouselBanner" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+
+        @for (int i = 0; i < Model.Count(); i++)
+        {
+            var activeClass = i == 0 ? "active" : "";
+            <button type="button" data-bs-target="#carouselBanner" data-bs-slide-to="@i" class="@activeClass"></button>
+        }
+    </div>
+    <div class="carousel-inner">
+        @foreach (var item in Model)
+        {
+            var a = item == Model.First() ? "active" : "";
+
+            <div class="carousel-item @a">
+               <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID"> 
+                   <img src="~/Photos/CoverImage/@item.CoverImage" class="d-block w-100"  alt="@item.ProgrammeName">
+                </a>
+               
+            </div>
+        }
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanner" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselBanner" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+<div class="container">
+    @await Component.InvokeAsync("VCLatestNews")
+
+    @await Component.InvokeAsync("VCProgrammeThree")
 </div>

@@ -18,11 +18,11 @@ namespace TicketSalesSystem.Service.IProgramme
         Task<VMProgrammeEdit> GetProgrammeForEditAsync(string id);
 
         // 更新 (PUT)
-        Task UpdateProgrammeAsync(string id, VMProgrammeEdit vm);
+        Task UpdateProgrammeAsync(Programme programme, VMProgrammeEdit vm);
 
         // 場次票區更新
-        Task SyncProgrammeDetailsAsync(string programmeID, VMProgrammeEdit vm);
+        Task SyncProgrammeDetailsAsync(Programme programme, VMProgrammeEdit vm);
         //圖片更新
-        Task SyncImagesAsync(string programmeID, List<DescriptionImageDTO> image);
+        Task SyncImagesAsync(Programme programme, List<DescriptionImageDTO> image);
     }
 }

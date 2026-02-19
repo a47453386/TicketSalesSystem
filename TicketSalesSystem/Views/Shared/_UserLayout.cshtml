@@ -25,10 +25,17 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link fw-bold" href="#">活動節目</a>
+                            <a asp-controller="Programmes" asp-action="Index" class="nav-link fw-bold">節目資訊</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-bold" href="#">常見問題</a>
+                            <a asp-controller="PublicNotices" asp-action="UserIndex" class="nav-link fw-bold">最新消息</a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="FAQs" asp-action="UserIndex" class="nav-link fw-bold">常見問題</a>
+
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Orders" asp-action="UserIndex" class="nav-link fw-bold">訂單查詢</a>
                         </li>
                     </ul>
 

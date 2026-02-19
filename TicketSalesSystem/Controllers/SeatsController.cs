@@ -83,16 +83,9 @@ namespace TicketSalesSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmBooking([FromBody] VMBookingRequest request)
         {
-
-
-            var (isValid, message) = await _bookingValidation.ValidateAllAsync(request);
-            if (!isValid)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                return Json(new VMBookingResponse { Success = false, Message = message });
-            }
 
-            try
-            {
                 string memberId = "004bc90a-26fb-48e9-a762-653a232d86e2";
                 var member = await _context.Member.AnyAsync(m => m.MemberID == memberId);
                 if (!member)
@@ -100,15 +93,52 @@ namespace TicketSalesSystem.Controllers
                     return Json(new VMBookingResponse { Success = false, Message = "會員不存在" });
                 }
 
-                var response = await _seatService.CreateOrderAndTicketsAsync(request, memberId);
-                return Json(response);
+                var (isValid, message) = await _bookingValidation.ValidateAllAsync(request, memberId);
+                if (!isValid)
+                {
+                    return Json(new VMBookingResponse { Success = false, Message = message });
+                }
 
-            }
-            catch (Exception ex)
-            {
-                // 這樣可以在瀏覽器 alert 看到更詳細的錯誤內容
-                var innerMsg = ex.InnerException != null ? ex.InnerException.Message : "";
-                return BadRequest(new { message = ex.Message + " | " + innerMsg });
+               
+
+                try
+                {
+                    //原子扣減
+                    var rowAffected = await _context.Database.ExecuteSqlRawAsync(
+                        "UPDATE TicketsArea SET Remaining = Remaining - {0} " +
+                        "WHERE TicketsAreaID = {1} AND Remaining >= {2}",
+                        request.Count, request.TicketsAreaID, request.Count
+                        );
+
+                    if (rowAffected == 0) return Json(new { success = false, message = "抱歉，該區域票券已售完！" });
+
+
+                    //建立訂單與寫入
+                    var response = await _seatService.CreateOrderAndTicketsAsync(request, memberId);
+                    
+
+                    if (response.Success)
+                    {
+                        // 🚩 核心修正：一定要提交交易！
+                        await transaction.CommitAsync();
+                    }
+                    else
+                    {
+                        await transaction.RollbackAsync();
+                    }
+
+                    return Json(response);
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    var detail = ex.InnerException?.Message ?? ex.Message;
+                    return Json(new VMBookingResponse { Success = false, Message = "系統異常：" + detail });
+
+                }
+
+
 
             }
 

@@ -1,109 +1,189 @@
 ﻿@using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep
 @model VMProgrammeStep3
 
-<div class="container mt-4">
+@* 🚩 核心樣板：放在最外面，確保 JS 隨時能抓到完整的場館清單 *@
+<select id="venue-template" style="display:none;">
+    <option value="">-- 選擇場館 --</option>
+    @if (ViewBag.VenueID != null)
+    {
+        @foreach (var item in (SelectList)ViewBag.VenueID)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    }
+</select>
+
+<div class="container mt-4 pb-5">
     @await Component.InvokeAsync("VCSteps", new { currentStep = 3 })
 
-
     <form asp-action="CreateStep3" id="step3Form">
-        <div class="card mb-4">
-            <div class="card-header">設定區域票價</div>
-            <div class="card-body">
-                <div class="form-group mb-3">
-                    <label>使用場地</label>
-                    <select asp-for="VenueID" class="form-control" asp-items="ViewBag.VenueID"></select>
+        @Html.AntiForgeryToken()
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold text-dark"><i class="bi bi-geo-fill me-2 text-primary"></i>設定各場次票價與場地</h3>
+            <div class="text-muted small">提示：每個票區可指定不同場館</div>
+        </div>
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        @for (int i = 0; i < Model.Session.Count; i++)
+        {
+            <div class="session-container card shadow-sm mb-5" data-session-index="@i">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        場次 @(i + 1)：@Model.Session[i].StartTime.ToString("yyyy/MM/dd HH:mm")
+                    </h5>
+                    @* 隱藏欄位確保資料回傳 *@
+                    <input type="hidden" asp-for="Session[i].SessionID" />
+                    <input type="hidden" asp-for="Session[i].StartTime" />
                 </div>
 
-                @for (int i = 0; i < Model.Session.Count; i++)
-                {
-                    <div class="session-container border p-3 mb-4" data-session-index="@i">
-                        <h5 class="text-primary">場次 @(i + 1)：@Model.Session[i].StartTime.ToString("yyyy/MM/dd HH:mm")</h5>
-
-                        @* 隱藏欄位確保場次 ID 或時間等資訊能傳回 *@
-                        <input type="hidden" asp-for="Session[i].SessionID" />
-                        <input type="hidden" asp-for="Session[i].StartTime" />
-
-                        <table class="table table-bordered area-table">
-                            <thead>
-                                <tr>
-                                    <th>票區名稱</th>
-                                    <th>排數</th>
-                                    <th>每排座位</th>
-                                    <th>價格</th>
-                                    <th>操作</th>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle area-table">
+                            <thead class="table-light">
+                                <tr class="text-center small">
+                                    <th style="width: 20%">指定場館</th>
+                                    <th style="width: 20%">票區名稱</th>
+                                    <th style="width: 12%">排數</th>
+                                    <th style="width: 12%">每排座位</th>
+                                    <th style="width: 12%">總座位數</th>
+                                    <th style="width: 15%">價格</th>
+                                    <th style="width: 8%">操作</th>
                                 </tr>
                             </thead>
                             <tbody class="area-tbody">
-                                @* 🚩 修正：務必確認 ViewModel 裡的屬性名是 TicketsArea 還是 TicketsAreas *@
-                                @if (Model.Session[i].TicketsArea != null)
+                                @if (Model.Session[i].TicketsArea != null && Model.Session[i].TicketsArea.Any())
                                 {
                                     @for (int j = 0; j < Model.Session[i].TicketsArea.Count; j++)
                                     {
-                                        <tr class="area-row">
-                                            <td><input name="Session[@i].TicketsArea[@j].TicketsAreaName" class="form-control" value="@Model.Session[i].TicketsArea[j].TicketsAreaName" required /></td>
-                                            <td><input name="Session[@i].TicketsArea[@j].RowCount" type="number" class="form-control" value="@Model.Session[i].TicketsArea[j].RowCount" /></td>
-                                            <td><input name="Session[@i].TicketsArea[@j].SeatCount" type="number" class="form-control" value="@Model.Session[i].TicketsArea[j].SeatCount" /></td>
-                                            <td><input name="Session[@i].TicketsArea[@j].Price" type="number" class="form-control" value="@Model.Session[i].TicketsArea[j].Price" /></td>
-                                            <td><button type="button" class="btn btn-danger btn-sm remove-area">刪除</button></td>
+                                        <tr class="area-row text-center">
+                                            <td>
+                                                @* 🚩 既有票區渲染 *@
+                                                <select name="Session[@i].TicketsArea[@j].VenueID" class="form-select form-select-sm" required>
+                                                    <option value="">-- 選擇場館 --</option>
+                                                    @foreach (var item in (SelectList)ViewBag.VenueID)
+                                                    {
+                                                        <!option value="@item.Value" @(item.Value == Model.Session[i].TicketsArea[j].VenueID ? "selected" : "")>@item.Text</!option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input name="Session[@i].TicketsArea[@j].TicketsAreaName" class="form-control form-control-sm" value="@Model.Session[i].TicketsArea[j].TicketsAreaName" required />
+                                            </td>
+                                            <td>
+                                                <input name="Session[@i].TicketsArea[@j].RowCount" type="number" class="form-control form-control-sm text-center row-count" value="@Model.Session[i].TicketsArea[j].RowCount" min="1" />
+                                            </td>
+                                            <td>
+                                                <input name="Session[@i].TicketsArea[@j].SeatCount" type="number" class="form-control form-control-sm text-center seat-count" value="@Model.Session[i].TicketsArea[j].SeatCount" min="1" />
+                                            </td>
+                                            <td>
+                                                <span class="total-seats fw-bold text-primary">0</span>
+                                            </td>
+                                            <td>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">$</span>
+                                                    <input name="Session[@i].TicketsArea[@j].Price" type="number" class="form-control text-end" value="@Model.Session[i].TicketsArea[j].Price" min="0" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-outline-danger btn-sm remove-area"><i class="bi bi-trash"></i></button>
+                                            </td>
                                         </tr>
                                     }
                                 }
                             </tbody>
                         </table>
-                        <button type="button" class="btn btn-secondary btn-sm add-area-btn">+ 增加票區</button>
                     </div>
-                }
+                    <button type="button" class="btn btn-outline-primary btn-sm add-area-btn shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i>增加票區
+                    </button>
+                </div>
             </div>
+        }
+
+        <div class="d-flex justify-content-between mt-5 border-top pt-4">
+            <a asp-action="CreateStep2" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-arrow-left me-1"></i>上一步
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg px-5 shadow">
+                下一步 (Step 4：上傳圖片) <i class="bi bi-arrow-right ms-1"></i>
+            </button>
         </div>
-        <div class="d-flex justify-content-between mt-4">
-            <a asp-action="CreateStep2" class="btn btn-outline-secondary">上一步 (Step 2)</a>
-            <button type="submit" class="btn btn-primary">下一步 (Step 4)</button>
-        </div>
-        <button type="submit" class="btn btn-primary">下一步 (Step 4)</button>
     </form>
-    <div asp-validation-summary="All" class="text-danger"></div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
-            // 🚩 使用事件委託，確保「動態產生」的按鈕也能被點擊
+            // 🚩 初始化：計算現有票區總座位
+            updateAllTotalSeats();
+
+            // 1. 【新增票區】邏輯
             $(document).on("click", ".add-area-btn", function () {
                 const container = $(this).closest(".session-container");
-                const sessionIndex = container.data("session-index");
+                const sIdx = container.data("session-index");
                 const tbody = container.find(".area-tbody");
-                const nextIndex = tbody.find(".area-row").length;
+                const tIdx = tbody.find(".area-row").length;
+
+                // 🚩 核心：抓取外部隱藏樣板的內容
+                const venueOptions = $('#venue-template').html();
 
                 const newRow = `
-                    <tr class="area-row">
-                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].TicketsAreaName" class="form-control" required /></td>
-                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].RowCount" type="number" class="form-control" value="0" /></td>
-                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].SeatCount" type="number" class="form-control" value="0" /></td>
-                        <td><input name="Session[${sessionIndex}].TicketsArea[${nextIndex}].Price" type="number" class="form-control" value="0" /></td>
-                        <td><button type="button" class="btn btn-danger btn-sm remove-area">刪除</button></td>
+                    <tr class="area-row text-center animate__animated animate__fadeIn">
+                        <td><select name="Session[${sIdx}].TicketsArea[${tIdx}].VenueID" class="form-select form-select-sm" required>${venueOptions}</select></td>
+                        <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].TicketsAreaName" class="form-control form-control-sm" placeholder="如：搖滾A區" required /></td>
+                        <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].RowCount" type="number" class="form-control form-control-sm text-center row-count" value="10" /></td>
+                        <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].SeatCount" type="number" class="form-control form-control-sm text-center seat-count" value="20" /></td>
+                        <td><span class="total-seats fw-bold text-primary">200</span></td>
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">$</span>
+                                <input name="Session[${sIdx}].TicketsArea[${tIdx}].Price" type="number" class="form-control text-end" value="0" />
+                            </div>
+                        </td>
+                        <td><button type="button" class="btn btn-outline-danger btn-sm remove-area"><i class="bi bi-trash"></i></button></td>
                     </tr>`;
                 tbody.append(newRow);
             });
 
-            // 刪除票區
+            // 2. 【即時計算】總座位數
+            $(document).on("input", ".row-count, .seat-count", function () {
+                const row = $(this).closest("tr");
+                const r = parseInt(row.find(".row-count").val()) || 0;
+                const s = parseInt(row.find(".seat-count").val()) || 0;
+                row.find(".total-seats").text((r * s).toLocaleString());
+            });
+
+            function updateAllTotalSeats() {
+                $(".area-row").each(function () {
+                    const r = parseInt($(this).find(".row-count").val()) || 0;
+                    const s = parseInt($(this).find(".seat-count").val()) || 0;
+                    $(this).find(".total-seats").text((r * s).toLocaleString());
+                });
+            }
+
+            // 3. 【刪除並重整索引】
             $(document).on("click", ".remove-area", function () {
                 const tbody = $(this).closest(".area-tbody");
-                $(this).closest(".area-row").remove();
+                const container = $(this).closest(".session-container");
+                const sIdx = container.data("session-index");
 
-                // 重新排序該場次下的所有票區 Index
-                tbody.find(".area-row").each(function (idx) {
-                    const sessionContainer = $(this).closest(".session-container");
-                    const sessionIndex = sessionContainer.data("session-index");
+                $(this).closest("tr").fadeOut(300, function() {
+                    $(this).remove();
 
-                    $(this).find("input").each(function () {
-                        const name = $(this).attr("name");
-                        if (name) {
-                            // 同時修正 Session 和 TicketsArea 的索引
-                            let newName = name.replace(/Session\[\d+\]/, `Session[${sessionIndex}]`)
-                                              .replace(/TicketsArea\[\d+\]/, `TicketsArea[${idx}]`);
-                            $(this).attr("name", newName);
-                        }
+                    // 🚩 重要：刪除後必須重新校對所有項目的 Name 索引
+                    tbody.find(".area-row").each(function (tIdx) {
+                        $(this).find("input, select").each(function () {
+                            let name = $(this).attr("name");
+                            if (name) {
+                                // 修正 TicketsArea[j] 的部分
+                                let newName = name.replace(/TicketsArea\[\d+\]/, `TicketsArea[${tIdx}]`);
+                                $(this).attr("name", newName);
+                            }
+                        });
                     });
                 });
             });

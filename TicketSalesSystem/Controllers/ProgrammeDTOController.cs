@@ -9,6 +9,7 @@ using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IProgramme;
+using TicketSalesSystem.Service.Validation.IProgrammeValidationService;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
 using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
@@ -23,14 +24,16 @@ namespace TicketSalesSystem.Controllers
         private readonly TicketsContext _context;
         private readonly IIDService _iIDService;
         private readonly IProgrammeService _programmeService;
+        private readonly IProgrammeValidationService _programmeValidationService;
 
-        public ProgrammeDTOController(IFileService fileService, TicketsContext context, IIDService iIDService, IProgrammeService programmeService   )
+        public ProgrammeDTOController(IFileService fileService, TicketsContext context, IIDService iIDService, IProgrammeService programmeService,IProgrammeValidationService programmeValidationService)
         {
 
             _fileService = fileService;
             _context = context;
             _iIDService = iIDService;
             _programmeService = programmeService;
+            _programmeValidationService = programmeValidationService;
         }
 
 
@@ -201,55 +204,65 @@ namespace TicketSalesSystem.Controllers
 
         private void MapStep3ToDo(VMProgrammeStep3 vm, ProgrammeDTO dto)
         {
-            dto.VenueID = vm.VenueID;
+            dto.VenueID = null;//因為場地已經下放到票區，頂層 VenueID 設為 null 或清空
             dto.TicketsAreaStatusID = vm.TicketsAreaStatusID;
 
-            dto.Session ??= new List<SessionDTO>();
-            var allTicketsAreas = new List<TicketsAreaDTO>();
 
-            // 🚩 這裡要巡覽的是 vm.Session (前端傳回來的場次)
-            foreach (var sessionVM in vm.Session)
+            if (vm.Session != null && dto.Session != null)
             {
-                var targetSession = dto.Session.FirstOrDefault(s => s.SessionID == sessionVM.SessionID);
-                if (targetSession != null)
+                for (int i = 0; i < vm.Session.Count; i++)
                 {
-                    // 更新該場次的票區清單
-                    targetSession.TicketsArea = sessionVM.TicketsArea.Select(ta => new TicketsAreaDTO
+                    var sessionVM = vm.Session[i];
+                    // 依照順序取回 DTO 裡的場次 (因為 Step 2 到 Step 3 順序是一致的)
+                    if (i < dto.Session.Count)
                     {
-                        TicketsAreaID = ta.TicketsAreaID,
-                        TicketsAreaName = ta.TicketsAreaName,
-                        Price = ta.Price,
-                        RowCount = ta.RowCount,
-                        SeatCount = ta.SeatCount,
-                        VenueID = vm.VenueID,
-                        TicketsAreaStatusID = ta.TicketsAreaStatusID ?? "A"
-                    }).ToList();
+                        var targetSession = dto.Session[i];
 
-                    // 收集所有票區到彙整清單中
-                    foreach (var ta in targetSession.TicketsArea)
-                    {
-                        allTicketsAreas.Add(ta);
+                        // 更新場次的 VenueID (如果你 SessionDTO 也有這個欄位的話)
+                        targetSession.VenueID = sessionVM.VenueID!;
+
+                        // 🚩 3. 核心：將票區資料轉換並存入
+                        targetSession.TicketsArea = sessionVM.TicketsArea.Select(ta => new TicketsAreaDTO
+                        {
+                            TicketsAreaID = ta.TicketsAreaID!,
+                            TicketsAreaName = ta.TicketsAreaName,
+                            RowCount = ta.RowCount,
+                            SeatCount = ta.SeatCount,
+                            Price = ta.Price,
+                            Capacity = ta.RowCount * ta.SeatCount,
+                            Remaining = ta.RowCount * ta.SeatCount,
+                            VenueID = ta.VenueID!, // 🚩 確保每一列選的 VenueID 都有存進去
+                            TicketsAreaStatusID = ta.TicketsAreaStatusID ?? "A"
+                        }).ToList();
                     }
                 }
             }
 
-            // 🚩 這行要放在 foreach 迴圈外面，否則會重複執行多次
-            dto.TicketsArea = allTicketsAreas.GroupBy(x => x.TicketsAreaName)
-                                             .Select(g => g.First())
-                                             .ToList();
+            // 🚩 4. 彙整所有票區名稱 (給發布預覽用)
+            dto.TicketsArea = dto.Session!.SelectMany(s => s.TicketsArea)
+                                .GroupBy(x => x.TicketsAreaName)
+                                .Select(g => g.First())
+                                .ToList();
         }
         private void MapStep3ToVM(ProgrammeDTO dto, VMProgrammeStep3 vm)
         {
-            vm.VenueID = dto.VenueID;
-            vm.TicketsAreaStatusID = dto.TicketsAreaStatusID;
+            //映射頂層狀態
+            vm.TicketsAreaStatusID = dto.TicketsAreaStatusID ?? "A";
 
-            if (dto.Session != null)
+            //vm.VenueID 已經下放到票區，所以這裡不需賦值給頂層 VenueID
+
+            if (dto.Session != null && dto.Session.Any())
             {
+                // 2. 映射場次列表
                 vm.Session = dto.Session.Select(s => new VMSessionItem
                 {
                     SessionID = s.SessionID,
                     StartTime = s.StartTime,
-                    // 將 DTO 裡的票區轉回 VM 格式
+                    SaleStartTime = s.SaleStartTime,
+                    SaleEndTime = s.SaleEndTime,
+                    VenueID = s.VenueID,
+
+                    // 3. 映射該場次下的票區列表
                     TicketsArea = s.TicketsArea?.Select(ta => new VMTicketsAreaItem
                     {
                         TicketsAreaID = ta.TicketsAreaID,
@@ -257,8 +270,15 @@ namespace TicketSalesSystem.Controllers
                         RowCount = ta.RowCount,
                         SeatCount = ta.SeatCount,
                         Price = ta.Price,
+
+                        //將 DTO 裡每個票區獨立的 VenueID 帶回 VM，讓下拉選單正確選中
                         VenueID = ta.VenueID,
-                        TicketsAreaStatusID = ta.TicketsAreaStatusID
+
+                        //即時計算：讓 View 載入時就能看到總數
+                        Capacity = ta.RowCount * ta.SeatCount,
+                        Remaining = ta.Remaining > 0 ? ta.Remaining : (ta.RowCount * ta.SeatCount),
+
+                        TicketsAreaStatusID = ta.TicketsAreaStatusID ?? "A"
                     }).ToList() ?? new List<VMTicketsAreaItem>()
                 }).ToList();
             }
@@ -284,20 +304,32 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateStep3(VMProgrammeStep3 vm)
         {
+            ModelState.Remove("VenueID");// 如果頂層的 VenueID 報錯，我們手動移除它，因為我們要看的是 TicketsArea 裡的 VenueID
 
             //驗證輸入
             if (!ModelState.IsValid)
             {
-                ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName", vm.VenueID);
+                ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName");
 
                 return View(vm);
             }
             //從 Session 取出 DTO，如果沒有就建立一個新的
             var dto = GetCurrentDTO();
             //將 VM 的資料映射到 DTO
+            foreach (var s in vm.Session)
+            {
+                if (s.TicketsArea.Any(ta => string.IsNullOrEmpty(ta.VenueID)))
+                {
+                    ModelState.AddModelError("", "請確保每個票區都已指定場館");
+                    ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName");
+                    return View(vm);
+                }
+            }
+
             if (vm.Session.Any(s => s.TicketsArea == null || !s.TicketsArea.Any()))
             {
-                ModelState.AddModelError("", "每個區域/場次請至少新增一個票區");
+                ModelState.AddModelError("", "每個場次請至少新增一個票區");
+                ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName");
                 return View(vm);
             }
             MapStep3ToDo(vm, dto);
@@ -472,7 +504,9 @@ namespace TicketSalesSystem.Controllers
                                 RowCount = aDto.RowCount,
                                 SeatCount = aDto.SeatCount,
                                 Price = aDto.Price,
-                                TicketsAreaStatusID = aDto.TicketsAreaStatusID
+                                Capacity = aDto.Capacity,
+                                Remaining = aDto.Remaining,
+                                TicketsAreaStatusID = aDto.TicketsAreaStatusID ?? "A"
                             };
                             _context.TicketsArea.Add(ticketsArea);
                             await _context.SaveChangesAsync();
@@ -501,7 +535,7 @@ namespace TicketSalesSystem.Controllers
                     // 修正：清除正確的 Session Key
                     HttpContext.Session.Remove("programme");
 
-                    return RedirectToAction("Index", "Programmes", new { msg = "活動建立成功！" });
+                    return RedirectToAction("AdminIndex", "Programmes", new { msg = "活動建立成功！" });
 
                 }
                 catch (Exception ex)
@@ -541,11 +575,7 @@ namespace TicketSalesSystem.Controllers
 
             if (vm == null) return NotFound();
 
-            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
-            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", vm.ProgrammeStatusID);
-           
-            var venues = await _context.Venue.Where(v => v.PlaceID == vm.PlaceID).ToListAsync();
-            ViewData["VenueID"] = new SelectList(venues, "VenueID", "VenueName", vm.VenueID);
+            await PrepareEditViewData(vm);
 
             return View(vm);
         }
@@ -554,28 +584,59 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, VMProgrammeEdit vm)
         {
-            if (id != vm.ProgrammeID) return NotFound();
-            // 🚩 存檔前先清空目前的追蹤快取，避免 ID 衝突
-            _context.ChangeTracker.Clear(); 
+            if (id != vm.ProgrammeID) return NotFound();            
+
+            // 執行業務邏輯驗證 (在進入 Transaction 之前)
+            foreach (var session in vm.Session)
+            {
+                foreach (var area in session.TicketsArea)
+                {
+                    // 呼叫你的驗證服務
+                    var (isValid, message) = await _programmeValidationService.ValidateAreaCapacityAsync(
+                        area.TicketsAreaID,
+                        area.RowCount,
+                        area.SeatCount
+                    );
+
+                    if (!isValid)
+                    {
+                        // 如果驗證失敗，將錯誤訊息塞入 ModelState
+                        ModelState.AddModelError("", message);
+
+                        // 重新準備頁面需要的下拉選單資料 (否則回傳 View 會報錯)
+                        await PrepareEditViewData(vm);
+                        return View(vm);
+                    }
+                }
+            }
+
+
+            ////存檔前先清空目前的追蹤快取，避免 ID 衝突
+            //_context.ChangeTracker.Clear();
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
 
                 try
                 {
-                    await _programmeService.UpdateProgrammeAsync(id,vm);
+                    var programmeDb = await _context.Programme
+                    .Include(p => p.Session).ThenInclude(s => s.TicketsArea)
+                    .Include(p => p.DescriptionImage)
+                    .FirstOrDefaultAsync(p => p.ProgrammeID == id);
+
+                    await _programmeService.UpdateProgrammeAsync(programmeDb, vm);
                     
 
-                    await _programmeService.SyncImagesAsync(id, vm.DescriptionImage);
+                    await _programmeService.SyncImagesAsync(programmeDb, vm.DescriptionImage);
 
-                    await _programmeService.SyncProgrammeDetailsAsync(id, vm);
+                    await _programmeService.SyncProgrammeDetailsAsync(programmeDb, vm);
 
 
                     await _context.SaveChangesAsync();  
 
                     await transaction.CommitAsync();
 
-                    return RedirectToAction("Index", "Programmes");
+                    return RedirectToAction("AdminIndex", "Programmes");
                 }
                 catch(Exception ex)
                 {
@@ -588,7 +649,13 @@ namespace TicketSalesSystem.Controllers
             }
 
         }
-
+        private async Task PrepareEditViewData(VMProgrammeEdit vm)
+        {
+            ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
+            ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", vm.ProgrammeStatusID);
+            var venues = await _context.Venue.Where(v => v.PlaceID == vm.PlaceID).ToListAsync();
+            ViewData["VenueID"] = new SelectList(venues, "VenueID", "VenueName", vm.VenueID);
+        }
 
 
 

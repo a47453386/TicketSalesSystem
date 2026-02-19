@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TicketSalesSystem.Models;
 
@@ -11,9 +12,11 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    partial class TicketsContextModelSnapshot : ModelSnapshot
+    [Migration("20260218094016_AddInventoryWithConstraint")]
+    partial class AddInventoryWithConstraint
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -533,10 +536,6 @@ namespace TicketSalesSystem.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<string>("OrderID")
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
-
                     b.Property<string>("QuestionDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -557,8 +556,6 @@ namespace TicketSalesSystem.Migrations
                     b.HasKey("QuestionID");
 
                     b.HasIndex("MemberID");
-
-                    b.HasIndex("OrderID");
 
                     b.HasIndex("QuestionTypeID");
 
@@ -868,6 +865,65 @@ namespace TicketSalesSystem.Migrations
                     b.ToTable("VenueStatus");
                 });
 
+            modelBuilder.Entity("TicketSalesSystem.ViewModel.Member.VMMemberCreate", b =>
+                {
+                    b.Property<string>("MemberID")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("Account")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("AccountStatusID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("Birthday")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<bool>("Gender")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPhoneVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("NationalID")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Tel")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("MemberID");
+
+                    b.ToTable("MemberCreateVM");
+                });
+
             modelBuilder.Entity("TicketSalesSystem.Models.DescriptionImage", b =>
                 {
                     b.HasOne("TicketSalesSystem.Models.Programme", "Programme")
@@ -1033,11 +1089,6 @@ namespace TicketSalesSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TicketSalesSystem.Models.Order", "Order")
-                        .WithMany("Question")
-                        .HasForeignKey("OrderID")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("TicketSalesSystem.Models.QuestionType", "QuestionType")
                         .WithMany("Question")
                         .HasForeignKey("QuestionTypeID")
@@ -1045,8 +1096,6 @@ namespace TicketSalesSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Member");
-
-                    b.Navigation("Order");
 
                     b.Navigation("QuestionType");
                 });
@@ -1211,8 +1260,6 @@ namespace TicketSalesSystem.Migrations
 
             modelBuilder.Entity("TicketSalesSystem.Models.Order", b =>
                 {
-                    b.Navigation("Question");
-
                     b.Navigation("Tickets");
                 });
 

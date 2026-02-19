@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TicketSalesSystem.Models
 {
@@ -34,10 +35,16 @@ namespace TicketSalesSystem.Models
         public string MemberID { get; set; } = null!;
         public string QuestionTypeID { get; set; } = null!;
 
+        [StringLength(14, MinimumLength = 14)]
+        public string? OrderID { get; set; } 
+
 
         //關聯區
-        public virtual Member? Member { get; set; } = null!;
-        public virtual QuestionType? QuestionType { get; set; } = null!;
+        public virtual Member? Member { get; set; } 
+        public virtual QuestionType? QuestionType { get; set; }
+
+        [ForeignKey(nameof(OrderID))]
+        public virtual Order? Order { get; set; }
 
 
         public virtual List<Reply>? Reply { get; set; }

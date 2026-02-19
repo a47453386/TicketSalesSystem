@@ -61,7 +61,7 @@ namespace TicketSalesSystem.Models
 
        
         public virtual List<Tickets>? Tickets { get; set; }
-      
 
+        public virtual List<Question>? Question { get; set; }
     }
 }

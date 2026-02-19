@@ -1,0 +1,98 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.FAQ>
+
+@{
+    ViewData["Title"] = "常見問題";
+    Layout = "_UserLayout";
+
+    // 將 FAQ 依照類型分組，這樣畫面更有條理
+    var groupedFaqs = Model.GroupBy(f => f.FAQType.FAQTypeName);
+}
+
+
+
+<style>
+    /* 讓手風琴按鈕選中時不要有太重的藍色 */
+    .accordion-button:not(.collapsed) {
+        background-color: #f8fbff;
+        color: #0d6efd;
+        box-shadow: none;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(0,0,0,.125);
+    }
+
+    .border-dashed {
+        border: 2px dashed #dee2e6 !important;
+    }
+
+    /* 調整手風琴圓角 */
+    .accordion-item:first-of-type {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .accordion-item:last-of-type {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">常見問題</h1>
+        <p class="text-muted">在這裡您可以找到關於購票與系統使用的相關解答</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-light text-center border">
+                    目前尚無發布的常見問題。
+                </div>
+            }
+            else
+            {
+                @foreach (var group in groupedFaqs)
+                {
+                    <h4 class="fw-bold mt-5 mb-3 text-primary">
+                        <i class="bi bi-bookmark-fill me-2"></i>@group.Key
+                    </h4>
+
+                    <div class="accordion shadow-sm" id="accordion_@group.Key.GetHashCode()">
+                        @foreach (var faq in group)
+                        {
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading_@faq.FAQID">
+                                    <button class="accordion-button collapsed fw-bold" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse_@faq.FAQID">
+                                        Q: @faq.FAQTitle
+                                    </button>
+                                </h2>
+                                <div id="collapse_@faq.FAQID" class="accordion-collapse collapse"
+                                     data-bs-parent="#accordion_@group.Key.GetHashCode()">
+                                    <div class="accordion-body text-secondary" style="line-height: 1.7;">
+                                        @Html.Raw(faq.FAQDescription?.Replace("\n", "<br/>"))
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+
+            <div class="mt-5 p-4 bg-light rounded-4 text-center border-dashed">
+                <h5 class="fw-bold">找不到您的問題？</h5>
+                <p class="text-muted small">如果您有其他特殊需求，歡迎透過線上諮詢與我們聯繫。</p>
+                <a asp-controller="Questions" asp-action="Create" class="btn btn-primary px-4 rounded-pill">
+                    前往線上諮詢
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

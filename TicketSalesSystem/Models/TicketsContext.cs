@@ -199,8 +199,13 @@ namespace TicketSalesSystem.Models
             modelBuilder.Entity<PaymentMethod>()
                 .HasMany(p => p.Order)
                 .WithOne(o => o.PaymentMethod)
-                .HasForeignKey(o => o.PaymentMethodID);                 
+                .HasForeignKey(o => o.PaymentMethodID);
 
+            modelBuilder.Entity<Question>()
+               .HasOne(q => q.Order)           
+               .WithMany(o => o.Question)                     
+               .HasForeignKey(q => q.OrderID)  
+               .OnDelete(DeleteBehavior.NoAction); 
 
             // Ticket / Seat相關
             modelBuilder.Entity<Order>()
@@ -218,13 +223,14 @@ namespace TicketSalesSystem.Models
             modelBuilder.Entity<TicketsStatus>()
                 .HasMany(s => s.Tickets)
                 .WithOne(t => t.TicketsStatus)
-                .HasForeignKey(t => t.TicketsStatusID);                  
+                .HasForeignKey(t => t.TicketsStatusID);
 
             modelBuilder.Entity<TicketsAreaStatus>()
                 .HasMany(s => s.TicketsArea)
                 .WithOne(t => t.TicketsAreaStatus)
-                .HasForeignKey(t => t.TicketsAreaStatusID)     
+                .HasForeignKey(t => t.TicketsAreaStatusID)
                 .OnDelete(DeleteBehavior.NoAction);
+                
 
             // Area相關
             modelBuilder.Entity<Venue>()
@@ -254,8 +260,7 @@ namespace TicketSalesSystem.Models
                 .WithMany(a => a.Employee)
                 .HasForeignKey(e => e.AccountStatusID)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
+           
             // =========================
             // Column Type Override
             // =========================
@@ -268,7 +273,7 @@ namespace TicketSalesSystem.Models
             base.OnModelCreating(modelBuilder);
 
         }
-        public DbSet<TicketSalesSystem.ViewModel.Member.VMMemberCreate> MemberCreateVM { get; set; } = default!;
+        
        
         
         

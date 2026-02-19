@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TicketSalesSystem.Models
@@ -30,6 +31,16 @@ namespace TicketSalesSystem.Models
         [Column(TypeName = "Money")]
         [Range(0, 100000, ErrorMessage = "票價必須在 0 到 100,000 之間")]
         public decimal Price { get; set; }
+
+        [Display(Name = "庫存量")]
+        [Required(ErrorMessage = "總座位數為必填")]
+        [Range(0, 100000, ErrorMessage = "數量不能為負數")]
+        public int Capacity { get; set; } = 0;
+
+        [Display(Name = "剩餘票數")]
+        [Required(ErrorMessage = "剩餘票數為必填")]
+        [Range(0, 100000, ErrorMessage = "數量不能為負數")]
+        public int Remaining { get; set; } = 0;
 
         //FK
         public string TicketsAreaStatusID { get; set; } = null!;

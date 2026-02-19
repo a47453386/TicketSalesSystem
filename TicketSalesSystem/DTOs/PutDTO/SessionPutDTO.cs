@@ -6,6 +6,6 @@
         public DateTime StartTime { get; set; }
         public DateTime SaleStartTime { get; set; }
         public DateTime SaleEndTime { get; set; }
-        public List<TicketsAreaPutDTO> TicketsAreas { get; set; } = new List<TicketsAreaPutDTO>();
+        public List<TicketsAreaPutDTO> TicketsArea { get; set; } = new List<TicketsAreaPutDTO>();
     }
 }

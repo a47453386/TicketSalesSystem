@@ -28,8 +28,10 @@ namespace TicketSalesSystem.Service
                     {
                         //從 DI 容器拿服務，拿不到就直接丟例外
                         var context = scope.ServiceProvider.GetRequiredService<TicketsContext>();
+                        //先處理過期票券並歸還庫存
                         await CleanupExpiredTicketsAsync(context);
 
+                        //更新活動售票狀態
                         await UpdateProgrammeStatusAsync(context);
 
                     }
@@ -43,39 +45,53 @@ namespace TicketSalesSystem.Service
             }
             _logger.LogInformation("Ticket Cleanup Service is stopping.");
         }
-        
+
 
         //票券釋出
         private async Task CleanupExpiredTicketsAsync(TicketsContext context)
         {
             _logger.LogInformation("正在檢查過期佔用票券...");
-
-            //現在時間往前推10分鐘
             var expirationTime = DateTime.Now.AddMinutes(-10);
-            try
-            {
-                // 1. 直接更新票券狀態 (直接在資料庫執行，不抓取實體)
-                // 回傳的是受影響的資料筆數 (int)
-                var affectedTickets = await context.Tickets
-                    .Where(t => t.TicketsStatusID == "P" && t.CreatedTime <= expirationTime)
-                    .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "N"));
 
-                // 2. 當有票券被釋放時，同步處理相關的訂單
-                if (affectedTickets > 0)
+            // 我們需要知道哪些區域要補回多少庫存， 找出狀態為 'P' (Pending) 且超時的票券，按區域分組統計
+            var expiredGroups = await context.Tickets
+                .Where(t => t.TicketsStatusID == "P" && t.CreatedTime <= expirationTime)
+                .GroupBy(t => t.TicketsAreaID)
+                .Select(g => new { AreaID = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            if (expiredGroups.Any())
+            {
+                // 使用 Transaction 確保庫存歸還與狀態更新一致
+                using var transaction = await context.Database.BeginTransactionAsync();
+                try
                 {
-                    // 直接更新訂單狀態：將所有「未付款」且「過期」的訂單設為失效
+                    foreach (var group in expiredGroups)
+                    {
+                        //原子性歸還庫存：Remaining = Remaining + N
+                        await context.Database.ExecuteSqlInterpolatedAsync(
+                            $"UPDATE TicketsArea SET Remaining = Remaining + {group.Count} WHERE TicketsAreaID = {group.AreaID}"
+                        );
+                    }
+
+                    // 2. 將票券設為失效 'N'(可售)
+                    var affectedTickets = await context.Tickets
+                        .Where(t => t.TicketsStatusID == "P" && t.CreatedTime <= expirationTime)
+                        .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "N"));
+
+                    // 3. 將訂單設為失效 'N' (未付款且過期)
                     var affectedOrders = await context.Order
-                        .Where(o => o.OrderStatusID != "N" &&
-                                    o.PaymentStatus == false &&
-                                    o.OrderCreatedTime <= expirationTime)
+                        .Where(o => o.OrderStatusID != "N" && o.PaymentStatus == false && o.OrderCreatedTime <= expirationTime)
                         .ExecuteUpdateAsync(s => s.SetProperty(o => o.OrderStatusID, "N"));
 
-                    _logger.LogInformation($"[背景服務] 已釋放 {affectedTickets} 個座位，並將 {affectedOrders} 筆過期訂單設為失效。");
+                    await transaction.CommitAsync();
+                    _logger.LogInformation($"[庫存回收] 成功歸還 {expiredGroups.Sum(g => g.Count)} 個座位，取消 {affectedOrders} 筆過期訂單。");
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "執行背景清理時發生錯誤");
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "回收過期票券庫存時失敗");
+                }
             }
         }
 
@@ -83,52 +99,48 @@ namespace TicketSalesSystem.Service
 
         private async Task UpdateProgrammeStatusAsync(TicketsContext context)
         {
-            _logger.LogWarning("==== 正在執行活動狀態更新檢查 ====");
-            _logger.LogInformation("正在更新活動售票狀態...");
+            _logger.LogInformation("正在同步活動售票狀態...");
             var now = DateTime.Now;
-            _logger.LogInformation($"[檢查狀態] 目前系統時間: {now:yyyy-MM-dd HH:mm:ss}");
 
-            // 一次抓出所有「非結束」且「非手動停用」的活動，減少多次資料庫查詢
-            //// R (已設定) 被排除在外，除非管理員手動改為 B，否則排程不理它
+            // 抓出 R (設定完成) 和 O (開賣中) 的活動進行判斷
             var activeProgrammes = await context.Programme
-                .Include(p => p.Session)// 預先載入場次資料，避免後續多次查詢
-                .Where(p =>  p.ProgrammeStatusID == "B"|| p.ProgrammeStatusID == "O")                
+                .Include(p => p.Session)
+                .Where(p => p.ProgrammeStatusID == "R" || p.ProgrammeStatusID == "O")
                 .ToListAsync();
+
             bool hasChanged = false;
 
             foreach (var p in activeProgrammes)
             {
-                var newStatus = p.ProgrammeStatusID;
+                string oldStatus = p.ProgrammeStatusID;
+                string newStatus = oldStatus;
 
-                //是否所有場次都結束了?(B 或 O 都有可能轉 E)
+                // 檢查是否所有場次售票都已結束 -> 轉為 E (Ended)
                 if (p.Session.Any() && p.Session.All(s => s.SaleEndTime <= now))
                 {
                     newStatus = "E";
-                    _logger.LogInformation($"[狀態更新] 活動 {p.ProgrammeName}：售票結束 [E: 已結束]");
-                    continue;
                 }
-
-                // 狀態轉移：只有 B (上架中) 且時間到了，才能轉 O (開賣中)
-                if (p.ProgrammeStatusID == "B" && p.Session.Any(s => s.SaleStartTime <= now && s.SaleEndTime > now))
+                // 檢查是否已達開賣時間 -> R 轉 O (On Sale)
+                else if (oldStatus == "R" && p.Session.Any(s => s.SaleStartTime <= now && s.SaleEndTime > now))
                 {
                     newStatus = "O";
-                    _logger.LogInformation($"[狀態更新] {p.ProgrammeName}：開賣中(O)");
-                }
-                if (newStatus != p.ProgrammeStatusID)
-                {
-                    _logger.LogInformation($"[狀態更新] 活動: {p.ProgrammeName} 轉移: {newStatus} -> {p.ProgrammeStatusID}");
-                    hasChanged = true;
-                }
-                if (hasChanged)
-                {
-                    await context.SaveChangesAsync();
-                    _logger.LogInformation("[系統通知] 售票狀態批次更新存檔成功。");
                 }
 
+                // 🚩 修正：必須賦值給實體，SaveChangesAsync 才會生效
+                if (newStatus != oldStatus)
+                {
+                    p.ProgrammeStatusID = newStatus;
+                    hasChanged = true;
+                    _logger.LogInformation($"[活動狀態切換] {p.ProgrammeName}: {oldStatus} -> {newStatus}");
+                }
             }
 
-           
-
+            if (hasChanged)
+            {
+                await context.SaveChangesAsync();
+                _logger.LogInformation("[系統通知] 活動狀態已批次更新。");
+            }
         }
     }
 }
+    

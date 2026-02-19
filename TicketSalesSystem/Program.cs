@@ -8,6 +8,7 @@ using TicketSalesSystem.Service.Orders;
 using TicketSalesSystem.Service.Seats;
 using TicketSalesSystem.Service.Sms;
 using TicketSalesSystem.Service.Validation.IBookingValidation;
+using TicketSalesSystem.Service.Validation.IProgrammeValidationService;
 using TicketSalesSystem.Service.Validation.NewFolder;
 
 
@@ -45,6 +46,11 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 //註冊虛擬簡訊介面
 builder.Services.AddScoped<ISmsService, MockSmsService>();
+
+//註冊活動驗證服務
+builder.Services.AddScoped<IProgrammeValidationService, ProgrammeValidationService>();
+
+
 
 
 

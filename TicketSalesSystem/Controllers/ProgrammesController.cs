@@ -40,6 +40,9 @@ namespace TicketSalesSystem.Controllers
                     ProgrammeStatusID = p.ProgrammeStatusID ?? "O",
                     ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "售票中",
 
+                    Capacity = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Capacity),
+                    Remaining = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Remaining),
+
                     StartTime = p.Session.OrderBy(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
                     SaleStartTime = p.Session.OrderBy(s => s.StartTime).Select(s => s.SaleStartTime).FirstOrDefault(),
                     SessionID = p.Session.OrderBy(s => s.StartTime).Select(s => s.SessionID).FirstOrDefault() ?? ""
@@ -83,7 +86,10 @@ namespace TicketSalesSystem.Controllers
                     ProgrammeStatusID = p.ProgrammeStatusID,
                     ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "未知",
                     // 抓最早場次時間
-                    StartTime = p.Session.OrderBy(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault()
+                    StartTime = p.Session.OrderBy(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
+                    Capacity = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Capacity),
+                    Remaining = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Remaining)
+                    
                 }).ToListAsync();
 
             return View(programmes);

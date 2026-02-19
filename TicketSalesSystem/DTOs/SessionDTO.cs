@@ -11,6 +11,8 @@ namespace TicketSalesSystem.DTOs
         public DateTime SaleEndTime { get; set; }
         public DateTime StartTime { get; set; }
 
+        public string VenueID { get; set; }
+
         public string ProgrammeID { get; set; } = null!;
 
         public List<TicketsAreaDTO> TicketsArea { get; set; } = new List<TicketsAreaDTO>();

@@ -7,8 +7,9 @@
         public int RowCount { get; set; }
         public int SeatCount { get; set; }
         public decimal Price { get; set; }
+        public int Capacity { get; set; }
+        public int Remaining { get; set; }
 
-        
         public string TicketsAreaStatusID { get; set; } = "A";
         public string VenueID { get; set; } = null!;
         public string SessionID { get; set; } = null!;

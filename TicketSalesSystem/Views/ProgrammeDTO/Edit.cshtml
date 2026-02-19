@@ -140,11 +140,13 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr class="small text-center">
-                                        <th style="width: 20%">場館</th>
+                                        <th style="width: 15%">場館</th>
                                         <th>票區名稱</th>
-                                        <th style="width: 15%">價格</th>
-                                        <th style="width: 10%">排數</th>
-                                        <th style="width: 10%">座/排</th>
+                                        <th style="width: 12%">價格</th>
+                                        <th style="width: 8%">排數</th>
+                                        <th style="width: 8%">座/排</th>
+                                        <th style="width: 10%">總量</th> @* 🚩 新增 *@
+                                        <th style="width: 10%">剩餘</th> @* 🚩 新增 *@
                                         <th style="width: 5%"></th>
                                     </tr>
                                 </thead>
@@ -180,6 +182,12 @@
                                                 </td>
                                                 <td>
                                                     <input name="Session[@i].TicketsArea[@j].SeatCount" value="@area.SeatCount" type="number" class="form-control form-control-sm" />
+                                                </td>
+                                                <td>
+                                                    <input name="Session[@i].TicketsArea[@j].Capacity" value="@area.Capacity" class="form-control form-control-sm text-center capacity-input bg-light" readonly />
+                                                </td>
+                                                <td>
+                                                    <input name="Session[@i].TicketsArea[@j].Remaining" value="@area.Remaining" class="form-control form-control-sm text-center bg-light fw-bold @(area.Remaining < 10 ? "text-danger" : "text-primary")" readonly />
                                                 </td>
                                                 <td>
                                                     <button type="button" class="btn btn-link text-danger remove-area p-0">×</button>
@@ -250,7 +258,7 @@
         $(document).ready(function () {
             console.log("頁面初始化中...");
 
-            // 1. 初始化場館
+            //初始化場館
             const initialPid = $("#PlaceID").val();
             console.log("初始 PlaceID:", initialPid);
             if (initialPid) {
@@ -259,7 +267,7 @@
             console.warn("未抓到初始 PlaceID，請檢查 HTML id 是否為 PlaceID");
             }
 
-            // 2. 地區切換
+            //地區切換
             $("#PlaceID").on("change", function () {
                 loadVenues($(this).val(), false);
             });
@@ -307,7 +315,7 @@
                 });
             }
 
-            // 3. 新增場次
+            //新增場次
             $("#add-session").on("click", function (e) {
                 e.preventDefault();
                 const sIdx = $(".session-item").length;
@@ -332,7 +340,7 @@
                 $("#session-container").append(html);
             });
 
-            // 4. 新增票區 (使用事件委派)
+            //新增票區 (使用事件委派)
             $(document).on("click", ".add-ticket-area", function (e) {
                 e.preventDefault();
                 const $session = $(this).closest(".session-item");
@@ -356,12 +364,33 @@
                     <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].Price" class="form-control form-control-sm text-end" required /></td>
                     <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].RowCount" class="form-control form-control-sm text-center" required /></td>
                     <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].SeatCount" class="form-control form-control-sm text-center" required /></td>
+                    <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].Capacity" class="form-control form-control-sm text-center capacity-input bg-light" readonly /></td>
+                    <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].Remaining" class="form-control form-control-sm text-center bg-light" readonly /></td>
                     <td><button type="button" class="btn btn-sm btn-outline-danger remove-area">×</button></td>
                 </tr>`;
                 $tbody.append(row);
             });
 
-            // 5. 刪除
+            //自動計算總量與初始化剩餘票數
+            $(document).on("input", ".row-count-input, .seat-count-input", function () {
+            const $tr = $(this).closest("tr");
+            const rows = parseInt($tr.find(".row-count-input").val()) || 0;
+            const seats = parseInt($tr.find(".seat-count-input").val()) || 0;
+            const capacity = rows * seats;
+
+            $tr.find(".capacity-input").val(capacity);
+
+            // 如果是「新票區」(ID 為空)，則剩餘票數同步更新為總量
+            const areaId = $tr.find(".area-id-input").val();
+            if (!areaId) {
+                $tr.find("input[name*='Remaining']").val(capacity);
+            }
+            });
+
+
+
+
+            //刪除
             $(document).on("click", ".remove-area", function () {
                 $(this).closest("tr").remove();
                 reIndexAll();

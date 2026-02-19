@@ -1,0 +1,20 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.PublicNotice>
+
+<div class="news-section my-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold m-0">最新消息</h4>
+        <a asp-controller="PublicNotices" asp-action="UserIndex" class="text-primary text-decoration-none small">更多 <i class="bi bi-chevron-right"></i></a>
+    </div>
+    <ul class="list-group list-group-flush border-top">
+        @foreach (var item in Model)
+        {
+            <li class="list-group-item d-flex align-items-center py-3 border-bottom">
+                <span class="badge bg-purple me-2">系統公告</span>
+                <span class="badge bg-danger me-3">NEW!</span>
+                <a asp-controller="PublicNotices" asp-action="UserDetails" asp-route-id="@item.PublicNoticeID" class="text-decoration-none text-dark text-truncate">
+                    @item.PublicNoticeTitle
+                </a>
+            </li>
+        }
+    </ul>
+</div>

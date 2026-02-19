@@ -1,84 +1,116 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.Order>
 
 @{
-    ViewData["Title"] = "Index";
-  
+    ViewData["Title"] = "訂單管理總覽";
 }
+<style>
+    /* 讓有提問的標籤稍微跳動，提醒管理員 */
+    .animate__infinite {
+        animation-iteration-count: infinite;
+    }
 
-<h1>Index</h1>
+    .badge i {
+        margin-right: 4px;
+    }
+</style>
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-list-ul"></i> 訂單管理總覽</h4>
+        </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.OrderCreatedTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentTradeNO)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentDescription)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaidTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Member)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentMethod)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OrderStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Session)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrderCreatedTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaymentTradeNO)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaymentDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaymentStatus)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaidTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Member.MemberID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaymentMethod.PaymentMethodID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrderStatus.OrderStatusID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Session.SessionID)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.OrderID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.OrderID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.OrderID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="searchString" class="form-control" placeholder="搜尋訂單編號或會員帳號..." value="@Context.Request.Query["searchString"]" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="statusFilter" class="form-select" asp-items="ViewBag.StatusList">
+                        <option value="">-- 所有狀態 --</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">執行篩選</button>
+                </div>
+                <div class="col-md-1">
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">重置</a>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>訂單編號</th>
+                            <th>會員帳號</th>
+                            <th>建立時間</th>
+                            <th>金流狀態</th>
+                            <th>訂單狀態</th>
+                            <th class="text-center">退票申請</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">@item.OrderID</td>
+                                <td>@item.Member?.MemberID</td>
+                                <td>@item.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>
+                                    @if (item.PaymentStatus)
+                                    {
+                                        <span class="badge bg-success">已付款</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">未付款</span>
+                                    }
+                                </td>
+                                <td>
+                                    @* 根據不同狀態顯示不同顏色 *@
+                                    @{
+                                        var statusClass = item.OrderStatusID switch
+                                        {
+                                            "Y" => "bg-primary",   // 已完成
+                                            "C" => "bg-danger",    // 已取消
+                                            "N" => "bg-warning text-dark", // 逾期
+                                            _ => "bg-info"         // 其他
+                                        };
+                                    }
+                                    <span class="badge @statusClass">@item.OrderStatus?.OrderStatusName</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Question != null && item.Question.Any())
+                                    {
+                                        <span class="badge rounded-pill bg-danger animate__animated animate__pulse animate__infinite">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> @item.Question.Count 筆提問
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Edit" asp-route-id="@item.OrderID" class="btn btn-outline-primary">
+                                            <i class="bi bi-pencil-square"></i> 審核/編輯
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.OrderID" class="btn btn-outline-secondary">
+                                            詳情
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

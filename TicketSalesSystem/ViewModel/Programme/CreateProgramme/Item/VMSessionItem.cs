@@ -12,6 +12,8 @@ namespace TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item
         // 可以在這裡加一個 TempId，方便前端刪除特定場次時使用
         public string TempId { get; set; } = Guid.NewGuid().ToString();
 
+        public string? VenueID { get; set; }
+
         public List<VMTicketsAreaItem> TicketsArea { get; set; } = new List<VMTicketsAreaItem>();
     }
 }

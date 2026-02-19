@@ -1,0 +1,115 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Programme>
+
+@{
+    Layout = null;
+}
+<style>
+    /* 拓元色調與卡片美化 */
+    :root {
+        --tix-blue: #003a8c;
+    }
+
+    .programme-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 0; /* 拓元多用方正邊角 */
+    }
+
+        .programme-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+        }
+
+    /* 固定圖片比例 16:9 且不變形 */
+    .custom-card-img {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .programme-card:hover .custom-card-img {
+        transform: scale(1.05);
+    }
+
+    .btn-tixcraft {
+        background-color: var(--tix-blue);
+        color: white;
+        border-radius: 4px;
+        border: none;
+    }
+
+        .btn-tixcraft:hover {
+            background-color: #002766;
+            color: white;
+        }
+
+    .hover-blue:hover {
+        color: var(--tix-blue) !important;
+    }
+</style>
+@if (Model != null && Model.Any())
+{
+    <div class="text-end m-3">
+        <a asp-controller="Programmes" asp-action="Index" class="  text-primary text-decoration-none small">更多 <i class="bi bi-chevron-right"></i></a>
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4">        
+        @foreach (var item in Model)
+        {
+            // 🚩 核心修正：從 Session 集合中抓取最接近的一場
+            var sortedSessions = item.Session.OrderBy(s => s.StartTime).ToList();
+            var firstSession = sortedSessions.FirstOrDefault();
+            var lastSession = sortedSessions.LastOrDefault();
+
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm programme-card">
+                    <div class="position-relative overflow-hidden">
+                        <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID">
+                            @if (!string.IsNullOrEmpty(item.CoverImage))
+                            {
+                                <img src="/Photos/CoverImage/@item.CoverImage" alt="@item.ProgrammeName" class="card-img-top custom-card-img" />
+                            }
+                            else
+                            {
+                                <img src="/Photos/CoverImage/nonoPhoto.jpg" alt="No Photo" class="card-img-top custom-card-img" />
+                            }
+                        </a>
+                        <span class="position-absolute top-0 start-0 badge bg-primary m-2 px-3 py-2">熱賣中</span>
+                    </div>
+
+                    <div class="card-body d-flex flex-column p-4">
+                        <h5 class="card-title fw-bold mb-3">
+                            <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID" class="text-decoration-none text-dark hover-blue">
+                                @item.ProgrammeName
+                            </a>
+                        </h5>
+
+                        <div class="mt-auto">
+                            <div class="text-secondary small mb-2">
+                                <i class="bi bi-calendar3 me-2"></i>
+                                @if (firstSession != null)
+                                {
+                                    @firstSession.StartTime.ToString("yyyy/MM/dd (ddd)")
+                                    @if (sortedSessions.Count > 1)
+                                    {
+                                        <span> ~ @lastSession.StartTime.ToString("MM/dd")</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>場次尚未公布</span>
+                                }
+                            </div>
+
+                            <div class="text-secondary small mb-3">
+                                <i class="bi bi-geo-alt-fill me-2"></i>
+                                @(item.Place?.PlaceName ?? "地點未定")
+                            </div>
+
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+

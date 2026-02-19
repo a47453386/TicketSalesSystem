@@ -1,74 +1,111 @@
 ﻿@model IEnumerable<TicketSalesSystem.ViewModel.Programme.VMProgramme>
 
-@{
-    ViewData["Title"] = "活動管理後台";
-   
-}
+<style>
+    /* 🚩 核心：限制列表最大寬度，不要讓它在寬螢幕上無限延伸 */
+    .admin-list-container {
+        max-width: 1200px; /* 鎖定寬度，解決「間隔太大」 */
+        margin: 0 auto;
+    }
+    /* 🚩 鎖定特定欄位寬度，讓內容往中間靠攏 */
+    .col-id {
+        width: 80px;
+    }
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold"><i class="bi bi-gear-fill me-2"></i>活動節目管理</h2>
-        <a asp-controller="ProgrammeDTO" asp-action="CreateStep1" class="btn btn-success"><i class="bi bi-plus-lg"></i> 新增活動</a>
+    .col-img {
+        width: 70px;
+    }
+
+    .col-status {
+        width: 100px;
+    }
+
+    .col-action {
+        width: 140px;
+    }
+
+    /* 壓縮行高 */
+    .table-sm td, .table-sm th {
+        padding: 0.5rem 0.3rem;
+    }
+</style>
+
+<div class="admin-list-container mt-4 pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0"><i class="bi bi-gear-fill me-2 text-primary"></i>活動節目管理</h3>
+        <a asp-controller="ProgrammeDTO" asp-action="CreateStep1" class="btn btn-success btn-sm shadow-sm">
+            <i class="bi bi-plus-lg"></i> 新增活動
+        </a>
     </div>
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="ps-4">活動 ID</th>
-                        <th>縮圖</th>
-                        <th style="width: 25%">活動名稱</th>
-                        <th>地點</th>
-                        <th>開演時間</th>
-                        <th>狀態</th>
-                        <th class="text-center">操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="ps-4"><code class="fw-bold">@item.ProgrammeID</code></td>
-                            <td>
-                                <img src="@Url.Content("~/Photos/CoverImage/" + item.CoverImage)"
-                                     style="width: 60px; height: 40px; object-fit: cover;"
-                                     class="rounded border"
-                                     onerror="this.src='https://via.placeholder.com/60x40?text=No+Img'">
-                            </td>
-                            <td class="fw-bold">@item.ProgrammeName</td>
-                            <td>@item.PlaceName</td>
-                            <td>@(item.StartTime?.ToString("yyyy-MM-dd HH:mm") ?? "未排定")</td>
-                            <td>
-                                <span class="badge bg-@item.StatusColor">@item.ProgrammeStatusName</span>
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    @* 🚩 這是你測試的重點：編輯按鈕 *@
-                                    <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil-square"></i> 編輯
-                                    </a>
-                                    <a asp-action="Details" asp-route-id="@item.ProgrammeID" class="btn btn-sm btn-outline-info">
-                                        <i class="bi bi-eye"></i> 預覽
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('@item.ProgrammeID')">
-                                        <i class="bi bi-trash"></i> 刪除
-                                    </button>
-                                </div>
-                            </td>
+            <div class="table-responsive">
+                @* 🚩 加入 table-sm 讓上下間距變小 *@
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr class="small">
+                            <th class="ps-3 col-id">ID</th>
+                            <th class="col-img">縮圖</th>
+                            <th style="width: 35%">活動名稱</th> @* 讓名稱吃掉剩下的空間 *@
+                            <th class="text-nowrap">地點</th>
+                            <th class="text-nowrap">開演時間</th>
+                            <th class="text-center text-nowrap">庫存 / 餘票</th>
+                            <th class="text-center col-status">狀態</th>
+                            <th class="text-center col-action">操作</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="small">
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-3 text-muted font-monospace">@item.ProgrammeID</td>
+                                    <td>
+                                        <img src="@Url.Content("~/Photos/CoverImage/" + item.CoverImage)"
+                                             style="width: 50px; height: 35px; object-fit: cover;"
+                                             class="rounded border"
+                                             onerror="this.src='https://via.placeholder.com/50x35?text=No+Img'">
+                                    </td>
+                                    <td class="fw-bold">@item.ProgrammeName</td>
+                                    <td class="text-secondary text-nowrap small">@item.PlaceName</td>
+                                    <td class="text-nowrap small">
+                                        @(item.StartTime?.ToString("yyyy-MM-dd HH:mm") ?? "未排定")
+                                    </td>
+                                    <td class="text-center text-nowrap">
+                                        <span class="fw-bold">@item.Capacity</span>
+                                        <span class="text-muted">/</span>
+                                        <span class="@(item.Remaining < 10 && item.Remaining > 0 ? "text-danger fw-bold" : "text-primary")">@item.Remaining</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge rounded-pill bg-@item.StatusColor" style="font-size: 0.7rem;">
+                                            @item.ProgrammeStatusName
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                            <a asp-action="Details" asp-route-id="@item.ProgrammeID" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
+                                            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete('@item.ProgrammeID')"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        function confirmDelete(id) {
-            if (confirm("確定要刪除活動 " + id + " 嗎？")) {
-                // 執行刪除邏輯...
+        function confirmDelete(id, name) {
+            // 使用更友善的提示
+            if (confirm(`確定要刪除活動「${name}」嗎？\n這將會移除所有相關場次與票區設定。`)) {
+                // 實作你的刪除 Ajax 或表單提交邏輯
+                console.log("Delete triggered for:", id);
             }
         }
     </script>

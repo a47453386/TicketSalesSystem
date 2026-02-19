@@ -33,6 +33,18 @@ namespace TicketSalesSystem.Controllers
             return View(await ticketsContext.ToListAsync());
         }
 
+
+        public async Task<IActionResult> UserIndex()
+        {
+            var ticketsContext =await _context.FAQ
+                .Include(f => f.FAQPublishStatus)
+                .Include(f => f.FAQType)
+                .Where(f => f.FAQPublishStatusID == "Y") // 只顯示已發布的 FAQ                
+                .ToListAsync();
+            return View(ticketsContext);
+        }
+
+
         // GET: FAQs/Details/5
         public async Task<IActionResult> Details(string id)
         {
