@@ -17,5 +17,10 @@ namespace TicketSalesSystem.Models
 
         //關聯
         public virtual List<Venue>? Venue { get; set; }
+
+
+        //顯示用
+        [NotMapped]
+        public string FullDisplayName => $"{VenueStatusID} - {VenueStatusName}";
     }
 }

@@ -1,7 +1,5 @@
 ﻿@using TicketSalesSystem.ViewModel.Booking
-@model IEnumerable<VMBookingResponse>
-
-
+@model IEnumerable<VMBookingDetailsResponse>
 
 @{
     ViewData["Title"] = "訂單明細查詢";
@@ -21,7 +19,7 @@
     .bg-detail-grey {
         background-color: #f8f9fa;
     }
-    /* 明細區底色 */
+
     .table-secondary {
         background-color: #e9ecef !important;
     }
@@ -34,7 +32,6 @@
         font-size: 0.75rem;
     }
 
-    /* 拓元風格按鈕 */
     .btn-tixcraft-outline {
         border: 1px solid var(--tixcraft-blue);
         color: var(--tixcraft-blue);
@@ -48,23 +45,23 @@
             color: white;
         }
 
-    /* 展開/縮合動畫 */
-    .collapse {
-        transition: all 0.3s ease-out;
-    }
-
-    /* 表格框線微調 */
+    /* 確保表格框線清晰 */
     .table td {
         border-color: #dee2e6;
     }
+
+    /* 徽章最小寬度確保整齊 */
+    .badge {
+        min-width: 80px;
+    }
 </style>
-
-
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-end mb-4 border-bottom border-dark border-3 pb-2">
         <h2 class="fw-bold mb-0">訂單查詢 <small class="text-secondary fs-6 ms-2">Order Inquiry</small></h2>
     </div>
+
+
 
     <div class="table-responsive shadow-sm">
         <table class="table mb-0 border align-middle">
@@ -77,81 +74,85 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var order in Model)
+                @if (Model != null && Model.Any())
                 {
-                    <tr class="text-center bg-white">
-                        <td class="fw-bold">@order.OrderID</td>
-                        <td class="small text-secondary">@order.StartTime</td> @* 建議此處放訂單成立時間 *@
-                        <td class="text-start ps-4">
-                            <div class="fw-bold text-primary">@order.ProgrammeName</div>
-                            <div class="small text-muted mt-1">
-                                <span class="badge bg-light text-dark border fw-normal">共 @order.Seats.Count 張</span>
-                                <span class="ms-2">總額：<span class="text-danger fw-bold">$@order.FinalAmount.ToString("N0")</span></span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="fw-bold">@order.OrderStatusName</span><br />   
-                            <button class="btn btn-tixcraft-outline btn-sm px-4" 
-                                    type="button" 
-                                    data-bs-toggle="collapse" 
-                                    data-bs-target="#detail_@order.OrderID">
-                                檢視明細 <i class="bi bi-chevron-down"></i>
-                            </button>
-                            <a asp-action="UserDetail" asp-route-id="@order.OrderID" class="btn btn-link btn-sm p-0 text-decoration-none">
-                                <i class="bi bi-zoom-in"></i> 查看 QR
-                            </a>
-                        </td>
-                    </tr>
+                    @foreach (var order in Model)
+                    {
+                        <tr class="text-center bg-white">
+                            <td class="fw-bold">@order.OrderID</td>
+                            <td class="small text-secondary">@order.StartTime</td>
+                            <td class="text-start ps-4">
+                                <div class="fw-bold text-primary">@order.ProgrammeName</div>
+                                <div class="small text-muted mt-1">
+                                    <span class="badge bg-light text-dark border fw-normal">共 @(order.TicketDetails?.Count ?? 0) 張</span>
+                                    <span class="ms-2">總額：<span class="text-danger fw-bold">$@order.FinalAmount.ToString("N0")</span></span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-bold d-block mb-2">@order.OrderStatusName</span>
+                                <button class="btn btn-tixcraft-outline btn-sm px-4"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#detail_@order.OrderID">
+                                    檢視明細 <i class="bi bi-chevron-down"></i>
+                                </button>
 
-                    <tr class="collapse" id="detail_@order.OrderID">
-                        <td colspan="4" class="p-0 border-0">
-                            <div class="bg-detail-grey p-4 border-top">
-                                <table class="table table-bordered bg-white mb-0 shadow-sm text-center align-middle">
-                                    <thead class="table-secondary small text-dark fw-bold">
-                                        <tr>
-                                            <th style="width: 10%;">序號</th>
-                                            <th style="width: 35%;">場次 / 地點</th>
-                                            <th style="width: 25%;">票區 / 座位</th>
-                                            <th style="width: 15%;">單價</th>
-                                            <th style="width: 15%;">狀態</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @{ int seatIndex = 1; }
-                                        @foreach (var seat in order.Seats)
-                                        {
+                                @* 🚩 需求 2：只有訂單成立（已付款）才顯示查看 QR *@
+                                <div class="mt-2">
+                                    @if (order.OrderStatusID == "Y")
+                                    {
+                                        <a asp-action="UserDetail" asp-route-id="@order.OrderID" class="text-decoration-none x-small text-success fw-bold">
+                                            <i class="bi bi-qr-code"></i> 查看 QR Code / 入場證明
+                                        </a>
+                                    }
+                                    
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr class="collapse" id="detail_@order.OrderID">
+                            <td colspan="4" class="p-0 border-0">
+                                <div class="bg-detail-grey p-4 border-top">
+                                    <table class="table table-bordered bg-white mb-0 shadow-sm text-center align-middle">
+                                        <thead class="table-secondary small text-dark fw-bold">
                                             <tr>
-                                                <td class="text-muted small">@seatIndex</td>
-                                                <td class="text-start ps-3">
-                                                    <div class="fw-bold small">@order.ProgrammeName</div>
-                                                    <div class="x-small text-secondary">📍 @order.PlaceName</div>
-                                                </td>
-                                                <td>
-                                                    @* 假設 seat 格式為 "特A區 10排 5號" *@
-                                                    <span class="fw-bold">@seat</span>
-                                                </td>
-                                                <td class="text-danger">
-                                                    $@((order.FinalAmount / order.Seats.Count).ToString("N0"))
-                                                </td>
-                                                <td>
-                                                    @if (order.RemainingSeconds > 0)
-                                                    {
-                                                        <a href="/Seats/Payment/@order.OrderID" class="btn btn-danger btn-sm py-0 small">前往付款</a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="badge bg-success py-1">可入場</span>
-                                                       
-                                                    }
-                                                </td>
+                                                <th style="width: 10%;">序號</th>
+                                                <th style="width: 50%;">場次 / 地點</th>
+                                                <th style="width: 25%;">票區 / 座位</th>
+                                                <th style="width: 15%;">單價</th>
+                                                @* 🚩 需求 1：移除狀態列 *@
                                             </tr>
-                                            seatIndex++;
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                int seatIndex = 1;
+                                            }
+                                            @if (order.TicketDetails != null && order.TicketDetails.Any())
+                                            {
+                                                @foreach (var seat in order.TicketDetails)
+                                                {
+                                                    <tr>
+                                                        <td class="text-muted small">@seatIndex</td>
+                                                        <td class="text-start ps-3">
+                                                            <div class="fw-bold small">@order.ProgrammeName</div>
+                                                            <div class="x-small text-secondary">📍 @order.PlaceName</div>
+                                                        </td>
+                                                        <td><span class="fw-bold">@seat.SeatInfo</span></td>
+                                                        <td class="text-danger fw-bold">$@seat.Price.ToString("N0")</td>
+                                                    </tr>
+                                                    seatIndex++;
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="4" class="text-center py-5 text-muted">目前沒有訂單紀錄</td></tr>
                 }
             </tbody>
         </table>

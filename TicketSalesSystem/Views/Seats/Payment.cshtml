@@ -195,11 +195,34 @@
         </div>
     </div>
 </div>
-
+<form asp-controller="Orders" asp-action="UserCancelOrder" id="cancelForm">
+    <input type="hidden" name="id" value="@Model.OrderID" />
+    <button type="button" class="btn btn-outline-danger" onclick="confirmCancel()">
+        我不要了，取消訂單
+    </button>
+   
+</form>
 
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function confirmCancel() {
+            Swal.fire({
+                title: '確定要取消訂單嗎？',
+                text: "取消後，您選購的座位將立即釋出給其他購票者！",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '確定取消',
+                cancelButtonText: '再考慮一下'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('cancelForm').submit();
+                }
+            })
+        }
         // 1. 倒數計時
         (function () {
             const timerDisplay = document.getElementById("countdownTimer");

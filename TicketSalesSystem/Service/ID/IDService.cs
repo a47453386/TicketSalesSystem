@@ -43,5 +43,15 @@ namespace TicketSalesSystem.Service.ID
             var employeeId = _context.Database.SqlQueryRaw<string>($"SELECT dbo.funGetEmployeeID(@p0) as value", roleID).AsEnumerable().FirstOrDefault();
             return employeeId;
         }
+        public async Task<string> GetNextPlaceID()
+        {
+            var placeId = _context.Database.SqlQueryRaw<string>($"SELECT dbo.funGetPlaceID() as value").AsEnumerable().FirstOrDefault();
+            return placeId;
+        }
+        public async Task<string> GetNextVenueID(string placeId)
+        {
+            var venueId = _context.Database.SqlQueryRaw<string>($"SELECT dbo.funGetVenueID(@p0)", placeId).AsEnumerable().FirstOrDefault();
+            return venueId;
+        }
     }
 }

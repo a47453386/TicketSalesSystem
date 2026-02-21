@@ -205,3 +205,54 @@ begin
 end
 
 SELECT dbo.funGetEmployeeID('A');
+
+----------------------------------------------------------------------------------------------------------
+--PlaceID A
+
+create function funGetPlaceID()
+returns nchar(1)
+as
+begin 
+   DECLARE @LastID VARCHAR(1),@NextID VARCHAR(1)
+    
+
+    -- 取得目前最後一筆 ID
+    SELECT TOP 1 @LastID = [PlaceID] FROM [Place] ORDER BY [PlaceID] DESC
+
+    IF @LastID IS NULL
+        SET @NextID = 'A'
+    ELSE
+        -- 將字母轉為 ASCII 碼 + 1 再轉回字元
+        SET @NextID = CHAR(ASCII(@LastID) + 1)
+
+    RETURN @NextID
+
+end
+
+SELECT dbo.funGetPlaceID();
+
+----------------------------------------------------------------------------------------------------------
+--EmployeeID F21025
+
+alter function funGetVenueID(@PlaceID nchar(1))
+returns nchar(3)
+as
+begin 
+    DECLARE @LastID VARCHAR(3),@NextID VARCHAR(3), @Seq INT
+
+   
+
+     select @Seq =isnull(max(cast(right(VenueID,2)as int)),0)
+	 from Venue
+	 where PlaceID like @PlaceID+'%';
+
+     set @Seq+=1
+
+    -- 組合成 A + 兩位數流水號 (例如 A02)
+    SET @NextID = @PlaceID + RIGHT('00' + CAST(@Seq AS VARCHAR), 2)
+
+    RETURN @NextID
+
+end
+
+SELECT dbo.funGetVenueID('C');

@@ -26,12 +26,12 @@ namespace TicketSalesSystem.Models
 
         [Display(Name ="每區總排數")]
         [Required(ErrorMessage ="必填")]
-        [Range(0,50,ErrorMessage =("排數為0~50之間"))]
+        [Range(1,50,ErrorMessage =("排數為1~50之間"))]
         public int RowCount { get; set; }
 
         [Display(Name = "每排總座位數")]
         [Required(ErrorMessage = "必填")]
-        [Range(0, 50, ErrorMessage = ("排數為0~50之間"))]
+        [Range(1, 50, ErrorMessage = ("排數為1~50之間"))]
         public int SeatCount { get; set; }
 
         

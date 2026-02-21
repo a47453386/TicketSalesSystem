@@ -1,0 +1,27 @@
+﻿<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                @* 🚩 動態標題 *@
+                <h5 class="modal-title" id="statusModalTitle">快速新增區域狀態</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">狀態代碼 (ID)</label>
+                    @* 🚩 編輯時，ID 通常不給改，所以要加一個 logic 控制 readonly *@
+                    <input type="text" id="newStatusID" class="form-control bg-light" placeholder="例如: A">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">狀態名稱</label>
+                    <input type="text" id="newStatusName" class="form-control" placeholder="例如: 正常使用">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                @* 🚩 確認按鈕，邏輯會由 JS 處理 *@
+                <button type="button" class="btn btn-primary w-100" id="btnConfirmStatus">確認儲存</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -83,10 +83,12 @@ namespace TicketSalesSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmBooking([FromBody] VMBookingRequest request)
         {
-            using (var transaction = await _context.Database.BeginTransactionAsync())
-            {
+            //先檢查目前是否已有交易，沒有才開啟
+            var transaction = _context.Database.CurrentTransaction == null
+                              ? await _context.Database.BeginTransactionAsync()
+                              : null;
 
-                string memberId = "004bc90a-26fb-48e9-a762-653a232d86e2";
+            string memberId = "004bc90a-26fb-48e9-a762-653a232d86e2";
                 var member = await _context.Member.AnyAsync(m => m.MemberID == memberId);
                 if (!member)
                 {
@@ -110,7 +112,11 @@ namespace TicketSalesSystem.Controllers
                         request.Count, request.TicketsAreaID, request.Count
                         );
 
-                    if (rowAffected == 0) return Json(new { success = false, message = "抱歉，該區域票券已售完！" });
+                if (rowAffected == 0) 
+                {
+                    if (transaction != null) await transaction.RollbackAsync();
+                    return Json(new { success = false, message = "抱歉，票券已售完！" });
+                } 
 
 
                     //建立訂單與寫入
@@ -119,12 +125,11 @@ namespace TicketSalesSystem.Controllers
 
                     if (response.Success)
                     {
-                        // 🚩 核心修正：一定要提交交易！
-                        await transaction.CommitAsync();
+                        if (transaction != null) await transaction.CommitAsync();
                     }
                     else
                     {
-                        await transaction.RollbackAsync();
+                        if (transaction != null) await transaction.RollbackAsync();
                     }
 
                     return Json(response);
@@ -132,15 +137,15 @@ namespace TicketSalesSystem.Controllers
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
-                    var detail = ex.InnerException?.Message ?? ex.Message;
+                    if (transaction != null) await transaction.RollbackAsync();
+                     var detail = ex.InnerException?.Message ?? ex.Message;
                     return Json(new VMBookingResponse { Success = false, Message = "系統異常：" + detail });
 
                 }
 
 
 
-            }
+            
 
         }
 

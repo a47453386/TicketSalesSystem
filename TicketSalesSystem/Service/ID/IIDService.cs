@@ -8,6 +8,8 @@
             Task<string> GetNextFAQTypeID();
             Task<string> GetQuestionTypeID();
             Task<string> GetNextEmployeeID(string roleID);
+            Task<string> GetNextPlaceID();
+            Task<string> GetNextVenueID(string placeId);
 
     }
 }

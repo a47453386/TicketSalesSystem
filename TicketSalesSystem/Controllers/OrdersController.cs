@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Booking;
 using TicketSalesSystem.ViewModel.Order;
 
@@ -20,7 +21,8 @@ namespace TicketSalesSystem.Controllers
             _context = context;
         }
 
-        // GET: Orders
+
+        // 後台訂單管理頁面
         public async Task<IActionResult> Index(string searchString, string statusFilter)
         {
             // 🚩 1. 基礎查詢，包含必要關聯
@@ -52,7 +54,7 @@ namespace TicketSalesSystem.Controllers
             return View(result);
         }
 
-        
+        // 前台會員專區的訂單列表
         public async Task<IActionResult> UserIndex()
         {
             string currentMemberID = "004bc90a-26fb-48e9-a762-653a232d86e2";
@@ -66,20 +68,26 @@ namespace TicketSalesSystem.Controllers
                 .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
                 .Where(o => o.MemberID == currentMemberID)
                 .OrderByDescending(o => o.OrderCreatedTime)
-                .Select(o=>new VMBookingResponse
+                .Select(o=>new VMBookingDetailsResponse
                 {
                     OrderID = o.OrderID,
                     ProgrammeName = o.Session.Programme.ProgrammeName,
                     StartTime = o.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
                     PlaceName = o.Session.Programme.Place.PlaceName,
                     FinalAmount= o.Tickets.Sum(t => t.TicketsArea.Price),
+                    OrderStatusID= o.OrderStatusID,
                     OrderStatusName = o.OrderStatus.OrderStatusName,
                     Seats = o.Tickets.Select(t => $"{t.RowIndex}排{t.SeatIndex}號").ToList(),
                     //只有在狀態是待付款 (P) 時才需要計算，已完成 (Y) 的話就給 0
                     RemainingSeconds = o.OrderStatusID=="P"? time:0,
                     Success=o.OrderStatusID =="Y",
                     Message=o.OrderStatusID=="Y"?"付款完成": o.OrderStatusID == "N" ? "訂單失效" : "待付款",
-                    
+                    TicketDetails = o.Tickets.Select(t => new VMTicketDetail
+                    {
+                        SeatInfo = $"{t.TicketsArea.TicketsAreaName} {t.RowIndex}排 {t.SeatIndex}號",
+                        StatusName = t.TicketsStatus.TicketsStatusName ?? "未知",
+                        Price = t.TicketsArea.Price
+                    }).ToList()
                 })
                 .ToArrayAsync();
 
@@ -91,6 +99,8 @@ namespace TicketSalesSystem.Controllers
 
             return View(odrders);
         }
+
+        // 前台會員專區的訂單詳細資料
         public async Task<IActionResult> UserDetail(string id)
         {
             if (id==null)return BadRequest();
@@ -100,6 +110,7 @@ namespace TicketSalesSystem.Controllers
                 .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(s => s.Place)
                 .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
                 .Include(o => o.Tickets).ThenInclude(t => t.Session)
+                .Include(o => o.Tickets).ThenInclude(t => t.TicketsStatus)
                 .Where(o => o.OrderID == id)
                 .FirstOrDefaultAsync();
             if (order == null) return NotFound();
@@ -136,7 +147,7 @@ namespace TicketSalesSystem.Controllers
             return View(vm);
         }
 
-
+        //訂單詳細資料頁面 (後台)
         // GET: Orders/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
@@ -181,6 +192,8 @@ namespace TicketSalesSystem.Controllers
 
             if (ModelState.IsValid)
             {
+                
+                
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
@@ -246,6 +259,62 @@ namespace TicketSalesSystem.Controllers
             ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "StatusName", order.OrderStatusID);
             ViewData["PaymentMethodID"] = new SelectList(_context.PaymentMethod, "PaymentMethodID", "MethodName", order.PaymentMethodID);
             return View(order);
+        }
+
+
+
+
+
+        // 前台會員專區：使用者主動取消訂單 (只能取消「待付款」的訂單)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserCancelOrder(string id)
+        {
+            // 1. 取得當前登入的會員 ID (假設你存在 Session 或 Claims 中)
+            //var currentMemberId = HttpContext.Session.GetString("MemberID");
+            //if (string.IsNullOrEmpty(currentMemberId)) return RedirectToAction("Login", "Member");
+            var currentMemberId= "004bc90a-26fb-48e9-a762-653a232d86e2";
+
+
+
+            // 2. 抓取訂單，並確保該訂單屬於此會員，且處於「待付款」狀態
+            // 假設 'P' 代表待付款 (Pending Payment)
+            var order = await _context.Order
+                .Include(o => o.Tickets)
+                .FirstOrDefaultAsync(o => o.OrderID == id && o.MemberID == currentMemberId);
+
+            if (order == null) return NotFound();
+
+            // 🚩 安全檢查：只有狀態為待付款時才能由使用者主動取消
+            if (order.OrderStatusID != "P")
+            {
+                TempData["Error"] = "訂單狀態已變更，無法手動取消。";
+                return RedirectToAction("Details", new { id = order.OrderID });
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // 3. 執行取消動作
+                order.OrderStatusID = "C"; // 改為取消狀態
+
+                // 4. 連動更新票券狀態為 'C' (這會觸發你的 SQL Trigger 自動回補庫存)
+                await _context.Tickets
+                     .Where(t => t.OrderID == id)
+                     .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "C"));
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["Success"] = "訂單已成功取消，名額已釋出。";
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "取消失敗，請稍後再試。";
+            }
+
+            return RedirectToAction("UserIndex"); // 返回會員的訂單列表
         }
 
 

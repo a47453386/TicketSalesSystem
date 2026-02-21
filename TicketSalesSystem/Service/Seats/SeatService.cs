@@ -21,7 +21,7 @@ namespace TicketSalesSystem.Service.Seats
         //取得場次列表
         public Task<List<Session>> GetSessionsAsync()
         {
-            var session =  _context.Session.ToListAsync();
+            var session = _context.Session.ToListAsync();
 
             return session;
         }
@@ -127,7 +127,7 @@ namespace TicketSalesSystem.Service.Seats
         }
 
         //保留時間
-        private  VMBookingResponse TimeResponse(List<string> seatIDs, decimal totalAmount, string orderID)
+        private VMBookingResponse TimeResponse(List<string> seatIDs, decimal totalAmount, string orderID)
         {
             int holdMinutes = 10;
 
@@ -135,7 +135,7 @@ namespace TicketSalesSystem.Service.Seats
             {
                 Success = true,
                 Message = "訂單建立成功",
-                OrderID= orderID,
+                OrderID = orderID,
                 Seats = seatIDs.Select(s => s.Replace("-", "排") + "號").ToList(),
                 FinalAmount = totalAmount,
                 RemainingSeconds = holdMinutes * 60,
@@ -145,15 +145,15 @@ namespace TicketSalesSystem.Service.Seats
             return response;
 
         }
-        
-                    
+
+
 
 
         //建立訂單與票券
         public async Task<VMBookingResponse> CreateOrderAndTicketsAsync(VMBookingRequest request, string memberID)
         {
-            
-            
+
+
 
             //驗證區域狀態
             var area = await _context.TicketsArea.FindAsync(request.TicketsAreaID);
@@ -186,10 +186,9 @@ namespace TicketSalesSystem.Service.Seats
 
 
             //執行資料庫交易
-            using (var transaction = await _context.Database.BeginTransactionAsync())
-            {
+            
                 try
-                {                                       
+                {
                     //建立訂單
                     var order = new Order
                     {
@@ -228,28 +227,28 @@ namespace TicketSalesSystem.Service.Seats
                     _context.Order.Add(order);
 
                     await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
 
 
                     //更新票區狀態
                     await SyncAreaStatusAaync(request.TicketsAreaID);
 
                     //保留時間
-                    return TimeResponse(bestSeatIDs, Amount,newOrderID);
+                    return TimeResponse(bestSeatIDs, Amount, newOrderID);
 
 
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+
+                    return new VMBookingResponse { Success = false, Message = ex.Message };
                 }
-            }
+            
         }
-
-
-        
-
     }
 
+
+
+
 }
+
+
