@@ -74,14 +74,14 @@ namespace TicketSalesSystem.Service.Images
 
         }
 
-        public async Task<bool> DeleteFileAsync(string fileName, string folderName)
+        public async Task<bool> DeleteFileAsync(string fileName, string folderName1, string folderName)
         {
             if (string.IsNullOrEmpty(fileName)) return false;
 
-            var filePath = Path.Combine(_basePath, folderName, fileName);
-
+            var filePath = Path.Combine(_basePath, folderName1, folderName, fileName);
             try
             {
+
                 if (System.IO.File.Exists(filePath))
                 {
                     await Task.Run(() => System.IO.File.Delete(filePath));

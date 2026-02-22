@@ -95,9 +95,11 @@
                                 @* 🚩 確保傳遞的是 EmployeeID *@
                                 <input type="hidden" name="id" value="@item.EmployeeID" />
 
-                                <button type="submit" class="btn btn-outline-danger btn-sm"
-                                        onclick="return confirm('你確定要刪除員工【@(item.Name)】及其所有資料嗎？')">
-                                    <i class="bi bi-trash"></i> 刪除
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        data-delete-id="@item.EmployeeID"
+                                        onclick="globalDelete('@item.EmployeeID', '@item.Name', 'Employees')">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </form>
                         </div>
@@ -108,25 +110,3 @@
     </table>
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function deleteEmployee(id, name) {
-            Swal.fire({
-                title: '確定要刪除嗎？',
-                text: `員工「${name}」的所有資料將被移除且無法還原！`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: '是的，刪除它！',
-                cancelButtonText: '取消'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // 使用 JS 送出隱藏表單或 AJAX 呼叫 Delete Action
-                    location.href = `/Employees/DeleteConfirm/${id}`;
-                }
-            })
-        }
-    </script>
-}

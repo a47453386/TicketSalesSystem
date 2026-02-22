@@ -119,19 +119,21 @@
                                 <div class="text-danger fw-bold">TWD $@area.Price.ToString("N0")</div>
                             </div>
                             <div class="text-end">
-                                @if (isSoldOut)
+                                @* 🚩 修正：判斷基準改為 Remaining *@
+                                @if (area.Remaining <= 0)
                                 {
                                     <span class="badge bg-secondary">已售罄</span>
                                 }
-                                else if (area.SeatCount < 10)
+                                else if (area.Remaining < 10)
                                 {
                                     <span class="badge bg-warning text-dark">最後少數</span>
-                                    <div class="small text-muted mt-1">剩餘 @area.SeatCount</div>
+                                    <div class="small text-muted mt-1">剩餘 @area.Remaining</div>
                                 }
                                 else
                                 {
                                     <span class="badge bg-success">還有座位</span>
-                                    <div class="small text-muted mt-1">剩餘 @area.SeatCount</div>
+                                    @* 如果不想讓消費者看到精確數字（怕被猜出賣得好不好），通常大型訂票系統只會顯示「還有座位」 *@
+                                    <div class="small text-muted mt-1">剩餘 @area.Remaining</div>
                                 }
                             </div>
                         </div>
@@ -146,17 +148,37 @@
                             <p id="selectedInfo" class="mb-0 fw-bold"></p>
                         </div>
                         <div class="p-3">
-                            <label class="form-label small fw-bold">購買張數 (每人限購 @Model.Programme.LimitPerOrder 張)：</label>
+                            <label class="form-label small fw-bold">
+                                購買張數 (本活動限購 @(Model.Programme.LimitPerOrder ?? 4) 張，您還可購買 @ViewBag.RemainingQuota 張)：
+                            </label>
+
                             <div class="input-group mb-3">
-                                <select id="ticketCount" class="form-select border-primary">
-                                    @for (int i = 1; i <= (Model.Programme.LimitPerOrder ?? 4); i++)
-                                    {
-                                        <option value="@i">@i 張</option>
-                                    }
-                                </select>
-                                <button id="autoAndConfirmBtn" class="btn btn-primary px-4 fw-bold">
-                                    下一步，確認座位 <i class="bi bi-chevron-right"></i>
-                                </button>
+                                @if (ViewBag.RemainingQuota > 0)
+                                {
+                                    <select id="ticketCount" class="form-select border-primary">
+                                        @* 🚩 根據計算出來的「剩餘配額」產生選項 *@
+                                        @for (int i = 1; i <= (int)ViewBag.RemainingQuota; i++)
+                                        {
+                                            <option value="@i">@i 張</option>
+                                        }
+                                    </select>
+                                    <button id="autoAndConfirmBtn" class="btn btn-primary px-4 fw-bold">
+                                        下一步，確認座位 <i class="bi bi-chevron-right"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-danger w-100 mb-0">
+                                        <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                                        您已達到本活動的購買上限，無法再購買。
+                                    </div>
+                                    @* 隱藏原本的按鈕區域 *@
+                                    <script>
+                                        document.addEventListener("DOMContentLoaded", function() {
+                                            $("#bookingSection").show(); // 強制顯示讓警示框出來
+                                        });
+                                    </script>
+                                }
                             </div>
                         </div>
                     </div>
@@ -195,6 +217,12 @@
         document.getElementById('autoAndConfirmBtn').onclick = async function() {
             const ticketCountElement = document.getElementById('ticketCount');
             const countValue = parseInt(ticketCountElement.value);
+
+            const remainingLimit = @(ViewBag.RemainingQuota ?? 0);
+            if (countValue > remainingLimit) {
+            alert(`❌ 您在此活動還能購買的票數剩餘 ${remainingLimit} 張，請重新選擇。`);
+            return;
+        }
 
             if (!currentArea) {
                 alert("請先選擇票區！");

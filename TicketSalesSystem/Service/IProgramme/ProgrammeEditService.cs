@@ -126,6 +126,7 @@ namespace TicketSalesSystem.Service.IProgramme
 
 
 
+        
         // 票區更新
         private async Task SyncTicketsAreasAsync(Session dbSession, List<VMTicketsAreaItem> vmTicketsAreas)
         {
@@ -141,11 +142,7 @@ namespace TicketSalesSystem.Service.IProgramme
                 .ToList();
             if (toDelete.Any())
             {
-                foreach (var s in toDelete)
-                {
-                    //刪除該票區
-                    _context.TicketsArea.RemoveRange(toDelete);
-                }
+                _context.TicketsArea.RemoveRange(toDelete);
             }
 
             string seedTaid = await _iIDService.GetNextTicketsAreaID(dbSession.SessionID);
@@ -175,26 +172,24 @@ namespace TicketSalesSystem.Service.IProgramme
                 }
                 else
                 {
-                    //更新場次
-                    var dbArea = dbSession.TicketsArea
-                        .FirstOrDefault(a => a.TicketsAreaID == vmArea.TicketsAreaID);
+                    //更新現有票區
+                    var dbArea = dbSession.TicketsArea.FirstOrDefault(a => a.TicketsAreaID == vmArea.TicketsAreaID);
                     if (dbArea != null)
                     {
-                        // 計算已售出的票數，用來校準 Remaining
+                        
+                        // 取得已售出的票數
                         int soldCount = await _context.Tickets
                             .CountAsync(t => t.TicketsAreaID == dbArea.TicketsAreaID && t.Order.OrderStatusID != "N");
-                        //手動更新欄位
+
                         dbArea.TicketsAreaName = vmArea.TicketsAreaName;
                         dbArea.Price = vmArea.Price;
                         dbArea.RowCount = vmArea.RowCount;
                         dbArea.SeatCount = vmArea.SeatCount;
+                        dbArea.VenueID = vmArea.VenueID; 
                         dbArea.Capacity = newCapacity;
-                        dbArea.Remaining = newCapacity - soldCount; ;
-                        dbArea.VenueID = vmArea.VenueID;
-                        
 
-                        //// 使用 SetValues 自動同步屬性，避免手動賦值的麻煩－另一個寫法
-                        //_context.Entry(dbArea).CurrentValues.SetValues(vmArea);                        
+                        // 🚩 剩餘票數 = 新容量 - 已售出
+                        dbArea.Remaining = newCapacity - soldCount;
                     }
                 }
             }
@@ -312,7 +307,7 @@ namespace TicketSalesSystem.Service.IProgramme
             {
                 foreach (var s in toDelete)
                 {
-                    bool isDeleted =await _fileService.DeleteFileAsync(s.DescriptionImageName, "DescriptionImage");
+                    bool isDeleted =await _fileService.DeleteFileAsync(s.DescriptionImageName,"Photos", "DescriptionImage");
                     if (isDeleted)
                     {
                         _context.DescriptionImage.Remove(s);
@@ -347,7 +342,7 @@ namespace TicketSalesSystem.Service.IProgramme
                         var dbImage = dbImages.FirstOrDefault(i => i.DescriptionImageID == imgVM.DescriptionImageID);
                         if (dbImage != null)
                         {
-                            await _fileService.DeleteFileAsync(dbImage.DescriptionImageName, "DescriptionImage");
+                            await _fileService.DeleteFileAsync(dbImage.DescriptionImageName, "Photos", "DescriptionImage");
                             dbImage.DescriptionImageName = uploadedFileName;
                             dbImage.ImagePath = uploadedFileName;
                         }

@@ -50,6 +50,25 @@
                             <a class="btn btn-outline-primary px-4 rounded-pill" href="#">登入 / 註冊</a>
                         </li>
                     </ul>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle fw-bold text-danger" href="#" id="adminNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-shield-lock-fill"></i> 系統管理
+                        </a>
+                        <ul class="dropdown-menu shadow-sm" aria-labelledby="adminNavbarDropdown">
+                            <li><h6 class="dropdown-header">核心業務</h6></li>
+                            <li><a class="dropdown-item" asp-controller="Programmes" asp-action="AdminIndex"><i class="bi bi-music-note-list me-2"></i>節目/售票管理</a></li>
+                            <li><a class="dropdown-item" asp-controller="Places" asp-action="Index"><i class="bi bi-building-gear me-2"></i>場地/區域管理</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">使用者管理</h6></li>
+                            <li><a class="dropdown-item" asp-controller="Employees" asp-action="Index"><i class="bi bi-person-badge me-2"></i>員工帳號管理</a></li>
+                            <li><a class="dropdown-item" asp-controller="Members" asp-action="Index"><i class="bi bi-people me-2"></i>會員清單管理</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">內容維護</h6></li>
+                            <li><a class="dropdown-item" asp-controller="PublicNotices" asp-action="Index"><i class="bi bi-megaphone me-2"></i>公告發佈</a></li>
+                            <li><a class="dropdown-item" asp-controller="FAQs" asp-action="Index"><i class="bi bi-question-circle me-2"></i>FAQ 編輯</a></li>
+                        </ul>
+                    </li>
+                    </ul>
                 </div>
             </div>
         </nav>

@@ -8,12 +8,12 @@ namespace TicketSalesSystem.ViewModel.Place
 
         [Key]
        
-        public string? PlaceID { get; set; } = null!;
+        public string? PlaceID { get; set; } 
 
         [Display(Name = "場地名稱")]
         [Required(ErrorMessage = "場地名稱必填")]
         [StringLength(20, ErrorMessage = "場地名稱最多20個字")]
-        public string PlaceName { get; set; } = null!;
+        public string? PlaceName { get; set; } 
 
         [Display(Name = "場地地址")]
         [Required(ErrorMessage = "場地地址必填")]

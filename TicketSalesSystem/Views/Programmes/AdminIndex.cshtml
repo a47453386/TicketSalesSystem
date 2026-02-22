@@ -3,8 +3,9 @@
 <style>
     /* 🚩 核心：限制列表最大寬度，不要讓它在寬螢幕上無限延伸 */
     .admin-list-container {
-        max-width: 1200px; /* 鎖定寬度，解決「間隔太大」 */
-        margin: 0 auto;
+        width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
     }
     /* 🚩 鎖定特定欄位寬度，讓內容往中間靠攏 */
     .col-id {
@@ -25,11 +26,11 @@
 
     /* 壓縮行高 */
     .table-sm td, .table-sm th {
-        padding: 0.5rem 0.3rem;
+        padding: 0.6rem 0.4rem;
     }
 </style>
 
-<div class="admin-list-container mt-4 pb-5">
+<div class="admin-list-container-fluid mt-4 pb-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="fw-bold mb-0"><i class="bi bi-gear-fill me-2 text-primary"></i>活動節目管理</h3>
         <a asp-controller="ProgrammeDTO" asp-action="CreateStep1" class="btn btn-success btn-sm shadow-sm">
@@ -40,13 +41,13 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
-                @* 🚩 加入 table-sm 讓上下間距變小 *@
+
                 <table class="table table-sm table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr class="small">
                             <th class="ps-3 col-id">ID</th>
                             <th class="col-img">縮圖</th>
-                            <th style="width: 35%">活動名稱</th> @* 讓名稱吃掉剩下的空間 *@
+                            <th style="width: 35%">活動名稱</th>
                             <th class="text-nowrap">地點</th>
                             <th class="text-nowrap">開演時間</th>
                             <th class="text-center text-nowrap">庫存 / 餘票</th>
@@ -86,7 +87,12 @@
                                         <div class="btn-group btn-group-sm">
                                             <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
                                             <a asp-action="Details" asp-route-id="@item.ProgrammeID" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
-                                            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete('@item.ProgrammeID')"><i class="bi bi-trash"></i></button>
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    data-delete-id="@item.ProgrammeID"
+                                                    onclick="globalDelete('@item.ProgrammeID', '@item.ProgrammeName', 'Programmes')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -100,13 +106,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        function confirmDelete(id, name) {
-            // 使用更友善的提示
-            if (confirm(`確定要刪除活動「${name}」嗎？\n這將會移除所有相關場次與票區設定。`)) {
-                // 實作你的刪除 Ajax 或表單提交邏輯
-                console.log("Delete triggered for:", id);
-            }
-        }
-    </script>
+  
 }

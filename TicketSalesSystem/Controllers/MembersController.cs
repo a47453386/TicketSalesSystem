@@ -370,36 +370,48 @@ namespace TicketSalesSystem.Controllers
 
 
 
+        
         // POST: Members/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id)) return NotFound();
-            var member = await _context.Member.FindAsync(id);
-            if (member == null) return NotFound();
-
             try
             {
+                // 1. 抓出會員資料
+                var member = await _context.Member.FindAsync(id);
+                if (member == null) return Json(new { success = false, message = "找不到該會員資料。" });
+
+                // 🚩 2. 安全檢查：如果會員已經有訂單 (Order)，通常禁止刪除以維護報表正確性
+                bool hasOrders = await _context.Order.AnyAsync(o => o.MemberID == id);
+                if (hasOrders)
+                {
+                    return Json(new { success = false, message = "此會員已有購票紀錄，無法刪除！建議改為停權狀態。" });
+                }
+
+                // 3. 處理關聯的登入帳號 (MemberLogin)
                 var login = await _context.MemberLogin.FirstOrDefaultAsync(l => l.MemberID == id);
                 if (login != null)
                 {
                     _context.MemberLogin.Remove(login);
                 }
 
+                // 4. 執行會員主表刪除
                 _context.Member.Remove(member);
-                _context.SaveChangesAsync();
 
-               
-                return RedirectToAction("Index");
+                // 🚩 核心修正：一定要補上 await，確保存檔完成才回傳
+                await _context.SaveChangesAsync();
+
+                // 🚩 5. 回傳 JSON 成功訊號 (因為沒圖片，直接回傳即可)
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                return RedirectToAction(nameof(Index), new { error = "刪除失敗" });
+                return Json(new { success = false, message = "刪除失敗，原因：" + ex.Message });
             }
         }
 
-       
+
 
         private void PopulateDropdownLists(string? selectedStatus = null)
         {

@@ -25,23 +25,24 @@ namespace TicketSalesSystem.Controllers
         // GET: FAQs
         public async Task<IActionResult> Index()
         {
-            var ticketsContext = _context.FAQ
+            var faqs = await _context.FAQ
                 .Include(f => f.Employee)
                 .Include(f => f.FAQPublishStatus)
                 .Include(f => f.FAQType)
-                .OrderBy(f=>f.FAQPublishStatus);
-            return View(await ticketsContext.ToListAsync());
+                .OrderBy(f=>f.FAQPublishStatusID)
+                .ToListAsync();
+            return View(faqs);
         }
 
 
         public async Task<IActionResult> UserIndex()
         {
-            var ticketsContext =await _context.FAQ
+            var faqs = await _context.FAQ
                 .Include(f => f.FAQPublishStatus)
                 .Include(f => f.FAQType)
                 .Where(f => f.FAQPublishStatusID == "Y") // 只顯示已發布的 FAQ                
                 .ToListAsync();
-            return View(ticketsContext);
+            return View(faqs);
         }
 
 
@@ -212,21 +213,35 @@ namespace TicketSalesSystem.Controllers
 
 
 
-        
+
+        // POST: FAQs/Delete/5
         // POST: FAQs/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            var fAQ = await _context.FAQ.FindAsync(id);
-
-            if (fAQ != null)
+            try
             {
+                // 1. 抓出 FAQ 資料
+                var fAQ = await _context.FAQ.FindAsync(id);
+
+                if (fAQ == null)
+                {
+                    return Json(new { success = false, message = "找不到該常見問題資料。" });
+                }
+
+                // 2. 執行刪除
                 _context.FAQ.Remove(fAQ);
+                await _context.SaveChangesAsync();
+
+                // 🚩 3. 回傳 JSON 成功訊號，觸發前端的 SweetAlert 成功視窗
+                return Json(new { success = true });
             }
- 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));            
+            catch (Exception ex)
+            {
+                // 捕捉可能的資料庫錯誤
+                return Json(new { success = false, message = "刪除失敗，原因：" + ex.Message });
+            }
         }
 
         private bool FAQExists(string id)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Validation.NewFolder;
 using TicketSalesSystem.ViewModel.Booking;
@@ -58,15 +59,17 @@ namespace TicketSalesSystem.Service.Validation.IBookingValidation
             return area != null && area.Remaining >= count;
         }
 
-        private async Task<bool> CheckProgrammePurchaseLimit(string memberId, string sessionId, int requestCount, int limit = 4)
+        private async Task<(bool Success, string Message)> CheckProgrammePurchaseLimit(string memberId, string sessionId, int requestCount)
         {
             // 1. 先找出這個場次所屬的「活動 ID (ProgrammeID)」
-            var programmeId = await _context.Session
-                .Where(s => s.SessionID == sessionId)
-                .Select(s => s.ProgrammeID)
-                .FirstOrDefaultAsync();
-
-            if (string.IsNullOrEmpty(programmeId)) return false;
+            var programmeData = await _context.Session
+                 .Where(s => s.SessionID == sessionId)
+                 .Select(s => new {
+                     s.ProgrammeID,
+                     s.Programme.LimitPerOrder 
+                 })
+                 .FirstOrDefaultAsync();
+            
 
             // 2. 統計該會員在「該活動」下所有場次已持有的有效票數
             // 邏輯：Tickets -> Session -> ProgrammeID 必須匹配，且訂單不能是已取消 (N)與待付款(P)
@@ -75,12 +78,17 @@ namespace TicketSalesSystem.Service.Validation.IBookingValidation
                 .Include(t => t.Order)
                 .Include(t => t.Session)
                 .Where(t => t.Order.MemberID == memberId &&
-                            t.Session.ProgrammeID == programmeId &&
+                            t.Session.ProgrammeID == programmeData.ProgrammeID &&
                             activeStatuses.Contains(t.Order.OrderStatusID)) // N 為已失效/已取消
                 .CountAsync();
 
             // 3. 判斷是否超過上限
-            return (existingTicketsCount + requestCount) <= limit;
+            if ((existingTicketsCount + requestCount) > programmeData.LimitPerOrder)
+            {
+                return (false, $"本活動每人限購 {programmeData.LimitPerOrder} 張，您目前已持有 {existingTicketsCount} 張，本次申請 {requestCount} 張，已超過上限。");
+            }
+
+            return (true, "");
 
         }
 
@@ -98,9 +106,10 @@ namespace TicketSalesSystem.Service.Validation.IBookingValidation
             if (!await CheckTicketsAreaStatus(request.TicketsAreaID)) return (false, "票區不可售");
             if (!await CheckInitialStock(request.TicketsAreaID, request.Count)) return (false, "庫存不足");
 
-            if (!await CheckProgrammePurchaseLimit(memberId, request.SessionID, request.Count))
+            var limitResult = await CheckProgrammePurchaseLimit(memberId, request.SessionID, request.Count);
+            if (!limitResult.Success)
             {
-                return (false, "本活動每人限購 4 張，您已超過購票上限。");
+                return (false, limitResult.Message);
             }
 
             return (true, "");

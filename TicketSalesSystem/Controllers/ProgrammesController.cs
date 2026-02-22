@@ -14,11 +14,12 @@ namespace TicketSalesSystem.Controllers
     public class ProgrammesController : Controller
     {
         private readonly TicketsContext _context;
-        
+        private readonly IFileService _fileService;
 
-        public ProgrammesController(TicketsContext context)
+        public ProgrammesController(TicketsContext context, IFileService fileService)
         {
             _context = context;
+            _fileService = fileService;
         }
 
         // GET: Programmes
@@ -100,18 +101,58 @@ namespace TicketSalesSystem.Controllers
 
 
         // POST: Programmes/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> Delete(string id)
         {
-            var programme = await _context.Programme.FindAsync(id);
-            if (programme != null)
+            try
             {
-                _context.Programme.Remove(programme);
-            }
+                // 1. 抓出活動，包含關聯的場次與票區
+                var programme = await _context.Programme
+                    .Include(p => p.Session)
+                    .Include(p => p.DescriptionImage)
+                    .FirstOrDefaultAsync(p => p.ProgrammeID == id);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                if (programme == null) return Json(new { success = false, message = "找不到該活動" });
+
+                // 🚩 2. 安全檢查：如果已經有票賣出去了，禁止刪除 (這很重要！)
+                bool hasSoldTickets = await _context.Tickets
+                    .AnyAsync(t => t.TicketsArea.Session.ProgrammeID == id && t.Order.OrderStatusID != "N");
+
+                if (hasSoldTickets)
+                {
+                    return Json(new { success = false, message = "此活動已有售票紀錄，無法刪除！建議改為下架狀態。" });
+                }
+
+                // 3. 備份要刪除的檔名（因為 DB 刪除後，物件內的資料會消失）
+                string coverImgToDelete = programme.CoverImage;
+                string seatImgToDelete = programme.SeatImage;
+                var descImgsToDelete = programme.DescriptionImage.Select(di => di.DescriptionImageName).ToList();
+
+                // 4. 執行資料庫刪除
+                // 備註：請確保 DB 有設定 Cascade Delete，否則請手動移除相關 Session 與 DescriptionImage
+                _context.Programme.Remove(programme);
+                await _context.SaveChangesAsync();
+
+                //5. 呼叫你的萬用服務刪除實體檔案 (非同步執行，不影響回傳速度)
+                // 刪除封面圖
+                await _fileService.DeleteFileAsync(coverImgToDelete,"Photos", "CoverImage");
+
+                // 刪除座位圖
+                await _fileService.DeleteFileAsync(seatImgToDelete, "Photos", "SeatImage");
+
+                // 刪除多張說明圖
+                foreach (var imgName in descImgsToDelete)
+                {
+                    await _fileService.DeleteFileAsync(imgName, "Photos", "DescriptionImage");
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "刪除失敗：" + ex.Message });
+            }
         }
 
        

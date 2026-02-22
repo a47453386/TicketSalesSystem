@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Diagnostics;
+using System.Net.Sockets;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel;
-using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
 using TicketSalesSystem.ViewModel.Member;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
 
 namespace TicketSalesSystem.Models
 {
@@ -230,8 +231,12 @@ namespace TicketSalesSystem.Models
                 .WithOne(t => t.TicketsAreaStatus)
                 .HasForeignKey(t => t.TicketsAreaStatusID)
                 .OnDelete(DeleteBehavior.NoAction);
-                
 
+            modelBuilder.Entity<Tickets>(entity =>
+            {
+                entity.ToTable(tb => tb.HasTrigger("Tr_Tickets_Inventory"));
+
+            });
             // Area相關
             modelBuilder.Entity<Venue>()
                .HasMany(s => s.TicketsArea)

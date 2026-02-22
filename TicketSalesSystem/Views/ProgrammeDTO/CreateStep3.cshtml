@@ -4,15 +4,18 @@
 @* 🚩 核心樣板：放在最外面，確保 JS 隨時能抓到完整的場館清單 *@
 <select id="venue-template" style="display:none;">
     <option value="">-- 選擇場館 --</option>
-    @if (ViewBag.VenueID != null)
+    @if (ViewBag.RawVenues != null)
     {
-        @foreach (var item in (SelectList)ViewBag.VenueID)
+        @foreach (var item in (List<TicketSalesSystem.Models.Venue>)ViewBag.RawVenues)
         {
-            <option value="@item.Value">@item.Text</option>
+            <option value="@item.VenueID"
+                    data-max-row="@item.RowCount"
+                    data-max-seat="@item.SeatCount">
+                @item.VenueName (上限：@(item.RowCount* item.SeatCount) 位)
+            </option>
         }
     }
 </select>
-
 <div class="container mt-4 pb-5">
     @await Component.InvokeAsync("VCSteps", new { currentStep = 3 })
 
@@ -60,23 +63,26 @@
                                     {
                                         <tr class="area-row text-center">
                                             <td>
-                                                @* 🚩 既有票區渲染 *@
-                                                <select name="Session[@i].TicketsArea[@j].VenueID" class="form-select form-select-sm" required>
-                                                    <option value="">-- 選擇場館 --</option>
-                                                    @foreach (var item in (SelectList)ViewBag.VenueID)
-                                                    {
-                                                        <!option value="@item.Value" @(item.Value == Model.Session[i].TicketsArea[j].VenueID ? "selected" : "")>@item.Text</!option>
-                                                    }
+                                                <select asp-for="Session[i].TicketsArea[j].VenueID"
+                                                        asp-items="@(ViewBag.VenueList as SelectList)"
+                                                        class="form-select form-select-sm">
+                                                    <option value="">-- 請選擇區域 --</option>
                                                 </select>
                                             </td>
                                             <td>
                                                 <input name="Session[@i].TicketsArea[@j].TicketsAreaName" class="form-control form-control-sm" value="@Model.Session[i].TicketsArea[j].TicketsAreaName" required />
                                             </td>
                                             <td>
-                                                <input name="Session[@i].TicketsArea[@j].RowCount" type="number" class="form-control form-control-sm text-center row-count" value="@Model.Session[i].TicketsArea[j].RowCount" min="1" />
+                                                <input asp-for="Session[i].TicketsArea[j].RowCount"
+                                                       type="number"
+                                                       class="form-control form-control-sm text-center row-count"
+                                                       min="1" />
                                             </td>
                                             <td>
-                                                <input name="Session[@i].TicketsArea[@j].SeatCount" type="number" class="form-control form-control-sm text-center seat-count" value="@Model.Session[i].TicketsArea[j].SeatCount" min="1" />
+                                                <input asp-for="Session[i].TicketsArea[j].SeatCount"
+                                                       type="number"
+                                                       class="form-control form-control-sm text-center seat-count"
+                                                       min="1" />
                                             </td>
                                             <td>
                                                 <span class="total-seats fw-bold text-primary">0</span>
@@ -118,73 +124,172 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
-            // 🚩 初始化：計算現有票區總座位
-            updateAllTotalSeats();
 
-            // 1. 【新增票區】邏輯
+            // --- 1. 初始化設定 ---
+
+            // 頁面載入時，幫原本就存在的下拉選單補上物理上限屬性 (data-max-row/seat)
+            $(".area-table .form-select").each(function() {
+                syncDataFromTemplate($(this));
+            });
+
+            // 初始化計算所有票區的總座位數與驗證狀態
+            updateAllTotalsAndValidation();
+
+
+            // --- 2. 核心邏輯函數 ---
+
+            // 🚩 關鍵函數：從隱藏樣板 (#venue-template) 同步屬性到目前的下拉選單
+            function syncDataFromTemplate($select) {
+                const val = $select.val();
+                if (!val) return;
+
+                // 從我們在頁面頂部寫的隱藏樣板中找到對應的 option
+                const $templateOpt = $(`#venue-template option[value="${val}"]`);
+                const $currentOpt = $select.find("option:selected");
+
+                // 將物理上限數據同步到目前的 option 上，供 validateRow 使用
+                $currentOpt.data("max-row", $templateOpt.data("max-row"));
+                $currentOpt.data("max-seat", $templateOpt.data("max-seat"));
+            }
+
+            // 驗證單一列的數據
+            function validateRow($row) {
+                const $selectOpt = $row.find("select option:selected");
+
+                // 抓取同步過後的物理上限
+                const maxR = parseInt($selectOpt.data("max-row")) || 0;
+                const maxS = parseInt($selectOpt.data("max-seat")) || 0;
+
+                // 抓取使用者輸入值
+                const currR = parseInt($row.find(".row-count").val()) || 0;
+                const currS = parseInt($row.find(".seat-count").val()) || 0;
+
+                // 更新總數小計
+                const total = currR * currS;
+                $row.find(".total-seats").text(total.toLocaleString());
+
+                // 執行驗證邏輯
+                let errorMsg = "";
+                if (maxR > 0 && currR > maxR) {
+                    errorMsg = `排數超過上限 (最大 ${maxR} 排)`;
+                } else if (maxS > 0 && currS > maxS) {
+                    errorMsg = `座位超過上限 (每排最大 ${maxS} 座)`;
+                }
+
+                // 視覺回饋：變紅或恢復
+                if (errorMsg !== "") {
+                    $row.addClass("table-danger");
+                    if (!$row.find(".error-msg").length) {
+                        $row.find("td:nth-child(5)").append(`<div class="error-msg text-danger x-small fw-bold">${errorMsg}</div>`);
+                    } else {
+                        $row.find(".error-msg").text(errorMsg);
+                    }
+                } else {
+                    $row.removeClass("table-danger");
+                    $row.find(".error-msg").remove();
+                }
+
+                checkFormValidity();
+            }
+
+            // 檢查整份表單是否允許提交
+            function checkFormValidity() {
+                const hasError = $(".table-danger").length > 0;
+                $('#step3Form button[type="submit"]').prop("disabled", hasError);
+            }
+
+            // 批量更新
+            function updateAllTotalsAndValidation() {
+                $(".area-row").each(function () {
+                    validateRow($(this));
+                });
+            }
+
+
+            // --- 3. 事件監聽 ---
+
+            // 監聽輸入值變動或更換場館
+            $(document).on("input change", ".row-count, .seat-count, .area-table .form-select", function () {
+                const $row = $(this).closest("tr");
+                const $select = $row.find("select");
+
+                // 如果是更換了場館，先同步屬性
+                if ($(this).hasClass("form-select")) {
+                    syncDataFromTemplate($select);
+                }
+
+                validateRow($row);
+            });
+
+            // 增加票區按鈕
             $(document).on("click", ".add-area-btn", function () {
                 const container = $(this).closest(".session-container");
                 const sIdx = container.data("session-index");
                 const tbody = container.find(".area-tbody");
                 const tIdx = tbody.find(".area-row").length;
 
-                // 🚩 核心：抓取外部隱藏樣板的內容
                 const venueOptions = $('#venue-template').html();
 
                 const newRow = `
-                    <tr class="area-row text-center animate__animated animate__fadeIn">
-                        <td><select name="Session[${sIdx}].TicketsArea[${tIdx}].VenueID" class="form-select form-select-sm" required>${venueOptions}</select></td>
-                        <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].TicketsAreaName" class="form-control form-control-sm" placeholder="如：搖滾A區" required /></td>
-                        <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].RowCount" type="number" class="form-control form-control-sm text-center row-count" value="10" /></td>
-                        <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].SeatCount" type="number" class="form-control form-control-sm text-center seat-count" value="20" /></td>
-                        <td><span class="total-seats fw-bold text-primary">200</span></td>
+                    <tr class="area-row text-center">
+                        <td>
+                            <select name="Session[${sIdx}].TicketsArea[${tIdx}].VenueID" class="form-select form-select-sm" required>
+                                ${venueOptions}
+                            </select>
+                        </td>
+                        <td>
+                            <input name="Session[${sIdx}].TicketsArea[${tIdx}].TicketsAreaName" class="form-control form-control-sm" placeholder="如：搖滾A區" required />
+                        </td>
+                        <td>
+                            <input name="Session[${sIdx}].TicketsArea[${tIdx}].RowCount" type="number" class="form-control form-control-sm text-center row-count" value="1" min="1" />
+                        </td>
+                        <td>
+                            <input name="Session[${sIdx}].TicketsArea[${tIdx}].SeatCount" type="number" class="form-control form-control-sm text-center seat-count" value="1" min="1" />
+                        </td>
+                        <td>
+                            <span class="total-seats fw-bold text-primary">1</span>
+                        </td>
                         <td>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">$</span>
-                                <input name="Session[${sIdx}].TicketsArea[${tIdx}].Price" type="number" class="form-control text-end" value="0" />
+                                <input name="Session[${sIdx}].TicketsArea[${tIdx}].Price" type="number" class="form-control text-end" value="0" min="0" />
                             </div>
                         </td>
-                        <td><button type="button" class="btn btn-outline-danger btn-sm remove-area"><i class="bi bi-trash"></i></button></td>
+                        <td>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-area">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>`;
-                tbody.append(newRow);
+
+                const $newRow = $(newRow).hide();
+                tbody.append($newRow);
+                $newRow.fadeIn(300);
+
+                validateRow($newRow);
             });
 
-            // 2. 【即時計算】總座位數
-            $(document).on("input", ".row-count, .seat-count", function () {
-                const row = $(this).closest("tr");
-                const r = parseInt(row.find(".row-count").val()) || 0;
-                const s = parseInt(row.find(".seat-count").val()) || 0;
-                row.find(".total-seats").text((r * s).toLocaleString());
-            });
-
-            function updateAllTotalSeats() {
-                $(".area-row").each(function () {
-                    const r = parseInt($(this).find(".row-count").val()) || 0;
-                    const s = parseInt($(this).find(".seat-count").val()) || 0;
-                    $(this).find(".total-seats").text((r * s).toLocaleString());
-                });
-            }
-
-            // 3. 【刪除並重整索引】
+            // 刪除票區並重新排序索引
             $(document).on("click", ".remove-area", function () {
-                const tbody = $(this).closest(".area-tbody");
-                const container = $(this).closest(".session-container");
-                const sIdx = container.data("session-index");
+                const row = $(this).closest("tr");
+                const tbody = row.closest(".area-tbody");
 
-                $(this).closest("tr").fadeOut(300, function() {
-                    $(this).remove();
+                row.fadeOut(300, function () {
+                    row.remove();
 
-                    // 🚩 重要：刪除後必須重新校對所有項目的 Name 索引
+                    // 🚩 核心：重新排序該場次下的所有票區索引，防止 Model Binding 斷號
                     tbody.find(".area-row").each(function (tIdx) {
                         $(this).find("input, select").each(function () {
                             let name = $(this).attr("name");
                             if (name) {
-                                // 修正 TicketsArea[j] 的部分
+                                // 替換 TicketsArea[j] 為新的連續索引 [tIdx]
                                 let newName = name.replace(/TicketsArea\[\d+\]/, `TicketsArea[${tIdx}]`);
                                 $(this).attr("name", newName);
                             }
                         });
                     });
+
+                    checkFormValidity();
                 });
             });
         });

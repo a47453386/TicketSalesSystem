@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 using TicketSalesSystem.DTOs;
 using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
 
@@ -12,6 +13,10 @@ namespace TicketSalesSystem.ViewModel.Programme.EditProgramme
         public string ProgrammeDescription { get; set; } = null!;
         public string? CoverImage { get; set; }
         public string? SeatImage { get; set; }
+
+        [Display(Name = "限購")]
+        [Required(ErrorMessage = "請輸入限購張數")]
+        [Range(0, 6, ErrorMessage = "限購數量請設定在 0 到 6 之間")]
         public int? LimitPerOrder { get; set; }
         public DateTime OnShelfTime { get; set; }
         public string? PlaceID { get; set; }

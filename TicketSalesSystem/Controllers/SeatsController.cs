@@ -34,6 +34,7 @@ namespace TicketSalesSystem.Controllers
 
             if (string.IsNullOrEmpty(id)) return NotFound();
 
+
             //取得場次資訊
             var session = await _context.Session
                 .Include(s => s.Programme)
@@ -49,12 +50,34 @@ namespace TicketSalesSystem.Controllers
                 return RedirectToAction("Index", "Programmes");
             }
 
+
+
             ////檢查是否在售票時間內
             //if(DateTime.Now<session.SaleStartTime||DateTime.Now>session.SaleEndTime)
             //{
             //    TempData["Message"] = "本時段尚未開放購票";
             //    return RedirectToAction("Index", "Programmes");
             //}
+
+            //取得目前會員 ID (這裡先用你代碼中的測試 ID)
+            string memberId = "004bc90a-26fb-48e9-a762-653a232d86e2";
+
+            //統計該會員在「該活動」下所有場次已持有的有效票數
+            // 包含：已付款 (S)、待付款 (P)
+            var activeStatuses = new[] { "P", "S" };
+            int purchasedCount = await _context.Tickets
+                .Where(t => t.Order.MemberID == memberId &&
+                            t.Session.ProgrammeID == session.ProgrammeID &&
+                            activeStatuses.Contains(t.Order.OrderStatusID))
+                .CountAsync();
+
+            //計算剩餘可購張數
+            int limit = session.Programme.LimitPerOrder ?? 4; // 預設 4
+            int remainingQuota = limit - purchasedCount;
+
+            //將結果傳給 View
+            ViewBag.RemainingQuota = Math.Max(0, remainingQuota);
+
             return View(session);
 
         }

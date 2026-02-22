@@ -91,8 +91,25 @@
 </div>
 
 <partial name="_VenueStatusModal" />
-
+<div asp-validation-summary="All" class="text-danger"></div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/venue-logic.js"></script> @* 建議將 JS 邏輯獨立出一個檔案或放在下方 *@
+    
+    <script>
+        // 🚩 建立橋樑：外部 JS 檔案看不懂 Razor (小老鼠)，所以我們在這裡把資料準備好
+        window.venueConfig = {
+            // 產出下拉選單的 HTML 字串，供新增列時使用
+            statusOptionsHtml: `@if (ViewBag.VenueStatus != null) {
+                foreach (var item in (SelectList)ViewBag.VenueStatus) {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }`,
+            // 控制器 API 路徑
+            updateStatusUrl: '@Url.Action("UpdateVenueStatus", "Places")',
+            createStatusUrl: '@Url.Action("QuickCreateStatus", "Places")' // 注意 Action 名稱
+        };
+    </script>
+
+    @* 🚩 載入獨立 JS 檔案 (加上版本號防止瀏覽器快取舊檔) *@
+    <script src="~/js/venue-logic.js?v=@DateTime.Now.Ticks"></script>
 }

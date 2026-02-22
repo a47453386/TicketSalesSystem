@@ -166,8 +166,8 @@
                                                 <td>
                                                     <select name="Session[@i].TicketsArea[@j].VenueID"
                                                             class="form-select form-select-sm venue-select"
-                                                            data-init-value="@area.VenueID"
-                                                            asp-items="@(new SelectList(ViewBag.VenueID as SelectList, "Value", "Text", area.VenueID))">
+                                                            data-init-value="@Model.Session[i].TicketsArea[j].VenueID">
+                                                        @* 🚩 這是給 JS 看的備忘錄 *@
                                                         <option value="">-- 選擇場館 --</option>
                                                     </select>
                                                 </td>
@@ -178,10 +178,14 @@
                                                     <input name="Session[@i].TicketsArea[@j].Price" value="@area.Price" type="number" class="form-control form-control-sm text-end" />
                                                 </td>
                                                 <td>
-                                                    <input name="Session[@i].TicketsArea[@j].RowCount" value="@area.RowCount" type="number" class="form-control form-control-sm" />
+                                                    <input name="Session[@i].TicketsArea[@j].RowCount"
+                                                           value="@area.RowCount" type="number"
+                                                           class="form-control form-control-sm row-count-input" /> @* 🚩 加上 row-count-input *@
                                                 </td>
                                                 <td>
-                                                    <input name="Session[@i].TicketsArea[@j].SeatCount" value="@area.SeatCount" type="number" class="form-control form-control-sm" />
+                                                    <input name="Session[@i].TicketsArea[@j].SeatCount"
+                                                           value="@area.SeatCount" type="number"
+                                                           class="form-control form-control-sm seat-count-input" /> @* 🚩 加上 seat-count-input *@
                                                 </td>
                                                 <td>
                                                     <input name="Session[@i].TicketsArea[@j].Capacity" value="@area.Capacity" class="form-control form-control-sm text-center capacity-input bg-light" readonly />
@@ -211,15 +215,13 @@
     <div asp-validation-summary="All" class="text-danger"></div>
 </div>
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-    @* 加入驗證腳本 *@
+    <partial name="_ValidationScriptsPartial" />
 
     <script>
         const getVenuesUrl = '@Url.Action("GetVenues")';
-        let cachedVenues = [];
+        let cachedVenues = []; // 快取當前地區的所有場館資料
 
+        // 1. 圖片預覽功能
         function previewImage(input, previewId) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
@@ -228,20 +230,104 @@
             }
         }
 
-        // 將工具函數放在 Ready 外面
+        // 🚩 2. 核心驗證函數：即時產出「物理上限」警示訊息
+        function validateRow($row) {
+            const $select = $row.find(".venue-select");
+            const $selectedOpt = $select.find("option:selected");
+
+            // 從選中的 option 讀取物理上限 (data 屬性)
+            const maxR = parseInt($selectedOpt.data("max-row")) || 0;
+            const maxS = parseInt($selectedOpt.data("max-seat")) || 0;
+            const vName = $selectedOpt.text().split('(')[0].trim() || "該區域";
+
+            // 取得目前輸入值
+            const currR = parseInt($row.find(".row-count-input").val()) || 0;
+            const currS = parseInt($row.find(".seat-count-input").val()) || 0;
+
+            // 計算並更新總量
+            const total = currR * currS;
+            $row.find(".capacity-input").val(total);
+
+            // 如果是「新票區」(無 ID)，同步更新剩餘票數
+            const areaId = $row.find(".area-id-input").val();
+            if (!areaId) {
+                $row.find("input[name*='Remaining']").val(total);
+            }
+
+            let errorMsg = "";
+            // 🚩 物理上限邏輯判斷
+            if (maxR > 0 && currR > maxR) {
+                errorMsg = `區域【${vName}】物理上限為 ${maxR} 排，您的設定已超出限制。`;
+            } else if (maxS > 0 && currS > maxS) {
+                errorMsg = `區域【${vName}】物理上限為每排 ${maxS} 座，您的設定已超出限制。`;
+            }
+
+            if (errorMsg !== "") {
+                $row.addClass("table-danger");
+                if (!$row.find(".error-msg").length) {
+                    // 訊息插入在「總量」那一格 (第 6 欄) 下方
+                    $row.find("td:nth-child(6)").append(`<div class="error-msg text-danger fw-bold mt-1" style="font-size: 0.75rem; line-height: 1.2;">${errorMsg}</div>`);
+                } else {
+                    $row.find(".error-msg").text(errorMsg);
+                }
+            } else {
+                $row.removeClass("table-danger");
+                $row.find(".error-msg").remove();
+            }
+
+            // 只要有錯誤，就鎖定提交按鈕
+            $('#editForm button[type="submit"]').prop("disabled", $(".table-danger").length > 0);
+        }
+
+        // 🚩 3. 渲染選單：解決「抓不到 VenueID」並執行選取
+        function updateVenueSelects(isInitial) {
+            $(".venue-select").each(function () {
+                const $select = $(this);
+                // 優先從標籤的 data-init-value 拿原始值 (資料庫值)
+                const originalValue = $select.attr("data-init-value") || $select.val();
+
+                let opt = '<option value="">-- 選擇場館 --</option>';
+                if (cachedVenues && cachedVenues.length > 0) {
+                    cachedVenues.forEach(v => {
+                        const vID = String(v.venueID || v.VenueID || "").trim();
+                        const vName = v.venueName || v.VenueName;
+                        const mR = v.rowCount || v.RowCount;
+                        const mS = v.seatCount || v.SeatCount;
+                        opt += `<option value="${vID}" data-max-row="${mR}" data-max-seat="${mS}">${vName}</option>`;
+                    });
+                }
+
+                // 🚩 覆蓋掉 Razor 產生的舊選單，換成有 data-max 屬性的新選單
+                $select.html(opt);
+
+                // 🚩 補救選取動作
+                if (isInitial && originalValue) {
+                    $select.val(originalValue);
+                    // 針對 GUID 大小寫不一致的二次檢查
+                    if ($select.val() === null) {
+                        $select.find("option").each(function() {
+                            if ($(this).val().toLowerCase() === String(originalValue).toLowerCase()) {
+                                $(this).prop("selected", true);
+                            }
+                        });
+                    }
+                }
+                // 渲染完立即驗證
+                validateRow($select.closest("tr"));
+            });
+        }
+
+        // 🚩 4. 索引重整 (確保 Model Binding 成功)
         function reIndexAll() {
-            console.log("正在重整索引...");
             $(".session-item").each(function (sIdx) {
                 const $session = $(this);
-                $session.attr("data-index", sIdx); // 確保 data-index 也被更新
+                $session.attr("data-index", sIdx);
                 $session.find(".session-num").text(sIdx + 1);
 
                 $session.find("input, select, textarea").each(function () {
                     let name = $(this).attr("name");
                     if (name) {
-                        // 使用 /g 旗標確保替換所有匹配項
                         let newName = name.replace(/Session\[\d+\]/g, `Session[${sIdx}]`);
-
                         if (newName.includes("TicketsArea")) {
                             const $tr = $(this).closest("tr");
                             if ($tr.length > 0) {
@@ -256,91 +342,60 @@
         }
 
         $(document).ready(function () {
-            console.log("頁面初始化中...");
-
-            //初始化場館
+            // --- A. 初始化載入 ---
             const initialPid = $("#PlaceID").val();
-            console.log("初始 PlaceID:", initialPid);
             if (initialPid) {
-                loadVenues(initialPid, true);
-            }else {
-            console.warn("未抓到初始 PlaceID，請檢查 HTML id 是否為 PlaceID");
+                $.get(getVenuesUrl, { placeId: initialPid }, function (data) {
+                    cachedVenues = data;
+                    updateVenueSelects(true);
+                });
             }
 
-            //地區切換
+            // --- B. 地區切換 ---
             $("#PlaceID").on("change", function () {
-                loadVenues($(this).val(), false);
+                const newPlaceId = $(this).val();
+                if(confirm("切換地區將清空目前票區的所有區域設定，確定嗎？")) {
+                    $.get(getVenuesUrl, { placeId: newPlaceId }, function (data) {
+                        cachedVenues = data;
+                        updateVenueSelects(false);
+                    });
+                } else {
+                    $(this).val($(this).data('prev'));
+                }
+            }).on("focus", function () { $(this).data('prev', $(this).val()); });
+
+            // --- C. 即時監聽變動 ---
+            $(document).on("input change", ".row-count-input, .seat-count-input, .venue-select", function () {
+                validateRow($(this).closest("tr"));
             });
 
-            function loadVenues(placeId, isInitial) {
-                if (!placeId) {
-                    cachedVenues = [];
-                    updateVenueSelects(isInitial);
-                    return;
-                }
-                $.ajax({
-                    url: getVenuesUrl,
-                    type: 'GET',
-                    data: { placeId: placeId },
-                    success: function (data) {
-                        cachedVenues = data;
-                        window.cachedVenues = data; // 確保全域可存取
-                        updateVenueSelects(isInitial);
-                    },
-                    error: function(err) {
-                        console.error("無法取得場館資料", err);
-                    }
-                });
-            }
-
-            function updateVenueSelects(isInitial) {
-                $(".venue-select").each(function () {
-                    const $s = $(this);
-                    const initValue = $s.attr("data-init-value");
-                    const currentValue = $s.val();
-                    const savedVal = isInitial ? initValue : currentValue;
-
-                    let opt = '<option value="">-- 選擇場館 --</option>';
-                    if (cachedVenues && cachedVenues.length > 0) {
-                        cachedVenues.forEach(v => {
-                            const vID = String(v.venueID || v.VenueID || "").trim(); // 👈 同時檢查小寫與大寫
-                            const vName = v.venueName || v.VenueName;               // 👈 同時檢查小寫與大寫
-
-                            const sVal = String(savedVal || "").trim();
-                            const isSelected = (vID === sVal && sVal !== "") ? 'selected' : '';
-                            opt += `<option value="${vID}" ${isSelected}>${vName}</option>`;
-                        });
-                    }
-                    $s.html(opt);
-                });
-            }
-
-            //新增場次
+            // 🚩 D. 新增場次邏輯 (HTML 拼接)
             $("#add-session").on("click", function (e) {
                 e.preventDefault();
                 const sIdx = $(".session-item").length;
                 const html = `
-                <div class="session-item border border-secondary rounded p-3 mb-3" data-index="${sIdx}">
+                <div class="session-item border-bottom p-4" data-index="${sIdx}">
                     <input type="hidden" name="Session[${sIdx}].SessionID" value="" />
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0">場次 #<span class="session-num">${sIdx + 1}</span></h5>
-                        <button type="button" class="btn btn-danger btn-sm remove-session">刪除場次</button>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-success"><i class="bi bi-calendar-plus"></i> 場次 #<span class="session-num">${sIdx + 1}</span> (新)</h5>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-session">刪除此場次</button>
                     </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-4"><label class="form-label small">演出時間</label><input type="datetime-local" name="Session[${sIdx}].StartTime" class="form-control form-control-sm" required /></div>
-                        <div class="col-md-4"><label class="form-label small">開賣時間</label><input type="datetime-local" name="Session[${sIdx}].SaleStartTime" class="form-control form-control-sm" required /></div>
-                        <div class="col-md-4"><label class="form-label small">結束時間</label><input type="datetime-local" name="Session[${sIdx}].SaleEndTime" class="form-control form-control-sm" required /></div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4"><label class="small fw-bold">演出時間</label><input type="datetime-local" name="Session[${sIdx}].StartTime" class="form-control shadow-sm" required /></div>
+                        <div class="col-md-4"><label class="small fw-bold">售票開始時間</label><input type="datetime-local" name="Session[${sIdx}].SaleStartTime" class="form-control shadow-sm" required /></div>
+                        <div class="col-md-4"><label class="small fw-bold">售票結束時間</label><input type="datetime-local" name="Session[${sIdx}].SaleEndTime" class="form-control shadow-sm" required /></div>
                     </div>
                     <table class="table table-sm">
-                        <thead><tr><th>場館</th><th>票區</th><th>價格</th><th>排</th><th>座</th><th></th></tr></thead>
+                        <thead><tr class="small text-center"><th>場館</th><th>票區</th><th>價格</th><th style="width:80px">排</th><th style="width:80px">座</th><th style="width:120px">總量</th><th></th></tr></thead>
                         <tbody class="area-tbody"></tbody>
                     </table>
-                    <button type="button" class="btn btn-secondary btn-sm add-ticket-area">+ 新增票區</button>
+                    <button type="button" class="btn btn-outline-info btn-sm add-ticket-area">+ 新增票區</button>
                 </div>`;
                 $("#session-container").append(html);
+                reIndexAll();
             });
 
-            //新增票區 (使用事件委派)
+            // 🚩 E. 新增票區邏輯 (HTML 拼接)
             $(document).on("click", ".add-ticket-area", function (e) {
                 e.preventDefault();
                 const $session = $(this).closest(".session-item");
@@ -348,66 +403,33 @@
                 const $tbody = $session.find(".area-tbody");
                 const tIdx = $tbody.find("tr").length;
 
-                let opts = '<option value="">-- 選擇場館 --</option>';
-                if (cachedVenues && cachedVenues.length > 0) {
-                    cachedVenues.forEach(v => {
-                        opts += `<option value="${v.venueID || v.VenueID}">${v.venueName || v.VenueName}</option>`;
-                    });
-                }
+                let venueOpts = '<option value="">-- 選擇場館 --</option>';
+                cachedVenues.forEach(v => {
+                    venueOpts += `<option value="${v.venueID || v.VenueID}" data-max-row="${v.rowCount || v.RowCount}" data-max-seat="${v.seatCount || v.SeatCount}">${v.venueName || v.VenueName}</option>`;
+                });
 
                 const row = `
                 <tr>
-                    <input type="hidden" name="Session[${sIdx}].TicketsArea[${tIdx}].TicketsAreaID" value="" />
-                    <input type="hidden" name="Session[${sIdx}].TicketsArea[${tIdx}].TicketsAreaStatusID" value="A" />
-                    <td><select name="Session[${sIdx}].TicketsArea[${tIdx}].VenueID" class="form-select form-select-sm venue-select" required>${opts}</select></td>
+                    <input type="hidden" name="Session[${sIdx}].TicketsArea[${tIdx}].TicketsAreaID" value="" class="area-id-input" />
+                    <td><select name="Session[${sIdx}].TicketsArea[${tIdx}].VenueID" class="form-select form-select-sm venue-select" required>${venueOpts}</select></td>
                     <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].TicketsAreaName" class="form-control form-control-sm" required /></td>
-                    <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].Price" class="form-control form-control-sm text-end" required /></td>
-                    <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].RowCount" class="form-control form-control-sm text-center" required /></td>
-                    <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].SeatCount" class="form-control form-control-sm text-center" required /></td>
+                    <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].Price" class="form-control form-control-sm text-end" value="0" /></td>
+                    <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].RowCount" class="form-control form-control-sm text-center row-count-input" value="0" /></td>
+                    <td><input type="number" name="Session[${sIdx}].TicketsArea[${tIdx}].SeatCount" class="form-control form-control-sm text-center seat-count-input" value="0" /></td>
                     <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].Capacity" class="form-control form-control-sm text-center capacity-input bg-light" readonly /></td>
-                    <td><input name="Session[${sIdx}].TicketsArea[${tIdx}].Remaining" class="form-control form-control-sm text-center bg-light" readonly /></td>
-                    <td><button type="button" class="btn btn-sm btn-outline-danger remove-area">×</button></td>
+                    <td><button type="button" class="btn btn-link text-danger remove-area p-0">×</button></td>
                 </tr>`;
                 $tbody.append(row);
-            });
-
-            //自動計算總量與初始化剩餘票數
-            $(document).on("input", ".row-count-input, .seat-count-input", function () {
-            const $tr = $(this).closest("tr");
-            const rows = parseInt($tr.find(".row-count-input").val()) || 0;
-            const seats = parseInt($tr.find(".seat-count-input").val()) || 0;
-            const capacity = rows * seats;
-
-            $tr.find(".capacity-input").val(capacity);
-
-            // 如果是「新票區」(ID 為空)，則剩餘票數同步更新為總量
-            const areaId = $tr.find(".area-id-input").val();
-            if (!areaId) {
-                $tr.find("input[name*='Remaining']").val(capacity);
-            }
-            });
-
-
-
-
-            //刪除
-            $(document).on("click", ".remove-area", function () {
-                $(this).closest("tr").remove();
                 reIndexAll();
             });
 
-            $(document).on("click", ".remove-session", function () {
-                if(confirm("確定刪除？")) {
-                    $(this).closest(".session-item").remove();
-                    reIndexAll();
-                }
+            // --- F. 刪除邏輯 ---
+            $(document).on("click", ".remove-area, .remove-session", function () {
+                const target = $(this).closest( $(this).hasClass("remove-area") ? "tr" : ".session-item" );
+                target.fadeOut(200, function() { $(this).remove(); reIndexAll(); });
             });
 
-            $('#editForm').on('submit', function() {
-            reIndexAll(); // 送出前最後校正一次
-            });
-
-
-        }); // Ready 結尾
+            $('#editForm').on('submit', function() { reIndexAll(); });
+        });
     </script>
 }

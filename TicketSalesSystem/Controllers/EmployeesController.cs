@@ -292,7 +292,7 @@ namespace TicketSalesSystem.Controllers
                         //刪除舊照片
                         if (!string.IsNullOrEmpty(employee.Photo))
                         {
-                            await _fileService.DeleteFileAsync(employee.Photo, "employeePhotos");
+                            await _fileService.DeleteFileAsync(employee.Photo, "Photos","employeePhotos");
                         }
                         //儲存新照片
                         var newFileName = await _fileService.SaveFileAsync(vm.PhotoFile, employee.EmployeeID, "employeePhotos");
@@ -346,44 +346,55 @@ namespace TicketSalesSystem.Controllers
             
         }
 
-       
 
+
+        // POST: Employees/Delete/5
         // POST: Employees/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id)) return NotFound();
-            var employee = await _context.Employee.FindAsync(id);
-            if (employee == null) return NotFound();
-
-            try 
+            try
             {
+                // 1. 抓出員工資料
+                var employee = await _context.Employee.FindAsync(id);
+                if (employee == null) return Json(new { success = false, message = "找不到該員工資料。" });
+
+                // 🚩 2. 先把照片檔名備份起來 (很重要，因為 SaveChanges 後物件可能會被釋放)
+                string photoToDelete = employee.Photo;
+
+                // 3. 處理關聯的登入帳號 (EmployeeLogin)
+                // 刪除員工前，必須先刪除依賴它的帳號資料 (若 DB 未設級聯刪除)
                 var login = await _context.EmployeeLogin.FirstOrDefaultAsync(l => l.EmployeeID == id);
                 if (login != null)
                 {
                     _context.EmployeeLogin.Remove(login);
                 }
 
+                // 4. 執行員工主表刪除
                 _context.Employee.Remove(employee);
-                _context.SaveChangesAsync();
 
-                if (!string.IsNullOrEmpty(employee.Photo))
+                // 🚩 核心修正：務必加上 await，確保資料庫存檔完成
+                await _context.SaveChangesAsync();
+
+                // 🚩 5. 資料庫成功後，再刪除實體檔案
+                if (!string.IsNullOrEmpty(photoToDelete))
                 {
-                    await _fileService.DeleteFileAsync(employee.Photo, "employeePhotos");
+                    // 依照你的參數：檔名, "Photos", "employeePhotos"
+                    await _fileService.DeleteFileAsync(photoToDelete, "Photos", "employeePhotos");
                 }
-                
-                return RedirectToAction("Index");
-            }
-            catch(Exception ex)
-            {
-                return RedirectToAction(nameof(Index), new { error = "刪除失敗" });
-            }
 
-            
+                // 🚩 6. 回傳成功 JSON
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                // 捕捉可能的異常 (例如權限不足或資料庫約束)
+                return Json(new { success = false, message = "刪除失敗，原因：" + ex.Message });
+            }
         }
 
-     
+
 
         private void PopulateDropdownLists(string? selectedStatus = null, string? selectedRole = null)
         {

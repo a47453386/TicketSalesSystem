@@ -195,38 +195,35 @@ namespace TicketSalesSystem.Controllers
             return View(publicNotice);
         }
 
-        // GET: PublicNotices1/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var publicNotice = await _context.PublicNotice
-                .Include(p => p.Employee)
-                .FirstOrDefaultAsync(m => m.PublicNoticeID == id);
-            if (publicNotice == null)
-            {
-                return NotFound();
-            }
-
-            return View(publicNotice);
-        }
+       
 
         // POST: PublicNotices1/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> Delete(string id) 
         {
-            var publicNotice = await _context.PublicNotice.FindAsync(id);
-            if (publicNotice != null)
+            try
             {
-                _context.PublicNotice.Remove(publicNotice);
-            }
+                // 1. 抓出公告資料
+                var publicNotice = await _context.PublicNotice.FindAsync(id);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                if (publicNotice == null)
+                {
+                    return Json(new { success = false, message = "找不到該公告資料。" });
+                }
+
+                // 2. 執行刪除
+                _context.PublicNotice.Remove(publicNotice);
+                await _context.SaveChangesAsync();
+
+                // 3. 因為沒有圖片，直接回傳成功 JSON 即可
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                // 捕捉可能的錯誤（例如資料庫連線問題）
+                return Json(new { success = false, message = "刪除失敗：" + ex.Message });
+            }
         }
 
         private bool PublicNoticeExists(string id)

@@ -286,17 +286,16 @@ namespace TicketSalesSystem.Controllers
         [HttpGet]
         public IActionResult CreateStep3()
         {
-            //取得現有的 DTO (使用你之前抽出來的 GetCurrentDto)
+            // 1. 取得現有的 DTO (這是在 Step1 & Step2 存好的)
             var dto = GetCurrentDTO();
-
             if (dto == null) return RedirectToAction("CreateStep1");
-            //建立 Step 3 的 VM
+
+            // 2. 建立 VM 並映射資料
             var vm = new VMProgrammeStep3();
-
-
-            ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName", dto.VenueID);
-
             MapStep3ToVM(dto, vm);
+
+            // 🚩 3. 準備「該場地專屬」的區域下拉選單
+             LoadVenueListAsync(dto.PlaceID, dto.VenueID);
 
             return View(vm);
         }
@@ -304,38 +303,85 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateStep3(VMProgrammeStep3 vm)
         {
-            ModelState.Remove("VenueID");// 如果頂層的 VenueID 報錯，我們手動移除它，因為我們要看的是 TicketsArea 裡的 VenueID
-
-            //驗證輸入
-            if (!ModelState.IsValid)
-            {
-                ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName");
-
-                return View(vm);
-            }
-            //從 Session 取出 DTO，如果沒有就建立一個新的
+            // 1. 取得 Session 中的 DTO，確保流程沒中斷
             var dto = GetCurrentDTO();
-            //將 VM 的資料映射到 DTO
-            foreach (var s in vm.Session)
+            if (dto == null) return RedirectToAction("CreateStep1");
+
+            //  2. 手動排除不需要的驗證項
+            // 如果 VM 頂層有 VenueID 屬性但此步驟沒用到，需排除以免 ModelState.IsValid 永遠為 false
+            ModelState.Remove("VenueID");
+
+            // 3. 核心業務邏輯驗證
+            if (vm.Session != null)
             {
-                if (s.TicketsArea.Any(ta => string.IsNullOrEmpty(ta.VenueID)))
+                // 效能優化：一次抓出該場地 (PlaceID) 下的所有物理區域，存入 Dictionary
+                // 這樣在後面的嵌套迴圈中就不用重複讀取資料庫
+                var allVenues = _context.Venue
+                    .Where(v => v.PlaceID == dto.PlaceID)
+                    .ToDictionary(v => v.VenueID);
+
+                foreach (var session in vm.Session)
                 {
-                    ModelState.AddModelError("", "請確保每個票區都已指定場館");
-                    ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName");
-                    return View(vm);
+                    // A. 場次完整性檢查
+                    if (session.TicketsArea == null || !session.TicketsArea.Any())
+                    {
+                        ModelState.AddModelError("", $"場次【{session.StartTime:yyyy-MM-dd HH:mm}】請至少新增一個票區");
+                        continue;
+                    }
+
+                    foreach (var area in session.TicketsArea)
+                    {
+                        // B. 檢查是否選取區域 ID
+                        if (string.IsNullOrEmpty(area.VenueID))
+                        {
+                            ModelState.AddModelError("", "請確保每個票區都已指定對應的場館區域");
+                            continue;
+                        }
+
+                        // C. 從 Dictionary 抓取物理設定，並驗證該區域是否屬於該場地
+                        if (!allVenues.TryGetValue(area.VenueID, out var physicalVenue))
+                        {
+                            ModelState.AddModelError("", $"區域編號 {area.VenueID} 不屬於所選場地或已不存在");
+                            continue;
+                        }
+
+                        // D. 區域狀態驗證：必須為 "A" (可用)
+                        if (physicalVenue.VenueStatusID != "A")
+                        {
+                            ModelState.AddModelError("", $"區域【{physicalVenue.VenueName}】目前處於維修或停用狀態，無法設定票區");
+                        }
+
+                        // E. 物理容量驗證：計算設定的總位數是否超過場館原始物理上限
+                        int physicalCapacity = physicalVenue.RowCount * physicalVenue.SeatCount;
+                        int requestedCapacity = area.RowCount * area.SeatCount;
+
+                        if (requestedCapacity > physicalCapacity)
+                        {
+                            ModelState.AddModelError("",
+                                $"區域【{physicalVenue.VenueName}】物理上限為 {physicalCapacity} " +
+                                $"(原廠設定 {physicalVenue.RowCount}排 x {physicalVenue.SeatCount}座)，" +
+                                $"您的設定 ({requestedCapacity}) 已超出限制");
+                        }
+                    }
                 }
             }
 
-            if (vm.Session.Any(s => s.TicketsArea == null || !s.TicketsArea.Any()))
+            // 4. 驗證失敗處理
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", "每個場次請至少新增一個票區");
-                ViewData["VenueID"] = new SelectList(_context.Venue.ToList(), "VenueID", "VenueName");
+                // 重新準備下拉選單資料，否則 View 會因為 ViewBag.VenueList 為 null 而崩潰
+                LoadVenueListAsync(dto.PlaceID, dto.VenueID);
                 return View(vm);
             }
+
+            // 5. 驗證成功：映射資料並存入 DTO
+            // 這裡會將 VM 裡面的多場次、多票區資料寫入 DTO
             MapStep3ToDo(vm, dto);
-            //將 DTO 存回 Session
+
+            // 6. 存回 Session 持久化
             SaveDTO(dto);
-            //導向下一步
+
+            // 7. 前往下一步：圖片上傳與詳細描述
             return RedirectToAction("CreateStep4");
         }
 
@@ -559,7 +605,12 @@ namespace TicketSalesSystem.Controllers
         {
             var venues = await _context.Venue
                 .Where(v => v.PlaceID == placeId)
-                .Select(v => new { v.VenueID, v.VenueName })
+                .Select(v => new {
+                    VenueID = v.VenueID,   // 🚩 明確名稱
+                    VenueName = v.VenueName,
+                    RowCount = v.RowCount,
+                    SeatCount = v.SeatCount
+                })
                 .ToListAsync();
             return Json(venues);
         }
@@ -584,80 +635,141 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, VMProgrammeEdit vm)
         {
-            if (id != vm.ProgrammeID) return NotFound();            
+            if (id != vm.ProgrammeID) return NotFound();
 
-            // 執行業務邏輯驗證 (在進入 Transaction 之前)
-            foreach (var session in vm.Session)
+            // 🚩 1. 效能優化：一次抓出該場地 (PlaceID) 下所有的實體區域設定
+            // 這包含了我們在 CreateStep3 用的 RowCount 與 SeatCount 物理上限
+            var allPhysicalVenues = await _context.Venue
+                .Where(v => v.PlaceID == vm.PlaceID)
+                .ToDictionaryAsync(v => v.VenueID);
+
+            // 🚩 2. 業務邏輯驗證迴圈
+            if (vm.Session != null)
             {
-                foreach (var area in session.TicketsArea)
+                foreach (var session in vm.Session)
                 {
-                    // 呼叫你的驗證服務
-                    var (isValid, message) = await _programmeValidationService.ValidateAreaCapacityAsync(
-                        area.TicketsAreaID,
-                        area.RowCount,
-                        area.SeatCount
-                    );
-
-                    if (!isValid)
+                    // A. 基本檢查：場次不可無票區
+                    if (session.TicketsArea == null || !session.TicketsArea.Any())
                     {
-                        // 如果驗證失敗，將錯誤訊息塞入 ModelState
-                        ModelState.AddModelError("", message);
+                        ModelState.AddModelError("", $"場次【{session.StartTime:yyyy/MM/dd}】請至少保留一個票區。");
+                        continue;
+                    }
 
-                        // 重新準備頁面需要的下拉選單資料 (否則回傳 View 會報錯)
-                        await PrepareEditViewData(vm);
-                        return View(vm);
+                    foreach (var area in session.TicketsArea)
+                    {
+                        // B. 驗證區域歸屬：確保選的 VenueID 真的屬於這個 Place
+                        if (!allPhysicalVenues.TryGetValue(area.VenueID, out var physical))
+                        {
+                            ModelState.AddModelError("", $"票區【{area.TicketsAreaName}】所選區域不屬於目前場地。");
+                            continue;
+                        }
+
+                        // C. 驗證區域狀態：不可選擇維修中 (非 "A") 的區域
+                        if (physical.VenueStatusID != "A")
+                        {
+                            ModelState.AddModelError("", $"區域【{physical.VenueName}】目前處於停用或維修狀態。");
+                        }
+
+                        // D. 驗證物理容量：不可超過場館原始設計的排數或座數
+                        if (area.RowCount > physical.RowCount || area.SeatCount > physical.SeatCount)
+                        {
+                            ModelState.AddModelError("",
+                                $"區域【{physical.VenueName}】物理上限為 {physical.RowCount}排 x {physical.SeatCount}座，您的設定已超出限制。");
+                        }
+
+                        // E. 核心業務驗證：呼叫你的 ValidationService 檢查已售票券
+                        // 確保縮減後的容量不會「壓碎」已經賣出去的票
+                        var (isCapacityValid, capacityMsg) = await _programmeValidationService.ValidateAreaCapacityAsync(
+                            area.TicketsAreaID,
+                            area.RowCount,
+                            area.SeatCount
+                        );
+
+                        if (!isCapacityValid)
+                        {
+                            ModelState.AddModelError("", capacityMsg);
+                        }
                     }
                 }
             }
 
+            // 🚩 3. 驗證失敗處理
+            if (!ModelState.IsValid)
+            {
+                // 必須重新填滿下拉選單，否則 View 的 SelectList 會變空
+                await PrepareEditViewData(vm);
+                return View(vm);
+            }
 
-            ////存檔前先清空目前的追蹤快取，避免 ID 衝突
-            //_context.ChangeTracker.Clear();
-
+            // 🚩 4. 執行資料庫事務 (Transaction)
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-
                 try
                 {
+                    // 抓取現有實體（包含所有關聯資料）
                     var programmeDb = await _context.Programme
-                    .Include(p => p.Session).ThenInclude(s => s.TicketsArea)
-                    .Include(p => p.DescriptionImage)
-                    .FirstOrDefaultAsync(p => p.ProgrammeID == id);
+                        .Include(p => p.Session).ThenInclude(s => s.TicketsArea)
+                        .Include(p => p.DescriptionImage)
+                        .FirstOrDefaultAsync(p => p.ProgrammeID == id);
 
+                    if (programmeDb == null) return NotFound();
+
+                    // 執行各項同步更新
+                    // 1. 更新主檔
                     await _programmeService.UpdateProgrammeAsync(programmeDb, vm);
-                    
 
+                    // 2. 同步說明圖片 (處理刪除舊圖與新增新圖)
                     await _programmeService.SyncImagesAsync(programmeDb, vm.DescriptionImage);
 
+                    // 3. 同步場次與票區 (處理刪除、更新、與新增 ID 生成)
                     await _programmeService.SyncProgrammeDetailsAsync(programmeDb, vm);
 
+                    // 存檔
+                    await _context.SaveChangesAsync();
 
-                    await _context.SaveChangesAsync();  
-
+                    // 提交事務
                     await transaction.CommitAsync();
 
                     return RedirectToAction("AdminIndex", "Programmes");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    // 偵錯用：建議印出完整的 InnerException，這對 TicketsArea 報錯很有幫助
+                    // 捕捉 InnerException 取得更詳細的 DB 錯誤資訊 (如外鍵衝突)
                     var fullMessage = ex.InnerException?.Message ?? ex.Message;
-                    return StatusCode(500, $"更新失敗: {fullMessage}");
+
+                    // 回到編輯頁並顯示錯誤
+                    ModelState.AddModelError("", $"系統更新失敗：{fullMessage}");
+                    await PrepareEditViewData(vm);
+                    return View(vm);
                 }
-
             }
-
         }
+
+
         private async Task PrepareEditViewData(VMProgrammeEdit vm)
         {
             ViewData["PlaceID"] = new SelectList(_context.Place, "PlaceID", "PlaceName", vm.PlaceID);
             ViewData["ProgrammeStatusID"] = new SelectList(_context.ProgrammeStatus, "ProgrammeStatusID", "ProgrammeStatusName", vm.ProgrammeStatusID);
-            var venues = await _context.Venue.Where(v => v.PlaceID == vm.PlaceID).ToListAsync();
-            ViewData["VenueID"] = new SelectList(venues, "VenueID", "VenueName", vm.VenueID);
+
+            await LoadVenueListAsync(vm.PlaceID);
         }
 
+        private async Task LoadVenueListAsync(string placeId, string? selectedVenueId = null)
+        {
+            var venues = await _context.Venue.Where(v => v.PlaceID == placeId).ToListAsync();
 
+            //給 View 頂部 @foreach 樣板用的 (List<Venue>)
+            ViewBag.RawVenues = venues;
+
+            //給 Razor asp-items 用的 (SelectList)
+            ViewBag.VenueList = new SelectList(venues.Select(v => new {
+                v.VenueID,
+                DisplayName = v.VenueName + (v.VenueStatusID != "A" ? " (不可用)" : "")
+            }), "VenueID", "DisplayName", selectedVenueId);
+
+            
+        }
 
 
 

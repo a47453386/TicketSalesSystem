@@ -28,23 +28,27 @@ namespace TicketSalesSystem.Controllers
         // GET: Places
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Place.ToListAsync());
+            var places =await _context.Place
+                .Include(p => p.Venue) 
+                .ThenInclude(v => v.VenueStatus)
+                .OrderBy(p => p.PlaceID)
+                .ToListAsync();
+
+            return View(places);
         }
 
         // GET: Places/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
+           
 
             var place = await _context.Place
+                .Include(p => p.Venue)
+                .ThenInclude(v => v.VenueStatus)
                 .FirstOrDefaultAsync(m => m.PlaceID == id);
-            if (place == null)
-            {
-                return NotFound();
-            }
+
+            if (place == null) return NotFound();           
 
             return View(place);
         }
@@ -104,7 +108,12 @@ namespace TicketSalesSystem.Controllers
                     VenueImage = imagePath,
                     
                 };
-                
+
+                if (place.Venue == null)
+                {
+                    place.Venue = new List<Venue>();
+                }
+
                 foreach (var item in vm.VenueItem)
                 {
                     string vID = await _idService.GetNextVenueID(pID);
@@ -158,7 +167,7 @@ namespace TicketSalesSystem.Controllers
                     AreaColor = v.AreaColor,
                     RowCount = v.RowCount,
                     SeatCount = v.SeatCount,
-                    VenueStatusID = v.VenueStatusID,
+                    VenueStatusID = v.VenueStatusID,    
                     VenueStatusName = v.VenueStatus?.VenueStatusName
                 }).ToList()
             };
@@ -175,6 +184,8 @@ namespace TicketSalesSystem.Controllers
             // 移除 ID 驗證，因為我們會在後端處理
             ModelState.Remove("PlaceID");
             ModelState.Remove("VenueID");
+            ModelState.Remove("VenueStatusID");
+            ModelState.Remove("VenueStatusName");
 
             if (ModelState.IsValid)
             {
@@ -268,24 +279,54 @@ namespace TicketSalesSystem.Controllers
             return View(vm);
         }
 
-        
 
-        // POST: Places/Delete/5
-        [HttpPost, ActionName("Delete")]
+
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> Delete(string id)
         {
-            var place = await _context.Place.FindAsync(id);
-            if (place != null)
+            try
             {
-                _context.Place.Remove(place);
-            }
+                // 1. 抓出場地，並包含區域 (Venue)
+                var place = await _context.Place
+                    .Include(p => p.Venue)
+                    .FirstOrDefaultAsync(p => p.PlaceID == id);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                if (place == null) return Json(new { success = false, message = "找不到該地點。" });
+
+                // 🚩 2. 先把圖片檔名備份起來 (因為 SaveChangesAsync 後物件狀態會改變)
+                // 假設欄位名稱是 VenueImage
+                string fileNameToDelete = place.VenueImage;
+
+                // 3. 安全檢查：檢查是否已被票區使用
+                bool isUsedInTicketsArea = await _context.TicketsArea
+                    .AnyAsync(ta => ta.Venue.PlaceID == id);
+
+                if (isUsedInTicketsArea)
+                {
+                    return Json(new { success = false, message = "此地點的區域已設定票價與場次，禁止刪除！" });
+                }
+
+                // 4. 執行資料庫刪除
+                _context.Place.Remove(place);
+                await _context.SaveChangesAsync();
+
+                // 🚩 5. 資料庫刪除成功後，呼叫你的萬用檔案服務刪除實體圖檔
+                // 參數順序依照你寫的：檔名, 第一層資料夾, 第二層資料夾
+                if (!string.IsNullOrEmpty(fileNameToDelete))
+                {
+                    await _fileService.DeleteFileAsync(fileNameToDelete, "Photos", "VenueImage");
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "刪除失敗：" + ex.Message });
+            }
         }
 
-        
+
         private void PopulateDropdownLists(string? selectedStatus = null)
         {
             ViewData["VenueStatus"] = new SelectList(_context.VenueStatus, "VenueStatusID", "FullDisplayName", selectedStatus);

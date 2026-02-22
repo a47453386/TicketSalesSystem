@@ -3,7 +3,6 @@
 
 @{
     ViewData["Title"] = "公告後台管理";
-    Layout = "_AdminLayout";
 }
 
 <div class="container-fluid px-4">
@@ -82,9 +81,11 @@
                                         <a asp-action="Details" asp-route-id="@item.PublicNoticeID" class="btn btn-outline-secondary" title="詳情">
                                             詳情
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger"
-                                                onclick="deleteNotice('@item.PublicNoticeID', '@item.PublicNoticeTitle')">
-                                            刪除
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                data-delete-id="@item.PublicNoticeID"
+                                                onclick="globalDelete('@item.PublicNoticeID', '@item.PublicNoticeTitle', 'PublicNotices')">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
 
@@ -101,40 +102,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        // 刪除確認
-        function deleteNotice(id, title) {
-            if (confirm(`你確定要刪除【${title}】嗎？`)) {
-                document.getElementById(`delete-form-${id}`).submit();
-            }
-        }
-
-        // 狀態切換 AJAX (承接之前的邏輯)
-        $('.status-toggle').change(function () {
-            const checkbox = $(this);
-            const noticeId = checkbox.data('id');
-            const label = $('#label_' + noticeId);
-            const token = $('input[name="__RequestVerificationToken"]').val();
-
-            $.ajax({
-                url: '@Url.Action("ToggleStatus", "PublicNotices")',
-                type: 'POST',
-                data: { id: noticeId, __RequestVerificationToken: token },
-                success: function (res) {
-                    if (res.success) {
-                        label.text(res.newStatus ? "已發佈" : "待發佈");
-                    } else {
-                        alert(res.message);
-                        checkbox.prop('checked', !checkbox.prop('checked'));
-                    }
-                },
-                error: function () {
-                    alert("連線失敗");
-                    checkbox.prop('checked', !checkbox.prop('checked'));
-                }
-            });
-        });
-    </script>
-}

@@ -1,47 +1,127 @@
 ﻿@model TicketSalesSystem.Models.FAQ
 
 @{
-    ViewData["Title"] = "常見問題詳細資訊";    
+    ViewData["Title"] = "常見問題詳情";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="container py-4">
+    @* 頂部導覽與操作按鈕 *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-action="Index">常見問題管理</a></li>
+                <li class="breadcrumb-item active" aria-current="page">問題詳情</li>
+            </ol>
+        </nav>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.FAQID" class="btn btn-warning">
+                <i class="bi bi-pencil-square me-1"></i>編輯
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>返回列表
+            </a>
+        </div>
+    </div>
 
-<div>
-    
-    <dl class="row">
-        <dt class = "col-sm-4">
-            @Html.DisplayNameFor(model => model.FAQTitle)
-        </dt>
-        <dd class = "col-sm-8">
-            @Html.DisplayFor(model => model.FAQTitle)
-        </dd>
-        <dt class = "col-sm-4">
-            @Html.DisplayNameFor(model => model.FAQDescription)
-        </dt>
-        <dd class = "col-sm-8">
-            @Html.DisplayFor(model => model.FAQDescription)
-        </dd>
-        <dt class = "col-sm-4">
-            @Html.DisplayNameFor(model => model.FAQPublishStatusID)
-        </dt>
-        <dd class = "col-sm-8">
-            @Html.DisplayFor(model => model.FAQPublishStatus.FAQPublishStatusName)
-        </dd>
-        <dt class = "col-sm-4">
-            @Html.DisplayNameFor(model => model.EmployeeID)
-        </dt>
-        <dd class = "col-sm-8">
-            @Html.DisplayFor(model => model.Employee.Name)
-        </dd>
-        <dt class = "col-sm-4">
-            @Html.DisplayNameFor(model => model.FAQType.FAQTypeName)
-        </dt>
-        <dd class = "col-sm-8">
-            @Html.DisplayFor(model => model.FAQType.FAQTypeName)
-        </dd>
-    </dl>
+    <div class="row g-4">
+        @* 左側：核心內容 *@
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-primary">
+                        <i class="bi bi-chat-left-text me-2"></i>問題與解答
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small">問題標題</label>
+                        <h4 class="fw-bold">@Model.FAQTitle</h4>
+                    </div>
+
+                    <hr class="my-4 opacity-25">
+
+                    <div>
+                        <label class="form-label fw-bold text-muted small">詳細解答</label>
+                        @* 🚩 關鍵：使用 pre-line 確保換行能正確顯示 *@
+                        <p class="fs-5 text-secondary" style="white-space: pre-line; line-height: 1.8;">
+                            @Model.FAQDescription
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* 右側：管理資訊 *@
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light fw-bold">
+                    <i class="bi bi-info-circle me-2"></i>管理資訊
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="text-muted">問題 ID</span>
+                        <span class="badge bg-light text-dark border">@Model.FAQID</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="text-muted">分類</span>
+                        <span class="badge bg-info text-dark">@Model.FAQType?.FAQTypeName</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="text-muted">發布狀態</span>
+                        @if (Model.FAQPublishStatusID == "Y")
+                        {
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>已發布</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary"><i class="bi bi-pencil-fill me-1"></i>草稿</span>
+                        }
+                    </li>
+                    <li class="list-group-item">
+                        <div class="text-muted small mb-1">負責員工</div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle fs-4 me-2 text-secondary"></i>
+                            <div>
+                                <div class="fw-bold">@Model.Employee?.Name</div>
+                                <div class="small text-muted">ID: @Model.EmployeeID</div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            @* 刪除區塊 *@
+            <div class="card border-danger shadow-sm mt-4">
+                <div class="card-body">
+                    <h6 class="text-danger fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>危險區域</h6>
+                    <p class="small text-muted">刪除此問題後將無法復原，且前台將不再顯示。</p>
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        刪除此常見問題
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.FAQID">更新</a> |
-    <a asp-action="Index">回到FAQ後管理總攬</a>
+
+@* 刪除確認 Modal *@
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">確認刪除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                您確定要刪除「<strong>@Model.FAQTitle</strong>」嗎？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form asp-action="Delete" asp-route-id="@Model.FAQID" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">確定刪除</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

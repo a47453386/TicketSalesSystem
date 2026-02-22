@@ -103,9 +103,11 @@
                                             @* 🚩 確保傳遞的是 MemberID *@
                                             <input type="hidden" name="id" value="@item.MemberID" />
 
-                                            <button type="submit" class="btn btn-outline-danger btn-sm"
-                                                    onclick="return confirm('你確定要刪除會員【@(item.Name)】及其所有資料嗎？')">
-                                                <i class="bi bi-trash"></i> 
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    data-delete-id="@item.MemberID"
+                                                    onclick="globalDelete('@item.MemberID', '@item.Name', 'Members')">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
                                     </div>
