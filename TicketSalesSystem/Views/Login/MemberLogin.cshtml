@@ -1,0 +1,18 @@
+﻿@model TicketSalesSystem.ViewModel.VMLogin
+@{
+    ViewData["Title"] = "會員登入";
+    Layout = "_UserLayout"; // 🚩 這裡要套用主版，讓它看起來像個完整網頁
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    @* 🚩 直接呼叫零件，省去重寫代碼的麻煩 *@
+                    @await Html.PartialAsync("_LoginPartial", Model)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

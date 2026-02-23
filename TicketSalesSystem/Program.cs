@@ -61,7 +61,16 @@ builder.Services.AddScoped<IQueueService, QueueService>();
 
 
 //註冊 Session 服務 加入 Session 服務
-builder.Services.AddDistributedMemoryCache(); // 提供內部記憶體快取
+
+//提供內部記憶體快取(for流量)
+builder.Services.AddDistributedMemoryCache();
+
+// 設定 Cookie 認證
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options => {
+        options.LoginPath = "/Login/MemberLogin";
+    });
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // 設定 Session 過期時間（例如 30 分鐘）
@@ -88,8 +97,8 @@ app.UseRouting();
 // 啟用 Session (必須放在 UseRouting 之後，UseAuthorization 之前)
 app.UseSession();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication();// 認證：你是誰？
+app.UseAuthorization();// 授權：你能做什麼？
 
 app.MapControllerRoute(
     name: "default",

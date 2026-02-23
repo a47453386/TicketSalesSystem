@@ -59,7 +59,7 @@ namespace TicketSalesSystem.Controllers
         // 前台會員專區的訂單列表
         public async Task<IActionResult> UserIndex()
         {
-            string currentMemberID = "a34b67b7-c02f-49a7-b37b-a07901d46022";
+            string currentMemberID = "a8e36451-c3fb-44ba-a05e-602ca0760166";
 
             var time=(int)Math.Max(0,(DateTime.Now.AddMinutes(10)-DateTime.Now).TotalSeconds);
             
@@ -279,8 +279,8 @@ namespace TicketSalesSystem.Controllers
             
             }
             // 若失敗，重新準備下拉選單並回傳頁面
-            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "StatusName", order.OrderStatusID);
-            ViewData["PaymentMethodID"] = new SelectList(_context.PaymentMethod, "PaymentMethodID", "MethodName", order.PaymentMethodID);
+            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusName", order.OrderStatusID);
+            ViewData["PaymentMethodID"] = new SelectList(_context.PaymentMethod, "PaymentMethodID", "PaymentMethodName", order.PaymentMethodID);
             return View(order);
         }
 
@@ -296,7 +296,7 @@ namespace TicketSalesSystem.Controllers
             if (string.IsNullOrEmpty(id)) return BadRequest("訂單編號不可為空");
 
             // 1. 取得當前登入的會員 ID (假設你存在 Session 或 Claims 中)
-            var currentMemberId= "a34b67b7-c02f-49a7-b37b-a07901d46022";
+            var currentMemberId= "a8e36451-c3fb-44ba-a05e-602ca0760166";
 
             
 

@@ -128,7 +128,7 @@ namespace TicketSalesSystem.Controllers
             if (string.IsNullOrEmpty(id)) return NotFound();
 
             //取得目前會員 ID (這裡先用你代碼中的測試 ID)
-            string memberId = "a34b67b7-c02f-49a7-b37b-a07901d46022";
+            string memberId = "a8e36451-c3fb-44ba-a05e-602ca0760166";
 
             // 檢查是否有通行證，防止直接輸入網址跳過排隊
             var gatePassed = HttpContext.Session.GetString("GatePassed_" + id);
@@ -206,7 +206,7 @@ namespace TicketSalesSystem.Controllers
                               ? await _context.Database.BeginTransactionAsync()
                               : null;
 
-            string memberId = "a34b67b7-c02f-49a7-b37b-a07901d46022";
+            string memberId = "a8e36451-c3fb-44ba-a05e-602ca0760166";
             var member = await _context.Member.AnyAsync(m => m.MemberID == memberId);
             if (!member)
             {

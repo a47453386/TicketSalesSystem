@@ -1,0 +1,43 @@
+﻿@model TicketSalesSystem.ViewModel.VMLogin
+
+@{
+    Layout = null;
+}
+
+<div class="px-4 pb-5 pt-2">
+    <div class="text-center mb-4">
+        <div class="bg-primary text-white d-inline-block rounded-circle p-3 mb-3 shadow">
+            <i class="bi bi-person-fill fs-2"></i>
+        </div>
+        <h4 class="fw-bold">歡迎回來</h4>
+        <p class="text-muted small">請輸入您的帳號密碼以繼續購票</p>
+    </div>
+
+    @* 🚩 指向 LoginController 的 MemberLogin Action *@
+    <form asp-controller="Login" asp-action="MemberLogin" method="post">
+        @* 處理 ReturnUrl，讓使用者登入後能回到原位 *@
+        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+        
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Account" class="form-control" placeholder="Account" />
+            <label asp-for="Account">會員帳號</label>
+            <span asp-validation-for="Account" class="text-danger small x-small"></span>
+        </div>
+
+        <div class="form-floating mb-4">
+            <input asp-for="Password" class="form-control" type="password" placeholder="Password" />
+            <label asp-for="Password">登入密碼</label>
+            <span asp-validation-for="Password" class="text-danger small x-small"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm rounded-3">
+            立即登入 <i class="bi bi-arrow-right-short"></i>
+        </button>
+
+        <div class="mt-4 text-center small text-muted border-top pt-3">
+            還沒有帳號嗎？ <a asp-controller="Members" asp-action="Create" class="text-primary fw-bold text-decoration-none">立即註冊</a>
+        </div>
+    </form>
+</div>

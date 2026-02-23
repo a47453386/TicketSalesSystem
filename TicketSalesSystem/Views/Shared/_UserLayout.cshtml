@@ -40,15 +40,26 @@
                     </ul>
 
                     <ul class="navbar-nav">
-                        @* 這裡未來會接 Session 判斷 *@
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Members" asp-action="UserEdit" asp-route-id="你的測試ID">
-                                <i class="bi bi-person-circle"></i> 會員中心
-                            </a>
-                        </li>
-                        <li class="nav-item ms-lg-3">
-                            <a class="btn btn-outline-primary px-4 rounded-pill" href="#">登入 / 註冊</a>
-                        </li>
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item ms-lg-3">
+                                <a class="btn btn-outline-primary px-4 rounded-pill" href="javascript:void(0);" onclick="openLoginModal()">登入 / 註冊</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i> @User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="UserIndex">我的訂單</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Members" asp-action="UserEdit">會員中心</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" asp-controller="Login" asp-action="Logout">登出</a></li>
+                                </ul>
+                            </li>
+                        }
                     </ul>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle fw-bold text-danger" href="#" id="adminNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -68,15 +79,35 @@
                             <li><a class="dropdown-item" asp-controller="FAQs" asp-action="Index"><i class="bi bi-question-circle me-2"></i>FAQ 編輯</a></li>
                         </ul>
                     </li>
-                    </ul>
+                    
                 </div>
             </div>
         </nav>
     </header>
+
+   
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+    </div>
+    
+    
+    @* 會員登入 *@
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-white border-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="loginModalBody" class="modal-body p-0">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">
@@ -92,6 +123,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.13/jquery.validate.unobtrusive.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/auth-modal.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
