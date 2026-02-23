@@ -48,3 +48,13 @@ WHERE t.name = 'Order' OR t.name = 'Tickets';
 
 ALTER TABLE EmployeeLogin
 ADD CONSTRAINT UQ_Employee_Account UNIQUE (Account);
+
+
+-- 1. 檢查目前的訂單狀態到底是什麼字母
+SELECT TOP 1 OrderStatusID FROM [Order] WHERE OrderID = '你的測試訂單ID';
+
+-- 2. 檢查票券狀態表
+SELECT * FROM [TicketsAreaStatus];
+
+-- 3. 測試：手動在 SQL 更新一張票試試看，看 Trigger 會不會噴錯
+UPDATE Tickets SET TicketsStatusID = 'C' WHERE OrderID = '你的測試訂單ID';

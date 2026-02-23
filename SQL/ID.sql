@@ -234,7 +234,7 @@ SELECT dbo.funGetPlaceID();
 ----------------------------------------------------------------------------------------------------------
 --EmployeeID F21025
 
-alter function funGetVenueID(@PlaceID nchar(1))
+create function funGetVenueID(@PlaceID nchar(1))
 returns nchar(3)
 as
 begin 
