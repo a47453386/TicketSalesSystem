@@ -2,43 +2,102 @@
 
 @{
     ViewData["Title"] = "營運戰情室";
-    Layout = "_AdminLayout";
 }
 
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center my-4">
-        <h3 class="fw-bold text-dark mb-0"><i class="bi bi-speedometer2 me-2"></i>營運戰情室</h3>
-        <div class="badge bg-dark px-3 py-2 shadow-sm">
-            <i class="bi bi-clock-history me-1"></i> 最後更新: @DateTime.Now.ToString("yyy年MM月dd日 HH:mm:ss")
+<style>
+    :root {
+        --monitor-height: 210px; /* 🚩 統一底部三欄的高度，可視情況改為 180px 或 200px */
+        --chart-height: 220px; /* 🚩 統一圖表層的高度 */
+    }
+
+    /* 1. 強制底部三欄等高 */
+    .monitor-row .card {
+        height: var(--monitor-height) !important;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 2. 內部內容高度計算 (扣除卡片 Header 的 35px) */
+    .monitor-body {
+        height: calc(var(--monitor-height) - 35px);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    /* 3. 圓餅圖專用容器：完全置中 */
+    .chart-wrapper {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+    }
+
+    /* 4. 圖表列的高度控制 */
+    .chart-row-height {
+        height: var(--chart-height);
+    }
+
+    .x-small {
+        font-size: 0.72rem !important;
+    }
+
+    .list-group-item {
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* 捲軸美化 */
+    .monitor-body::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .monitor-body::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 10px;
+    }
+
+    .x-small {
+        /* 原本可能是 0.7rem 或 0.75rem */
+        font-size: 0.95rem !important; /* 🚩 數字越大文字越大 */
+    }
+</style>
+
+<div class="container-fluid px-3">
+    <div class="d-flex justify-content-between align-items-center my-2">
+        <div>
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-speedometer2 me-2"></i>營運監測中心</h5>
+        </div>
+        <div class="x-small">
+            最後更新：<span class="fw-bold">@DateTime.Now.ToString("HH:mm:ss")</span>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-2 mb-2">
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 border-start border-primary border-4">
+            <div class="card border-0 shadow-sm border-start border-primary border-4 compact-card">
                 <div class="card-body">
-                    <h6 class="text-muted small fw-bold text-uppercase">總銷售額</h6>
-                    <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0 text-primary">NT$ @ViewBag.TotalSales.ToString("N0")</h3>
-                    </div>
+                    <div class="kpi-title">總累計營收</div>
+                    <h4 class="text-primary fw-bold">NT$ @ViewBag.TotalSales.ToString("N0")</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
+            <div class="card border-0 shadow-sm border-start border-success border-4 compact-card">
                 <div class="card-body">
-                    <h6 class="text-muted small fw-bold text-uppercase">已售票數</h6>
-                    <h3 class="fw-bold mb-0 text-success">@ViewBag.TotalTicketsSold 張</h3>
+                    <div class="kpi-title">總已售票數</div>
+                    <h4 class="text-success fw-bold">@ViewBag.TotalTicketsSold 張</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 border-start border-info border-4">
+            <div class="card border-0 shadow-sm border-start border-info border-4 compact-card">
                 <div class="card-body">
-                    <h6 class="text-muted small fw-bold text-uppercase">總銷售率</h6>
+                    <div class="kpi-title">總銷售率</div>
                     <div class="d-flex align-items-center justify-content-between">
-                        <h3 class="fw-bold mb-0 text-info">@ViewBag.SalesRate %</h3>
-                        <div class="progress w-50" style="height: 10px;">
+                        <h4 class="text-info fw-bold">@ViewBag.SalesRate%</h4>
+                        <div class="progress w-50 ms-2">
                             <div class="progress-bar bg-info" style="width: @ViewBag.SalesRate%"></div>
                         </div>
                     </div>
@@ -46,132 +105,94 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 border-start border-warning border-4">
+            <div class="card border-0 shadow-sm border-start border-warning border-4 compact-card">
                 <div class="card-body">
-                    <h6 class="text-muted small fw-bold text-uppercase">註冊會員</h6>
-                    <h3 class="fw-bold mb-0 text-warning">@ViewBag.MemberCount 位</h3>
+                    <div class="kpi-title">註冊會員數</div>
+                    <h4 class="text-warning fw-bold">@ViewBag.MemberCount 位</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-bar-chart-fill me-2"></i>票區銷售分析 (即時)</h6>
-                    <span class="badge bg-light text-dark border">已售 vs 庫存</span>
+    <div class="row g-2 mb-2">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm compact-card" style="height: var(--chart-height);">
+                <div class="card-header border-0 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold x-small text-primary"><i class="bi bi-bar-chart-fill me-1"></i>活動銷售分析</span>
                 </div>
                 <div class="card-body position-relative">
-                    <div id="chartLoading" class="position-absolute top-50 start-50 translate-middle text-center">
-                        <div class="spinner-border text-primary-subtle" role="status"></div>
-                        <div class="small text-muted mt-2">數據載入中...</div>
+                    <div id="chartLoading" class="position-absolute top-50 start-50 translate-middle"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+                    <div style="height: 160px;"><canvas id="salesAreaChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm compact-card" style="height: var(--chart-height);">
+                <div class="card-header border-0"><span class="fw-bold x-small text-primary"><i class="bi bi-activity me-1"></i>24 小時銷售趨勢</span></div>
+                <div class="card-body">
+                    <div style="height: 160px;"><canvas id="salesVelocityChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2">
+            <div class="card border-0 shadow-sm bg-dark text-white compact-card h-100 d-flex flex-column justify-content-center align-items-center text-center p-2">
+                <div class="spinner-grow text-success mb-2" style="width: 20px; height: 20px;"></div>
+                <div style="font-size: 0.7rem; font-weight: bold;">清理服務</div>
+                <div class="text-success fw-bold" style="font-size: 0.75rem;">運行中</div>
+                <hr class="w-75 my-2 opacity-25">
+                <div class="x-small opacity-50">每 10 分鐘</div>
+                <div class="x-small opacity-50">掃描失效訂單</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-2 monitor-row">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm compact-card">
+                <div class="card-header border-0"><span class="fw-bold x-small text-danger"><i class="bi bi-bell-fill me-1"></i>系統即時預警</span></div>
+                <div class="card-body p-0 monitor-body">
+                    <div id="alertsLoading" class="text-center py-4"><div class="spinner-border spinner-border-sm text-muted"></div></div>
+                    <div id="noAlertsMsg" class="text-center py-4 d-none">
+                        <i class="bi bi-shield-check text-success fs-2 mb-1 d-block"></i>
+                        <span class="text-muted x-small">系統狀態平安</span>
                     </div>
-                    <div style="min-height: 350px;">
-                        <canvas id="salesAreaChart"></canvas>
+                    <div id="alertsContainer" class="list-group list-group-flush"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm compact-card">
+                <div class="card-header border-0"><span class="fw-bold x-small text-dark"><i class="bi bi-pie-chart-fill me-1"></i>訂單狀態分佈</span></div>
+                <div class="card-body p-1 monitor-body">
+                    <div class="chart-wrapper">
+                        <canvas id="orderStatusChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3 border-0">
-                    <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-list-task me-2"></i>管理待辦項目</h6>
-                </div>
-                <div class="card-body p-0">
+            <div class="card border-0 shadow-sm compact-card">
+                <div class="card-header border-0"><span class="fw-bold x-small text-dark "><i class="bi bi-list-check me-1"></i>管理執行清單</span></div>
+                <div class="card-body p-0 monitor-body">
                     <div class="list-group list-group-flush">
-                        <a asp-controller="Question" asp-action="Index" asp-route-statusFilter="P" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-chat-dots me-2 text-danger"></i>待處理客服提問</span>
-                            <span class="badge @(ViewBag.PendingRefunds > 0 ? "bg-danger" : "bg-light text-muted") rounded-pill">@ViewBag.PendingRefunds</span>
+                        <a asp-controller="Question" asp-action="Index" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span>客服提問</span><span class="badge bg-danger rounded-pill">@ViewBag.PendingRefunds</span>
                         </a>
-                        <a asp-controller="Programmes" asp-action="AdminIndex" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-pencil-square me-2 text-warning"></i>草稿狀態活動</span>
-                            <span class="badge bg-warning text-dark rounded-pill">@ViewBag.PendingProgramme</span>
+                        <a asp-controller="ProgrammeDTO" asp-action="AdminIndex" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span>草稿活動</span><span class="badge bg-warning text-dark rounded-pill">@ViewBag.PendingProgramme</span>
                         </a>
-                        <a asp-controller="FAQs" asp-action="Index" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-question-circle me-2 text-info"></i>未發佈 FAQ</span>
-                            <span class="badge bg-info rounded-pill">@ViewBag.PendingFAQ</span>
+                        <a asp-controller="FAQs" asp-action="Index" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span>未發佈 FAQ</span><span class="badge bg-info rounded-pill">@ViewBag.PendingFAQ</span>
                         </a>
-                        <a asp-controller="PublicNotices" asp-action="Index" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-megaphone me-2 text-secondary"></i>未發佈公告</span>
-                            <span class="badge bg-secondary rounded-pill">@ViewBag.PendingPublicNotice</span>
+                        <a asp-controller="PublicNotices" asp-action="Index" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0">
+                            <span>未發佈公告</span><span class="badge bg-secondary rounded-pill">@ViewBag.PendingPublicNotice</span>
                         </a>
                     </div>
                 </div>
-            </div>
-
-            <div class="card border-0 shadow-sm bg-dark text-white">
-                <div class="card-body text-center py-4">
-                    <i class="bi bi-shield-check display-6 text-success mb-2"></i>
-                    <h6 class="fw-bold">系統異步清理服務</h6>
-                    <p class="text-light opacity-50 small mb-0">運行狀態：正常</p>
-                    <hr class="my-2 opacity-25">
-                    <small class="text-light opacity-50">最後掃描: @DateTime.Now.ToString("HH:mm")</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0">最近 5 筆成交訂單</h5>
-            <a asp-action="Index" asp-controller="Orders" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                所有訂單紀錄 <i class="bi bi-arrow-right ms-1"></i>
-            </a>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">訂單編號</th>
-                            <th>訂購人</th>
-                            <th>票券明細</th>
-                            <th>總額</th>
-                            <th>下單時間</th>
-                            <th>付款狀態</th>
-                            <th class="text-end pe-4">功能</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var order in Model)
-                        {
-                            <tr>
-                                <td class="ps-4 fw-bold text-primary">@order.OrderID</td>
-                                <td>
-                                    <div class="fw-bold">@order.Member?.Name</div>
-                                    <small class="text-muted">@order.MemberID</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border">@order.Tickets.Count 張</span>
-                                    <small class="text-muted ms-1">@order.Tickets.FirstOrDefault()?.TicketsArea?.TicketsAreaName</small>
-                                </td>
-                                <td class="fw-bold text-danger">$@order.Tickets.Sum(t => t.TicketsArea.Price).ToString("N0")</td>
-                                <td class="small">@order.OrderCreatedTime.ToString("MM/dd HH:mm")</td>
-                                <td>
-                                    @if (order.PaymentStatus || order.OrderStatusID == "Y")
-                                    {
-                                        <span class="badge bg-success-subtle text-success">已付款</span>
-                                    }
-                                    else if (order.OrderStatusID == "N")
-                                    {
-                                        <span class="badge bg-secondary-subtle text-secondary">已失效</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning-subtle text-warning">待支付</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderID" class="btn btn-sm btn-light border">
-                                        <i class="bi bi-search text-primary"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -181,61 +202,139 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 🚩 AJAX 非同步抓取圖表數據
+            // --- 0. 統一配置 ---
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 10, font: { size: 10 } }
+                    }
+                }
+            };
+
+            // --- 1. 活動銷售分析 (Bar Chart) ---
             fetch('/Admin/GetAreaSalesData')
-                .then(response => {
-                    if (!response.ok) throw new Error("API 請求失敗");
-                    return response.json();
-                })
+                .then(res => res.json())
                 .then(data => {
-                    // 數據回來後隱藏 Loading
-                    document.getElementById('chartLoading').style.display = 'none';
+                    const el = document.getElementById('salesAreaChart');
+                    if (!el) return; // 沒找到標籤就不跑，防止報錯
 
-                    const labels = data.map(item => item.label);
-                    const soldData = data.map(item => item.sold);
-                    const remainingData = data.map(item => item.remaining);
+                    // 隱藏 Loading
+                    const loader = document.getElementById('chartLoading');
+                    if (loader) loader.style.display = 'none';
 
-                    const ctx = document.getElementById('salesAreaChart').getContext('2d');
-                    new Chart(ctx, {
+                    new Chart(el.getContext('2d'), {
                         type: 'bar',
                         data: {
-                            labels: labels,
+                            labels: data.map(d => d.label),
                             datasets: [
-                                {
-                                    label: '已售出 (Sold)',
-                                    data: soldData,
-                                    backgroundColor: '#0d6efd',
-                                    borderRadius: 4
-                                },
-                                {
-                                    label: '剩餘庫存 (Remaining)',
-                                    data: remainingData,
-                                    backgroundColor: '#f8f9fa',
-                                    borderColor: '#dee2e6',
-                                    borderWidth: 1,
-                                    borderRadius: 4
-                                }
+                                { label: '已售', data: data.map(d => d.sold), backgroundColor: '#0d6efd', borderRadius: 4 },
+                                { label: '剩餘', data: data.map(d => d.remaining), backgroundColor: '#f8f9fa', borderColor: '#dee2e6', borderWidth: 1, borderRadius: 4 }
                             ]
                         },
                         options: {
-                            indexAxis: 'y', // 🚩 橫向長條圖，適合顯示較長的票區名稱
+                            ...commonOptions,
+                            indexAxis: 'y',
+                            scales: { x: { stacked: true }, y: { stacked: true } }
+                        }
+                    });
+                }).catch(err => console.error("活動圖表失敗:", err));
+
+            // --- 2. 24小時銷售趨勢 (Line Chart) ---
+            fetch('/Admin/GetSalesVelocity')
+                .then(res => res.json())
+                .then(data => {
+                    const el = document.getElementById('salesVelocityChart');
+                    if (!el) return;
+
+                    new Chart(el.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: data.map(d => d.hour),
+                            datasets: [{
+                                label: '單量',
+                                data: data.map(d => d.count),
+                                borderColor: '#0d6efd',
+                                tension: 0.4,
+                                fill: true,
+                                backgroundColor: 'rgba(13, 110, 253, 0.05)',
+                                pointRadius: 2
+                            }]
+                        },
+                        options: {
+                            ...commonOptions,
+                            plugins: { legend: { display: false } } // 趨勢圖不需要圖例
+                        }
+                    });
+                }).catch(err => console.error("趨勢圖失敗:", err));
+
+            // --- 3. 訂單狀態分佈 (Doughnut Chart) ---
+            fetch('/Admin/GetOrderStatusDistribution')
+                .then(res => res.json())
+                .then(data => {
+                    const el = document.getElementById('orderStatusChart');
+                    if (!el) return;
+
+                    new Chart(el.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.map(d => d.status),
+                            datasets: [{
+                                data: data.map(d => d.count),
+                                backgroundColor: ['#198754', '#ffc107', '#adb5bd', '#0dcaf0'],
+                                borderWidth: 0,
+                                hoverOffset: 10
+                            }]
+                        },
+                        options: {
                             responsive: true,
-                            maintainAspectRatio: false,
+                            maintainAspectRatio: false, // 🚩 重要：讓它填滿我們設定的 150px 容器
+                            cutout: '75%',
                             plugins: {
-                                legend: { position: 'bottom' }
-                            },
-                            scales: {
-                                x: { stacked: true, grid: { display: false } },
-                                y: { stacked: true, grid: { display: false } }
+                                legend: {
+                                position: 'right', // 🚩 改到右邊，避免吃掉上下空間
+                                labels: { boxWidth: 8, font: { size: 10 } }
+                                }
                             }
                         }
                     });
-                })
-                .catch(error => {
-                    console.error("圖表載入錯誤:", error);
-                    document.getElementById('chartLoading').innerHTML =
-                        '<span class="text-danger small"><i class="bi bi-exclamation-circle"></i> 圖表載入失敗</span>';
-                });
+                }).catch(err => console.error("圓餅圖失敗:", err));
+
+            // --- 4. 即時警示與通知邏輯 ---
+            function loadLiveAlerts() {
+                fetch('/Admin/GetLiveAlerts')
+                    .then(res => res.json())
+                    .then(data => {
+                        const loading = document.getElementById('alertsLoading');
+                        const container = document.getElementById('alertsContainer');
+                        const noAlerts = document.getElementById('noAlertsMsg');
+
+                        if (loading) loading.classList.add('d-none');
+                        if (!container) return;
+
+                        container.innerHTML = "";
+
+                        if (!data || data.length === 0) {
+                            if (noAlerts) noAlerts.classList.remove('d-none');
+                            return;
+                        }
+
+                        if (noAlerts) noAlerts.classList.add('d-none');
+                        data.forEach(alert => {
+                            const icon = alert.level === 'danger' ? 'bi-exclamation-octagon-fill' : 'bi-exclamation-triangle-fill';
+                            container.innerHTML += `
+                                <div class="list-group-item border-start border-${alert.level} border-4 py-2 bg-light bg-opacity-10 mb-1">
+                                    <h6 class="mb-0 fw-bold text-${alert.level}" style="font-size:0.75rem;"><i class="bi ${icon} me-1"></i>${alert.title}</h6>
+                                    <p class="mb-0 x-small text-dark">${alert.message}</p>
+                                </div>`;
+                        });
+                    });
+            }
+
+            loadLiveAlerts();
+            setInterval(loadLiveAlerts, 60000); // 每一分鐘自動更新一次
         });
     </script>
 }

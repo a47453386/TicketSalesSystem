@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.Queue;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Booking;
 using TicketSalesSystem.ViewModel.Order;
@@ -15,10 +16,11 @@ namespace TicketSalesSystem.Controllers
     public class OrdersController : Controller
     {
         private readonly TicketsContext _context;
-
-        public OrdersController(TicketsContext context)
+        private readonly IQueueService _queueService;
+        public OrdersController(TicketsContext context, IQueueService queueService)
         {
             _context = context;
+            _queueService = queueService;
         }
 
 
@@ -57,7 +59,7 @@ namespace TicketSalesSystem.Controllers
         // 前台會員專區的訂單列表
         public async Task<IActionResult> UserIndex()
         {
-            string currentMemberID = "004bc90a-26fb-48e9-a762-653a232d86e2";
+            string currentMemberID = "a34b67b7-c02f-49a7-b37b-a07901d46022";
 
             var time=(int)Math.Max(0,(DateTime.Now.AddMinutes(10)-DateTime.Now).TotalSeconds);
             
@@ -291,12 +293,12 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UserCancelOrder(string id)
         {
+            if (string.IsNullOrEmpty(id)) return BadRequest("訂單編號不可為空");
+
             // 1. 取得當前登入的會員 ID (假設你存在 Session 或 Claims 中)
-            //var currentMemberId = HttpContext.Session.GetString("MemberID");
-            //if (string.IsNullOrEmpty(currentMemberId)) return RedirectToAction("Login", "Member");
-            var currentMemberId= "004bc90a-26fb-48e9-a762-653a232d86e2";
+            var currentMemberId= "a34b67b7-c02f-49a7-b37b-a07901d46022";
 
-
+            
 
             // 2. 抓取訂單，並確保該訂單屬於此會員，且處於「待付款」狀態
             // 假設 'P' 代表待付款 (Pending Payment)
@@ -326,7 +328,7 @@ namespace TicketSalesSystem.Controllers
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-
+                _queueService.ReleaseQueueSlot();
                 TempData["Success"] = "訂單已成功取消，名額已釋出。";
             }
             catch (Exception ex)

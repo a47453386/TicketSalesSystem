@@ -69,7 +69,9 @@ namespace TicketSalesSystem.Controllers
             
         }
 
-        //專門給圖表使用，回傳 JSON
+
+
+        //活動銷售分析
         [HttpGet]
         public async Task<IActionResult> GetAreaSalesData()
         {
@@ -87,5 +89,91 @@ namespace TicketSalesSystem.Controllers
 
             return Json(data); // 直接回傳 JSON
         }
+
+
+        //訂單健康度
+        [HttpGet]
+        public async Task<IActionResult> GetOrderStatusDistribution()
+        {
+            // 統計各個狀態的訂單張數
+            var data = await _context.Order
+                .GroupBy(o => o.OrderStatusID)
+                .Select(g => new {
+                    status = g.Key == "Y" ? "已付款" :
+                             g.Key == "P" ? "待付款" :
+                             g.Key == "N" ? "逾期付款" : "已失效",
+                    count = g.Count()
+                })
+                .ToListAsync();
+
+            return Json(data);
+        }
+
+
+        //銷售趨勢分析
+        [HttpGet]
+        public async Task<IActionResult> GetSalesVelocity()
+        {
+            var now = DateTime.Now;
+            var last24Hours = now.AddHours(-23); // 從 23 小時前開始算起
+
+            // 1. 抓出過去 24 小時的所有訂單
+            var orders = await _context.Order
+                .Where(o => o.OrderCreatedTime >= last24Hours)
+                .Select(o => new { o.OrderCreatedTime })
+                .ToListAsync();
+
+            // 2. 建立連續的 24 小時時段清單，並與訂單數據媒合
+            var velocityData = Enumerable.Range(0, 24).Select(offset =>
+            {
+                var hourPoint = last24Hours.AddHours(offset);
+                var hourLabel = hourPoint.ToString("HH:00");
+
+                // 統計該小時內的訂單數
+                var count = orders.Count(o => o.OrderCreatedTime.Hour == hourPoint.Hour &&
+                                              o.OrderCreatedTime.Date == hourPoint.Date);
+
+                return new { hour = hourLabel, count = count };
+            }).ToList();
+
+            return Json(velocityData);
+        }
+
+        //即時警示與通知
+        [HttpGet]
+        public async Task<IActionResult> GetLiveAlerts()
+        {
+            // 1. 完售預警：剩餘數量 < 5% 且 尚未完全售罄 (Remaining > 0)
+            var soldOutWarnings = await _context.TicketsArea
+                .Include(a => a.Session).ThenInclude(s => s.Programme)
+                .Where(a => a.Capacity > 0 && (double)a.Remaining / a.Capacity <= 0.05 && a.Remaining > 0)
+                .Select(a => new {
+                    Type = "SoldOut",
+                    Title = "完售預警",
+                    Message = $"{a.Session.Programme.ProgrammeName} - {a.TicketsAreaName} 剩餘不到 5%",
+                    Level = "danger"
+                })
+                .ToListAsync();
+
+            // 2. 物理上限警告：目前設定的 Capacity >= 該場館區域物理上限的 95%
+            // 物理上限 = Venue.RowCount * Venue.SeatCount
+            var physicalLimitWarnings = await _context.TicketsArea
+                .Include(a => a.Venue)
+                .Include(a => a.Session).ThenInclude(s => s.Programme)
+                .Where(a => a.Venue != null && a.Capacity >= (a.Venue.RowCount * a.Venue.SeatCount) * 0.95)
+                .Select(a => new {
+                    Type = "PhysicalLimit",
+                    Title = "物理上限警告",
+                    Message = $"{a.TicketsAreaName} 設定張數 ({a.Capacity}) 已逼近場館物理上限 ({a.Venue.RowCount * a.Venue.SeatCount})",
+                    Level = "warning"
+                })
+                .ToListAsync();
+
+            // 合併所有警示
+            var allAlerts = soldOutWarnings.Concat(physicalLimitWarnings).ToList();
+            return Json(allAlerts);
+        }
     }
+
+
 }

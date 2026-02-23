@@ -7,21 +7,13 @@
 }
 
 <style>
-    /* 拓元標準藍與細節 */
+    /* 拓元標準藍與版面優化 */
     :root {
         --tixcraft-blue: #003a8c;
     }
 
     .bg-dark {
         background-color: #212529 !important;
-    }
-
-    .bg-detail-grey {
-        background-color: #f8f9fa;
-    }
-
-    .table-secondary {
-        background-color: #e9ecef !important;
     }
 
     .text-primary {
@@ -32,12 +24,18 @@
         font-size: 0.75rem;
     }
 
+    /* 表格與卡片優化 */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
     .btn-tixcraft-outline {
         border: 1px solid var(--tixcraft-blue);
         color: var(--tixcraft-blue);
         font-weight: 500;
         transition: 0.2s;
-        border-radius: 0;
+        min-width: 120px;
     }
 
         .btn-tixcraft-outline:hover {
@@ -45,14 +43,13 @@
             color: white;
         }
 
-    /* 確保表格框線清晰 */
-    .table td {
-        border-color: #dee2e6;
+    .badge-status {
+        min-width: 85px;
+        padding: 6px 10px;
     }
 
-    /* 徽章最小寬度確保整齊 */
-    .badge {
-        min-width: 80px;
+    .bg-detail {
+        background-color: #fcfcfc;
     }
 </style>
 
@@ -61,16 +58,14 @@
         <h2 class="fw-bold mb-0">訂單查詢 <small class="text-secondary fs-6 ms-2">Order Inquiry</small></h2>
     </div>
 
-
-
     <div class="table-responsive shadow-sm">
         <table class="table mb-0 border align-middle">
             <thead class="bg-dark text-white text-center">
                 <tr>
                     <th class="py-3" style="width: 15%;">訂單編號</th>
                     <th class="py-3" style="width: 20%;">訂購時間</th>
-                    <th class="py-3" style="width: 45%;">活動節目</th>
-                    <th class="py-3" style="width: 20%;">訂單狀態</th>
+                    <th class="py-3" style="width: 40%;">活動節目 / 內容</th>
+                    <th class="py-3" style="width: 25%;">狀態與操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -79,68 +74,73 @@
                     @foreach (var order in Model)
                     {
                         <tr class="text-center bg-white">
-                            <td class="fw-bold">@order.OrderID</td>
-                            <td class="small text-secondary">@order.StartTime</td>
+                            <td class="fw-bold text-secondary">@order.OrderID</td>
+                            <td class="small text-muted">@order.StartTime</td>
                             <td class="text-start ps-4">
-                                <div class="fw-bold text-primary">@order.ProgrammeName</div>
-                                <div class="small text-muted mt-1">
+                                <div class="fw-bold text-primary fs-5">@order.ProgrammeName</div>
+                                <div class="small mt-1 d-flex align-items-center">
                                     <span class="badge bg-light text-dark border fw-normal">共 @(order.TicketDetails?.Count ?? 0) 張</span>
-                                    <span class="ms-2">總額：<span class="text-danger fw-bold">$@order.FinalAmount.ToString("N0")</span></span>
+                                    <span class="ms-3">總額：<span class="text-danger fw-bold">$@order.FinalAmount.ToString("N0")</span></span>
                                 </div>
                             </td>
                             <td>
-                                <span class="fw-bold d-block mb-2">@order.OrderStatusName</span>
-                                <button class="btn btn-tixcraft-outline btn-sm px-4"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#detail_@order.OrderID">
-                                    檢視明細 <i class="bi bi-chevron-down"></i>
-                                </button>
+                                <div class="d-flex flex-column align-items-center gap-2">
+                                    @* 狀態標籤 *@
+                                    <span class="fw-bold text-dark">@order.OrderStatusName</span>
 
-                                @* 🚩 需求 2：只有訂單成立（已付款）才顯示查看 QR *@
-                                <div class="mt-2">
-                                    @if (order.OrderStatusID == "Y")
+                                    @* 🚩 主動作按鈕：根據狀態決定去 UserDetail 做什麼 *@
+                                    @if (order.OrderStatusID == "P")
                                     {
-                                        <a asp-action="UserDetail" asp-route-id="@order.OrderID" class="text-decoration-none x-small text-success fw-bold">
-                                            <i class="bi bi-qr-code"></i> 查看 QR Code / 入場證明
+                                        <a asp-controller="Seats" asp-action="Payment" asp-route-id="@order.OrderID" class="btn btn-warning btn-sm fw-bold px-3">
+                                            前往付款 / 取消 <i class="bi bi-credit-card"></i>
                                         </a>
                                     }
-                                    
+                                    else if (order.OrderStatusID == "Y")
+                                    {
+                                        <a asp-action="UserDetail" asp-route-id="@order.OrderID" class="btn btn-success btn-sm fw-bold px-3">
+                                            查看入場證明 <i class="bi bi-qr-code"></i>
+                                        </a>
+                                    }
+
+                                    @* 摺疊切換按鈕 *@
+                                    <button class="btn btn-tixcraft-outline btn-sm btn-detail-toggle"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#detail_@order.OrderID">
+                                        <span class="btn-text">檢視明細</span> <i class="bi bi-chevron-down btn-icon"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
 
+                        @* 摺疊明細內容 *@
                         <tr class="collapse" id="detail_@order.OrderID">
                             <td colspan="4" class="p-0 border-0">
-                                <div class="bg-detail-grey p-4 border-top">
-                                    <table class="table table-bordered bg-white mb-0 shadow-sm text-center align-middle">
-                                        <thead class="table-secondary small text-dark fw-bold">
+                                <div class="bg-detail p-4 border-top">
+                                    <table class="table table-bordered bg-white mb-0 shadow-sm text-center align-middle small">
+                                        <thead class="table-secondary fw-bold text-dark">
                                             <tr>
-                                                <th style="width: 10%;">序號</th>
-                                                <th style="width: 50%;">場次 / 地點</th>
-                                                <th style="width: 25%;">票區 / 座位</th>
-                                                <th style="width: 15%;">單價</th>
-                                                @* 🚩 需求 1：移除狀態列 *@
+                                                <th style="width: 8%;">序號</th>
+                                                <th style="width: 45%;">場次與地點</th>
+                                                <th style="width: 30%;">票區 / 座位</th>
+                                                <th style="width: 17%;">單價</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @{
-                                                int seatIndex = 1;
-                                            }
                                             @if (order.TicketDetails != null && order.TicketDetails.Any())
                                             {
-                                                @foreach (var seat in order.TicketDetails)
+                                                int seatIdx = 1;
+                                                foreach (var seat in order.TicketDetails)
                                                 {
                                                     <tr>
-                                                        <td class="text-muted small">@seatIndex</td>
+                                                        <td class="text-muted">@(seatIdx++)</td>
                                                         <td class="text-start ps-3">
-                                                            <div class="fw-bold small">@order.ProgrammeName</div>
+                                                            <div class="fw-bold">@order.ProgrammeName</div>
                                                             <div class="x-small text-secondary">📍 @order.PlaceName</div>
                                                         </td>
-                                                        <td><span class="fw-bold">@seat.SeatInfo</span></td>
+                                                        <td class="fw-bold">@seat.SeatInfo</td>
                                                         <td class="text-danger fw-bold">$@seat.Price.ToString("N0")</td>
                                                     </tr>
-                                                    seatIndex++;
                                                 }
                                             }
                                         </tbody>
@@ -152,27 +152,72 @@
                 }
                 else
                 {
-                    <tr><td colspan="4" class="text-center py-5 text-muted">目前沒有訂單紀錄</td></tr>
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <i class="bi bi-inbox text-light display-1 d-block mb-3"></i>
+                            <span class="text-muted">目前沒有任何訂單紀錄</span>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
 
-<script>
-    function toggleDetail() {
-        const row = document.getElementById('detailRow');
-        const text = document.getElementById('btnText');
-        const icon = document.getElementById('btnIcon');
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 🚩 1. 處理所有明細按鈕的文字與圖示切換
+            const collapseElements = document.querySelectorAll('.collapse');
 
-        if (row.style.display === 'none') {
-            row.style.display = 'table-row';
-            text.innerText = '隱藏明細';
-            icon.className = 'bi bi-chevron-up';
-        } else {
-            row.style.display = 'none';
-            text.innerText = '顯示明細';
-            icon.className = 'bi bi-chevron-down';
-        }
-    }
-</script>
+            collapseElements.forEach(el => {
+                // 展開時
+                el.addEventListener('show.bs.collapse', function () {
+                    const btn = document.querySelector(`[data-bs-target="#${this.id}"]`);
+                    if (btn) {
+                        btn.querySelector('.btn-text').innerText = '隱藏明細';
+                        btn.querySelector('.btn-icon').classList.replace('bi-chevron-down', 'bi-chevron-up');
+                        btn.classList.add('active');
+                    }
+                });
+
+                // 收合時
+                el.addEventListener('hide.bs.collapse', function () {
+                    const btn = document.querySelector(`[data-bs-target="#${this.id}"]`);
+                    if (btn) {
+                        btn.querySelector('.btn-text').innerText = '檢視明細';
+                        btn.querySelector('.btn-icon').classList.replace('bi-chevron-up', 'bi-chevron-down');
+                        btn.classList.remove('active');
+                    }
+                });
+            });
+
+            // 🚩 2. 如果有從 Controller 傳來的成功訊息（例如取消訂單成功）
+            @if (TempData["Success"] != null)
+            {
+                    <text>
+                    Swal.fire({
+                        icon: 'success',
+                        title: '操作成功',
+                        text: '@Html.Raw(TempData["Success"])',
+                        confirmButtonColor: '#003a8c',
+                        timer: 3000
+                    });
+                    </text>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                    <text>
+                    Swal.fire({
+                        icon: 'error',
+                        title: '發生錯誤',
+                        text: '@Html.Raw(TempData["Error"])',
+                        confirmButtonColor: '#d33'
+                    });
+                    </text>
+            }
+        });
+    </script>
+}

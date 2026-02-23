@@ -5,6 +5,7 @@ using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IProgramme;
 using TicketSalesSystem.Service.Orders;
+using TicketSalesSystem.Service.Queue;
 using TicketSalesSystem.Service.Seats;
 using TicketSalesSystem.Service.Sms;
 using TicketSalesSystem.Service.Validation.IBookingValidation;
@@ -50,6 +51,11 @@ builder.Services.AddScoped<ISmsService, MockSmsService>();
 //註冊活動驗證服務
 builder.Services.AddScoped<IProgrammeValidationService, ProgrammeValidationService>();
 
+//註冊MemoryCache服務
+builder.Services.AddMemoryCache();
+
+//註冊佇列服務
+builder.Services.AddScoped<IQueueService, QueueService>();
 
 
 

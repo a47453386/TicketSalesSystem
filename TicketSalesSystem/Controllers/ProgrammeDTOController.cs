@@ -284,7 +284,7 @@ namespace TicketSalesSystem.Controllers
             }
         }
         [HttpGet]
-        public IActionResult CreateStep3()
+        public async Task<IActionResult> CreateStep3()
         {
             // 1. 取得現有的 DTO (這是在 Step1 & Step2 存好的)
             var dto = GetCurrentDTO();
@@ -295,13 +295,13 @@ namespace TicketSalesSystem.Controllers
             MapStep3ToVM(dto, vm);
 
             // 🚩 3. 準備「該場地專屬」的區域下拉選單
-             LoadVenueListAsync(dto.PlaceID, dto.VenueID);
+            await LoadVenueListAsync(dto.PlaceID, dto.VenueID);
 
             return View(vm);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateStep3(VMProgrammeStep3 vm)
+        public async Task<IActionResult> CreateStep3(VMProgrammeStep3 vm)
         {
             // 1. 取得 Session 中的 DTO，確保流程沒中斷
             var dto = GetCurrentDTO();
@@ -370,7 +370,7 @@ namespace TicketSalesSystem.Controllers
             if (!ModelState.IsValid)
             {
                 // 重新準備下拉選單資料，否則 View 會因為 ViewBag.VenueList 為 null 而崩潰
-                LoadVenueListAsync(dto.PlaceID, dto.VenueID);
+               await LoadVenueListAsync(dto.PlaceID, dto.VenueID);
                 return View(vm);
             }
 

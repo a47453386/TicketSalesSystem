@@ -195,12 +195,10 @@
         </div>
     </div>
 </div>
-<form asp-controller="Orders" asp-action="UserCancelOrder" id="cancelForm">
-    <input type="hidden" name="id" value="@Model.OrderID" />
-    <button type="button" class="btn btn-outline-danger" onclick="confirmCancel()">
-        我不要了，取消訂單
+<form asp-controller="Orders" asp-action="UserCancelOrder" asp-route-id="@Model.OrderID" method="post" id="cancelForm">
+    <button type="button" id="btnCancel" class="btn btn-outline-danger" onclick="confirmCancel()">
+        <i class="bi bi-x-circle me-1"></i> 我不要了，取消訂單
     </button>
-   
 </form>
 
 
@@ -216,9 +214,22 @@
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: '確定取消',
-                cancelButtonText: '再考慮一下'
+                cancelButtonText: '再考慮一下',
+                // 防止點擊背景關閉，確保流程完整
+                allowOutsideClick: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // 🚩 顯示「正在處理」的狀態
+                    Swal.fire({
+                        title: '正在處理中...',
+                        html: '正在為您釋放名額，請稍候。',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading(); // 顯示內建的轉圈圈動畫
+                        }
+                    });
+
+                    // 正式送出表單
                     document.getElementById('cancelForm').submit();
                 }
             })

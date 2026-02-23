@@ -1,0 +1,148 @@
+﻿@model string
+@{
+    ViewData["Title"] = "安全驗證";
+    Layout = "_UserLayout";
+}
+
+<div class="container text-center" style="margin-top: 100px; max-width: 500px;">
+    <div id="gateSection">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white fw-bold py-3">安全驗證 (Security Check)</div>
+            <div class="card-body py-4">
+                <p class="text-muted small">為維護購票公平性，請輸入驗證碼以進入選位頁面</p>
+                <canvas id="captchaCanvas" width="180" height="60" class="mb-2" style="background:#eee; border-radius:4px; cursor:pointer;" onclick="generateCaptcha()"></canvas>
+                <div class="x-small text-primary mb-3" style="cursor:pointer" onclick="generateCaptcha()">
+                    <i class="bi bi-arrow-clockwise"></i> 換一張圖
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" id="captchaInput" class="form-control form-control-lg text-center fw-bold" placeholder="請輸入 4 位英數代碼" maxlength="4">
+                </div>
+                <button id="submitBtn" class="btn btn-primary btn-lg w-100 fw-bold" onclick="startQueue()">確認送出，開始購票</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="queueSection" style="display:none;">
+        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;"></div>
+        <h4 class="mt-4 fw-bold">正在為您安排序位...</h4>
+        <p class="text-muted">驗證通過！請勿重新整理，系統即將為您導向選票區</p>
+        <div class="alert alert-info py-2 small">目前流量較大，感謝您的耐心等候</div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        let captchaCode = "";
+        const sessionId = '@Model';
+        console.log("目前讀取到的 Session ID 為:", sessionId);
+
+        // 1. 生成驗證碼
+        function generateCaptcha() {
+            const canvas = document.getElementById('captchaCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "bold 35px Arial";
+            ctx.fillStyle = "#003a8c";
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            captchaCode = "";
+            for (let i = 0; i < 4; i++) {
+                let char = chars.charAt(Math.floor(Math.random() * chars.length));
+                captchaCode += char;
+                ctx.save();
+                ctx.translate(40 * i + 30, 40);
+                ctx.rotate((Math.random() - 0.5) * 0.4);
+                ctx.fillText(char, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        // 2. 按下按鈕後的邏輯
+        async function startQueue() {
+            const input = document.getElementById('captchaInput').value.toUpperCase();
+
+            // 前端初步檢查
+            if (input !== captchaCode) {
+                alert("驗證碼錯誤！");
+                generateCaptcha();
+                return;
+            }
+
+            // 鎖定按鈕防止重複點擊
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = "驗證中...";
+
+            try {
+                // 🚩 第一步：呼叫 POST VerifyGateCaptcha (通知伺服器驗證通過)
+                const response = await fetch(`/Seats/VerifyGateCaptcha`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        id: sessionId,
+                        captchaInput: input,
+                        sessionCaptcha: captchaCode
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(result.message);
+                    btn.disabled = false;
+                    btn.innerHTML = "確認送出，開始購票";
+                    generateCaptcha();
+                    return;
+                }
+
+                // 🚩 第二步：根據後端結果判斷
+                if (result.isQueuing === false) {
+                    // ✅ 沒爆滿，直接去購票頁
+                    window.location.href = `/Seats/Index/${sessionId}`;
+                } else {
+                    // 🚩 爆滿了，顯示轉圈圈並開始輪詢
+                    document.getElementById('gateSection').style.display = 'none';
+                    document.getElementById('queueSection').style.display = 'block';
+                    startPolling();
+                }
+
+            } catch (error) {
+                console.error("驗證失敗", error);
+                alert("系統連線異常，請重試");
+                btn.disabled = false;
+            }
+        }
+
+        // 3. 輪詢檢查排隊狀態
+            function startPolling() {
+            if (!sessionId || sessionId === '') {
+                console.error("錯誤：sessionId 是空的，無法排隊！");
+                return;
+            }
+
+            const check = setInterval(() => {
+                fetch(`/Seats/CheckQueueStatus?id=${sessionId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.canEnter) {
+                            clearInterval(check);
+
+                            // 🚩 安全跳轉邏輯
+                            let targetUrl = data.redirectUrl;
+                            if (!targetUrl || targetUrl.includes('undefined') || targetUrl.endsWith('/Index/')) {
+                                // 如果後端回傳網址壞了，我們手動用 sessionId 拼一個
+                                targetUrl = `/Seats/Index/${sessionId}`;
+                            }
+
+                            console.log("排隊成功，準備跳轉至:", targetUrl);
+                            window.location.href = targetUrl;
+                        }
+                    });
+            }, 2000);
+        }
+
+        // 初始化
+        generateCaptcha();
+    </script>
+
+}
