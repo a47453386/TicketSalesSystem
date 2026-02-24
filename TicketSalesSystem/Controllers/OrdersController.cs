@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.Queue;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Booking;
@@ -17,10 +19,12 @@ namespace TicketSalesSystem.Controllers
     {
         private readonly TicketsContext _context;
         private readonly IQueueService _queueService;
-        public OrdersController(TicketsContext context, IQueueService queueService)
+        private readonly IUserAccessorService _userAccessorService;
+        public OrdersController(TicketsContext context, IQueueService queueService, IUserAccessorService userAccessorService)
         {
             _context = context;
             _queueService = queueService;
+            _userAccessorService = userAccessorService;
         }
 
 
@@ -59,7 +63,12 @@ namespace TicketSalesSystem.Controllers
         // 前台會員專區的訂單列表
         public async Task<IActionResult> UserIndex()
         {
-            string currentMemberID = "a8e36451-c3fb-44ba-a05e-602ca0760166";
+            var memberID =_userAccessorService.GetMemberId();
+
+            if (memberID == null)
+            {
+                return RedirectToAction("MemberLogin", "Login");
+            }
 
             var time=(int)Math.Max(0,(DateTime.Now.AddMinutes(10)-DateTime.Now).TotalSeconds);
             
@@ -68,7 +77,7 @@ namespace TicketSalesSystem.Controllers
                 .Include(o=>o.OrderStatus)                
                 .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(s => s.Place)
                 .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
-                .Where(o => o.MemberID == currentMemberID)
+                .Where(o => o.MemberID == memberID)
                 .OrderByDescending(o => o.OrderCreatedTime)
                 .Select(o=>new VMBookingDetailsResponse
                 {
@@ -296,15 +305,20 @@ namespace TicketSalesSystem.Controllers
             if (string.IsNullOrEmpty(id)) return BadRequest("訂單編號不可為空");
 
             // 1. 取得當前登入的會員 ID (假設你存在 Session 或 Claims 中)
-            var currentMemberId= "a8e36451-c3fb-44ba-a05e-602ca0760166";
+            var memberID = _userAccessorService.GetMemberId();
 
-            
+            if (memberID == null)
+            {
+                return RedirectToAction("MemberLogin", "Login");
+            }
+
+
 
             // 2. 抓取訂單，並確保該訂單屬於此會員，且處於「待付款」狀態
             // 假設 'P' 代表待付款 (Pending Payment)
             var order = await _context.Order
                 .Include(o => o.Tickets)
-                .FirstOrDefaultAsync(o => o.OrderID == id && o.MemberID == currentMemberId);
+                .FirstOrDefaultAsync(o => o.OrderID == id && o.MemberID == memberID);
 
             if (order == null) return NotFound();
 

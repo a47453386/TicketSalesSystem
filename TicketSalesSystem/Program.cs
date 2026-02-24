@@ -4,6 +4,7 @@ using TicketSalesSystem.Service;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IProgramme;
+using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.Orders;
 using TicketSalesSystem.Service.Queue;
 using TicketSalesSystem.Service.Seats;
@@ -58,6 +59,10 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IQueueService, QueueService>();
 
 
+builder.Services.AddHttpContextAccessor();
+
+//註冊會員比對服務
+builder.Services.AddScoped<IUserAccessorService, UserAccessorService>();
 
 
 //註冊 Session 服務 加入 Session 服務
@@ -82,9 +87,23 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+//using (var scope = app.Services.CreateScope())
+//{
+//    SeedData.Initialize(scope.ServiceProvider);
+//}
 using (var scope = app.Services.CreateScope())
 {
-    //SeedData.Initialize(scope.ServiceProvider);
+    var services = scope.ServiceProvider;
+    try
+    {
+        // 呼叫你的 SeedData 類別
+        SeedData.Initialize(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "種子資料植入過程中發生錯誤！");
+    }
 }
 
 

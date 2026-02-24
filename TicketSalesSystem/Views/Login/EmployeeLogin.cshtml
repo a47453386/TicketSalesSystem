@@ -1,0 +1,67 @@
+﻿@model TicketSalesSystem.ViewModel.VMLogin
+
+@{
+    ViewData["Title"] = "員工管理系統登入";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-dark text-white text-center py-4 rounded-top-4">
+                    <div class="mb-2">
+                        <i class="bi bi-shield-lock-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="fw-bold mb-0">員工管理系統</h3>
+                    <p class="text-secondary small mb-0">TICKET SYSTEM INTERNAL ONLY</p>
+                </div>
+
+                <div class="card-body p-5">
+                    <form asp-action="EmployeeLogin" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Account" class="form-label fw-bold text-secondary">員工帳號</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                                <input asp-for="Account" class="form-control bg-light border-start-0" placeholder="請輸入帳號" autocomplete="off" />
+                            </div>
+                            <span asp-validation-for="Account" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Password" class="form-label fw-bold text-secondary">安全密碼</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-key"></i></span>
+                                <input asp-for="Password" type="password" class="form-control bg-light border-start-0" placeholder="請輸入密碼" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-dark btn-lg rounded-pill fw-bold">
+                                驗證身分並登入
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-light text-center py-3 rounded-bottom-4">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small">
+                        <i class="bi bi-arrow-left"></i> 回到購票首頁
+                    </a>
+                </div>
+            </div>
+
+            <p class="text-center text-muted mt-4 small">
+                &copy; 2026 TicketSalesSystem IT Department. All rights reserved.
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

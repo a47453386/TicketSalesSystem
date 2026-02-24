@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
 using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.Orders;
 using TicketSalesSystem.Service.Queue;
 using TicketSalesSystem.Service.Seats;
@@ -23,10 +24,11 @@ namespace TicketSalesSystem.Controllers
         private readonly IOrderService _orderService;
         private readonly IMemoryCache _memoryCache;
         private readonly IQueueService _queueService;
+        private readonly IUserAccessorService _userAccessorService;
 
         public SeatsController(ISeatService seatService, IBookingValidationService bookingValidation, 
             TicketsContext context, IOrderService orderService, IMemoryCache memoryCache,
-            IQueueService queueService)
+            IQueueService queueService,IUserAccessorService userAccessorService)
         {
             _seatService = seatService;
             _bookingValidation = bookingValidation;
@@ -34,6 +36,7 @@ namespace TicketSalesSystem.Controllers
             _orderService = orderService;
             _memoryCache = memoryCache;
             _queueService = queueService;
+            _userAccessorService = userAccessorService;
         }
 
         // 【入口門衛】--當使用者點擊「立即購票」時，這是他們看到的第一站。
@@ -128,7 +131,12 @@ namespace TicketSalesSystem.Controllers
             if (string.IsNullOrEmpty(id)) return NotFound();
 
             //取得目前會員 ID (這裡先用你代碼中的測試 ID)
-            string memberId = "a8e36451-c3fb-44ba-a05e-602ca0760166";
+            var memberID = _userAccessorService.GetMemberId();
+
+            if (memberID == null)
+            {
+                return RedirectToAction("MemberLogin", "Login");
+            }
 
             // 檢查是否有通行證，防止直接輸入網址跳過排隊
             var gatePassed = HttpContext.Session.GetString("GatePassed_" + id);
@@ -161,7 +169,7 @@ namespace TicketSalesSystem.Controllers
             // 包含：已付款 (S)、待付款 (P)
             var activeStatuses = new[] { "P", "S" };
             int purchasedCount = await _context.Tickets
-                .Where(t => t.Order.MemberID == memberId &&
+                .Where(t => t.Order.MemberID == memberID &&
                             t.Session.ProgrammeID == session.ProgrammeID &&
                             activeStatuses.Contains(t.Order.OrderStatusID))
                 .CountAsync();
@@ -206,15 +214,21 @@ namespace TicketSalesSystem.Controllers
                               ? await _context.Database.BeginTransactionAsync()
                               : null;
 
-            string memberId = "a8e36451-c3fb-44ba-a05e-602ca0760166";
-            var member = await _context.Member.AnyAsync(m => m.MemberID == memberId);
+            var memberID = _userAccessorService.GetMemberId();
+
+            if (memberID == null)
+            {
+                return RedirectToAction("MemberLogin", "Login");
+            }
+
+            var member = await _context.Member.AnyAsync(m => m.MemberID == memberID);
             if (!member)
             {
                 return Json(new VMBookingResponse { Success = false, Message = "會員不存在" });
             }
 
 
-            var (isValid, message) = await _bookingValidation.ValidateAllAsync(request, memberId);
+            var (isValid, message) = await _bookingValidation.ValidateAllAsync(request, memberID);
             if (!isValid)
             {
                 return Json(new VMBookingResponse { Success = false, Message = message });
@@ -240,7 +254,7 @@ namespace TicketSalesSystem.Controllers
 
 
                 //建立訂單與寫入
-                var response = await _seatService.CreateOrderAndTicketsAsync(request, memberId);
+                var response = await _seatService.CreateOrderAndTicketsAsync(request, memberID);
 
 
                 if (response.Success)

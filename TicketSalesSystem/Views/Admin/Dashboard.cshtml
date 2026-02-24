@@ -3,67 +3,313 @@
 @{
     ViewData["Title"] = "營運戰情室";
 }
-
 <style>
     :root {
-        --monitor-height: 210px; /* 🚩 統一底部三欄的高度，可視情況改為 180px 或 200px */
-        --chart-height: 220px; /* 🚩 統一圖表層的高度 */
+        --tech-cyan: #00f2ff;
+        --tech-bg: #000b1a;
+        --tech-border: rgba(0, 242, 255, 0.3);
+        --panel-bg: rgba(0, 20, 40, 0.7);
     }
 
-    /* 1. 強制底部三欄等高 */
-    .monitor-row .card {
-        height: var(--monitor-height) !important;
+    /* 🚩 1. 背景升級：加入網格紋理 */
+    body.admin-body {
+        background-color: var(--tech-bg);
+        /* 放射漸層 + 數位網格 */
+        background-image: radial-gradient(circle at 50% 50%, #001a33 0%, #000b1a 100%), linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
+        background-size: 100% 100%, 40px 40px, 40px 40px;
+        color: var(--tech-cyan);
+        font-family: 'Share Tech Mono', 'Segoe UI', monospace;
+    }
+
+    /* 🚩 2. 外框升級：改為裝甲斜切角 */
+    .cyber-card {
+        background: var(--panel-bg);
+        border: 1px solid var(--tech-cyan);
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        /* 核心變動：銳利的科技切角 */
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+        .cyber-card:hover {
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.5);
+            transform: translateY(-2px);
+            background: rgba(0, 30, 60, 0.8);
+        }
+
+        /* 🚩 3. 裝飾性裝甲點：讓邊角看起來更厚實 */
+        .cyber-card::after {
+            content: "";
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 20px;
+            height: 2px;
+            background: var(--tech-cyan);
+            transform: rotate(-45deg);
+        }
+
+    /* 🚩 4. 表格升級：數據串流感 */
+    .cyber-table {
+        border-collapse: separate;
+        border-spacing: 0 5px;
+    }
+
+        .cyber-table thead tr {
+            background: linear-gradient(90deg, rgba(0, 242, 255, 0.2), transparent) !important;
+            border: none;
+        }
+
+        .cyber-table td {
+            background: rgba(0, 242, 255, 0.03);
+            border-top: 1px solid rgba(0, 242, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+        }
+
+    /* 🚩 5. 霓虹文字：層次感提升 */
+    .neon-text {
+        text-shadow: 0 0 5px var(--tech-cyan), 0 0 15px var(--tech-cyan);
+        letter-spacing: 1px;
+    }
+</style>
+@* <style>
+    /* 核心背景：深邃科技藍 */
+    body.admin-body {
+        background-color: #000b1a;
+        background-image: radial-gradient(circle at 50% 50%, #001a33 0%, #000b1a 100%);
+        color: #00f2ff;
+        font-family: 'Segoe UI', 'Roboto', sans-serif;
+    }
+
+    /* 科技感外框 */
+    .cyber-card {
+        background: rgba(0, 20, 40, 0.7);
+        border: 2px solid #00d2ff;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.3), inset 0 0 10px rgba(0, 210, 255, 0.2);
+        border-radius: 5px;
+        position: relative;
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
     }
 
-    /* 2. 內部內容高度計算 (扣除卡片 Header 的 35px) */
-    .monitor-body {
-        height: calc(var(--monitor-height) - 35px);
-        overflow-y: auto;
-        overflow-x: hidden;
+    /* 裝飾性角標 */
+    .cyber-card::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        width: 10px; height: 10px;
+        border-top: 3px solid #00f2ff;
+        border-left: 3px solid #00f2ff;
     }
 
-    /* 3. 圓餅圖專用容器：完全置中 */
-    .chart-wrapper {
-        height: 100%;
+    /* 圓形發光圖示 */
+    .cyber-icon-circle {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        border: 2px solid #00f2ff;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 5px;
+        margin: 0 auto 15px;
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+        background: radial-gradient(circle, rgba(0, 242, 255, 0.2) 0%, transparent 70%);
     }
 
-    /* 4. 圖表列的高度控制 */
-    .chart-row-height {
-        height: var(--chart-height);
+    /* 科技感表格 */
+    .cyber-table {
+        color: #00f2ff;
+    }
+    .cyber-table thead {
+        background: rgba(0, 210, 255, 0.2);
+        border-bottom: 2px solid #00d2ff;
+    }
+    .cyber-table td {
+        border-bottom: 1px solid rgba(0, 210, 255, 0.1);
+        padding: 12px;
     }
 
-    .x-small {
-        font-size: 0.72rem !important;
+    /* 霓虹文字 */
+    .neon-text {
+        text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
     }
+</style> *@
 
-    .list-group-item {
-        padding: 0.4rem 0.75rem !important;
-        font-size: 0.75rem !important;
-    }
 
-    /* 捲軸美化 */
-    .monitor-body::-webkit-scrollbar {
-        width: 3px;
-    }
+<div class="admin-body p-3">
+    <div class="text-center mb-4">
+        <div class="d-inline-block p-2 cyber-card px-5">
+            <h2 class="fw-bold mb-0 neon-text" style="letter-spacing: 5px;">
+                <i class="bi bi-shield-shaded me-3"></i>售票資料管理系統
+            </h2>
+            <div class="text-end x-small opacity-75 mt-1">
+                KERNEL_STATUS: <span class="text-success">ACTIVE</span> | 
+                REFRESH: <span class="fw-bold">@DateTime.Now.ToString("HH:mm:ss")</span>
+            </div>
+        </div>
+    </div>
 
-    .monitor-body::-webkit-scrollbar-thumb {
-        background: #cbd5e0;
-        border-radius: 10px;
-    }
+    <div class="row text-center g-3 mb-4">
+        <div class="col-md-3">
+            <div class="cyber-card p-3 h-100">
+                <div class="cyber-icon-circle"><i class="bi bi-currency-dollar fs-3"></i></div>
+                <div class="text-muted small mb-1">總累計營收</div>
+                <h3 class="fw-bold neon-text">NT$ @ViewBag.TotalSales.ToString("N0")</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-card p-3 h-100">
+                <div class="cyber-icon-circle"><i class="bi bi-ticket-perforated fs-3"></i></div>
+                <div class="text-muted small mb-1">已售票數 / 銷售率</div>
+                <h3 class="fw-bold">@ViewBag.TotalTicketsSold <span class="fs-6 opacity-50">張</span> / <span class="text-info">@ViewBag.SalesRate%</span></h3>
+                <div class="progress bg-dark mt-2" style="height: 4px; border: 1px solid var(--tech-cyan);">
+                    <div class="progress-bar bg-info shadow-glow" style="width: @ViewBag.SalesRate%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-card p-3 h-100">
+                <div class="cyber-icon-circle"><i class="bi bi-people-fill fs-3"></i></div>
+                <div class="text-muted small mb-1">註冊會員總數</div>
+                <h4 class="fw-bold neon-text">@ViewBag.MemberCount <span class="fs-6 opacity-50">USERS</span></h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-card p-3 h-100">
+                <div class="cyber-icon-circle border-danger text-danger" style="box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);"><i class="bi bi-exclamation-triangle fs-3"></i></div>
+                <div class="text-muted small mb-1">待處理客服件</div>
+                <h3 class="fw-bold text-danger">@ViewBag.PendingRefunds <span class="fs-6 opacity-50">PENDING</span></h3>
+            </div>
+        </div>
+    </div>
 
-    .x-small {
-        /* 原本可能是 0.7rem 或 0.75rem */
-        font-size: 0.95rem !important; /* 🚩 數字越大文字越大 */
-    }
-</style>
+    <div class="row g-2 mb-4 align-items-stretch">
+        <div class="col-lg-5">
+            <div class="cyber-card p-3 h-100">
+                <div class="mb-3 border-bottom border-info border-opacity-25 pb-2">
+                    <span class="fw-bold x-small text-info neon-text">
+                        <i class="bi bi-bar-chart-fill me-1"></i>活動銷售地理區域分析
+                    </span>
+                </div>
+                <div style="height: 180px; position: relative;">
+                    <canvas id="salesAreaChart"></canvas>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-lg-5">
+            <div class="cyber-card p-3 h-100">
+                <div class="mb-3 border-bottom border-info border-opacity-25 pb-2">
+                    <span class="fw-bold x-small text-info neon-text">
+                        <i class="bi bi-activity me-1"></i>24 小時銷售趨勢監測
+                    </span>
+                </div>
+                <div style="height: 180px; position: relative;">
+                    <canvas id="salesVelocityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2">
+            <div class="cyber-card h-100 d-flex flex-column justify-content-center align-items-center text-center p-2"
+                 style="background: rgba(0, 242, 255, 0.05); border-left: 3px solid #198754;">
+
+                <div class="spinner-grow text-success mb-3" role="status"
+                     style="width: 30px; height: 30px; filter: drop-shadow(0 0 8px #198754);">
+                </div>
+
+                <div class="neon-text fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 2px;">清理服務</div>
+                <div class="badge bg-success bg-opacity-25 text-success border border-success mb-3" style="font-size: 0.6rem;">
+                    SERVICE_ACTIVE
+                </div>
+
+                <hr class="w-75 border-info opacity-25 my-2">
+
+                <div class="x-small text-muted mb-1" style="font-size: 0.65rem;">每 10 分鐘自動執行</div>
+                <div class="x-small text-info mb-3" style="font-size: 0.65rem;">掃描失效訂單中...</div>
+
+                <div class="progress w-75" style="height: 2px; background: rgba(0,242,255,0.1);">
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                </div>
+
+                <div class="mt-3 x-small opacity-25 fw-bold" style="font-size: 0.5rem; font-family: 'Orbitron';">
+                    PROC_ID: #8829-X
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="cyber-card p-3 h-100">
+                <div class="mb-3 border-bottom border-danger pb-2 x-small fw-bold text-danger">
+                    <i class="bi bi-bell-fill me-2"></i>系統即時預警 (LIVE)
+                </div>
+                <div class="overflow-auto" style="max-height: 250px;">
+                    <div id="alertsContainer" class="list-group list-group-flush bg-transparent">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="cyber-card p-3 h-100">
+                <div class="mb-3 border-bottom border-info pb-2 x-small fw-bold text-info">
+                    <i class="bi bi-list-ul me-2"></i>最近交易數據串流
+                </div>
+                <div class="table-responsive">
+                    <table class="w-100 cyber-table small text-center">
+                        <thead>
+                            <tr class="text-muted">
+                                <th>時間</th>
+                                <th>帳號</th>
+                                <th>金額</th>
+                                <th>狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="small opacity-75">@item.OrderCreatedTime.ToString("HH:mm:ss")</td>
+                                    <td>@item.Member?.Name</td>
+                                    <td class="text-info fw-bold">@item.Tickets.Sum(t => t.TicketsArea.Price).ToString("C0")</td>
+                                    <td>
+                                        <span class="x-small @(item.OrderStatusID == "Y" ? "text-success" : "text-warning")">
+                                            ● @item.OrderStatus?.OrderStatusName
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="cyber-card p-3 h-100">
+                <div class="mb-3 border-bottom border-info pb-2 x-small fw-bold text-info">
+                    <i class="bi bi-list-check me-2"></i>待辦執行清單
+                </div>
+                <div class="list-group list-group-flush small">
+                    <a asp-controller="Questions" asp-action="Index" class="list-group-item bg-transparent text-cyan border-info border-opacity-25 d-flex justify-content-between align-items-center px-0">
+                        <span>客服提問回覆</span><span class="badge rounded-pill bg-danger shadow-glow">@ViewBag.PendingRefunds</span>
+                    </a>
+                    <a asp-controller="Programmes" asp-action="AdminIndex" class="list-group-item bg-transparent text-cyan border-info border-opacity-25 d-flex justify-content-between align-items-center px-0">
+                        <span>活動草稿審核</span><span class="badge rounded-pill bg-warning text-dark">@ViewBag.PendingProgramme</span>
+                    </a>
+                    <a asp-controller="FAQs" asp-action="Index" class="list-group-item bg-transparent text-cyan border-info border-opacity-25 d-flex justify-content-between align-items-center px-0">
+                        <span>未發佈 FAQ</span><span class="badge rounded-pill bg-info">@ViewBag.PendingFAQ</span>
+                    </a>
+                    <a asp-controller="PublicNotices" asp-action="Index" class="list-group-item bg-transparent text-cyan border-0 d-flex justify-content-between align-items-center px-0">
+                        <span>未發佈公告</span><span class="badge rounded-pill bg-secondary">@ViewBag.PendingPublicNotice</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@* 
 <div class="container-fluid px-3">
     <div class="d-flex justify-content-between align-items-center my-2">
         <div>
@@ -197,7 +443,7 @@
         </div>
     </div>
 </div>
-
+ *@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -271,36 +517,61 @@
                 }).catch(err => console.error("趨勢圖失敗:", err));
 
             // --- 3. 訂單狀態分佈 (Doughnut Chart) ---
-            fetch('/Admin/GetOrderStatusDistribution')
-                .then(res => res.json())
-                .then(data => {
-                    const el = document.getElementById('orderStatusChart');
-                    if (!el) return;
+           fetch('/Admin/GetOrderStatusDistribution')
+            .then(res => res.json())
+            .then(data => {
+                const el = document.getElementById('orderStatusChart');
+                if (!el) return;
 
-                    new Chart(el.getContext('2d'), {
-                        type: 'doughnut',
-                        data: {
-                            labels: data.map(d => d.status),
-                            datasets: [{
-                                data: data.map(d => d.count),
-                                backgroundColor: ['#198754', '#ffc107', '#adb5bd', '#0dcaf0'],
-                                borderWidth: 0,
-                                hoverOffset: 10
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false, // 🚩 重要：讓它填滿我們設定的 150px 容器
-                            cutout: '75%',
-                            plugins: {
-                                legend: {
-                                position: 'right', // 🚩 改到右邊，避免吃掉上下空間
-                                labels: { boxWidth: 8, font: { size: 10 } }
+                new Chart(el.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(d => d.status),
+                        datasets: [{
+                            data: data.map(d => d.count),
+                            // 🚩 修改 1：換成 Cyberpunk 霓虹色系
+                            backgroundColor: [
+                                '#00f2ff', // 亮青色 (你的主色)
+                                '#7000ff', // 電子紫
+                                '#ff0055', // 霓虹紅
+                                '#39ff14'  // 螢光綠
+                            ],
+                            borderColor: '#000b1a', // 🚩 修改 2：邊框換成背景深藍色，營造分離感
+                            borderWidth: 2,
+                            hoverOffset: 15,
+                            hoverBorderColor: '#00f2ff', // 懸停時邊框發光
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '80%', // 🚩 讓圓環更細，看起來更精緻
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 10,
+                                    padding: 15,
+                                    // 🚩 修改 3：重要！將圖例文字改為亮青色，否則深色背景看不見
+                                    color: '#00f2ff',
+                                    font: {
+                                        size: 11,
+                                        family: "'Share Tech Mono', monospace" // 使用科技感字體
+                                    }
                                 }
+                            },
+                            tooltip: {
+                                // 🚩 修改 4：提示框也要科技感
+                                backgroundColor: 'rgba(0, 20, 40, 0.9)',
+                                titleColor: '#00f2ff',
+                                bodyColor: '#fff',
+                                borderColor: '#00f2ff',
+                                borderWidth: 1
                             }
                         }
-                    });
-                }).catch(err => console.error("圓餅圖失敗:", err));
+                    }
+                });
+            }).catch(err => console.error("圓餅圖失敗:", err));
 
             // --- 4. 即時警示與通知邏輯 ---
             function loadLiveAlerts() {

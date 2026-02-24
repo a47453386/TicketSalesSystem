@@ -1,0 +1,175 @@
+/* --- 核心變數定義 (Palette) --- */
+:root {
+    --pixel-bg-dark: #110022; /* 深紫色背景 */
+    --pixel-bg-light: #220033; /* 較亮的紫色容器背景 */
+    --pixel-pink: #ff00cc; /* 霓虹粉 */
+    --pixel-blue: #00ccff; /* 霓虹藍 */
+    --pixel-yellow: #ffcc00; /* 像素黃 */
+    --pixel-text-light: #ffffff;
+    --pixel-text-muted: #b399c5;
+}
+
+/* 引入 Google 像素字體 */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* --- 全域樣式重置 --- */
+body {
+    background-color: var(--pixel-bg-dark);
+    color: var(--pixel-text-light);
+    font-family: 'Press Start 2P', cursive, sans-serif; /* 核心像素字體 */
+    image-rendering: pixelated; /* 強制圖片像素化 */
+    /* 復古網格背景 */
+    background-image: linear-gradient(rgba(255, 0, 204, 0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(0, 204, 255, 0.1) 2px, transparent 2px);
+    background-size: 40px 40px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 覆蓋 Bootstrap 預設連結顏色 */
+a {
+    color: var(--pixel-blue);
+    text-decoration: none;
+}
+
+    a:hover {
+        color: var(--pixel-yellow);
+    }
+
+/* --- 像素化導覽列 (Navbar) --- */
+.pixel-navbar {
+    background-color: #000 !important; /* 純黑底色 */
+    border-bottom: 4px solid var(--pixel-pink);
+    padding: 1.5rem 1rem; /* 增加一點高度 */
+    box-shadow: 0 4px 0 rgba(0,0,0,0.5);
+}
+
+.pixel-brand {
+    font-size: 1.2rem; /* 像素字體較大，稍微調小 */
+    color: var(--pixel-yellow) !important;
+    text-shadow: 3px 3px 0px var(--pixel-pink);
+    letter-spacing: 1px;
+}
+
+.pixel-nav-link {
+    font-size: 1.1rem !important;
+    font-size: 0.8rem;
+    color: var(--pixel-blue) !important;
+    margin-left: 0.5rem;
+    padding: 0.5rem 1rem !important;
+    position: relative;
+    transition: all 0.1s;
+    border: 2px solid transparent;
+}
+
+    .pixel-nav-link:hover, .pixel-nav-link:focus {
+        color: var(--pixel-yellow) !important;
+        border-color: var(--pixel-yellow);
+        background-color: rgba(255, 204, 0, 0.1);
+        transform: translateY(-2px); /* 懸停跳動 */
+    }
+
+/* --- 像素按鈕 (Btn) --- */
+.btn-pixel {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    background-color: var(--pixel-blue);
+    color: #000 !important;
+    border: none;
+    padding: 12px 24px;
+    position: relative;
+    /* 像素立體陰影 */
+    box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4), 4px 4px 0px 0px #000;
+    transition: all 0.1s;
+    border-radius: 0 !important; /* 禁止圓角 */
+}
+
+    .btn-pixel:hover {
+        background-color: var(--pixel-yellow);
+        color: #000 !important;
+        transform: translate(2px, 2px); /* 按下效果 */
+        box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.4), 2px 2px 0px 0px #000;
+    }
+
+/* --- 像素下拉選單 (Dropdown) --- */
+.pixel-dropdown-menu {
+    background-color: var(--pixel-bg-light) !important;
+    border: 4px solid var(--pixel-blue) !important;
+    border-radius: 0 !important;
+    box-shadow: 6px 6px 0px #000 !important;
+    margin-top: 10px !important;
+}
+
+.pixel-dropdown-item {
+    font-size: 0.9rem;
+    color: var(--pixel-text-light) !important;
+    padding: 10px 15px;
+}
+
+    .pixel-dropdown-item:hover {
+        background-color: var(--pixel-pink) !important;
+        color: #fff !important;
+    }
+
+.dropdown-divider {
+    border-top-color: var(--pixel-blue) !important;
+    opacity: 0.5;
+}
+
+.dropdown-header {
+    color: var(--pixel-yellow) !important;
+    font-size: 0.7rem;
+}
+
+/* --- 主內容容器 (Container) --- */
+/* 將主要內容包在一個像素框中 */
+.pixel-container-box {
+    background-color: var(--pixel-bg-light);
+    padding: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    /* 複雜的像素邊框模擬 */
+    box-shadow: 0 4px 0 var(--pixel-blue), 0 -4px 0 var(--pixel-blue), 4px 0 0 var(--pixel-blue), -4px 0 0 var(--pixel-blue), 0 0 0 4px #000, /* 黑色間隔 */
+    0 8px 0 var(--pixel-pink), 0 -8px 0 var(--pixel-pink), 8px 0 0 var(--pixel-pink), -8px 0 0 var(--pixel-pink), 12px 12px 0 #00000080; /* 最外層陰影 */
+}
+
+/* --- 頁尾 (Footer) --- */
+.pixel-footer {
+    background-color: #000;
+    border-top: 4px solid var(--pixel-yellow) !important;
+    color: var(--pixel-text-muted) !important;
+    font-size: 0.7rem;
+    padding: 20px 0;
+    margin-top: auto; /* 確保頁尾置底 */
+}
+
+/* --- 彈窗 (Modal) 像素化 --- */
+.modal-content.pixel-modal-content {
+    background-color: var(--pixel-bg-light);
+    border: 4px solid var(--pixel-pink);
+    border-radius: 0 !important;
+    box-shadow: 8px 8px 0px #000;
+}
+
+.pixel-modal-content .modal-header {
+    border-bottom: 4px solid var(--pixel-blue);
+    background-color: #000;
+}
+
+.pixel-modal-content .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* 讓關閉按鈕變白 */
+}
+
+/* --- 工具類別 --- */
+.text-pixel-muted {
+    color: var(--pixel-text-muted) !important;
+}
+
+.fs-pixel-small {
+    font-size: 0.7rem !important;
+}
+
+/* 覆蓋 Bootstrap 圖示顏色使其符合主題 */
+.bi {
+    color: var(--pixel-blue);
+}

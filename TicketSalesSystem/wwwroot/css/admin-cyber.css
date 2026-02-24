@@ -1,0 +1,132 @@
+﻿/* --- 1. 核心變數定義 (必須在最上方) --- */
+:root {
+    --tech-cyan: #00f2ff;
+    --tech-blue: #004d66;
+    --tech-bg: #000b1a;
+    --tech-border: rgba(0, 242, 255, 0.15); /* 稍微加深一點點線條 */
+    --neon-glow: 0 0 10px rgba(0, 242, 255, 0.5);
+    --sidebar-bg: rgba(0, 15, 30, 0.95);
+    --panel-bg: rgba(0, 20, 40, 0.6);
+}
+
+/* --- 2. 全域背景強制修復 --- */
+body.admin-body {
+    background-color: var(--tech-bg) !important; /* 強制深色底 */
+    color: var(--tech-cyan);
+    font-family: 'Share Tech Mono', 'Orbitron', monospace;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    /* 🚩 科技感網格：使用固定背景確保不隨滾動消失 */
+    background-image: linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px) !important;
+    background-size: 40px 40px !important;
+    background-attachment: fixed;
+}
+
+/* 🚩 關鍵修正：強制清除所有中間層的背景色 */
+.flex-grow-1,
+.main-wrapper,
+main[role="main"],
+.bg-light,
+.bg-white {
+    background-color: transparent !important;
+}
+
+/* --- 3. 側邊欄 (Sidebar) --- */
+.sidebar {
+    width: 280px;
+    background: var(--sidebar-bg) !important;
+    border-right: 2px solid var(--tech-cyan);
+    box-shadow: 5px 0 20px rgba(0, 242, 255, 0.1);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+}
+
+    .sidebar h4 {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--tech-cyan);
+        text-shadow: var(--neon-glow);
+        letter-spacing: 2px;
+        border-bottom: 1px solid var(--tech-border);
+        padding-bottom: 15px;
+    }
+
+/* --- 4. 科技感導覽選項 --- */
+.admin-nav {
+    gap: 8px;
+    padding: 10px;
+}
+
+.nav-item-tech {
+    position: relative;
+    background: rgba(0, 242, 255, 0.05);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    clip-path: polygon(0 0, 95% 0, 100% 25%, 100% 100%, 5% 100%, 0 75%);
+    transition: all 0.3s ease;
+    margin-bottom: 5px;
+}
+
+    .nav-item-tech:hover {
+        background: rgba(0, 242, 255, 0.15);
+        border-color: var(--tech-cyan);
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        transform: translateX(5px);
+    }
+
+    .nav-item-tech i {
+        color: var(--tech-cyan);
+        text-shadow: 0 0 8px var(--tech-cyan);
+    }
+
+    .nav-item-tech .nav-link {
+        color: rgba(0, 242, 255, 0.6) !important;
+    }
+
+        .nav-item-tech .nav-link.active {
+            background: linear-gradient(90deg, rgba(0, 242, 255, 0.3) 0%, transparent 100%) !important;
+            border-left: 4px solid var(--tech-cyan) !important;
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff;
+        }
+
+/* --- 5. 主內容區與面板 --- */
+.main-wrapper {
+    flex-grow: 1;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+header.cyber-header {
+    background: rgba(0, 10, 20, 0.8) !important;
+    border-bottom: 1px solid var(--tech-border) !important;
+    backdrop-filter: blur(5px);
+}
+
+/* 🚩 內容區面板：這裡才是放內容的地方 */
+.cyber-panel {
+    background: var(--panel-bg) !important;
+    border: 1px solid var(--tech-cyan) !important;
+    box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.1) !important;
+    padding: 20px;
+    margin-bottom: 20px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+}
+
+.neon-text {
+    text-shadow: 0 0 5px var(--tech-cyan);
+}
+
+.btn-outline-cyan {
+    color: var(--tech-cyan);
+    border-color: var(--tech-cyan);
+    border-radius: 0;
+    transition: 0.3s;
+}
+
+    .btn-outline-cyan:hover {
+        background: var(--tech-cyan);
+        color: #000;
+    }
+

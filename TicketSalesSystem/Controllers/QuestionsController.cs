@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Images;
+using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -10,13 +11,16 @@ namespace TicketSalesSystem.Controllers
     {
         private readonly TicketsContext _context;
         private readonly IFileService _fileService;
+        private readonly IUserAccessorService _userAccessorService;
 
-        public QuestionsController(TicketsContext context, IFileService fileService)
+        public QuestionsController(TicketsContext context, IFileService fileService,IUserAccessorService userAccessor)
         {
             _context = context;
             _fileService = fileService;
+            _userAccessorService = userAccessor;
         }
 
+        
         public async Task<IActionResult> Index()
         {
             // 🚩 必須 Include(q => q.Reply)，畫面的 Count 判斷才會有值
@@ -36,13 +40,19 @@ namespace TicketSalesSystem.Controllers
         // A. 我的提問紀錄 (消費者只能看自己的)
         public async Task<IActionResult> MyList()
         {
-            // 🚩 這裡暫時寫死，之後要從 User.Identity 或 Session 抓 MemberID
-            string currentMemberId = "004bc90a-26fb-48e9-a762-653a232d86e2";
+            //// 🚩 這裡暫時寫死，之後要從 User.Identity 或 Session 抓 MemberID
+            //string currentMemberId = "004bc90a-26fb-48e9-a762-653a232d86e2";
+            var memberID = _userAccessorService.GetMemberId();
+
+            if (memberID == null)
+            {
+                return RedirectToAction("MemberLogin", "Login");
+            }
 
             var myQuestions = await _context.Question
                 .Include(q => q.QuestionType)
                 .Include(q => q.Reply) // 載入回覆紀錄
-                .Where(q => q.MemberID == currentMemberId)
+                .Where(q => q.MemberID == memberID)
                 .OrderByDescending(q => q.CreatedTime)
                 .ToListAsync();
 
@@ -60,10 +70,17 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Question question,IFormFile? upload)
         {
+            var memberID = _userAccessorService.GetMemberId();
+
+            if (memberID == null)
+            {
+                return RedirectToAction("MemberLogin", "Login");
+            }
+
             // 🚩 後端補足必要資訊
             question.QuestionID = Guid.NewGuid().ToString();
             question.CreatedTime = DateTime.Now;
-            question.MemberID = "004bc90a-26fb-48e9-a762-653a232d86e2"; // 應抓取登入者
+            question.MemberID = memberID; // 應抓取登入者
 
 
             // 如果沒有上傳檔案，確保 UploadFile 欄位為 null
