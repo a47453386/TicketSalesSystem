@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@* 1. 注入你的 UserAccessor 服務 *@
+@inject TicketSalesSystem.Service.IUserAccessor.IUserAccessorService UserAccessor
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -13,89 +17,92 @@
 </head>
 <body>
     <header>
-        @* 🚩 修改 Nav：移除 bg-white, navbar-light，加入 pixel-navbar *@
+        
         <nav class="navbar navbar-expand-lg pixel-navbar">
             <div class="container">
-                @* 🚩 修改 Brand：加入 pixel-brand *@
+                @* --- 品牌標誌 --- *@
                 <a class="navbar-brand pixel-brand" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-joystick me-2"></i> 8-BIT TICKET
+                    <i class="bi bi-joystick me-2"></i> 演唱會售票系統
                 </a>
 
-                @* 修改 Toggler 按鈕顏色以適應深色背景 *@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="background-color: var(--pixel-blue);">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
+                    @* --- 左側通用選單 (所有人都看的到) --- *@
                     <ul class="navbar-nav me-auto">
-                        @* 🚩 修改連結：加入 pixel-nav-link *@
                         <li class="nav-item"><a asp-controller="Programmes" asp-action="Index" class="nav-link pixel-nav-link">節目資訊</a></li>
                         <li class="nav-item"><a asp-controller="PublicNotices" asp-action="UserIndex" class="nav-link pixel-nav-link">最新消息</a></li>
                         <li class="nav-item"><a asp-controller="FAQs" asp-action="UserIndex" class="nav-link pixel-nav-link">常見問題</a></li>
                         <li class="nav-item"><a asp-controller="Orders" asp-action="UserIndex" class="nav-link pixel-nav-link">訂單查詢</a></li>
                     </ul>
 
-                    <ul class="navbar-nav align-items-center">
-                        @if (!User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item ms-lg-3">
-                                @* 🚩 修改按鈕：換成 btn-pixel *@
-                                <a class="btn btn-pixel" href="javascript:void(0);" onclick="openLoginModal()">
-                                    <i class="bi bi-person-fill me-2"></i>會員登入
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item dropdown">
-                                @* 🚩 修改下拉觸發器 *@
-                                <a class="nav-link dropdown-toggle pixel-nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                    PLAYER: @User.Identity.Name
-                                </a>
-                                @* 🚩 修改下拉選單容器：加入 pixel-dropdown-menu *@
-                                <ul class="dropdown-menu dropdown-menu-end shadow-none pixel-dropdown-menu">
-                                    <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Orders" asp-action="UserIndex">我的訂單</a></li>
-                                    <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Members" asp-action="UserEdit">會員中心</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="Logout">GAME OVER (登出)</a></li>
-                                </ul>
-                            </li>
-                        }
-                    </ul>
-
-                    @* 管理員選單 (同樣套用像素樣式) *@
-                    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-                    {
-                        <ul class="navbar-nav ms-3">
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle pixel-nav-link text-danger" href="#" id="adminNavbarDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-shield-lock-fill"></i> ADMIN ZONE
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-none pixel-dropdown-menu mt-2">
-                                    @if (User.IsInRole("S") || User.IsInRole("A") || User.IsInRole("B"))
-                                    {
+                    @* --- 右側功能區 (根據身份切換) --- *@
+                    <div class="d-flex align-items-center">
+                        @* --- 第一部分：員工/管理員區塊 (EmployeeScheme) --- *@
+                        <ul class="navbar-nav">
+                            @if (UserAccessor.IsEmployee())
+                            {
+                                @* 情況 B-1：員工已登入 - 顯示紅色管理專區 *@
+                                <li class="nav-item dropdown ms-3">
+                                    <a class="nav-link dropdown-toggle pixel-nav-link text-danger" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-shield-lock-fill"></i> BOSS AREA: @UserAccessor.GetUserRole()
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-none pixel-dropdown-menu mt-2">
                                         <li><h6 class="dropdown-header">CORE SYSTEMS</h6></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Programmes" asp-action="AdminIndex">節目管理</a></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Admin" asp-action="Dashboard">控制面板</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                    }
-                                    @* (省略其他管理員選項，請依照上方模式套用 pixel-dropdown-item) *@
-                                    <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Admin" asp-action="Dashboard">進入後台</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    }
-                    else if (!User.IsInRole("Admin"))
-                    {
-                        <ul class="navbar-nav ms-3">
-                            <li class="nav-item">
-                                <a class="nav-link pixel-nav-link fs-pixel-small" asp-controller="Login" asp-action="EmployeeLogin">
-                                    <i class="bi bi-door-open"></i> 後台管理
-                                </a>
-                            </li>
-                        </ul>
-                    }
+                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Admin" asp-action="Dashboard">系統儀表板</a></li>
 
+                                        @* 根據細分角色顯示 *@
+                                        @if (UserAccessor.GetUserRole() == "S" || UserAccessor.GetUserRole() == "A" || UserAccessor.GetUserRole() == "B")
+                                        {
+                                            <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Programmes" asp-action="AdminIndex">節目管理</a></li>
+                                        }
+
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="Logout">下班登出</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                @* 情況 A-1：員工未登入 - 顯示員工入口連結 *@
+                                <li class="nav-item">
+                                    <a class="nav-link pixel-nav-link fs-pixel-small mt-1" asp-controller="Login" asp-action="EmployeeLogin">
+                                        <i class="bi bi-door-open"></i> 員工入口
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+
+                        @* --- 第二部分：一般會員區塊 (MemberScheme) --- *@
+                        <ul class="navbar-nav">
+                            @if (UserAccessor.IsMember())
+                            {
+                                @* 情況 B-2：會員已登入 - 顯示藍色玩家選單 *@
+                                <li class="nav-item dropdown ms-3">
+                                    <a class="nav-link dropdown-toggle pixel-nav-link" href="#" id="memberDropdown" role="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-person-circle"></i> PLAYER: @UserAccessor.GetUserName()
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-none pixel-dropdown-menu mt-2">
+                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Orders" asp-action="UserIndex">我的訂單</a></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Members" asp-action="UserEdit">個人中心</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="Logout">GAME OVER (登出)</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                @* 情況 A-2：會員未登入 - 顯示顯眼的登入按鈕 *@
+                                <li class="nav-item ms-lg-3">
+                                    <a class="btn btn-pixel" href="javascript:void(0);" onclick="openLoginModal()">
+                                        <i class="bi bi-person-fill me-2"></i>會員登入
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </div>
         </nav>

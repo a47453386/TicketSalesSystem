@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
  using System;
@@ -67,6 +68,9 @@ namespace TicketSalesSystem.Controllers
             return View(member);
         }
 
+
+
+        [Authorize(AuthenticationSchemes = "MemberScheme")]
         // GET: Members/Create
         public IActionResult Create()
         {

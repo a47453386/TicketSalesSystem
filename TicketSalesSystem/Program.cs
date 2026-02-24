@@ -71,9 +71,16 @@ builder.Services.AddScoped<IUserAccessorService, UserAccessorService>();
 builder.Services.AddDistributedMemoryCache();
 
 // 設定 Cookie 認證
-builder.Services.AddAuthentication("CookieAuth")
-    .AddCookie("CookieAuth", options => {
-        options.LoginPath = "/Login/MemberLogin";
+builder.Services.AddAuthentication()
+    .AddCookie("MemberScheme", options =>
+    {
+        options.LoginPath = "/Login/MemberLogin"; // 會員登入路徑
+        options.Cookie.Name = "TicketSystem.Member.Cookie"; // 這是會員的口袋
+    })
+    .AddCookie("EmployeeScheme", options =>
+    {
+        options.LoginPath = "/Login/EmployeeLogin"; // 員工登入路徑
+        options.Cookie.Name = "TicketSystem.Employee.Cookie"; // 這是員工的口袋
     });
 
 builder.Services.AddSession(options =>

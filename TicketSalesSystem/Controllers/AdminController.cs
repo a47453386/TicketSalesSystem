@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
@@ -6,6 +7,7 @@ using TicketSalesSystem.Service.Images;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme")]
     public class AdminController : Controller
     {
         private readonly TicketsContext _context;
@@ -15,6 +17,7 @@ namespace TicketSalesSystem.Controllers
             _context = context;
             
         }
+        
         public async Task<IActionResult> Dashboard()
         {
             //1. 總累計營收 (優化：處理 null 並確保是已付款訂單)

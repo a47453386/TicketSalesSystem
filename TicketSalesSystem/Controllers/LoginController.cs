@@ -59,6 +59,7 @@ namespace TicketSalesSystem.Controllers
             // 🚩 修改 1：只用「帳號」去找人。
             // 因為資料庫裡的密碼是加密的，直接比對 vm.Password 會找不到。
             var user = await _context.MemberLogin
+                .Include(m => m.Member)
                 .FirstOrDefaultAsync(m => m.Account == vm.Account);
 
             // 🚩 修改 2：找到人後，才開始比對密碼
@@ -75,15 +76,15 @@ namespace TicketSalesSystem.Controllers
                     // 3. 準備身分證 (Claims)
                     var claims = new List<Claim>
                      {
-                         new Claim(ClaimTypes.Name, user.Account),
-                         new Claim(ClaimTypes.NameIdentifier, user.MemberID),
-                         new Claim(ClaimTypes.Role, "User")
+                         new Claim(ClaimTypes.Name, user.Member.Name?? user.Account),// 這裡放姓名
+                         new Claim(ClaimTypes.NameIdentifier, user.MemberID),// 這裡放 ID
+                         new Claim(ClaimTypes.Role, "Member")//會員 (Member)
                      };
 
-                    var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+                    var claimsIdentity = new ClaimsIdentity(claims, "MemberScheme");
 
                     // 4. 執行登入 (核發 Cookie)
-                    await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
+                    await HttpContext.SignInAsync("MemberScheme", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                     {
                         IsPersistent = true,
                         ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
@@ -172,10 +173,10 @@ namespace TicketSalesSystem.Controllers
                         new Claim(ClaimTypes.Role, emp.Employee.RoleID) // S, A, B, C
                     };
 
-                    var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+                    var claimsIdentity = new ClaimsIdentity(claims, "EmployeeScheme");
 
                     // 🚩 修改 3：核發 Cookie
-                    await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
+                    await HttpContext.SignInAsync("EmployeeScheme", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                     {
                         IsPersistent = true,
                         ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
