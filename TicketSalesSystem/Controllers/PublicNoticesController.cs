@@ -1,21 +1,23 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
     public class PublicNoticesController : Controller
     {
         private readonly TicketsContext _context;
-
-        public PublicNoticesController(TicketsContext context)
+        private readonly IUserAccessorService _userAccessorService;
+        public PublicNoticesController(TicketsContext context, IUserAccessorService userAccessorService)
         {
             _context = context;
+            _userAccessorService = userAccessorService;
         }
 
         // GET: PublicNotices1
@@ -127,12 +129,14 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( PublicNotice publicNotice)
         {
+            var employeeID = _userAccessorService.GetEmployeeId();
+
             ModelState.Remove("EmployeeID");
 
             publicNotice.CreatedTime = DateTime.Now;
             publicNotice.UpdatedAt = null;
             publicNotice.PublicNoticeStatus = false;
-            publicNotice.EmployeeID = "A23025";
+            publicNotice.EmployeeID = employeeID;
 
             if (ModelState.IsValid)
             {

@@ -1,15 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
     public class ReplyController : Controller
     {
         private readonly TicketsContext _context;
+        private readonly IUserAccessorService _userAccessorService;
 
-        public ReplyController(TicketsContext context)
+        public ReplyController(TicketsContext context, IUserAccessorService userAccessorService)
         {
             _context = context;
+            _userAccessorService = userAccessorService;
         }
         public IActionResult Index()
         {
@@ -20,6 +23,8 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string questionId, string replyDescription, string replyStatusId)
         {
+
+
             // 1. 內容驗證
             if (string.IsNullOrWhiteSpace(replyDescription))
             {
@@ -36,13 +41,15 @@ namespace TicketSalesSystem.Controllers
                 return RedirectToAction("Index", "Questions");
             }
 
+            var employeeId = _userAccessorService.GetEmployeeId();
+
             // 3. 建立回覆資料
             var reply = new Reply
             {
                 ReplyID = Guid.NewGuid().ToString(),
                 QuestionID = questionId,
                 ReplyDescription = replyDescription,
-                EmployeeID = "A23025",
+                EmployeeID = employeeId,
                 CreatedTime = DateTime.Now,
                 ReplyStatusID = replyStatusId,
                 Note = ""

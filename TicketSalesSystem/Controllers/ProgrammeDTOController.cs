@@ -9,6 +9,7 @@ using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IProgramme;
+using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.Validation.IProgrammeValidationService;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep;
@@ -25,8 +26,11 @@ namespace TicketSalesSystem.Controllers
         private readonly IIDService _iIDService;
         private readonly IProgrammeService _programmeService;
         private readonly IProgrammeValidationService _programmeValidationService;
+        private readonly IUserAccessorService _userAccessorService;
 
-        public ProgrammeDTOController(IFileService fileService, TicketsContext context, IIDService iIDService, IProgrammeService programmeService,IProgrammeValidationService programmeValidationService)
+        public ProgrammeDTOController(IFileService fileService, TicketsContext context,
+            IIDService iIDService, IProgrammeService programmeService,
+            IProgrammeValidationService programmeValidationService,IUserAccessorService userAccessorService)
         {
 
             _fileService = fileService;
@@ -34,6 +38,7 @@ namespace TicketSalesSystem.Controllers
             _iIDService = iIDService;
             _programmeService = programmeService;
             _programmeValidationService = programmeValidationService;
+            _userAccessorService = userAccessorService;
         }
 
 
@@ -493,8 +498,12 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateConfirm(IFormCollection col)
         {
-            var dto = GetCurrentDTO();
+            
+            var employeeID = _userAccessorService.GetEmployeeId();
 
+
+            var dto = GetCurrentDTO();
+            
             if (dto == null || string.IsNullOrEmpty(dto.ProgrammeName))
             {
                 return RedirectToAction("CreateStep1");
@@ -517,7 +526,7 @@ namespace TicketSalesSystem.Controllers
                         LimitPerOrder = dto.LimitPerOrder,
                         OnShelfTime = dto.OnShelfTime,
                         ProgrammeStatusID = dto.ProgrammeStatusID ?? "D",
-                        EmployeeID = "A23025",
+                        EmployeeID = employeeID,
                         PlaceID = dto.PlaceID
                     };
                     _context.Programme.Add(programme);

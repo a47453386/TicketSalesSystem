@@ -8,6 +8,7 @@ using TicketSalesSystem.DTOs;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
+using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
 using TicketSalesSystem.ViewModel.Programme.EditProgramme;
@@ -19,14 +20,15 @@ namespace TicketSalesSystem.Service.IProgramme
         private readonly TicketsContext _context;
         private readonly IIDService _iIDService;
         private readonly IFileService _fileService;
-        
+        private readonly IUserAccessorService _userAccessorService;
 
-        public ProgrammeEditService(TicketsContext context, IIDService iIDService, IFileService fileService)
+
+        public ProgrammeEditService(TicketsContext context, IIDService iIDService, IFileService fileService,IUserAccessorService userAccessorService)
         {
             _context = context;
             _iIDService = iIDService;
             _fileService = fileService;
-           
+            _userAccessorService = userAccessorService;
         }
 
 
@@ -95,8 +97,8 @@ namespace TicketSalesSystem.Service.IProgramme
         // 更新 (PUT)
         public async Task UpdateProgrammeAsync(Programme programme, VMProgrammeEdit vm)
         {
-
-            //if (programmme == null) return;(控制邏輯)
+            
+            var employeeID = _userAccessorService.GetEmployeeId();
 
             // 2.更新活動主檔
             programme.ProgrammeName = vm.ProgrammeName;
@@ -109,7 +111,7 @@ namespace TicketSalesSystem.Service.IProgramme
             programme.OnShelfTime=vm.OnShelfTime;
             programme.PlaceID=vm.PlaceID;
             programme.ProgrammeStatusID=vm.ProgrammeStatusID;
-            programme.EmployeeID = "A23025";
+            programme.EmployeeID = employeeID;
 
             ////3.處理圖片清單同步 (說明圖)
             //if(vm.DescriptionImage!=null)
