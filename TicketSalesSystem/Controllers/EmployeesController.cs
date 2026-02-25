@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,6 +13,7 @@ using TicketSalesSystem.ViewModel.Employee;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,F")]
     public class EmployeesController : Controller
     {
         private readonly TicketsContext _context;
@@ -24,7 +26,7 @@ namespace TicketSalesSystem.Controllers
             _idService = idService;
             _fileService = fileService;
         }
-
+        
         // GET: Employees
         public async Task<IActionResult> Index(string searchString)
         {
@@ -50,7 +52,7 @@ namespace TicketSalesSystem.Controllers
 
             return View(result);
         }
-
+       
         // GET: Employees/Details/5
         public async Task<IActionResult> Details(string id)
         {

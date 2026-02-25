@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,6 +11,7 @@ using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A")]
     public class PublicNoticesController : Controller
     {
         private readonly TicketsContext _context;
@@ -20,6 +22,7 @@ namespace TicketSalesSystem.Controllers
             _userAccessorService = userAccessorService;
         }
 
+       
         // GET: PublicNotices1
         public async Task<IActionResult> Index()
         {
@@ -28,17 +31,7 @@ namespace TicketSalesSystem.Controllers
         }
 
 
-        public IActionResult UserIndex()
-        {
-            var publicNotices = _context.PublicNotice
-                .Where(p => p.PublicNoticeStatus == true)
-                .ToList();
-            return View(publicNotices);
-        }
-
-
-
-
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(string id)
@@ -67,10 +60,10 @@ namespace TicketSalesSystem.Controllers
                 return Json(new { success = false, message = "更新失敗" });
             }
         }
-        
 
 
 
+       
         // GET: PublicNotices1/Details/5
         public async Task<IActionResult> Details(string id)
         {
@@ -89,31 +82,6 @@ namespace TicketSalesSystem.Controllers
 
             return View(publicNotice);
         }
-
-
-        public async Task<IActionResult> UserDetails(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var publicNotices = await _context.PublicNotice
-               .Where(p => p.PublicNoticeStatus == true)
-               .FirstOrDefaultAsync(m => m.PublicNoticeID == id);
-
-            if (publicNotices == null)
-            {
-                return NotFound();
-            }
-
-            return View(publicNotices);
-        }
-
-
-
-
-
 
 
         // GET: PublicNotices1/Create
@@ -147,6 +115,7 @@ namespace TicketSalesSystem.Controllers
             return View(publicNotice);
         }
 
+       
         // GET: PublicNotices1/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
@@ -199,8 +168,8 @@ namespace TicketSalesSystem.Controllers
             return View(publicNotice);
         }
 
-       
 
+        
         // POST: PublicNotices1/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]

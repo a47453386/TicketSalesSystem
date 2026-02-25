@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,C")]
     public class QuestionTypesController : Controller
     {
         private readonly TicketsContext _context;

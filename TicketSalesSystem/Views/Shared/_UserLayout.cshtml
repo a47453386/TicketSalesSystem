@@ -33,9 +33,10 @@
                     @* --- 左側通用選單 (所有人都看的到) --- *@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item"><a asp-controller="Programmes" asp-action="Index" class="nav-link pixel-nav-link">節目資訊</a></li>
-                        <li class="nav-item"><a asp-controller="PublicNotices" asp-action="UserIndex" class="nav-link pixel-nav-link">最新消息</a></li>
-                        <li class="nav-item"><a asp-controller="FAQs" asp-action="UserIndex" class="nav-link pixel-nav-link">常見問題</a></li>
-                        <li class="nav-item"><a asp-controller="Orders" asp-action="UserIndex" class="nav-link pixel-nav-link">訂單查詢</a></li>
+                        <li class="nav-item"><a asp-controller="UserPublicNotices" asp-action="UserIndex" class="nav-link pixel-nav-link">最新消息</a></li>
+                        <li class="nav-item"><a asp-controller="UserFAQs" asp-action="UserIndex" class="nav-link pixel-nav-link">常見問題</a></li>
+                        <li class="nav-item"><a asp-controller="UserOrders" asp-action="UserIndex" class="nav-link pixel-nav-link">訂單查詢</a></li>
+                        <li class="nav-item"><a asp-controller="UserMembers" asp-action="Index" class="nav-link pixel-nav-link">會員中心</a></li>
                     </ul>
 
                     @* --- 右側功能區 (根據身份切換) --- *@
@@ -60,7 +61,7 @@
                                         }
 
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="Logout">下班登出</a></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="EmployeeLogout">下班登出</a></li>
                                     </ul>
                                 </li>
                             }
@@ -88,7 +89,7 @@
                                         <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Orders" asp-action="UserIndex">我的訂單</a></li>
                                         <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Members" asp-action="UserEdit">個人中心</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="Logout">GAME OVER (登出)</a></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="MemberLogout">GAME OVER (登出)</a></li>
                                     </ul>
                                 </li>
                             }
@@ -117,19 +118,21 @@
         </div>
     </div>
 
-    @* 🚩 修改 Modal：加入 pixel-modal-content *@
     <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content pixel-modal-content border-0">
-                <div class="modal-header">
-                    <h5 class="modal-title text-pixel-yellow">PLAYER LOGIN</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            @* 🚩 加入 modal-md 確保寬度足夠 *@
+            <div class="modal-content pixel-modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-pixel-yellow" style="font-family: 'Press Start 2P', cursive, monospace;">PLAYER LOGIN</h5>
+                    @* 🚩 btn-close-white 確保在深色背景下看得到叉叉 *@
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div id="loginModalBody" class="modal-body p-0 bg-dark">
+
+                @* 🚩 移除 p-0 以免內容貼邊，背景統一為深色 *@
+                <div id="loginModalBody" class="modal-body bg-dark" style="min-height: 350px;">
                     <div class="text-center py-5">
-                        @* 修改 Loading Spinner 顏色 *@
-                        <div class="spinner-border text-info" role="status" style="color: var(--pixel-blue) !important;"></div>
-                        <div class="mt-3 fs-pixel-small">LOADING...</div>
+                        <div class="spinner-border text-info" role="status" style="color: var(--pixel-blue) !important; width: 3rem; height: 3rem;"></div>
+                        <div class="mt-3 text-white fs-pixel-small">LOADING...</div>
                     </div>
                 </div>
             </div>

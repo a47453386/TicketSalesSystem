@@ -287,7 +287,7 @@
                 const result = await res.json();
                 if (result.success) {
                     alert("✅ 付款成功！系統將為您跳轉至訂單記錄。");
-                    window.location.href = "/Orders/UserIndex";
+                    window.location.href = "/UserOrders/UserIndex";
                 } else {
                     alert("❌ 付款失敗：" + result.message);
                     btn.disabled = false;

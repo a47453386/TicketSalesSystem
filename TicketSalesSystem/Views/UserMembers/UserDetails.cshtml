@@ -1,0 +1,197 @@
+﻿@model TicketSalesSystem.Models.Member
+
+@{
+    ViewData["Title"] = "PLAYER PROFILE";
+    Layout = "_UserLayout";
+}
+
+@* 🚩 引入像素風 CSS (建議已放在 site.css) *@
+<style>
+    .pixel-profile-card {
+        background-color: #212529;
+        border: 4px solid #fff;
+        box-shadow: 8px 8px 0px #000;
+        color: white;
+    }
+
+    .pixel-table th {
+        background-color: #343a40 !important;
+        color: var(--pixel-yellow) !important;
+        border-bottom: 2px dashed #555 !important;
+    }
+
+    .pixel-table td {
+        background-color: #212529 !important;
+        color: #fff !important;
+        border-bottom: 2px dashed #555 !important;
+    }
+    /* 簡訊驗證盒 */
+    .verify-pixel-box {
+        background-color: #000;
+        border: 2px solid var(--pixel-blue);
+        padding: 15px;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="container mt-4 mb-5 font-pixel">
+    @* --- 麵包屑：換成遊戲路徑 --- *@
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="pixel-link">WORLD MAP (首頁)</a></li>
+            <li class="breadcrumb-item active text-white">PLAYER STATS</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        @* --- 左側：玩家頭像與驗證狀態 --- *@
+        <div class="col-lg-4">
+            <div class="card pixel-profile-card text-center py-5 mb-4">
+                <div class="pixel-icon-box mx-auto mb-3" style="width: 100px; height: 100px; background-color: var(--pixel-blue);">
+                    <i class="bi bi-person-fill display-3 text-white"></i>
+                </div>
+                <h3 class="fw-bold text-pixel-yellow">@Model.Name</h3>
+                <p class="text-white-50 small mb-4">LEVEL 1 PLAYER</p>
+
+                <div class="px-3">
+                    <label class="pixel-label d-block">手機驗證狀態</label>
+
+                    @if (Model.IsPhoneVerified)
+                    {
+                        <div class="p-2 border border-success text-success">
+                            <i class="bi bi-check-all"></i>身分已認證
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="input-group">
+                            <input type="text" value="@Model.Tel" class="form-control pixel-input bg-dark text-white" readonly />
+                            <button type="button" class="btn btn-pixel-primary btn-sm" id="btnSendSMS">發送驗證碼</button>
+                        </div>
+
+                        @* 驗證輸入框 *@
+                        <div class="verify-pixel-box mt-3" id="verifyBox" style="display:none;">
+                            <p class="small text-pixel-blue">ENTER 6-DIGIT CODE:</p>
+                            <div class="input-group mb-2">
+                                <input type="text" id="inputVerifyCode" class="form-control pixel-input text-center" maxlength="6" placeholder="000000">
+                                <button type="button" class="btn btn-success btn-pixel-sm" id="btnSubmitSMS">SUBMIT</button>
+                            </div>
+                            <small class="text-white-50" id="timerText"></small>
+                        </div>
+                    }
+                </div>
+
+                <hr class="mx-4 border-secondary" />
+                <div class="text-start px-4 mt-2">
+                    <small class="text-white-50 d-block">ACCOUNT STATUS</small>
+                    <span class="text-success fw-bold">● ONLINE (已登入)</span>
+                </div>
+            </div>
+        </div>
+
+        @* --- 右側：詳細屬性表 --- *@
+        <div class="col-lg-8">
+            <div class="card pixel-profile-card">
+                <div class="card-header border-bottom border-secondary bg-transparent py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-pixel-yellow fw-bold"><i class="bi bi-controller me-2"></i>PLAYER ATTRIBUTES</h5>
+                    <a asp-action="UserEdit" asp-route-id="@Model.MemberID"  class="btn btn-pixel-primary btn-sm">
+                        <i class="bi bi-gear-fill me-1"></i>EDIT STATS
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table pixel-table mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="ps-4 py-3" style="width: 35%;">身分證字號 (ID)</th>
+                                    <td class="ps-4 py-3">@Model.NationalID</td>
+                                </tr>
+                                <tr>
+                                    <th class="ps-4 py-3">性別 (GENDER)</th>
+                                    <td class="ps-4 py-3">@(Model.Gender == true ? "男 (MALE)" : "女 (FEMALE)")</td>
+                                </tr>
+                                <tr>
+                                    <th class="ps-4 py-3">出生日期 (BIRTHDAY)</th>
+                                    <td class="ps-4 py-3">@Model.Birthday.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                                <tr>
+                                    <th class="ps-4 py-3">電子郵件 (EMAIL)</th>
+                                    <td class="ps-4 py-3">@Model.Email</td>
+                                </tr>
+                                <tr>
+                                    <th class="ps-4 py-3">通訊地址 (ADDR)</th>
+                                    <td class="ps-4 py-3 text-break">@Model.Address</td>
+                                </tr>
+                                <tr>
+                                    <th class="ps-4 py-3">加入時間 (JOIN DATE)</th>
+                                    <td class="ps-4 py-3 text-white-50">@Model.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @* 🚩 下方加入一個快速傳送按鈕 *@
+            <div class="mt-4 d-flex gap-3">
+                <a asp-controller="Orders" asp-action="UserIndex" class="btn btn-pixel-primary flex-grow-1 py-3">
+                    <i class="bi bi-ticket-perforated-fill me-2"></i>VIEW MY TICKETS
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-pixel-secondary py-3 px-4">
+                    BACK TO MAP
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            // --- 簡訊發送邏輯 ---
+            $(document).on("click", "#btnSendSMS", function() {
+                var $btn = $(this);
+                $btn.prop('disabled', true).text("SENDING...");
+
+                $.post("/Members/SendSmsCode", { id: "@Model.MemberID" }, function(res) {
+                    if (res.success) {
+                        $("#inputVerifyCode").val("");
+                        $("#verifyBox").fadeIn(); // 像素風建議用 fadeIn 或直接顯示
+                        startTimer(60, $btn);
+                    } else {
+                        alert("⚠️ " + res.message);
+                        $btn.prop('disabled', false).text("RETRY");
+                    }
+                });
+            });
+
+            // --- 倒數計時器 ---
+            function startTimer(duration, $button) {
+                var timer = duration;
+                var interval = setInterval(function () {
+                    $button.text(timer + "s REMAIN");
+                    if (--timer < 0) {
+                        clearInterval(interval);
+                        $button.prop('disabled', false).text("RESEND CODE");
+                    }
+                }, 1000);
+            }
+
+            // --- 驗證碼提交 ---
+            $(document).on("click", "#btnSubmitSMS", function() {
+                var code = $("#inputVerifyCode").val();
+                if (code.length < 6) { alert("ENTER 6 DIGITS!"); return; }
+
+                $.post("/Members/SubmitVerifyCode", { id: "@Model.MemberID", inputCode: code }, function(res) {
+                    if (res.success) {
+                        alert("🎉 LEVEL UP! 驗證成功");
+                        location.reload();
+                    } else {
+                        alert("❌ WRONG CODE!");
+                        $("#inputVerifyCode").val("");
+                    }
+                });
+            });
+        });
+    </script>
+}

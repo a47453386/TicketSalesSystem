@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,6 +13,7 @@ using TicketSalesSystem.ViewModel.Place;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
     public class PlacesController : Controller
     {
         private readonly TicketsContext _context;

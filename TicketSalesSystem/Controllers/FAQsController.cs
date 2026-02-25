@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -11,6 +12,7 @@ using TicketSalesSystem.Service.ID;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
     public class FAQsController : Controller
     {
         private readonly TicketsContext _context;
@@ -21,7 +23,7 @@ namespace TicketSalesSystem.Controllers
             _context = context;
             _idService = idService;
         }
-
+        
         // GET: FAQs
         public async Task<IActionResult> Index()
         {
@@ -33,19 +35,8 @@ namespace TicketSalesSystem.Controllers
                 .ToListAsync();
             return View(faqs);
         }
-
-
-        public async Task<IActionResult> UserIndex()
-        {
-            var faqs = await _context.FAQ
-                .Include(f => f.FAQPublishStatus)
-                .Include(f => f.FAQType)
-                .Where(f => f.FAQPublishStatusID == "Y") // 只顯示已發布的 FAQ                
-                .ToListAsync();
-            return View(faqs);
-        }
-
-
+        
+        
         // GET: FAQs/Details/5
         public async Task<IActionResult> Details(string id)
         {
@@ -64,8 +55,8 @@ namespace TicketSalesSystem.Controllers
             return View(fAQ);
         }
 
-        
 
+        
         [HttpPost]
         public async Task<IActionResult> CreateTypeQuickly(string typeName)
         {
@@ -93,7 +84,7 @@ namespace TicketSalesSystem.Controllers
             }
         }
 
-
+        
         [HttpPost]
         public async Task<IActionResult> EditTypeQuickly(string typeId, string typeName)
         {
@@ -106,9 +97,6 @@ namespace TicketSalesSystem.Controllers
 
             return Json(new{success = true, faqTypeId = faqType.FAQTypeID,faqTypeName = faqType.FAQTypeName});
         }
-
-
-
 
 
         // GET: FAQs/Create
@@ -140,11 +128,6 @@ namespace TicketSalesSystem.Controllers
                 return StatusCode(500, $"更新失敗: {fullMessage}");
             }
         }
-
-
-
-
-
 
 
 

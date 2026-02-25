@@ -20,27 +20,26 @@ namespace TicketSalesSystem.Controllers
             _userAccessorService = userAccessorService;
         }
 
-        // 🚩 GET: 登入頁面 / 彈窗內容
         [HttpGet]
         public IActionResult MemberLogin(string? returnUrl)
         {
-            // 1. 如果使用者已經登入，直接踢回首頁或 ReturnUrl
-            if (_userAccessorService.IsAuthenticated())
+            // 🚩 1. 檢查是否已有會員證 (這段寫得很好，保留)
+            if (_userAccessorService.IsMember())
             {
                 return Redirect(Url.IsLocalUrl(returnUrl) ? returnUrl : "/");
             }
 
-            // 2. 準備資料給 View
             ViewBag.ReturnUrl = returnUrl;
-            var vm = new VMLogin(); // 🚩 務必傳入空物件，避免 PartialView 報 Null 錯誤
+            var vm = new VMLogin();
 
-            // 3. 判斷是否為 AJAX 請求 (彈窗使用)
+            // 🚩 2. 關鍵判斷：檢查是否為 AJAX 請求 (彈窗呼叫)
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                // 指定完整路徑確保找得到檔案
-                return PartialView("~/Views/Shared/_LoginPartial.cshtml", vm);
+                // 🚀 回傳 PartialView，這會徹底無視 _ViewStart 和所有 Layout
+                return PartialView("_LoginPartial", vm);
             }
 
+            //如果是直接開啟網頁 (例如：localhost/Login/MemberLogin)
             return View(vm);
         }
 
@@ -115,28 +114,10 @@ namespace TicketSalesSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> EmployeeLogin(string? returnUrl) // 1. 補上 async Task
         {
-            // 使用你寫好的 Service 檢查狀態
-            if (_userAccessorService.IsAuthenticated())
+            // 🚩 修正：明確檢查是否已經有「員工證」
+            if (_userAccessorService.IsEmployee())
             {
-                // 2. 直接拿 Role，不需要手動去 Claims 抓
-                var role = _userAccessorService.GetUserRole();
-                var validRoles = new[] { "S", "A", "B", "C","F" };
-
-                if (role != null && validRoles.Contains(role))
-                {
-                    // 3. 🚩 這裡可以選擇：要「相信 Cookie」直接跳轉，還是「再次查 DB」
-                    // 既然你之前想去資料庫找，我們就保留這個嚴謹的檢查
-                    var empId = _userAccessorService.GetEmployeeId();
-                    var dbRole = await _context.Employee
-                        .Where(e => e.EmployeeID == empId)
-                        .Select(e => e.RoleID)
-                        .FirstOrDefaultAsync();
-
-                    if (dbRole != null && validRoles.Contains(dbRole))
-                    {
-                        return RedirectToAction("Dashboard", "Admin");
-                    }
-                }
+                return RedirectToAction("Dashboard", "Admin");
             }
 
             ViewBag.ReturnUrl = returnUrl;
@@ -202,14 +183,20 @@ namespace TicketSalesSystem.Controllers
 
 
 
-        // 🚩 GET: 登出
-        public async Task<IActionResult> Logout()
+        // 🚩 會員登出 (GAME OVER)
+        public async Task<IActionResult> MemberLogout()
         {
-            await HttpContext.SignOutAsync("CookieAuth");
-
-            HttpContext.Session.Clear();
-
+            await HttpContext.SignOutAsync("MemberScheme");
+            // 不需要清除整個 Session，因為員工可能還在線
+            // HttpContext.Session.Remove("SomeMemberData"); 
             return RedirectToAction("Index", "Home");
+        }
+
+        // 🚩 員工登出 (下班)
+        public async Task<IActionResult> EmployeeLogout()
+        {
+            await HttpContext.SignOutAsync("EmployeeScheme");
+            return RedirectToAction("Dashboard", "Admin");
         }
     }
 }

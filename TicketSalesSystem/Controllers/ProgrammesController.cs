@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -22,6 +23,7 @@ namespace TicketSalesSystem.Controllers
             _fileService = fileService;
         }
 
+        [Authorize(AuthenticationSchemes = "MemberScheme")]
         // GET: Programmes
         public async Task<IActionResult> Index()
         {
@@ -52,6 +54,7 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
+        [Authorize(AuthenticationSchemes = "MemberScheme")]
         // GET: Programmes/Details/5
         public async Task<IActionResult> Details(string id)
         {
@@ -73,6 +76,7 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
         public async Task<IActionResult> AdminIndex()
         {
             // 後台通常不進行狀態過濾 (Where)，以便管理所有活動
@@ -99,7 +103,7 @@ namespace TicketSalesSystem.Controllers
 
 
 
-
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
         // POST: Programmes/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,C")]
     public class ReplyController : Controller
     {
         private readonly TicketsContext _context;

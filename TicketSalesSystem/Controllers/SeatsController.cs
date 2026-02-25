@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -15,6 +16,7 @@ using TicketSalesSystem.ViewModel.Booking;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "MemberScheme")]
     public class SeatsController : Controller
 
     {
@@ -187,23 +189,6 @@ namespace TicketSalesSystem.Controllers
 
 
 
-        //選擇場次(顯示)
-        public async Task<IActionResult> IndexTest(string id)
-        {
-            var session = await _seatService.GetSessionsAsync();
-            ViewBag.Session = session;
-            return View();
-        }
-
-        //AJAX抓取票區(取得)
-        [HttpGet]
-        public async Task<IActionResult> GetAreasBySession(string sessionId)
-        {
-            var areas = await _seatService.GetAreasBySession(sessionId);
-
-            return Json(areas);
-        }
-
 
 
         [HttpPost]
@@ -366,7 +351,24 @@ namespace TicketSalesSystem.Controllers
             }
         }
 
-       
+
+
+        ////選擇場次(顯示)
+        //public async Task<IActionResult> IndexTest(string id)
+        //{
+        //    var session = await _seatService.GetSessionsAsync();
+        //    ViewBag.Session = session;
+        //    return View();
+        //}
+
+        ////AJAX抓取票區(取得)
+        //[HttpGet]
+        //public async Task<IActionResult> GetAreasBySession(string sessionId)
+        //{
+        //    var areas = await _seatService.GetAreasBySession(sessionId);
+
+        //    return Json(areas);
+        //}
     }
 
 }

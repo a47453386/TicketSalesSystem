@@ -1,0 +1,169 @@
+﻿@model TicketSalesSystem.Models.Question
+
+@{
+    ViewData["Title"] = "QUEST DETAILS";
+    Layout = "_UserLayout"; 
+}
+
+@* 🚩 像素風 CSS 強化 *@
+<style>
+    .pixel-details-container {
+        background-color: #1a1a1a;
+        border: 4px solid #fff;
+        padding: 30px;
+        box-shadow: 10px 10px 0px #000;
+        color: white;
+    }
+
+    /* 任務狀態標籤 */
+    .pixel-status-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border: 2px solid #fff;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+    }
+
+    .status-pending {
+        background-color: #ffcc00;
+        color: #000;
+    }
+
+    .status-resolved {
+        background-color: #00cc66;
+        color: #fff;
+    }
+
+    /* 對話氣泡框 (RPG 風格) */
+    .dialogue-box {
+        border: 4px solid #fff;
+        background-color: #000;
+        padding: 20px;
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+        .dialogue-box::before {
+            content: "[ PLAYER INQUIRY ]";
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #1a1a1a;
+            padding: 0 10px;
+            color: var(--pixel-yellow);
+            font-size: 0.75rem;
+        }
+
+    /* 管理員回覆框 (反色設計) */
+    .admin-reply-box {
+        border: 4px solid var(--pixel-blue, #0099ff);
+        padding: 20px;
+        margin-left: 30px;
+        margin-bottom: 20px;
+        background-color: #0d0d0d;
+    }
+
+        .admin-reply-box::before {
+            content: "[ STAFF RESPONSE ]";
+            color: var(--pixel-blue, #0099ff);
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+    .time-stamp {
+        font-family: monospace;
+        font-size: 0.7rem;
+        color: #666;
+        text-align: right;
+    }
+</style>
+
+<div class="container mt-5 mb-5 font-pixel">
+    @* --- 麵包屑 --- *@
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="MyList" class="pixel-link">我的問題清單</a></li>
+            <li class="breadcrumb-item active text-white">詳細資訊</li>
+        </ol>
+    </nav>
+
+    <div class="pixel-details-container">
+        @* --- 頂部資訊：類型與狀態 --- *@
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h2 class="text-pixel-yellow mb-1">@Model.QuestionType?.QuestionTypeName</h2>
+                <p class="text-white-50 small">TICKET_ID: @Model.QuestionID</p>
+            </div>
+            @* 抓取最後一個回覆的狀態 *@
+            @{
+                var lastStatus = Model.Reply.LastOrDefault()?.ReplyStatus?.ReplyStatusName ?? "PENDING";
+                var statusClass = lastStatus.Contains("結案") || lastStatus.Contains("已解決") ? "結案" : "已解決";
+            }
+            <div class="pixel-status-badge @statusClass">
+                STATUS: @lastStatus
+            </div>
+        </div>
+
+        <hr class="border-secondary my-4" />
+
+        @* --- 玩家原始提問 --- *@
+        <div class="dialogue-box">
+            <div class="fs-5 mb-3">
+                @Model.QuestionTitle
+            </div>
+            <div class="time-stamp">
+                SEND_TIME: @Model.CreatedTime.ToString("yyyy-MM-dd HH:mm")
+            </div>
+        </div>
+
+        @* --- 管理員回覆列表 (過濾後) --- *@
+        <div class="reply-section mt-5">
+            <h5 class="text-pixel-blue mb-4"><i class="bi bi-chat-dots-fill me-2"></i>MESSAGES FROM STAFF</h5>
+
+            @if (Model.Reply == null || !Model.Reply.Any())
+            {
+                <div class="text-center py-4 border border-secondary dashed">
+                    <p class="text-muted mb-0">請稍候，管理員正在趕來的路上...</p>
+                    <small class="text-muted">[ NO RESPONSE YET ]</small>
+                </div>
+            }
+            else
+            {
+                @foreach (var reply in Model.Reply)
+                {
+                    <div class="admin-reply-box shadow">
+                        <div class="mb-3">
+                            @reply.ReplyDescription
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-pixel-blue">
+                                <i class="bi bi-person-badge me-1"></i> @(reply.Employee?.Name ?? "系統管理員")
+                            </span>
+                            <span class="time-stamp">
+                                @reply.CreatedTime.ToString("yyyy-MM-dd HH:mm")
+                            </span>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        @* --- 底部操作區 --- *@
+        <div class="mt-5 pt-4 border-top border-secondary d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-pixel-secondary">
+                <i class="bi bi-arrow-left"></i> BACK TO LIST
+            </a>
+
+            @* 如果還沒結案，可以顯示追加提問按鈕 (可選) *@
+            @if (lastStatus != "已結案")
+            {
+                <button class="btn btn-pixel-primary" onclick="alert('追加提問功能開發中...')">
+                    <i class="bi bi-plus-circle"></i> SEND FOLLOW-UP
+                </button>
+            }
+        </div>
+    </div>
+</div>

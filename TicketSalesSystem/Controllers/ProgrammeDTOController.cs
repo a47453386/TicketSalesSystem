@@ -1,4 +1,5 @@
 ﻿using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ using TicketSalesSystem.ViewModel.Programme.EditProgramme;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
     [Route("ProgrammeDTO/[action]")]
     public class ProgrammeDTOController : Controller
     {

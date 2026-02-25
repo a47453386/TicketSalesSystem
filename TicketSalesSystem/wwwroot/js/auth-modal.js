@@ -13,9 +13,12 @@ function openLoginModal() {
     var myModal = new bootstrap.Modal(modalEl);
     myModal.show();
 
+    $('#loginModalBody').html('<div class="text-center py-5"><div class="spinner-border text-info"></div><div class="mt-3 text-white">LOADING...</div></div>');
+    myModal.show();
+
     // 3. 使用 AJAX 抓取內容，並把 returnUrl 帶過去
     $.get('/Login/MemberLogin', { returnUrl: returnUrl }, function (data) {
-        $('#loginModalBody').html(data);
+        $('#loginModalBody').hide().html(data).fadeIn(200);
 
         // 重新解析驗證標籤
         if (typeof $.validator !== 'undefined' && typeof $.validator.unobtrusive !== 'undefined') {

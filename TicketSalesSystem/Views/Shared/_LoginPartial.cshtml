@@ -4,40 +4,161 @@
     Layout = null;
 }
 
-<div class="px-4 pb-5 pt-2">
+@* 🚩 像素風 CSS (建議將此區塊移動到你的 site.css 檔案中，方便全站管理) 
+    這裡為了方便示範直接寫在頁面上。
+*@
+<style>
+    /* 定義像素變數 (如果 site.css 已有定義可移除) */
+    :root {
+        --pixel-yellow: #ffcc00;
+        --pixel-blue: #0099ff;
+        --pixel-red: #ff3333;
+        --pixel-dark: #212529;
+        --pixel-border: 4px solid #000;
+        --pixel-shadow: 6px 6px 0px #000;
+        --pixel-shadow-active: 2px 2px 0px #000;
+    }
+
+    /* 像素容器 */
+    .pixel-login-container {
+        color: white;
+        font-family: 'Press Start 2P', cursive, monospace; /* 建議引入像素字體 */
+    }
+
+    /* 像素圖示盒子 */
+    .pixel-icon-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        background-color: var(--pixel-yellow);
+        color: #000;
+        border: var(--pixel-border);
+        /* 像素化硬陰影 */
+        box-shadow: var(--pixel-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    /* 像素輸入框 */
+    .pixel-input {
+        border: var(--pixel-border) !important;
+        border-radius: 0 !important; /* 移除圓角 */
+        padding: 10px;
+        font-family: monospace;
+        background-color: #fff;
+        color: #000;
+        box-shadow: 3px 3px 0px #000;
+    }
+
+        .pixel-input:focus {
+            outline: none;
+            box-shadow: 3px 3px 0px var(--pixel-yellow);
+            border-color: var(--pixel-yellow) !important;
+        }
+
+    /* 像素標籤 */
+    .pixel-label {
+        color: var(--pixel-yellow);
+        margin-bottom: 5px;
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    /* 像素主按鈕 (藍色版) */
+    .btn-pixel-primary {
+        background-color: var(--pixel-blue);
+        color: white;
+        border: var(--pixel-border);
+        border-radius: 0 !important;
+        padding: 12px;
+        font-weight: bold;
+        box-shadow: var(--pixel-shadow);
+        transition: all 0.1s;
+        position: relative;
+        top: 0;
+        left: 0;
+    }
+        /* 按鈕按下的效果 */
+        .btn-pixel-primary:active {
+            box-shadow: var(--pixel-shadow-active);
+            top: 4px;
+            left: 4px;
+        }
+
+        .btn-pixel-primary:hover {
+            color: var(--pixel-yellow);
+        }
+
+    /* 錯誤訊息像素化 */
+    .alert-pixel-danger {
+        background-color: var(--pixel-red);
+        color: white;
+        border: var(--pixel-border);
+        border-radius: 0;
+        font-size: 0.8rem;
+    }
+
+    .text-pixel-danger {
+        color: var(--pixel-red) !important;
+        font-family: monospace;
+    }
+
+    /* 底部連結 */
+    .pixel-divider {
+        border-top: 4px dashed #555;
+    }
+
+    .pixel-link {
+        color: var(--pixel-yellow);
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+    }
+
+        .pixel-link:hover {
+            color: white;
+            border-bottom: 2px solid var(--pixel-yellow);
+        }
+</style>
+
+<div class="px-4 pb-5 pt-4 pixel-login-container">
     <div class="text-center mb-4">
-        <div class="bg-primary text-white d-inline-block rounded-circle p-3 mb-3 shadow">
-            <i class="bi bi-person-fill fs-2"></i>
+        @* 🚩 修改：像素圖示盒子 *@
+        <div class="pixel-icon-box">
+            <i class="bi bi-person-fill fs-1"></i>
         </div>
-        <h4 class="fw-bold">歡迎回來</h4>
-        <p class="text-muted small">請輸入您的帳號密碼以繼續購票</p>
+        @* 修改文字顏色以適應深色背景 *@
+        <h4 class="fw-bold text-white">WELCOME BACK!</h4>
+        <p class="text-white-50 small" style="font-family: monospace;">INSERT COIN TO CONTINUE...</p>
     </div>
 
-    @* 🚩 指向 LoginController 的 MemberLogin Action *@
     <form asp-controller="Login" asp-action="MemberLogin" method="post">
-        @* 處理 ReturnUrl，讓使用者登入後能回到原位 *@
         <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
-        
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Account" class="form-control" placeholder="Account" />
-            <label asp-for="Account">會員帳號</label>
-            <span asp-validation-for="Account" class="text-danger small x-small"></span>
+        @* 🚩 修改：像素風錯誤提示 *@
+        <div asp-validation-summary="ModelOnly" class="alert alert-pixel-danger py-2 small mb-3"></div>
+
+        @* 🚩 修改：移除 form-floating，改用傳統標籤 + 像素輸入框 *@
+        <div class="mb-4 text-start">
+            <label asp-for="Account" class="pixel-label">PLAYER ACCOUNT</label>
+            <input asp-for="Account" class="form-control pixel-input" placeholder="輸入帳號..." />
+            <span asp-validation-for="Account" class="text-pixel-danger small x-small mt-1 d-block"></span>
         </div>
 
-        <div class="form-floating mb-4">
-            <input asp-for="Password" class="form-control" type="password" placeholder="Password" />
-            <label asp-for="Password">登入密碼</label>
-            <span asp-validation-for="Password" class="text-danger small x-small"></span>
+        <div class="mb-4 text-start">
+            <label asp-for="Password" class="pixel-label">PASSWORD</label>
+            <input asp-for="Password" class="form-control pixel-input" type="password" placeholder="輸入密碼..." />
+            <span asp-validation-for="Password" class="text-pixel-danger small x-small mt-1 d-block"></span>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm rounded-3">
-            立即登入 <i class="bi bi-arrow-right-short"></i>
+        @* 🚩 修改：像素風按鈕 *@
+        <button type="submit" class="btn btn-pixel-primary w-100 fw-bold">
+            START GAME <i class="bi bi-caret-right-fill"></i>
         </button>
 
-        <div class="mt-4 text-center small text-muted border-top pt-3">
-            還沒有帳號嗎？ <a asp-controller="Members" asp-action="Create" class="text-primary fw-bold text-decoration-none">立即註冊</a>
+        @* 🚩 修改：底部像素分隔線與連結 *@
+        <div class="mt-4 text-center small text-white-50 pixel-divider pt-3" style="font-family: monospace;">
+            NEW PLAYER? <a asp-controller="UserMembers" asp-action="Create" class="pixel-link fw-bold">CREATE ACCOUNT(註冊)</a>
         </div>
     </form>
 </div>
