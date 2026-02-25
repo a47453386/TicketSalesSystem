@@ -193,3 +193,33 @@ a {
 .bi {
     color: var(--pixel-blue);
 }
+
+.server-status-bar {
+    background: #000;
+    border-bottom: 2px solid #333;
+    padding: 5px 0;
+    font-size: 0.75rem;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.dot-blink {
+    animation: pixel-blink 1s infinite;
+    margin-right: 5px;
+}
+
+@@keyframes pixel-blink {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.text-pixel-yellow {
+    color: #ffcc00;
+}
+
+</style >

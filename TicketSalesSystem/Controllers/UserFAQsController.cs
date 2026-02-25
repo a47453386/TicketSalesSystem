@@ -6,7 +6,7 @@ using TicketSalesSystem.Service.ID;
 
 namespace TicketSalesSystem.Controllers
 {
-    [Authorize(AuthenticationSchemes = "MemberScheme")]
+   
     public class UserFAQsController : Controller
     {
         private readonly TicketsContext _context;

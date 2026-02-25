@@ -83,7 +83,7 @@
                                 @* 情況 B-2：會員已登入 - 顯示藍色玩家選單 *@
                                 <li class="nav-item dropdown ms-3">
                                     <a class="nav-link dropdown-toggle pixel-nav-link" href="#" id="memberDropdown" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-person-circle"></i> PLAYER: @UserAccessor.GetUserName()
+                                        <i class="bi bi-person-circle"></i> @UserAccessor.GetUserName()
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-none pixel-dropdown-menu mt-2">
                                         <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Orders" asp-action="UserIndex">我的訂單</a></li>
@@ -123,7 +123,7 @@
             @* 🚩 加入 modal-md 確保寬度足夠 *@
             <div class="modal-content pixel-modal-content">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title text-pixel-yellow" style="font-family: 'Press Start 2P', cursive, monospace;">PLAYER LOGIN</h5>
+                    <h5 class="modal-title text-pixel-yellow" style="font-family: 'Press Start 2P', cursive, monospace;">會員登入</h5>
                     @* 🚩 btn-close-white 確保在深色背景下看得到叉叉 *@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -141,6 +141,23 @@
 
     @* 🚩 修改 Footer：加入 pixel-footer *@
     <footer class="pixel-footer text-muted">
+        <div class="server-status-bar font-pixel">
+            <div class="container d-flex justify-content-between align-items-center text-end">
+                
+                <div class="d-flex align-items-center gap-3 ">
+                    <div class="status-item">
+                        <span id="load-dot" class="dot-blink">●</span>
+                        人流狀態: <span id="server-load" class="text-success">穩定</span>
+                    </div>
+                    <div class="status-item d-none d-sm-block">
+                        | 在線率: <span id="uptime-val" class="text-pixel-yellow">99.98</span>%
+                    </div>
+                    <div class="status-item">
+                        | <span id="sync-clock" class="text-white-50">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="container text-center">
             &copy; 2026 - 8-BIT TICKET SYSTEM - PRESS START TO CONTINUE
         </div>

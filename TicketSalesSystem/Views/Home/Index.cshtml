@@ -11,6 +11,35 @@
         object-fit: cover; /* 🚩 關鍵：這會讓圖片填滿空間但不變形 */
         object-position: center; /* 讓圖片中心對準容器 */
     }
+
+    .public-status-hud {
+        background: rgba(0, 0, 0, 0.8);
+        border-bottom: 2px solid #333;
+        border-top: 2px solid #333;
+        color: #fff;
+        letter-spacing: 1px;
+    }
+
+    /* 點點閃爍動畫 */
+    .dot-blink {
+        animation: blink 1s infinite;
+        color: #00ffcc;
+        margin-right: 5px;
+    }
+
+    @@keyframes blink {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.3;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
 </style>
 
 <div id="carouselBanner" class="carousel slide" data-bs-ride="carousel">
@@ -28,10 +57,10 @@
             var a = item == Model.First() ? "active" : "";
 
             <div class="carousel-item @a">
-               <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID"> 
-                   <img src="~/Photos/CoverImage/@item.CoverImage" class="d-block w-100"  alt="@item.ProgrammeName">
+                <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID">
+                    <img src="~/Photos/CoverImage/@item.CoverImage" class="d-block w-100" alt="@item.ProgrammeName">
                 </a>
-               
+
             </div>
         }
     </div>

@@ -50,48 +50,53 @@ namespace TicketSalesSystem.Service
         //票券釋出
         private async Task CleanupExpiredTicketsAsync(TicketsContext context)
         {
-            _logger.LogInformation("正在檢查過期佔用票券...");
-            var expirationTime = DateTime.Now.AddMinutes(-10);
+            _logger.LogInformation("正在檢查過期佔用訂單與票券...");
+            // 🚩 建議加一點緩衝（例如 11 分鐘），給前端 10 分鐘倒數一點餘裕
+            var expirationTime = DateTime.Now.AddMinutes(-11);
 
-            // 我們需要知道哪些區域要補回多少庫存， 找出狀態為 'P' (Pending) 且超時的票券，按區域分組統計
-            var expiredGroups = await context.Tickets
-                .Where(t => t.TicketsStatusID == "P" && t.CreatedTime <= expirationTime)
-                .GroupBy(t => t.TicketsAreaID)
-                .Select(g => new { AreaID = g.Key, Count = g.Count() })
+            // 1. 找出所有「待付款」且「已過期」的訂單 ID 及其票券資訊
+            var expiredOrdersData = await context.Order
+                .Where(o => o.OrderStatusID == "P" && o.OrderCreatedTime <= expirationTime && o.PaymentStatus == false)
+                .Select(o => new {
+                    o.OrderID,
+                    Tickets = o.Tickets.Select(t => new { t.TicketsID, t.TicketsAreaID })
+                })
                 .ToListAsync();
 
-            if (expiredGroups.Any())
+            if (!expiredOrdersData.Any()) return;
+
+            var orderIds = expiredOrdersData.Select(x => x.OrderID).ToList();
+            var ticketIds = expiredOrdersData.SelectMany(x => x.Tickets).Select(t => t.TicketsID).ToList();
+
+            // 按區域計算要歸還的庫存
+            var areaReturnGroups = expiredOrdersData
+                .SelectMany(x => x.Tickets)
+                .GroupBy(t => t.TicketsAreaID)
+                .Select(g => new { AreaID = g.Key, Count = g.Count() });
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
             {
-                // 使用 Transaction 確保庫存歸還與狀態更新一致
-                using var transaction = await context.Database.BeginTransactionAsync();
-                try
-                {
-                    foreach (var group in expiredGroups)
-                    {
-                        //原子性歸還庫存：Remaining = Remaining + N
-                        await context.Database.ExecuteSqlInterpolatedAsync(
-                            $"UPDATE TicketsArea SET Remaining = Remaining + {group.Count} WHERE TicketsAreaID = {group.AreaID}"
-                        );
-                    }
+                //C# 負責決策：判定哪些訂單超時了，並發出「處決」指令（將狀態改為 N）。
+                //Trigger 負責體力活：只要看到票券狀態變了，就自動去後台把庫存加回去。
 
-                    // 2. 將票券設為失效 'N'(可售)
-                    var affectedTickets = await context.Tickets
-                        .Where(t => t.TicketsStatusID == "P" && t.CreatedTime <= expirationTime)
-                        .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "N"));
+                // 1. 只改票券狀態 (這會觸發 Trigger 自動加回庫存)
+                await context.Tickets
+                    .Where(t => ticketIds.Contains(t.TicketsID))
+                    .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "N"));
 
-                    // 3. 將訂單設為失效 'N' (未付款且過期)
-                    var affectedOrders = await context.Order
-                        .Where(o => o.OrderStatusID != "N" && o.PaymentStatus == false && o.OrderCreatedTime <= expirationTime)
-                        .ExecuteUpdateAsync(s => s.SetProperty(o => o.OrderStatusID, "N"));
+                // 2. 只改訂單狀態
+                await context.Order
+                    .Where(o => orderIds.Contains(o.OrderID))
+                    .ExecuteUpdateAsync(s => s.SetProperty(o => o.OrderStatusID, "N"));
 
-                    await transaction.CommitAsync();
-                    _logger.LogInformation($"[庫存回收] 成功歸還 {expiredGroups.Sum(g => g.Count)} 個座位，取消 {affectedOrders} 筆過期訂單。");
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    _logger.LogError(ex, "回收過期票券庫存時失敗");
-                }
+                await transaction.CommitAsync();
+                _logger.LogInformation($"[回收成功] 取消訂單: {orderIds.Count} 筆, 釋出票券: {ticketIds.Count} 張。");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "執行庫存回收事務時發生異常");
             }
         }
 

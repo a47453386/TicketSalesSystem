@@ -65,8 +65,8 @@
 
     <div class="top-status-bar d-flex justify-content-between align-items-center">
         <div>
-            <span class="text-success">● SYSTEM_STATUS: STABLE</span> |
-            <span class="text-white-50">UPTIME: 99.9%</span>
+            <span class="text-warning">● 欲購票請先手機驗證</span>
+
         </div>
         @* <div class="text-pixel-yellow">
             <i class="bi bi-person-fill"></i> PLAYER: @ViewBag.MemberName
@@ -89,7 +89,7 @@
                 <h4 class="neon-text">發問數</h4>
                 <div class="display-6 text-danger">@ViewBag.QuestionCount</div>
                 @* <p class="small text-white-50">PENDING TASKS</p> *@
-                <a asp-controller="Questions" asp-action="Index" class="btn btn-sm btn-outline-warning w-100 mt-2">查看</a>
+                <a asp-controller="UserQuestions" asp-action="MyList" class="btn btn-sm btn-outline-warning w-100 mt-2">查看</a>
             </div>
         </div>
 
@@ -147,17 +147,22 @@
                         <span class="time-stamp text-white-50">@ViewBag.LoginTime</span>
                     </li>
                     <li class="mb-3 border-bottom border-secondary pb-2">
-                        <span class="text-warning">[問題]</span> <br>
+                        <span class="text-warning">[問題]</span> <br/>
                         總提問數
-                        <span class="time-stamp text-white-50">@ViewBag.QuestionTotal</span><br>
+                        <span class="time-stamp text-white-50">@ViewBag.QuestionTotal</span><br/>
                         今日新增提問
-                        <span class="time-stamp text-white-50">@ViewBag.QuestionToday</span>
+                        <span class="time-stamp text-white-50">@ViewBag.QuestionToday</span><br/>
                         最新提問時間
                         <span class="time-stamp text-white-50">@ViewBag.LatestQuestionTime</span>
                         
                     </li>
                     <li class="mb-3 border-bottom border-secondary pb-2">
                         <span class="text-success">[訂單]</span> 購買了 2 張門票<br />
+                        總訂單數
+                        <span class="time-stamp text-white-50">@ViewBag.OrderTotal</span><br />
+                        今日新增訂單
+                        <span class="time-stamp text-white-50">@ViewBag.OrderToday</span><br />
+                        最新訂購時間
                         <span class="time-stamp text-white-50">@ViewBag.LatestOrderTime</span>
                     </li>
                 </ul>
@@ -167,6 +172,6 @@
     </div>
 
     <div class="mt-2 py-2 border-top border-bottom border-secondary text-white-50 overflow-hidden" style="white-space: nowrap;">
-        <marquee scrollamount="5">>>> SYSTEM_MSG: 歡迎來到售票系統控制台... 請確保您的帳號安全... 下次搶票時間為 2026/03/01... <<<</marquee>
+        <marquee scrollamount="5">>>> 系統訊息: 歡迎來到售票系統會員中心...預售票請先手機認證...無手機驗證無法購買票券... <<<</marquee>
     </div>
 </div>

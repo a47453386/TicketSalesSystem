@@ -6,7 +6,7 @@ using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
-    [Authorize(AuthenticationSchemes = "MemberScheme")]
+    
     public class UserPublicNoticesController : Controller
     {
         private readonly TicketsContext _context;

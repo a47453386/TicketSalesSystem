@@ -23,7 +23,7 @@ namespace TicketSalesSystem.Controllers
             _fileService = fileService;
         }
 
-        [Authorize(AuthenticationSchemes = "MemberScheme")]
+        
         // GET: Programmes
         public async Task<IActionResult> Index()
         {
@@ -54,7 +54,7 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
-        [Authorize(AuthenticationSchemes = "MemberScheme")]
+        
         // GET: Programmes/Details/5
         public async Task<IActionResult> Details(string id)
         {

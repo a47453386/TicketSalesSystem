@@ -128,8 +128,8 @@
             <i class="bi bi-person-fill fs-1"></i>
         </div>
         @* 修改文字顏色以適應深色背景 *@
-        <h4 class="fw-bold text-white">WELCOME BACK!</h4>
-        <p class="text-white-50 small" style="font-family: monospace;">INSERT COIN TO CONTINUE...</p>
+        <h4 class="fw-bold text-white">立即登入</h4>
+        @* <p class="text-white-50 small" style="font-family: monospace;">INSERT COIN TO CONTINUE...</p> *@
     </div>
 
     <form asp-controller="Login" asp-action="MemberLogin" method="post">
@@ -140,25 +140,27 @@
 
         @* 🚩 修改：移除 form-floating，改用傳統標籤 + 像素輸入框 *@
         <div class="mb-4 text-start">
-            <label asp-for="Account" class="pixel-label">PLAYER ACCOUNT</label>
+            <label asp-for="Account" class="pixel-label">帳號</label>
             <input asp-for="Account" class="form-control pixel-input" placeholder="輸入帳號..." />
             <span asp-validation-for="Account" class="text-pixel-danger small x-small mt-1 d-block"></span>
         </div>
 
         <div class="mb-4 text-start">
-            <label asp-for="Password" class="pixel-label">PASSWORD</label>
+            <label asp-for="Password" class="pixel-label">密碼</label>
             <input asp-for="Password" class="form-control pixel-input" type="password" placeholder="輸入密碼..." />
             <span asp-validation-for="Password" class="text-pixel-danger small x-small mt-1 d-block"></span>
         </div>
 
         @* 🚩 修改：像素風按鈕 *@
         <button type="submit" class="btn btn-pixel-primary w-100 fw-bold">
-            START GAME <i class="bi bi-caret-right-fill"></i>
+           登入 <i class="bi bi-caret-right-fill"></i>
         </button>
 
         @* 🚩 修改：底部像素分隔線與連結 *@
         <div class="mt-4 text-center small text-white-50 pixel-divider pt-3" style="font-family: monospace;">
-            NEW PLAYER? <a asp-controller="UserMembers" asp-action="Create" class="pixel-link fw-bold">CREATE ACCOUNT(註冊)</a>
-        </div>
+            還沒有帳戶嗎?? <a asp-controller="UserMembers" asp-action="Create" class="pixel-link fw-bold">立即註冊</a><br />
+            忘記密碼?? <a asp-controller="UserMembers" asp-action="Create" class="pixel-link fw-bold">立即重設</a>
+
+        </div>        
     </form>
 </div>

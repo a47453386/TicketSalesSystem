@@ -350,7 +350,23 @@ namespace TicketSalesSystem.Controllers
                 return Json(new { success = false, message = "系統更新異常：" + detail });
             }
         }
+//        // 1. 先抓出訂單狀態與創建時間
+//        var orderInfo = await _context.Order
+//            .AsNoTracking()
+//            .Where(o => o.OrderID == request.OrderID)
+//            .Select(o => new { o.OrderStatusID, o.OrderCreatedTime })
+//            .FirstOrDefaultAsync();
 
+//if (orderInfo == null) return Json(new { success = false, message = "訂單不存在" });
+
+//// 🚩 核心邏輯：手動判斷是否超時（例如 10 分鐘）
+//var expireTime = orderInfo.OrderCreatedTime.AddMinutes(10);
+//if (DateTime.Now > expireTime && orderInfo.OrderStatusID == "P") // P 代表待付款
+//{
+//    // 如果超時了，在這裡順便把資料庫改為失效 "N"
+//    await _orderService.SetOrderExpiredAsync(request.OrderID); 
+//    return Json(new { success = false, message = "遊戲結束！訂單已超時失效，請重新購票。" });
+//}
 
 
         ////選擇場次(顯示)

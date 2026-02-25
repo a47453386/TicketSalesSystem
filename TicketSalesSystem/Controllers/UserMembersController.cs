@@ -72,7 +72,7 @@ namespace TicketSalesSystem.Controllers
                 .CountAsync(q => q.MemberID == memberId);
 
             //今日新增訂單 (Today's Order)            
-            ViewBag.QuestionToday = await _context.Order
+            ViewBag.OrderToday = await _context.Order
                 .CountAsync(q => q.MemberID == memberId && q.OrderCreatedTime >= today);
             
             //最新訂單時間
