@@ -25,11 +25,73 @@ namespace TicketSalesSystem.Controllers
 
         public async Task<IActionResult> Index()
         {
+            // 1. 取得當前登入玩家的 ID
             string? memberId = _userAccessorService.GetMemberId();
+            if (string.IsNullOrEmpty(memberId))
+            {
+                return RedirectToAction("MemberLogin", "Login");
+            }
+
+            // 2. 抓取會員本人物件 (傳給 View 當 Model)
+            // 🚩 注意：這解決了之前的 List<Member> 錯誤，只抓「一個」
+            var member = await _context.Member
+                .FirstOrDefaultAsync(m => m.MemberID == memberId);
+
+            if (member == null) return NotFound();
+
+            // 3. 數據統計區 (用於儀表板方塊)
             ViewBag.OrderCount = await _context.Order.CountAsync(o => o.MemberID == memberId);
             ViewBag.QuestionCount = await _context.Question.CountAsync(q => q.MemberID == memberId);
-            ViewBag.PlayerName = _userAccessorService.GetUserName();
-            return View();
+            ViewBag.MemberName = member.Name;
+
+            // 4. 抓取最新日誌時間點
+            
+            //總提問數 (All Quests)
+            ViewBag.QuestionTotal = await _context.Question
+                .CountAsync(q => q.MemberID == memberId);
+
+            //今日新增提問 (Today's Quests)
+            var today = DateTime.Today;
+            ViewBag.QuestionToday = await _context.Question
+                .CountAsync(q => q.MemberID == memberId && q.CreatedTime >= today);
+
+            //最新提問時間
+            var latestQuestion = await _context.Question
+                .Where(q => q.MemberID == memberId)
+                .OrderByDescending(q => q.CreatedTime)
+                .Select(q => q.CreatedTime)
+                .FirstOrDefaultAsync();
+
+           
+            var OrderSum = await _context.Order
+                .Where(q => q.MemberID == memberId)
+                .CountAsync();
+
+            //總訂單數 (All Order)
+            ViewBag.OrderTotal = await _context.Order
+                .CountAsync(q => q.MemberID == memberId);
+
+            //今日新增訂單 (Today's Order)            
+            ViewBag.QuestionToday = await _context.Order
+                .CountAsync(q => q.MemberID == memberId && q.OrderCreatedTime >= today);
+            
+            //最新訂單時間
+            var latestOrder = await _context.Order
+                .Where(o => o.MemberID == memberId)
+                .OrderByDescending(o => o.OrderCreatedTime)
+                .Select(o => o.OrderCreatedTime)
+                .FirstOrDefaultAsync();
+
+            // 5. 格式化時間並存入 ViewBag
+            ViewBag.LatestQuestionTime = latestQuestion == default ? "---" : latestOrder.ToString("yyyy/MM/dd");
+            ViewBag.LatestOrderTime = latestOrder == default ? "---" : latestOrder.ToString("yyyy/MM/dd");
+
+            // 6. 處理登入時間 (從 Session 抓取真正的登入時間)
+            ViewBag.LoginTime = HttpContext.Session.GetString("LoginTime")
+                                ?? DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+
+            // 🚀 回傳 Model
+            return View(member);
         }
 
 

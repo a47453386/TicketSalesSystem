@@ -1,4 +1,5 @@
-﻿@{
+﻿@model TicketSalesSystem.Models.Member
+@{
     ViewData["Title"] = "PLAYER DASHBOARD";
     Layout = "_UserLayout";
 }
@@ -67,51 +68,70 @@
             <span class="text-success">● SYSTEM_STATUS: STABLE</span> |
             <span class="text-white-50">UPTIME: 99.9%</span>
         </div>
-        <div class="text-pixel-yellow">
-            <i class="bi bi-person-fill"></i> PLAYER: @ViewBag.PlayerName
-        </div>
+        @* <div class="text-pixel-yellow">
+            <i class="bi bi-person-fill"></i> PLAYER: @ViewBag.MemberName
+        </div> *@
     </div>
 
     <div class="row">
 
         <div class="col-md-3">
             <div class="dashboard-tile" style="border-color: #ff00ff;">
-                <div class="tile-header"><span>$ REVENUE</span></div>
-                <h4 class="neon-text">INVENTORY</h4>
+                <div class="tile-header"><span>訂單中心</span></div>
+                <h4 class="neon-text">累績數量</h4>
                 <div class="display-6 neon-yellow">@ViewBag.OrderCount</div>
-                <p class="small text-white-50">TICKETS OWNED</p>
-                <a asp-controller="Orders" asp-action="UserIndex" class="btn btn-sm btn-outline-info w-100 mt-2">進入背包</a>
+                @* <p class="small text-white-50">訂單中心</p> *@
+                <a asp-controller="UserOrders" asp-action="UserIndex" class="btn btn-sm btn-outline-info w-100 mt-2">訂單查詢</a>
             </div>
 
             <div class="dashboard-tile" style="border-color: var(--pixel-yellow);">
-                <div class="tile-header"><span>! EVENTS</span></div>
-                <h4 class="neon-text">QUESTS</h4>
+                <div class="tile-header"><span>問題中心</span></div>
+                <h4 class="neon-text">發問數</h4>
                 <div class="display-6 text-danger">@ViewBag.QuestionCount</div>
-                <p class="small text-white-50">PENDING TASKS</p>
-                <a asp-controller="Questions" asp-action="Index" class="btn btn-sm btn-outline-warning w-100 mt-2">查看任務</a>
+                @* <p class="small text-white-50">PENDING TASKS</p> *@
+                <a asp-controller="Questions" asp-action="Index" class="btn btn-sm btn-outline-warning w-100 mt-2">查看</a>
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="dashboard-tile" style="min-height: 410px;">
-                <div class="tile-header">
+                @* <div class="tile-header">
                     <span><i class="bi bi-activity"></i> SYSTEM_CORE</span>
                     <span class="text-success">ACTIVE</span>
-                </div>
+                </div> *@
                 <div class="text-center py-4">
                     <div class="pixel-icon-box mx-auto mb-3" style="width:120px; height:120px; background: #000; border: 4px solid var(--pixel-blue);">
                         <i class="bi bi-shield-shaded display-1 text-pixel-blue"></i>
                     </div>
-                    <h2 class="text-white fw-bold">玩家資料管理系統</h2>
-                    <p class="text-white-50">KERNEL_STATUS: <span class="text-success">AUTHENTICATED</span></p>
+                    <h2 class="text-white fw-bold">@ViewBag.MemberName</h2>
+                    <h2 class="text-white fw-bold">會員中心</h2>
+                    <p class="text-white-50">手機認證 
+                        <span class="text-success">
+                            @if (Model.IsPhoneVerified)
+                            {
+                                <span class="text-success">[ <i class="bi bi-check-pixel"></i> 已認證 ]</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">[ <i class="bi bi-x-pixel"></i> 尚未認證 ]</span>
+                            }
+                        </span>
+                    </p>
 
                     <div class="mt-4 px-3">
-                        <a asp-action="UserDetail" class="btn btn-pixel-primary w-100 py-3 mb-3">
-                            <i class="bi bi-person-bounding-box me-2"></i> 修改屬性 (EDIT STATS)
+                       @*  <a asp-action="UserDetails" asp-route-id="@Model.MemberID" class="btn btn-pixel-primary w-100 py-3 mb-3">
+                            <i class="bi bi-person-bounding-box me-2"></i> 詳細資訊
                         </a>
                         <div class="d-flex gap-2">
                             <button class="btn btn-outline-secondary btn-sm flex-grow-1">DEBUG</button>
                             <button class="btn btn-outline-danger btn-sm flex-grow-1">LOGOUT</button>
+                        </div> *@
+                        
+                        <div class="d-flex gap-2">
+                            <a asp-action="UserDetails" asp-route-id="@Model.MemberID" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                                <i class="bi bi-person-bounding-box me-2"></i> 詳細資訊
+                            </a>
+                            <button class="btn btn-outline-danger btn-sm flex-grow-1">登出</button>
                         </div>
                     </div>
                 </div>
@@ -120,19 +140,25 @@
 
         <div class="col-md-3">
             <div class="dashboard-tile" style="min-height: 410px; border-color: #00ffcc;">
-                <div class="tile-header"><span>RECENT_LOGS</span></div>
+                <div class="tile-header"><span>最新紀錄</span></div>
                 <ul class="list-unstyled small">
                     <li class="mb-3 border-bottom border-secondary pb-2">
-                        <span class="text-info">[LOGIN]</span> 成功進入系統<br />
-                        <span class="time-stamp text-white-50">13:17:18</span>
+                        <span class="text-info">[登入]</span> 成功進入系統<br />
+                        <span class="time-stamp text-white-50">@ViewBag.LoginTime</span>
                     </li>
                     <li class="mb-3 border-bottom border-secondary pb-2">
-                        <span class="text-warning">[QUEST]</span> 提交了一個諮詢<br />
-                        <span class="time-stamp text-white-50">昨天 10:22</span>
+                        <span class="text-warning">[問題]</span> <br>
+                        總提問數
+                        <span class="time-stamp text-white-50">@ViewBag.QuestionTotal</span><br>
+                        今日新增提問
+                        <span class="time-stamp text-white-50">@ViewBag.QuestionToday</span>
+                        最新提問時間
+                        <span class="time-stamp text-white-50">@ViewBag.LatestQuestionTime</span>
+                        
                     </li>
                     <li class="mb-3 border-bottom border-secondary pb-2">
-                        <span class="text-success">[ORDER]</span> 購買了 2 張門票<br />
-                        <span class="time-stamp text-white-50">2026-02-24</span>
+                        <span class="text-success">[訂單]</span> 購買了 2 張門票<br />
+                        <span class="time-stamp text-white-50">@ViewBag.LatestOrderTime</span>
                     </li>
                 </ul>
             </div>
