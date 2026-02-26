@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using System.Security.Claims;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.ViewModel;
+using TicketSalesSystem.ViewModel.Login;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -14,16 +16,21 @@ namespace TicketSalesSystem.Controllers
     {
         private readonly TicketsContext _context;
         private readonly IUserAccessorService _userAccessorService;
-        public LoginController(TicketsContext context, IUserAccessorService userAccessorService)
+        private readonly IDataProtector _dataProtector;
+        private readonly PasswordHasher<MemberLogin> _passwordHasher;
+
+        public LoginController(TicketsContext context, IUserAccessorService userAccessorService, IDataProtectionProvider dataProtector, PasswordHasher<MemberLogin> passwordHasher)
         {
             _context = context;
             _userAccessorService = userAccessorService;
+            _dataProtector = dataProtector.CreateProtector("PasswordResetPurpose"); ;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpGet]
         public IActionResult MemberLogin(string? returnUrl)
         {
-            // 🚩 1. 檢查是否已有會員證 (這段寫得很好，保留)
+            //檢查是否已有會員證 (這段寫得很好，保留)
             if (_userAccessorService.IsMember())
             {
                 return Redirect(Url.IsLocalUrl(returnUrl) ? returnUrl : "/");
@@ -32,10 +39,10 @@ namespace TicketSalesSystem.Controllers
             ViewBag.ReturnUrl = returnUrl;
             var vm = new VMLogin();
 
-            // 🚩 2. 關鍵判斷：檢查是否為 AJAX 請求 (彈窗呼叫)
+            //檢查是否為 AJAX 請求 (彈窗呼叫)
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                // 🚀 回傳 PartialView，這會徹底無視 _ViewStart 和所有 Layout
+                // 回傳 PartialView，這會徹底無視 _ViewStart 和所有 Layout
                 return PartialView("_LoginPartial", vm);
             }
 
@@ -180,10 +187,7 @@ namespace TicketSalesSystem.Controllers
 
 
 
-
-
-
-        // 🚩 會員登出 (GAME OVER)
+        //會員登出
         public async Task<IActionResult> MemberLogout()
         {
             await HttpContext.SignOutAsync("MemberScheme");
@@ -192,11 +196,117 @@ namespace TicketSalesSystem.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // 🚩 員工登出 (下班)
+        //員工登出
         public async Task<IActionResult> EmployeeLogout()
         {
             await HttpContext.SignOutAsync("EmployeeScheme");
             return RedirectToAction("Dashboard", "Admin");
         }
+
+        //會員忘記密碼(發送重設連結)
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var member = await _context.MemberLogin
+                .Include(m=>m.Member)
+                .FirstOrDefaultAsync(m => m.Member.Email == email);
+
+            if (member == null)
+            {
+                 ModelState.AddModelError("email", "無此信箱，請確認信箱，並重新填寫!!!!");
+                return View();
+            }
+            // 1. 採集指紋 (取現有雜湊密碼的最後 8 碼作為 Security Stamp)
+            string stamp = member.Password.Substring(member.Password.Length - 8);
+
+            // 2. 封裝封包：ID | 過期時間(Ticks) | 指紋
+            string payload = $"{member.MemberID}|{DateTime.UtcNow.AddMinutes(30).Ticks}|{stamp}";
+
+            // 3. 加密成 Token
+            string token = _dataProtector.Protect(payload);
+
+            // 4. 產生修復連結 (導向 ResetPassword)
+            string resetLink = Url.Action("ResetPassword", "Login", new { t = token }, Request.Scheme);
+
+            // TODO: 串接 MailService 發信
+            // _mailService.SendEmail(member.Email, "【系統】帳號存取權修復指令", $"連結：{resetLink}");
+
+            // 暫時在 Console 打印，方便你測試
+            Console.WriteLine($"[DEBUG] Reset Link: {resetLink}");
+            ViewBag.IsSuccess = true;
+            ViewBag.Message = "已發送連結，請確認信箱。";
+            return View();
+        }
+
+        //重設密碼
+        [HttpGet]
+        public IActionResult ResetPassword(string t)
+        {
+            if (string.IsNullOrEmpty(t)) return RedirectToAction("MemberLogin");
+
+            // 將 Token 填入 ViewModel 傳給前端隱藏欄位
+            var vm = new VMResetPassword { Token = t };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(VMResetPassword vm)
+        {
+            if (!ModelState.IsValid) return View(vm);
+
+            try
+            {
+                // 1. 解密憑證
+                string decryptedData = _dataProtector.Unprotect(vm.Token);
+                var parts = decryptedData.Split('|');
+
+                string memberId = parts[0];
+                long expireTicks = long.Parse(parts[1]);
+                string oldStamp = parts[2];
+
+                // 2. 效期檢查
+                if (DateTime.UtcNow.Ticks > expireTicks)
+                {
+                    ModelState.AddModelError("", "修復憑證已失效，請重新申請。");
+                    return View(vm);
+                }
+
+                // 3. 指紋核對 (確保密碼未曾被改過)
+                var member = await _context.MemberLogin
+                    .Include(m=>m.Member)
+                    .FirstOrDefaultAsync(m => m.Member.MemberID == memberId);
+
+                if (member == null) return NotFound();
+
+                string currentStamp = member.Password.Substring(member.Password.Length - 8);
+                if (currentStamp != oldStamp)
+                {
+                    ModelState.AddModelError("", "此連結已過期或已使用過 (Security Stamp Mismatch)。");
+                    return View(vm);
+                }
+
+                // 4. 通過驗證：執行密碼覆蓋
+                member.Password = _passwordHasher.HashPassword(member, vm.NewPassword);
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("MemberLogin", new { msg = "SUCCESS: 通行碼已更新！" });
+            }
+            catch
+            {
+                // 加密格式不對或被竄改會進這裡
+                ModelState.AddModelError("", "無效的修復協定。");
+                return View(vm);
+            }
+        }
+
+
     }
 }

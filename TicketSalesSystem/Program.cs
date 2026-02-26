@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service;
@@ -62,9 +63,11 @@ builder.Services.AddScoped<IQueueService, QueueService>();
 
 builder.Services.AddHttpContextAccessor();
 
-//註冊會員比對服務
+//註冊帳號比對服務
 builder.Services.AddScoped<IUserAccessorService, UserAccessorService>();
 
+//註冊密碼複雜度服務
+builder.Services.AddScoped<PasswordHasher<MemberLogin>>();
 
 //註冊資料保護服務，並指定金鑰存放在專案資料夾下的一個特定目錄
 builder.Services.AddDataProtection()
@@ -111,7 +114,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         // 呼叫你的 SeedData 類別
-        SeedData.Initialize(services);
+        //SeedData.Initialize(services);
     }
     catch (Exception ex)
     {

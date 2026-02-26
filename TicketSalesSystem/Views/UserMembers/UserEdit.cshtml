@@ -4,91 +4,137 @@
     ViewData["Title"] = "修改個人資料";
     Layout = "_UserLayout";
 }
+<style>
+    .pixel-container-box {
+        font-size:1rem;
+    }
+    /* 像素化輸入框群組圖示 */
+    .pixel-input-group-text {
+        background-color: #000 !important;
+        border: 2px solid var(--pixel-blue) !important;
+        border-right: none !important;
+        color: var(--pixel-blue) !important;
+        border-radius: 0 !important;
+    }
+
+    /* 確保 input 與 group-text 接合處也是直角 */
+    .pixel-input {
+        border: 2px solid var(--pixel-blue) !important;
+        border-radius: 0 !important;
+        background-color: #1a1a1a !important;
+        color: #fff !important;
+    }
+
+        .pixel-input:focus {
+            border-color: var(--pixel-pink) !important;
+            box-shadow: 0 0 10px rgba(255, 0, 204, 0.3) !important;
+            outline: none;
+        }
+
+    /* 成功的像素邊框 */
+    .border-pixel-success {
+        border: 2px solid #00ff66 !important;
+    }
+
+    /* 文字懸停變黃 */
+    .hover-yellow:hover {
+        color: var(--pixel-yellow) !important;
+    }
+
+</style>
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-
-            @* 成功訊息提示 *@
+        <div class="col-md-9">
+            @* 🚩 像素風格成功訊息 *@
             @if (TempData["Success"] != null)
             {
-                <div class="alert alert-success border-0 shadow-sm mb-4" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+                <div class="alert bg-dark text-pixel-success border-pixel-success mb-4 font-pixel-small" role="alert">
+                    <i class="bi bi-broadcast-pin me-2 dot-blink"></i> [ 系統指令 ]：@TempData["Success"]
                 </div>
             }
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-person-gear me-2"></i> 個人帳號設定</h5>
+            @* 🚩 核心像素容器 *@
+            <div class="pixel-container-box">
+                <div class="status-header border-bottom border-secondary pb-3 mb-4">
+                    <h2 class="text-pixel-yellow mb-0">
+                        <i class="bi bi-cpu me-2"></i>[ 修改個人資料 ]
+                    </h2>
+                    <p class="text-white-50 fs-pixel-small mt-2">UUID: @Model.MemberID | ACCOUNT: @Model.Account</p>
                 </div>
 
-                <div class="card-body p-4">
-                    <form asp-action="UserEdit" asp-route-id="@Model.MemberID" method="post">
-                        @* 🚩 務必隱藏 MemberID *@
-                        <input type="hidden" asp-for="MemberID" />
-                        <input type="hidden" asp-for="Account" />
+                <form asp-action="UserEdit" asp-route-id="@Model.MemberID" method="post">
+                    <input type="hidden" asp-for="MemberID" />
+                    <input type="hidden" asp-for="Account" />
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                        <div class="bg-light p-3 rounded mb-4">
-                            <h6 class="text-secondary fw-bold mb-3"><i class="bi bi-shield-lock me-1"></i> 基本本資料 (不可修改)</h6>
-                            <span>若需要修改請提出申請，並上傳相關證明</span>
-                            <div class="row">
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">姓名</label>
-                                    <input asp-for="Name" class="form-control-plaintext fw-bold ps-2" readonly />
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">生日</label>
-                                    @* 使用 readonly 保持值傳遞，但外觀像純文字 *@
-                                    <input value="@Model.Birthday.ToString("yyyy-MM-dd")" class="form-control-plaintext fw-bold ps-2" readonly />
-                                </div>
+                    @* 🚩 唯讀區塊：基本資料 (不可修改) *@
+                    <div class="bg-black bg-opacity-50 p-3 border-start border-pixel-blue border-4 mb-5">
+                        <h6 class="text-pixel-blue mb-3">
+                            <i class="bi bi-shield-lock me-1"></i> 核心封存資料 (READ_ONLY)
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-pixel-muted fs-pixel-small d-block">姓名 / NAME</label>
+                                <div class="text-white fw-bold ps-2 pt-1">@Model.Name</div>
+                                <input type="hidden" asp-for="Name" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-pixel-muted fs-pixel-small d-block">生日 / BIRTHDAY</label>
+                                <div class="text-white fw-bold ps-2 pt-1">@Model.Birthday.ToString("yyyy-MM-dd")</div>
+                                <input type="hidden" asp-for="Birthday" />
                             </div>
                         </div>
-
-                        <h6 class="text-primary fw-bold mb-3"><i class="bi bi-pencil-square me-1"></i> 聯絡資訊</h6>
-
-                        <div class="mb-3">
-                            <label asp-for="Tel" class="form-label fw-bold">手機號碼</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bi bi-phone"></i></span>
-                                <input asp-for="Tel" class="form-control" placeholder="0912345678" />
-                            </div>
-                            <span asp-validation-for="Tel" class="text-danger"></span>
-                            <div class="form-text text-warning">
-                                <i class="bi bi-exclamation-triangle-fill"></i> 注意：更換手機後需重新進行簡訊驗證。
-                            </div>
+                        <div class="fs-pixel-small text-warning mt-2">
+                            <i class="bi bi-info-circle"></i> 如需修改核心資料，請聯繫系統管理員。
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label fw-bold">電子郵件</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
-                                <input asp-for="Email" class="form-control" placeholder="example@mail.com" />
-                            </div>
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
+                    @* 🚩 編輯區塊：聯絡資訊 *@
+                    <h6 class="text-pixel-pink mb-4">
+                        <i class="bi bi-terminal me-2"></i>聯絡資訊編輯 (EDIT_MODE)
+                    </h6>
 
-                        <div class="mb-3">
-                            <label asp-for="Address" class="form-label fw-bold">聯絡地址</label>
-                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="請輸入您的通訊地址"></textarea>
-                            <span asp-validation-for="Address" class="text-danger"></span>
+                    <div class="mb-4">
+                        <label asp-for="Tel" class="text-info fs-pixel-small mb-2 d-block">手機號碼 / MOBILE</label>
+                        <div class="input-group">
+                            <span class="input-group-text pixel-input-group-text"><i class="bi bi-phone"></i></span>
+                            <input asp-for="Tel" class="form-control pixel-input" placeholder="0912345678" />
                         </div>
+                        <span asp-validation-for="Tel" class="text-danger fs-pixel-small"></span>
+                    </div>
 
-                        <div class="d-flex justify-content-between align-items-center mt-5 border-top pt-3">
-                            <a asp-action="Index" class="text-decoration-none text-muted">取消變更</a>
-                            <button type="submit" class="btn btn-primary px-5 fw-bold">
-                                <i class="bi bi-cloud-arrow-up-fill me-1"></i> 儲存所有變更
-                            </button>
+                    <div class="mb-4">
+                        <label asp-for="Email" class="text-info fs-pixel-small mb-2 d-block">電子郵件 / EMAIL</label>
+                        <div class="input-group">
+                            <span class="input-group-text pixel-input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" class="form-control pixel-input" placeholder="example@mail.com" />
                         </div>
-                    </form>
-                </div>
+                        <span asp-validation-for="Email" class="text-danger fs-pixel-small"></span>
+                    </div>
+
+                    <div class="mb-5">
+                        <label asp-for="Address" class="text-info fs-pixel-small mb-2 d-block">聯絡地址 / ADDRESS</label>
+                        <textarea asp-for="Address" class="form-control pixel-input" rows="3" placeholder="請輸入通訊地址..."></textarea>
+                        <span asp-validation-for="Address" class="text-danger fs-pixel-small"></span>
+                    </div>
+
+                    @* 🚩 底部操作按鈕 *@
+                    <div class="d-flex justify-content-between align-items-center mt-5 border-top border-secondary pt-4">
+                        <a asp-action="Index" class="text-pixel-muted text-decoration-none fs-pixel-small hover-yellow">
+                            [ 取消變更 / CANCEL ]
+                        </a>
+                        <button type="submit" class="btn btn-pixel-bright-flat px-4">
+                            <i class="bi bi-save2 me-2"></i>執行儲存 (EXEC_UPDATE)
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-<div asp-validation-summary="All" class="text-danger"></div>
+
+<div asp-validation-summary="All" class="text-danger fs-pixel-small container mt-3"></div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

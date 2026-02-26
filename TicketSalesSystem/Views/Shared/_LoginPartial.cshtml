@@ -17,11 +17,12 @@
         --pixel-border: 4px solid #000;
         --pixel-shadow: 6px 6px 0px #000;
         --pixel-shadow-active: 2px 2px 0px #000;
+        --pixel-bg-light: #220033;
     }
 
     /* 像素容器 */
     .pixel-login-container {
-        color: white;
+        background-color: var(--pixel-bg-light);
         font-family: 'Press Start 2P', cursive, monospace; /* 建議引入像素字體 */
     }
 
@@ -159,7 +160,7 @@
         @* 🚩 修改：底部像素分隔線與連結 *@
         <div class="mt-4 text-center small text-white-50 pixel-divider pt-3" style="font-family: monospace;">
             還沒有帳戶嗎?? <a asp-controller="UserMembers" asp-action="Create" class="pixel-link fw-bold">立即註冊</a><br />
-            忘記密碼?? <a asp-controller="UserMembers" asp-action="Create" class="pixel-link fw-bold">立即重設</a>
+            忘記密碼?? <a asp-controller="Login" asp-action="ForgotPassword" class="pixel-link fw-bold">忘記密碼</a>
 
         </div>        
     </form>

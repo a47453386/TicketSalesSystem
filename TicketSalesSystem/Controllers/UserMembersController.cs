@@ -164,7 +164,7 @@ namespace TicketSalesSystem.Controllers
                         Email = vm.Email,
                         CreatedDate = DateTime.Now,
                         LastLoginTime = null,
-                        IsPhoneVerified = false,
+                        IsPhoneVerified = false, 
                         AccountStatusID = "A"
                     };
                     _context.Member.Add(member);
