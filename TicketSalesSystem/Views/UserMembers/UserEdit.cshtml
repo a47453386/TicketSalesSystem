@@ -5,9 +5,7 @@
     Layout = "_UserLayout";
 }
 <style>
-    .pixel-container-box {
-        font-size:1rem;
-    }
+    
     /* 像素化輸入框群組圖示 */
     .pixel-input-group-text {
         background-color: #000 !important;
@@ -41,6 +39,9 @@
         color: var(--pixel-yellow) !important;
     }
 
+  
+
+
 </style>
 
 <div class="container mt-5">
@@ -60,7 +61,7 @@
                     <h2 class="text-pixel-yellow mb-0">
                         <i class="bi bi-cpu me-2"></i>[ 修改個人資料 ]
                     </h2>
-                    <p class="text-white-50 fs-pixel-small mt-2">UUID: @Model.MemberID | ACCOUNT: @Model.Account</p>
+                    <p class="text-white-20 fs-pixel-small mt-2">會員編號: @Model.MemberID | 會員帳號: @Model.Account</p>
                 </div>
 
                 <form asp-action="UserEdit" asp-route-id="@Model.MemberID" method="post">
@@ -70,64 +71,67 @@
                     @* 🚩 唯讀區塊：基本資料 (不可修改) *@
                     <div class="bg-black bg-opacity-50 p-3 border-start border-pixel-blue border-4 mb-5">
                         <h6 class="text-pixel-blue mb-3">
-                            <i class="bi bi-shield-lock me-1"></i> 核心封存資料 (READ_ONLY)
+                            <i class="bi bi-shield-lock me-1"></i> 基本資料
                         </h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="text-pixel-muted fs-pixel-small d-block">姓名 / NAME</label>
+                                <label class="text-pixel-muted fs-5 d-block">姓名</label>
                                 <div class="text-white fw-bold ps-2 pt-1">@Model.Name</div>
                                 <input type="hidden" asp-for="Name" />
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="text-pixel-muted fs-pixel-small d-block">生日 / BIRTHDAY</label>
+                                <label class="text-pixel-muted fs-5 d-block">生日</label>
                                 <div class="text-white fw-bold ps-2 pt-1">@Model.Birthday.ToString("yyyy-MM-dd")</div>
                                 <input type="hidden" asp-for="Birthday" />
                             </div>
                         </div>
-                        <div class="fs-pixel-small text-warning mt-2">
-                            <i class="bi bi-info-circle"></i> 如需修改核心資料，請聯繫系統管理員。
+                        <div class="fs-6 text-warning mt-2">
+                            <i class="bi bi-info-circle"></i> 如需修改請向客服提出申請，並上傳相關證明。
                         </div>
                     </div>
 
                     @* 🚩 編輯區塊：聯絡資訊 *@
-                    <h6 class="text-pixel-pink mb-4">
-                        <i class="bi bi-terminal me-2"></i>聯絡資訊編輯 (EDIT_MODE)
+                    <h6 class="text-pixel-pink mb-4 fs-3">
+                        <i class="bi bi-terminal me-2"></i>聯絡資訊編輯
                     </h6>
 
                     <div class="mb-4">
-                        <label asp-for="Tel" class="text-info fs-pixel-small mb-2 d-block">手機號碼 / MOBILE</label>
+                        <label asp-for="Tel" class="text-info fs-4 mb-2 d-block">手機號碼</label>
                         <div class="input-group">
                             <span class="input-group-text pixel-input-group-text"><i class="bi bi-phone"></i></span>
-                            <input asp-for="Tel" class="form-control pixel-input" placeholder="0912345678" />
+                            <input asp-for="Tel" class="form-control pixel-input fs-6" placeholder="0912345678" />
                         </div>
                         <span asp-validation-for="Tel" class="text-danger fs-pixel-small"></span>
                     </div>
 
                     <div class="mb-4">
-                        <label asp-for="Email" class="text-info fs-pixel-small mb-2 d-block">電子郵件 / EMAIL</label>
+                        <label asp-for="Email" class="text-info fs-4 mb-2 d-block">電子郵件</label>
                         <div class="input-group">
                             <span class="input-group-text pixel-input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input asp-for="Email" class="form-control pixel-input" placeholder="example@mail.com" />
+                            <input asp-for="Email" class="form-control pixel-input fs-6" placeholder="example@mail.com" />
                         </div>
                         <span asp-validation-for="Email" class="text-danger fs-pixel-small"></span>
                     </div>
 
                     <div class="mb-5">
-                        <label asp-for="Address" class="text-info fs-pixel-small mb-2 d-block">聯絡地址 / ADDRESS</label>
-                        <textarea asp-for="Address" class="form-control pixel-input" rows="3" placeholder="請輸入通訊地址..."></textarea>
+                        <label asp-for="Address" class="text-info fs-4 mb-2 d-block">聯絡地址 </label>
+                        <textarea asp-for="Address" class="form-control pixel-input fs-6" rows="1" placeholder="請輸入通訊地址..."></textarea>
                         <span asp-validation-for="Address" class="text-danger fs-pixel-small"></span>
                     </div>
 
                     @* 🚩 底部操作按鈕 *@
                     <div class="d-flex justify-content-between align-items-center mt-5 border-top border-secondary pt-4">
-                        <a asp-action="Index" class="text-pixel-muted text-decoration-none fs-pixel-small hover-yellow">
-                            [ 取消變更 / CANCEL ]
+                        <a asp-action="Index" class="text-pixel-muted text-decoration-none fs-6 hover-yellow">
+                            [ 取消變更 ]
                         </a>
-                        <button type="submit" class="btn btn-pixel-bright-flat px-4">
-                            <i class="bi bi-save2 me-2"></i>執行儲存 (EXEC_UPDATE)
+                        <button type="submit" class="btn-pixel-text fs-6">
+                            <i class="bi bi-save2 me-2"></i>儲存
                         </button>
                     </div>
                 </form>
+                <div class="mt-2 py-2  border-secondary text-warning overflow-hidden" style="white-space: nowrap;">
+                    <marquee scrollamount="5">>>> 如有變更手機電話，請回到詳細資料重新手機驗證... <<<</marquee>
+                </div>
             </div>
         </div>
     </div>

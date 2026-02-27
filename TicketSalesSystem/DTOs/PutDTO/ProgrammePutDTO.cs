@@ -4,6 +4,10 @@
     {
         public string ProgrammeName { get; set; }        
         public string ProgrammeDescription { get; set; }
+        public string Notice { get; set; } 
+        public string PurchaseReminder { get; set; } 
+        public string CollectionReminder { get; set; } 
+        public string RefundPolicy { get; set; }
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
         public string? SeatImage { get; set; }
         public string? CoverImage { get; set; }

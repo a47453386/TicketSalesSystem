@@ -4,79 +4,113 @@
     ViewData["Title"] = "常見問題";
     Layout = "_UserLayout";
 
-    // 將 FAQ 依照類型分組，這樣畫面更有條理
+    // 保持原本的分組邏輯
     var groupedFaqs = Model.GroupBy(f => f.FAQType.FAQTypeName);
 }
 
-
-
 <style>
-    /* 讓手風琴按鈕選中時不要有太重的藍色 */
-    .accordion-button:not(.collapsed) {
-        background-color: #f8fbff;
-        color: #0d6efd;
-        box-shadow: none;
+    .font-pixel-small .fs-pixel-small{
+                font-size: 0.8rem;
+    
+    }
+    /* 🚩 像素手風琴核心樣式 */
+    .pixel-accordion {
+        background: transparent;
+        border: none;
     }
 
-    .accordion-button:focus {
-        box-shadow: none;
-        border-color: rgba(0,0,0,.125);
+    .pixel-accordion-item {
+        background-color: var(--pixel-bg-light) !important;
+        border: 2px solid #331144 !important;
+        border-radius: 0 !important;
+        margin-bottom: 8px;
     }
 
-    .border-dashed {
-        border: 2px dashed #dee2e6 !important;
+    .pixel-accordion-button {
+        background-color: #000 !important;
+        color: #fff !important;
+        font-family: 'Press Start 2P', cursive;
+        font-size:1.2rem;
+        padding: 20px;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border-bottom: 2px solid var(--pixel-blue) !important;
+        transition: all 0.2s;
     }
 
-    /* 調整手風琴圓角 */
-    .accordion-item:first-of-type {
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
+        .pixel-accordion-button:not(.collapsed) {
+            color: var(--pixel-yellow) !important;
+            border-bottom-color: var(--pixel-pink) !important;
+        }
+
+        /* 箭頭顏色修正 */
+        .pixel-accordion-button::after {
+            filter: invert(1) hue-rotate(180deg) brightness(2); /* 讓箭頭變色 */
+        }
+
+    .pixel-accordion-body {
+        background-color: rgba(0, 0, 0, 0.4);
+        color: #fff;
+        line-height: 1.8;
+        border-top: 2px dashed #331144;
+        font-size: 1.2rem !important;
+        line-height: 2 !important;
+
     }
 
-    .accordion-item:last-of-type {
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
+    /* 懸停效果 */
+    .pixel-accordion-button:hover {
+        background-color: #111 !important;
+        padding-left: 30px; /* 輕微右移增加動態感 */
     }
+   
 </style>
 
 <div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="fw-bold">常見問題</h1>
-        <p class="text-muted">在這裡您可以找到關於購票與系統使用的相關解答</p>
+    @* 🚩 頁面標題：數據中心風格 *@
+    <div class="pixel-container-box mb-5">
+        <div class="text-center">
+            <h2 class="text-pixel-yellow mb-0">@ViewData["Title"] </h2>
+            @* <p class="text-pixel-muted fs-pixel-small mt-2">ACCESSING_KNOWLEDGE_BASE... STATUS: ONLINE</p> *@
+        </div>
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-lg-9">
+        <div class="col-lg-10">
 
             @if (!Model.Any())
             {
-                <div class="alert alert-light text-center border">
-                    目前尚無發布的常見問題。
+                <div class="pixel-container-box text-center py-5">
+                    <span class="text-pixel-muted">[ 系統更新中... ]</span>
                 </div>
             }
             else
             {
                 @foreach (var group in groupedFaqs)
                 {
-                    <h4 class="fw-bold mt-5 mb-3 text-primary">
-                        <i class="bi bi-bookmark-fill me-2"></i>@group.Key
+                    @* 分類標題 *@
+                    <h4 class="text-pixel-pink mt-5 mb-3 font-pixel-small">
+                        <i class="bi bi-terminal me-2"></i>@group.Key
                     </h4>
 
-                    <div class="accordion shadow-sm" id="accordion_@group.Key.GetHashCode()">
+                    @* 🚩 像素化手風琴容器 *@
+                    <div class="accordion pixel-accordion" id="accordion_@group.Key.GetHashCode()">
                         @foreach (var faq in group)
                         {
-                            <div class="accordion-item">
+                            <div class="accordion-item pixel-accordion-item">
                                 <h2 class="accordion-header" id="heading_@faq.FAQID">
-                                    <button class="accordion-button collapsed fw-bold" type="button"
+                                    <button class="accordion-button collapsed pixel-accordion-button" type="button"
                                             data-bs-toggle="collapse"
                                             data-bs-target="#collapse_@faq.FAQID">
-                                        Q: @faq.FAQTitle
+                                        <span class="text-pixel-blue me-3">Q:</span> @faq.FAQTitle
                                     </button>
                                 </h2>
                                 <div id="collapse_@faq.FAQID" class="accordion-collapse collapse"
                                      data-bs-parent="#accordion_@group.Key.GetHashCode()">
-                                    <div class="accordion-body text-secondary" style="line-height: 1.7;">
-                                        @Html.Raw(faq.FAQDescription?.Replace("\n", "<br/>"))
+                                    <div class="accordion-body pixel-accordion-body">
+                                        <div class="text-white">
+                                            A:@Html.Raw(faq.FAQDescription?.Replace("\n", "<br/>"))
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -85,11 +119,12 @@
                 }
             }
 
-            <div class="mt-5 p-4 bg-light rounded-4 text-center border-dashed">
-                <h5 class="fw-bold">找不到您的問題？</h5>
-                <p class="text-muted small">如果您有其他特殊需求，歡迎透過線上諮詢與我們聯繫。</p>
-                <a asp-controller="Questions" asp-action="Create" class="btn btn-primary px-4 rounded-pill">
-                    前往線上諮詢
+            @* 🚩 底部諮詢區塊 *@
+            <div class="pixel-container-box mt-5 text-center bg-black bg-opacity-50">
+                <h5 class="text-pixel-yellow fw-bold">找不到您的問題？</h5>
+                <p class="text-pixel-muted fs-pixel-small">如果您有其他特殊需求，請我們聯繫。</p>
+                <a asp-controller="UserQuestions" asp-action="Create" class="btn-pixel mt-3">
+                    <i class="bi bi-chat-dots me-2"></i>線上諮詢 
                 </a>
             </div>
         </div>

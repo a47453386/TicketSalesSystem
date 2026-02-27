@@ -6,186 +6,191 @@
 }
 
 <style>
-    /* --- 拓元風格與版面壓縮 --- */
-    :root {
-        --tix-blue: #003a8c;
-        --tix-hover: #002766;
-    }
-
-    .bg-tixcraft {
-        background-color: var(--tix-blue) !important;
-    }
-
-    .btn-primary {
-        background-color: var(--tix-blue);
-        border: none;
-    }
-
-        .btn-primary:hover {
-            background-color: var(--tix-hover);
-        }
-
-    /* --- 第一階段：安全門口樣式 --- */
+    /* 🚩 專屬：賽博購票介面微調 */
     #securityGate {
         display: @(isPassed ? "none" : "flex") !important;
+        min-height: 60vh;
+        align-items: center;
+        justify-content: center;
     }
 
+    /* 像素驗證碼畫布 */
     #captchaCanvas {
-        background: #eee;
-        border-radius: 4px;
+        background: #000;
+        border: 2px solid var(--pixel-blue);
         cursor: pointer;
-        letter-spacing: 5px;
+        image-rendering: pixelated;
     }
 
-    /* --- 第二階段：選購區域 --- */
-    #mainPurchaseContent {
-        display: @(isPassed ? "flex" : "none") !important;
-    }
-
-    .area-card {
-        border: 1px solid #dee2e6;
+    /* 區域選擇卡片 - 像素化 */
+    .pixel-area-card {
+        background-color: rgba(0, 0, 0, 0.6) !important;
+        border: 2px solid var(--pixel-blue) !important;
+        border-radius: 0 !important;
         cursor: pointer;
-        transition: all 0.2s ease;
-        border-radius: 4px;
+        transition: all 0.1s;
+        margin-bottom: 10px;
+       
     }
 
-        .area-card:hover:not(.sold-out) {
-            border-color: var(--tix-blue);
-            background-color: #f0f5ff;
-            transform: translateX(5px);
+    
+        .pixel-area-card:hover:not(.sold-out) {
+            border-color: var(--pixel-yellow) !important;
+            transform: translateX(8px);
+            background-color: rgba(255, 204, 0, 0.1) !important;
         }
 
-        .area-card.active {
-            border-color: var(--tix-blue);
-            background-color: var(--tix-blue);
-            color: white;
+        .pixel-area-card.active {
+            border-color: var(--pixel-pink) !important;
+            background-color: rgba(255, 0, 204, 0.2) !important;
+            box-shadow: -4px 0 0 var(--pixel-pink);
         }
 
-            .area-card.active .text-danger, .area-card.active .text-muted {
-                color: #fff !important;
-            }
-
-        .area-card.sold-out {
-            opacity: 0.6;
+        .pixel-area-card.sold-out {
+            opacity: 0.4;
+            filter: grayscale(100%);
             cursor: not-allowed;
-            background-color: #f8f9fa;
+            border-color: #444 !important;
         }
 
-    /* --- 流量削峰：全螢幕等候室 --- */
+    /* 全螢幕等候室 - 黑化 */
     #waitingRoom {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(255, 255, 255, 0.98);
+        background: rgba(0, 0, 0, 0.95);
         z-index: 9999;
         display: none;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        text-align: center;
     }
 
-    .seat-map-img {
-        max-width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .seat-map-frame {
+        border: 4px solid var(--pixel-blue);
+        padding: 10px;
+        background: #000;
+        box-shadow: 10px 10px 0 #000;
     }
 
-    @@media (min-width: 992px) {
-        .sticky-bottom-md {
-            position: sticky;
-            bottom: 20px;
-        }
+    .pixel-badge-status {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 1.2rem;
+        padding: 5px 10px;
+    }
+
+    .fs-pixel-small{
+        font-size: 1.2rem !important;
+    }
+
+    .text-pixel-yellow {
+        color: var(--pixel-yellow) !important;
+    }
+
+    .text-pixel-blue {
+        color: var(--pixel-blue) !important;
+    }
+
+    .text-pixel-pink, .bg-pixel-pink {
+        color: var(--pixel-pink) !important;
+    }
+
+    .text-pixel-muted {
+        color: var(--pixel-text-muted) !important;
     }
 </style>
 
+@* --- 🚩 伺服器緩衝區 (Waiting Room) --- *@
 <div id="waitingRoom">
-    <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;"></div>
-    <h4 class="mt-4 fw-bold text-dark">正在排隊處理中，請勿重新整理...</h4>
-    <p class="text-muted">請勿離開此頁面，系統正在為您進入購票系統</p>
+    <div class="spinner-border text-pixel-blue" style="width: 5rem; height: 5rem; border-width: 0.5rem;"></div>
+    <h3 class="text-pixel-yellow mt-5 fw-bold dot-blink">伺服器更新中...</h3>
+    <p class="text-pixel-muted fs-pixel-small">正在連接加密節點，請勿切斷連線</p>
 </div>
 
-<div class="bg-dark text-white py-3 mb-4 shadow-sm">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="h4 mb-1 fw-bold">@Model.Programme.ProgrammeName</h1>
-                <p class="mb-0 small text-light opacity-75">
-                    <i class="bi bi-calendar3 me-1"></i> @Model.StartTime.ToString("yyyy/MM/dd (ddd) HH:mm")
-                </p>
-            </div>
-            <div class="col-md-4 text-md-end">
-                <div id="stepBadge" class="badge @(isPassed ? "bg-primary" : "bg-danger") px-3 py-2">
-                    @(isPassed ? "步驟 2: 選擇票區" : "步驟 1: 安全驗證")
-                </div>
+@* --- 🚩 頂部活動標頭 --- *@
+<div class="pixel-container-box p-3 mb-4 bg-black">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="h4 text-pixel-yellow mb-1 fw-bold">節目名稱: @Model.Programme.ProgrammeName</h1>
+            <p class="mb-0 fs-6 text-pixel-blue">
+                <i class="bi bi-cpu me-2"></i>演出時間: @Model.StartTime.ToString("yyyy/MM/dd HH:mm")
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div id="stepBadge" class="pixel-badge-status @(isPassed ? "text-pixel-blue" : "text-pixel-pink")">
+                [ @(isPassed ? "STEP_02: SELECT_ZONE" : "STEP_01: SECURITY_OVERRIDE") ]
             </div>
         </div>
     </div>
 </div>
 
 <div class="container">
+    @* --- 🚩 第一階段：安全門口 (Captcha) --- *@
     <div id="securityGate">
-        <div class="card shadow-sm border-0" style="max-width: 400px; width: 100%;">
-            <div class="card-header bg-white text-center border-0 py-3">
-                <h5 class="fw-bold mb-0">購票安全驗證</h5>
+        <div class="pixel-container-box" style="max-width: 450px; width: 100%;">
+            <div class="text-center py-3 border-bottom border-secondary mb-4">
+                <h5 class="text-pixel-blue mb-0">安全協議驗證</h5>
             </div>
-            <div class="card-body text-center py-4">
-                <p class="small text-muted mb-3">請輸入下方驗證碼以進入選票區域</p>
-                <div class="mb-3">
+            <div class="text-center">
+                <p class="fs-pixel-small text-pixel-muted mb-4">請輸入解密金鑰以存取票務數據</p>
+                <div class="mb-4">
                     <canvas id="captchaCanvas" width="200" height="60" onclick="generateCaptcha()"></canvas>
-                    <div class="x-small text-primary mt-2" style="cursor:pointer" onclick="generateCaptcha()">
-                        <i class="bi bi-arrow-clockwise"></i> 換一張圖
+                    <div class="btn-pixel-text mt-3" onclick="generateCaptcha()">
+                        <i class="bi bi-arrow-clockwise"></i> [ 重新產生  ]
                     </div>
                 </div>
-                <input type="text" id="captchaInput" class="form-control form-control-lg text-center fw-bold mb-3"
-                       placeholder="輸入代碼" maxlength="4" autocomplete="off">
-                <button class="btn btn-primary w-100 btn-lg fw-bold" onclick="verifyGateCaptcha()">
-                    驗證並進入選位 <i class="bi bi-shield-lock ms-1"></i>
+                <input type="text" id="captchaInput" class="form-control pixel-input text-center mb-4"
+                       placeholder="KEY_CODE" maxlength="4" autocomplete="off">
+                <button class="btn-pixel w-100 py-3" onclick="verifyGateCaptcha()">
+                    執行驗證 <i class="bi bi-shield-lock ms-2"></i>
                 </button>
             </div>
         </div>
     </div>
 
+    @* --- 🚩 第二階段：選購區域 --- *@
     <div id="mainPurchaseContent" class="row">
         <div class="col-lg-7 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white fw-bold"><i class="bi bi-map me-2"></i>區域圖參考</div>
-                <div class="card-body text-center bg-light">
+            <div class="pixel-container-box">
+                <h6 class="text-pixel-blue mb-3"><i class="bi bi-map me-2"></i>座位分佈圖</h6>
+                <div class="seat-map-frame text-center">
                     @if (!string.IsNullOrEmpty(Model.Programme.SeatImage))
                     {
-                        <img src="@Url.Content("~/Photos/SeatImage/" + Model.Programme.SeatImage)" class="seat-map-img" alt="座位圖" />
+                        <img src="@Url.Content("~/Photos/SeatImage/" + Model.Programme.SeatImage)" class="img-fluid" alt="座位圖" />
                     }
                     else
                     {
-                        <div class="py-5 text-muted">暫無座位圖資訊</div>
+                        <div class="py-5 text-pixel-muted">[ 無法讀取圖像數據 ]</div>
                     }
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <h2 class="h5 mb-3 fw-bold"><i class="bi bi-list-ul me-2"></i>請選擇票區</h2>
+        <div class="col-lg-5 ">
+            <h2 class="text-pixel-yellow h5 mb-4 fw-bold"><i class="bi bi-list-ul me-2"></i>選擇目標票區</h2>
             <div class="area-list-container">
                 @foreach (var area in Model.TicketsArea.OrderByDescending(a => a.Price))
                 {
                     bool isSoldOut = area.Remaining <= 0;
-                    <div class="card area-card mb-2 @(isSoldOut ? "sold-out" : "")"
+                    <div class="pixel-area-card @(isSoldOut ? "sold-out" : "")"
                          onclick="@(isSoldOut ? "" : $"selectArea('{area.TicketsAreaID}', '{area.TicketsAreaName}', {area.Price}, '{area.VenueID}')")">
-                        <div class="card-body d-flex justify-content-between align-items-center py-3">
+                        <div class="p-3 d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-bold fs-5">@area.TicketsAreaName</div>
-                                <div class="text-danger fw-bold">TWD $@area.Price.ToString("N0")</div>
+                                <div class="text-white fw-bold">@area.TicketsAreaName</div>
+                                <div class="text-pixel-pink fw-bold fs-pixel-small">$@area.Price.ToString("N0")</div>
                             </div>
                             <div class="text-end">
                                 @if (isSoldOut)
                                 {
-                                    <span class="badge bg-secondary">已售罄</span>
+                                    <span class="text-pixel-muted fs-pixel-small">[ 已完售 ]</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-success">還有座位</span>
-                                    <div class="x-small text-muted mt-1">剩餘 @area.Remaining</div>
+                                    <span class="text-pixel-blue fs-pixel-small">[ 開賣中 ]</span>
+                                    <div class="text-white-50 mt-1" style="font-size: 1rem;">剩餘數量: @area.Remaining</div>
                                 }
                             </div>
                         </div>
@@ -193,30 +198,31 @@
                 }
             </div>
 
-            <div id="bookingSection" class="mt-4 sticky-bottom-md" style="display:none;">
-                <div class="card border-primary shadow-lg overflow-hidden">
-                    <div class="card-body p-0">
-                        <div class="p-3 bg-light border-bottom"><p id="selectedInfo" class="mb-0 fw-bold text-primary"></p></div>
-                        <div class="p-3">
-                            <label class="form-label small fw-bold">購買張數：</label>
-                            <div class="input-group">
-                                @if (ViewBag.RemainingQuota > 0)
-                                {
-                                    <select id="ticketCount" class="form-select border-primary">
-                                        @for (int i = 1; i <= (int)ViewBag.RemainingQuota; i++)
-                                        {
-                                            <option value="@i">@i 張</option>
-                                        }
-                                    </select>
-                                    <button class="btn btn-primary px-4 fw-bold" onclick="confirmBooking()">
-                                        立即訂購 <i class="bi bi-lightning-fill"></i>
-                                    </button>
-                                }
-                                else
-                                {
-                                    <div class="alert alert-danger w-100 mb-0 small">您已達本活動購買上限。</div>
-                                }
-                            </div>
+            @* --- 🚩 浮動訂購確認區 --- *@
+            <div id="bookingSection" class="mt-4" style="display:none;">
+                <div class="pixel-container-box border-pixel-pink p-0 overflow-hidden shadow-lg">
+                    <div class="p-3 bg-pixel-pink text-dark fw-bold">
+                        <i class="bi bi-check-circle-fill"></i> <span class="text-white" id="selectedInfo"></span>
+                    </div>
+                    <div class="p-3">
+                        <label class="text-pixel-blue fs-pixel-small mb-2 d-block">數量</label>
+                        <div class="input-group">
+                            @if (ViewBag.RemainingQuota > 0)
+                            {
+                                <select id="ticketCount" class="form-select pixel-input">
+                                    @for (int i = 1; i <= (int)ViewBag.RemainingQuota; i++)
+                                    {
+                                        <option value="@i">@i 張</option>
+                                    }
+                                </select>
+                                <button class="btn-pixel ms-2 px-4" onclick="confirmBooking()">
+                                    確認訂購
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="text-pixel-pink fs-pixel-small">[ 警告：已達帳號購買上限 ]</div>
+                            }
                         </div>
                     </div>
                 </div>

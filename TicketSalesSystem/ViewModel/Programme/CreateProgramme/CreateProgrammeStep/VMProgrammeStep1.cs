@@ -11,6 +11,10 @@ namespace TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeS
         public string ProgrammeName { get; set; } = null!;
         
         public string ProgrammeDescription { get; set; } = null!;
+        public string Notice { get; set; } = null!;
+        public string PurchaseReminder { get; set; } = null!;
+        public string CollectionReminder { get; set; } = null!;
+        public string RefundPolicy { get; set; } = null!;
 
         [Display(Name = "限購")]
         [Required(ErrorMessage = "請輸入限購張數")]

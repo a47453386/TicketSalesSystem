@@ -5,78 +5,197 @@
     Layout = "_UserLayout";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 mb-0 text-dark">@ViewData["Title"]</h2>
-        <a asp-action="Create" class="btn btn-primary rounded-pill shadow-sm">
-            <i class="bi bi-chat-dots-fill me-1"></i> 我要提問
+<style>
+    /* 🚩 數據表整體黑化與像素化 */
+    .pixel-log-table {
+        background-color: rgba(0, 0, 0, 0.6) !important;
+        border: 4px solid var(--pixel-blue);
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        color: #fff;
+    }
+
+        /* 表頭樣式 - 確保文字置中 */
+        .pixel-log-table thead th {
+            background-color: rgba(0, 204, 255, 0.1);
+            color: var(--pixel-yellow) !important;
+            border-bottom: 4px solid var(--pixel-blue);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.3rem !important;
+            padding: 20px 15px;
+            text-align: center !important; /* 強制標頭置中 */
+        }
+
+        /* 內容單元格樣式 - 強制 1.2rem 並置中 */
+        .pixel-log-table td {
+            border-bottom: 1px solid rgba(0, 204, 255, 0.2);
+            padding: 18px 15px;
+            font-size: 1.2rem !important;
+            vertical-align: middle;
+            text-align: center !important; /* 🚩 核心修改：強制所有單元格內容水平置中 */
+        }
+
+        /* 懸停整行發光效果 */
+        .pixel-log-table tbody tr {
+            transition: all 0.1s;
+            cursor: default;
+        }
+
+            .pixel-log-table tbody tr:hover {
+                background-color: rgba(0, 204, 255, 0.1);
+                box-shadow: inset 0 0 15px rgba(0, 204, 255, 0.2);
+            }
+
+    /* 狀態標籤：硬折角與霓虹配色 */
+    .pixel-status-flag {
+        font-size: 1.1rem !important;
+        padding: 8px 12px;
+        font-family: 'Press Start 2P', cursive;
+        display: inline-block;
+        min-width: 130px;
+        text-align: center;
+    }
+
+    .status-pending {
+        background-color: var(--pixel-yellow);
+        color: #000;
+    }
+
+    .status-resolved {
+        background-color: var(--pixel-blue);
+        color: #000;
+    }
+
+    .status-closed {
+        background-color: var(--pixel-pink);
+        color: #fff;
+        box-shadow: 0 0 10px var(--pixel-pink); /* 已結案增加發光感 */
+    }
+
+    /* 掃描線效果覆蓋 */
+    .table-scanline {
+        position: relative;
+        overflow: hidden;
+        border: 4px solid var(--pixel-blue);
+    }
+
+        .table-scanline::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+    /* 調整主旨內部的 Flex 容器 */
+    .subject-flex-container {
+        display: flex;
+        align-items: center;
+        justify-content: center; /* 🚩 確保內容在 Flex 容器內也置中 */
+        gap: 10px;
+    }
+</style>
+
+<div class="container py-5">
+    @* 🚩 頂部操作區 *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-secondary pb-4">
+        <div>
+            <h2 class="text-pixel-yellow fw-bold mb-1">[ 問題清單 ]</h2>
+        </div>
+        <a asp-action="Create" class="btn-pixel py-3 px-4">
+            <i class="bi bi-plus-square me-2"></i> 我要發問
         </a>
     </div>
 
     @if (!Model.Any())
     {
-        <div class="text-center py-5 bg-light rounded shadow-sm">
-            <div class="mb-3 display-4 text-muted"><i class="bi bi-inbox"></i></div>
-            <p class="text-muted">目前沒有諮詢紀錄</p>
+        <div class="pixel-container-box text-center py-5">
+            <p class="text-pixel-muted fs-pixel-base mb-0">暫無任何問題</p>
         </div>
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-2 g-4">
-            @foreach (var item in Model)
-            {
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 transition-hover">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="badge bg-info text-dark bg-opacity-10 px-3 py-2">
-                                    @item.QuestionType?.QuestionTypeName
-                                </span>
-                                <small class="text-muted">@item.CreatedTime.ToString("yyyy/MM/dd")</small>
-                            </div>
+        @* 🚩 橫向數據表 *@
+        <div class="table-responsive table-scanline">
+            <table class="pixel-log-table m-0">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">種類</th>
+                        <th style="width: 40%">主旨</th>
+                        <th style="width: 15%">提問時間</th>
+                        <th style="width: 15%">狀態</th>
+                        <th style="width: 15%">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            @* 種類 *@
+                            <td class="text-pixel-blue fw-bold">
+                                # @item.QuestionType?.QuestionTypeName
+                            </td>
 
-                            <h5 class="card-title fw-bold text-truncate">@item.QuestionTitle</h5>
-                            <p class="card-text text-muted small mb-3 text-truncate-2">@item.QuestionDescription</p>
+                            @* 主旨與附件標示 - 移除 text-start，確保完全置中 *@
+                            <td class="text-white">
+                                <div class="subject-flex-container">
+                                    <span class="text-truncate" style="max-width: 350px;" title="@item.QuestionTitle">
+                                        @item.QuestionTitle
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(item.UploadFile))
+                                    {
+                                        <i class="bi bi-paperclip text-pixel-yellow" title="含附件憑證"></i>
+                                    }
+                                </div>
+                            </td>
 
-                            <div class="d-flex justify-content-between align-items-center">
+                            @* 建立日期 *@
+                            <td class="text-pixel-muted font-monospace">
+                                @item.CreatedTime.ToString("yyyy-MM-dd")
+                            </td>
+
+                            @* 狀態判斷邏輯 *@
+                            <td>
                                 @{
-                                    // 1. 抓取最後一筆回覆
                                     var latestReply = item.Reply?.OrderByDescending(r => r.CreatedTime).FirstOrDefault();
-
-                                    // 2. 設定標籤文字 (根據你的資料庫 ID，假設 "2" 是已完成)
-                                    string statusText = "待處理";
-                                    string badgeClass = "bg-warning text-dark";
+                                    string statusText = "處理中";
+                                    string badgeClass = "status-pending";
 
                                     if (latestReply != null)
                                     {
                                         if (latestReply.ReplyStatusID == "Y")
                                         {
                                             statusText = "已結案";
-                                            badgeClass = "bg-success";
+                                            badgeClass = "status-closed";
                                         }
-                                        else // 其他狀態如 "N" 或 "A" (處理中)
+                                        else
                                         {
-                                            statusText = latestReply.ReplyStatus?.ReplyStatusName ?? "處理中";
-                                            badgeClass = "bg-info text-dark";
+                                            statusText = latestReply.ReplyStatus?.ReplyStatusName ?? "已回覆";
+                                            badgeClass = "status-resolved";
                                         }
                                     }
                                 }
-                                @* 3. 顯示標籤 *@
-                                <span class="badge @badgeClass">@statusText</span>
-                                <a asp-action="UserDetails" asp-route-id="@item.QuestionID" class="btn btn-sm btn-outline-primary">
-                                    查看詳情 <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </div>
-                            @if (!string.IsNullOrEmpty(item.UploadFile))
-                            {
-                                <span class="badge rounded-pill bg-light text-dark border">
-                                    <i class="bi bi-paperclip"></i> 有附件
+                                <span class="pixel-status-flag @badgeClass">
+                                    @statusText
                                 </span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
+                            </td>
+
+                            @* 進入詳情 *@
+                            <td>
+                                <a asp-action="UserDetails" asp-route-id="@item.QuestionID" class="btn-pixel-text text-pixel-yellow">
+                                    [ 查看 ]
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
 </div>

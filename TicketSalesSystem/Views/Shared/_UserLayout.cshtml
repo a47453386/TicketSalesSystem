@@ -37,6 +37,7 @@
                         <li class="nav-item"><a asp-controller="UserFAQs" asp-action="UserIndex" class="nav-link pixel-nav-link">常見問題</a></li>
                         <li class="nav-item"><a asp-controller="UserOrders" asp-action="UserIndex" class="nav-link pixel-nav-link">訂單查詢</a></li>
                         <li class="nav-item"><a asp-controller="UserMembers" asp-action="Index" class="nav-link pixel-nav-link">會員中心</a></li>
+                        <li class="nav-item"><a asp-controller="UserQuestions" asp-action="Create" class="nav-link pixel-nav-link">我要發問</a></li>
                     </ul>
 
                     @* --- 右側功能區 (根據身份切換) --- *@
@@ -86,10 +87,10 @@
                                         <i class="bi bi-person-circle"></i> @UserAccessor.GetUserName()
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-none pixel-dropdown-menu mt-2">
-                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Orders" asp-action="UserIndex">我的訂單</a></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="Members" asp-action="UserEdit">個人中心</a></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="UserOrders" asp-action="UserIndex">我的訂單</a></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="UserMembers" asp-action="Index">個人中心</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="MemberLogout">GAME OVER (登出)</a></li>
+                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="MemberLogout">登出</a></li>
                                     </ul>
                                 </li>
                             }

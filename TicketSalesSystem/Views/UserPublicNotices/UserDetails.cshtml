@@ -4,53 +4,107 @@
     ViewData["Title"] = Model.PublicNoticeTitle;
     Layout = "_UserLayout";
 }
+
 <style>
-    .notice-content {
-        color: #333;
-        word-wrap: break-word;
+    /* 🚩 內容區塊專屬像素樣式 */
+    .notice-article-box {
+        background-color: rgba(0, 0, 0, 0.7); /* 半透明黑 */
+        border-left: 4px solid var(--pixel-pink); /* 側邊裝飾線 */
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
     }
 
-        /* 讓內容中的圖片不要爆出去 */
-        .notice-content img {
+        /* 模擬掃描線特效 (背景淡淡的橫線) */
+        .notice-article-box::before {
+            content: " ";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+    .notice-content-pixel {
+        color: #fff;
+        line-height: 2;
+        font-size: 1rem;
+        position: relative;
+        z-index: 3;
+    }
+
+        /* 🚩 內容中的圖片也必須像素化 */
+        .notice-content-pixel img {
             max-width: 100%;
             height: auto;
-            border-radius: 8px;
+            border: 4px solid var(--pixel-blue) !important;
+            border-radius: 0 !important; /* 禁止圓角 */
             margin: 20px 0;
+            box-shadow: 4px 4px 0px #000;
         }
+
+    .decryption-status {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.65rem;
+        color: var(--pixel-blue);
+        letter-spacing: 2px;
+    }
 </style>
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
+
+            @* 🚩 頂部導覽：返回按鈕 *@
             <nav class="mb-4">
-                <a asp-action="UserIndex" class="text-decoration-none text-secondary">
-                    <i class="bi bi-chevron-left"></i> 返回公告列表
+                <a asp-action="UserIndex" class="btn-pixel-text">
+                    <i class="bi bi-chevron-left"></i> [ 返回]
                 </a>
             </nav>
 
-            <header class="mb-5">
-                <h1 class="fw-bold mb-3">@Model.PublicNoticeTitle</h1>
-                <div class="d-flex align-items-center text-muted small border-top border-bottom py-3">
-                    <div class="me-4">
-                        <i class="bi bi-calendar3 me-2"></i>發布日期：@Model.CreatedTime.ToString("yyyy-MM-dd")
+            @* 🚩 主容器 *@
+            <div class="pixel-container-box">
+
+                @* 標題與標籤 *@
+                <header class="mb-5 border-bottom border-secondary pb-4">
+                  @*   <div class="decryption-status mb-3">
+                        <span class="dot-blink">●</span> DECRYPTING_INTEL_LOG... 100%
+                    </div> *@
+
+                    <h1 class="text-pixel-yellow fw-bold mb-4" style="line-height: 1.4;">
+                       @Model.PublicNoticeTitle
+                    </h1>
+
+                    <div class="d-flex align-items-center fs-pixel-small">
+                        <div class="text-pixel-pink border-pixel-pink px-2 py-1">
+                            <i class="bi bi-calendar3 me-2"></i> @Model.CreatedTime.ToString("yyyy.MM.dd")
+                        </div>
                     </div>
-                    
-                </div>
-            </header>
+                </header>
 
-            <article class="notice-content mb-5" style="line-height: 1.8; font-size: 1.1rem;">
-                @* 如果你的內容包含 HTML 標籤，請使用 Html.Raw *@
-                @Html.Raw(Model.PublicNoticeDescription?.Replace("\n", "<br/>"))
-            </article>
+                @* 🚩 文章主體 *@
+                <article class="notice-article-box">
+                    <div class="notice-content-pixel">
+                        @* 顯示內容，保持 HTML 標籤渲染 *@
+                        @Html.Raw(Model.PublicNoticeDescription?.Replace("\n", "<br/>"))
+                    </div>
+                </article>
 
-            <div class="border-top pt-4 text-center">
-                <p class="text-muted small">本公告內容受法律保護，轉載請註明出處。</p>
-                
+                @* 🚩 底部註解 *@
+                <footer class="mt-5 pt-4 border-top border-secondary text-center">
+                    <p class="text-pixel-muted fs-pixel-small">
+                        [如有問題請聯繫客服 ]
+                    </p>
+                    @* <p class="text-pixel-muted fs-pixel-small mt-2">
+                        SOURCE_NODE: TICKET_CORE_V1.0
+                    </p> *@
+                </footer>
             </div>
+
         </div>
     </div>
 </div>
-
-
-
-

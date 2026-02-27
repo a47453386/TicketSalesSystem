@@ -1,20 +1,108 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.PublicNotice>
 
-<div class="news-section my-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold m-0">最新消息</h4>
-        <a asp-controller="PublicNotices" asp-action="UserIndex" class="text-primary text-decoration-none small">更多 <i class="bi bi-chevron-right"></i></a>
-    </div>
-    <ul class="list-group list-group-flush border-top">
-        @foreach (var item in Model)
-        {
-            <li class="list-group-item d-flex align-items-center py-3 border-bottom">
-                <span class="badge bg-purple me-2">系統公告</span>
-                <span class="badge bg-danger me-3">NEW!</span>
-                <a asp-controller="PublicNotices" asp-action="UserDetails" asp-route-id="@item.PublicNoticeID" class="text-decoration-none text-dark text-truncate">
-                    @item.PublicNoticeTitle
-                </a>
-            </li>
+<style>
+    /* 🚩 最新消息區域專用樣式 - 最小字體 1.2rem */
+    .pixel-news-container {
+        font-size: 1.2rem !important;
+        color: #fff;
+    }
+
+    /* 標題與更多連結 */
+    .news-header-title {
+        font-family: 'Press Start 2P', cursive;
+        color: var(--pixel-yellow) !important;
+        font-size: 1.4rem !important;
+        text-shadow: 2px 2px 0px #000;
+    }
+
+    /* 列表項目：移除 Bootstrap 預設清單感 */
+    .pixel-news-item {
+        border-bottom: 1px dashed rgba(0, 204, 255, 0.3);
+        transition: all 0.2s;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        padding: 15px 10px;
+    }
+
+        .pixel-news-item:hover {
+            background: rgba(0, 204, 255, 0.05);
+            padding-left: 20px; /* 移入感 */
         }
-    </ul>
+
+    /* 🚩 種類標籤：藍色線框 */
+    .badge-pixel-blue {
+        border: 1px solid var(--pixel-blue);
+        color: var(--pixel-blue);
+        padding: 4px 10px;
+        font-size: 1rem !important;
+        font-family: 'Press Start 2P', cursive;
+        white-space: nowrap;
+    }
+
+    /* 🚩 NEW 標籤：粉紅霓虹 [同步已結案風格] */
+    .badge-pixel-pink {
+        background-color: var(--pixel-pink);
+        color: #fff;
+        padding: 4px 10px;
+        font-size: 0.9rem !important;
+        font-family: 'Press Start 2P', cursive;
+        box-shadow: 0 0 10px var(--pixel-pink);
+        animation: dot-blink 1.5s infinite;
+    }
+
+    /* 新聞連結文字 */
+    .news-link {
+        color: #fff !important;
+        text-decoration: none;
+        font-size: 1.2rem !important;
+        letter-spacing: 1px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+        .news-link:hover {
+            color: var(--pixel-yellow) !important;
+        }
+</style>
+
+<div class="pixel-news-container">
+    @* --- 頂部標題列 --- *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="news-header-title m-0">最新公告</h4>
+        <a asp-controller="PublicNotices" asp-action="UserIndex" class="btn-pixel-text text-pixel-blue" style="font-size: 1.2rem;">
+            [ 更多 ]
+        </a>
+    </div>
+
+    @* --- 新聞數據列表 --- *@
+    <div class="pixel-news-list">
+        @if (!Model.Any())
+        {
+            <div class="text-pixel-muted py-4 text-center">
+                [ 目前尚無最新公告 ]
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="pixel-news-item">
+                    @* 種類標籤 *@
+                    <span class="badge-pixel-blue me-2">最新公告</span>
+
+                    @* NEW 標籤 *@
+                    <span class="badge-pixel-pink me-3">NEW!</span>
+
+                    @* 標題連結 *@
+                    <a asp-controller="PublicNotices" asp-action="UserDetails" asp-route-id="@item.PublicNoticeID" class="news-link flex-grow-1">
+                        @item.PublicNoticeTitle
+                    </a>
+
+                </div>
+            }
+        }
+    </div>
 </div>
+

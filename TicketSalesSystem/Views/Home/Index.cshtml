@@ -3,48 +3,94 @@
     ViewData["Title"] = "Home Page";
     Layout = "_UserLayout";
 }
+
 <style>
+    /* ============================================================
+       [ 1. 核心規格 ] - 最小字體 1.2rem
+       ============================================================ */
+    body {
+        font-size: 1.2rem !important;
+    }
 
-    /* 設定輪播圖圖片的統一規格 */
+    /* 🚩 輪播圖設定：固定高度且「更扁」，移除外框 */
     .carousel-item img {
-        height: 500px; /* 🚩 這裡設定你想要的高度，例如 500px 或 60vh */
-        object-fit: cover; /* 🚩 關鍵：這會讓圖片填滿空間但不變形 */
-        object-position: center; /* 讓圖片中心對準容器 */
+        height: 280px; /* 👈 縮減高度，呈現橫向長條感 */
+        object-fit: cover;
+        object-position: center;
+        filter: brightness(0.85);
     }
 
-    .public-status-hud {
+    /* 🚩 下方區塊專用：霓虹外框樣式 [同步原外框風格] */
+    .pixel-neon-section {
         background: rgba(0, 0, 0, 0.8);
-        border-bottom: 2px solid #333;
-        border-top: 2px solid #333;
+        border: 4px solid var(--pixel-blue);
+        box-shadow: 6px 6px 0px var(--pixel-pink); /* 增加厚度使視覺更統一 */
+        padding: 20px;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    /* 🚩 HUD 狀態列：扁平化 */
+    .public-status-hud {
+        background: #000;
+        border-bottom: 2px solid #222;
         color: #fff;
-        letter-spacing: 1px;
+        padding: 8px 20px;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 1.2rem !important;
     }
 
-    /* 點點閃爍動畫 */
-    .dot-blink {
-        animation: blink 1s infinite;
-        color: #00ffcc;
-        margin-right: 5px;
+    /* 輪播指示器 */
+    .carousel-indicators [data-bs-target] {
+        width: 10px;
+        height: 10px;
+        background-color: var(--pixel-blue);
     }
 
-    @@keyframes blink {
-        0% {
-            opacity: 1;
-        }
+    .carousel-item img {
+        height: 280px;
+        object-fit: cover;
+        object-position: center;
+        filter: brightness(0.8); /* 稍微調暗圖片，讓按鈕更突出 */
+    }
 
-        50% {
-            opacity: 0.3;
-        }
+    /* 🚩 強化：左右按鈕樣式 */
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 5%; /* 縮小感應區，避免誤觸 */
+        z-index: 10; /* 確保在最上層 */
+        opacity: 0.8;
+    }
 
-        100% {
-            opacity: 1;
-        }
+    /* 自定義按鈕圖示：變成霓虹藍色 */
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.7); /* 黑底 */
+        border: 2px solid var(--pixel-blue); /* 藍邊 */
+        padding: 20px;
+        background-size: 60%;
+        box-shadow: 0 0 10px var(--pixel-blue); /* 發光 */
+    }
+
+    .carousel-control-prev:hover .carousel-control-prev-icon,
+    .carousel-control-next:hover .carousel-control-next-icon {
+        border-color: var(--pixel-pink);
+        box-shadow: 0 0 15px var(--pixel-pink);
+    }
+
+    /* 保持下方霓虹區塊樣式 */
+    .pixel-neon-section {
+        background: rgba(0, 0, 0, 0.8);
+        border: 4px solid var(--pixel-blue);
+        box-shadow: 6px 6px 0px var(--pixel-pink);
+        padding: 20px;
+        margin-bottom: 3rem;
     }
 </style>
 
-<div id="carouselBanner" class="carousel slide" data-bs-ride="carousel">
+@* --- 🚩 頂部輪播：純淨無框版 --- *@
+<div id="carouselBanner" class="carousel slide mb-0" data-bs-ride="carousel">
     <div class="carousel-indicators">
-
         @for (int i = 0; i < Model.Count(); i++)
         {
             var activeClass = i == 0 ? "active" : "";
@@ -55,12 +101,11 @@
         @foreach (var item in Model)
         {
             var a = item == Model.First() ? "active" : "";
-
             <div class="carousel-item @a">
                 <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID">
                     <img src="~/Photos/CoverImage/@item.CoverImage" class="d-block w-100" alt="@item.ProgrammeName">
+                    
                 </a>
-
             </div>
         }
     </div>
@@ -73,8 +118,22 @@
         <span class="visually-hidden">Next</span>
     </button>
 </div>
-<div class="container">
-    @await Component.InvokeAsync("VCLatestNews")
 
-    @await Component.InvokeAsync("VCProgrammeThree")
+
+
+@* --- 🚩 內容區塊：霓虹外框套用在此 --- *@
+<div class="container pb-5 mt-5">
+    
+    @* 最新消息區塊 *@
+    <div class="pixel-neon-section">
+      
+        @await Component.InvokeAsync("VCLatestNews")
+    </div>
+
+    @* 精選活動區塊 *@
+    <div class="pixel-neon-section">
+       
+        @await Component.InvokeAsync("VCProgrammeThree")
+    </div>
+
 </div>

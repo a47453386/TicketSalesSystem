@@ -1,169 +1,288 @@
 ﻿@model TicketSalesSystem.Models.Programme
 @{
+    ViewData["Title"] = Model.ProgrammeName;
     Layout = "_UserLayout";
 }
+
 <style>
-    /* 拓元深藍風格 */
-    :root {
-        --tixcraft-blue: #003a8c;
-        --tixcraft-red: #d9534f;
+    /* ============================================================
+           [ 1. 核心容器與基礎設定 ]
+           ============================================================ */
+    .pixel-container-box {
+        background-color: rgba(0, 0, 0, 0.6) !important; /* 深色半透明 */
+        backdrop-filter: blur(8px); /* 賽博感毛玻璃 */
+        border: 4px solid var(--pixel-blue);
+        padding: 30px;
+        font-size: 1.1rem !important; /* 平衡後的讀取大小 */
+        color: #ffffff;
     }
 
-    .btn-tixcraft-main {
-        background-color: var(--tixcraft-blue);
-        color: white;
-        border: none;
-        border-radius: 4px;
+    /* 統一小字級規範 (依照你設定的 1.2rem，若覺得太大可微調) */
+    .fs-pixel-small {
+        font-size: 1.1rem !important;
+        letter-spacing: 1px;
     }
 
-        .btn-tixcraft-main:hover {
-            background-color: #002766;
-            color: white;
+    /* ============================================================
+           [ 2. 大標題橫幅 (Banner) ]
+           ============================================================ */
+    .pixel-banner-frame {
+        border: 4px solid var(--pixel-blue);
+        box-shadow: 0 8px 0px #000;
+        position: relative;
+        background-color: #000;
+        display: block;
+        width: 100%;
+    }
+
+        /* 合併掃描線特效：使用單一偽元素達成 */
+        .pixel-banner-frame::after {
+            content: " ";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* 增加掃描線質感 */
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 4px;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.5;
         }
 
-    .alert-custom-danger {
-        background-color: #fff5f5;
-        border-left: 6px solid var(--tixcraft-red) !important;
+    /* ============================================================
+           [ 3. 像素分頁控制 (Tabs) ]
+           ============================================================ */
+    .pixel-nav-tabs {
+        border-bottom: 4px solid var(--pixel-blue) !important;
+        display: flex;
+        flex-wrap: nowrap; /* 確保手機版不亂跑 */
     }
 
-    .nav-tabs .nav-link {
-        color: #666;
-        border: none;
-        border-bottom: 3px solid transparent;
-    }
-
-        .nav-tabs .nav-link.active {
-            color: var(--tixcraft-blue);
-            border-bottom: 3px solid var(--tixcraft-blue);
-            background: none;
+        .pixel-nav-tabs .nav-link {
+            background-color: #000 !important;
+            color: var(--pixel-blue) !important;
+            border: 2px solid var(--pixel-blue) !important;
+            border-bottom: none !important;
+            border-radius: 0 !important;
+            margin-right: 5px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem; /* 稍微縮小以容納更多 Tab */
+            padding: 15px 20px;
+            transition: all 0.2s;
         }
 
-    .btn-primary {
-        background-color: var(--tixcraft-blue);
+            .pixel-nav-tabs .nav-link.active {
+                background-color: var(--pixel-blue) !important;
+                color: #000 !important;
+                border-color: var(--pixel-blue) !important;
+                transform: translateY(-2px); /* 選中時稍微跳出 */
+            }
+
+    .pixel-tab-content {
+        background-color: rgba(17, 0, 34, 0.6); /* 深紫色透明感 */
+        border: 4px solid var(--pixel-blue);
+        border-top: none;
+        padding: 30px;
+        color: #fff;
+    }
+
+    /* ============================================================
+           [ 4. 徹底黑化表格 (Table) ]
+           ============================================================ */
+    .pixel-table {
+        background-color: transparent !important;
+        color: #ffffff !important;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .pixel-table thead th {
+            background-color: rgba(0, 0, 0, 0.9) !important;
+            color: var(--pixel-blue) !important;
+            border-bottom: 3px solid var(--pixel-blue) !important;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem !important;
+            padding: 20px !important;
+            text-align: center;
+        }
+
+        .pixel-table td {
+            background-color: transparent !important;
+            border-bottom: 1px solid rgba(0, 204, 255, 0.1) !important;
+            padding: 15px !important;
+            color: #ffffff !important;
+        }
+
+        .pixel-table tbody tr:hover {
+            background-color: rgba(0, 204, 255, 0.05) !important;
+        }
+
+    /* ============================================================
+           [ 5. 按鈕與功能類別 ]
+           ============================================================ */
+    /* 霓虹粉按鈕 (完售/取消專用) */
+    .btn-pixel-pink {
+        font-family: 'Press Start 2P', cursive;
+        background-color: var(--pixel-pink) !important;
+        color: #000 !important;
         border: none;
+        padding: 12px 24px;
+        box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4), 4px 4px 0px 0px #000;
+        cursor: not-allowed;
+        transition: none;
     }
 
-    /* 平滑滾動 */
-    html {
-        scroll-behavior: smooth;
+    /* 邊框與陰影工具 */
+    .border-pixel-pink {
+        border: 2px solid var(--pixel-pink) !important;
     }
 
-    .programme-description img {
-        max-width: 100%;
-        height: auto;
+    .shadow-glow {
+        text-shadow: 0 0 10px var(--pixel-pink);
     }
+
+    .shadow-glow-blue {
+        text-shadow: 0 0 10px var(--pixel-blue);
+    }
+
 </style>
 
 <div class="container mt-4 mb-5">
-    <div class="text-center mb-4">
-        <div class="banner-container shadow-sm rounded overflow-hidden">
+    <div class="text-center mb-5">
+        @* 1. 橫幅圖片區 *@
+        <div class="pixel-banner-frame d-block w-100 overflow-hidden mb-4">
             <img src="@Url.Content("~/Photos/CoverImage/" + Model.CoverImage)"
-                 class="img-fluid w-100"
-                 style="max-height: 500px; object-fit: cover;"
+                 class="img-fluid"
+                 style="max-height: 400px; width: 100%; object-fit: cover;"
                  alt="@Model.ProgrammeName">
+            <div class="position-absolute bottom-0 start-0 w-100 bg-black bg-opacity-75 text-pixel-blue py-2 fs-pixel-small border-top border-pixel-blue">
+                <marquee scrollamount="3">@Model.ProgrammeName </marquee>
+            </div>
         </div>
-        <h2 class="fw-bold mt-4 text-dark">@Model.ProgrammeName</h2>
-    </div>
 
-    <div class="row g-2 justify-content-center my-4">
-        <div class="col-6 col-md-2">
+        @* 2. 標題區：加入一點裝飾符號 *@
+        <div class="programme-title-area mb-4">
+            <h2 class="text-pixel-yellow fw-bold">
+                <span class="text-pixel-blue me-2">[</span>@Model.ProgrammeName<span class="text-pixel-blue ms-2">]</span>
+            </h2>
+        </div>
+
+        @* 3. 核心動作按鈕：寬度調大一點，並確保絕對置中 *@
+        <div class="d-flex justify-content-center">
             @if (Model.ProgrammeStatusID == "O")
             {
-                @* 🚩 點擊後會滑動到下方的場次區塊 *@
-                <a href="#sessions" class="btn btn-tixcraft-main w-100 py-3 shadow-sm">
-                    <div class="fw-bold fs-5">立即購票</div>
-                    <div class="small opacity-75">Buy Tickets</div>
+                <a href="#sessions" class="btn-pixel px-5 py-3 fs-5">
+                    <i class="bi bi-caret-right-fill me-2"></i>立即購票
                 </a>
             }
             else
             {
-                <button class="btn btn-secondary w-100 py-3 disabled">尚未啟售</button>
+                <button class="btn btn-pixel px-5 py-3 opacity-50 fs-5" disabled>
+                    <i class="bi bi-slash-circle me-2"></i>尚未啟售
+                </button>
             }
         </div>
-        <div class="col-6 col-md-2">
-            <a href="#intro" class="btn btn-outline-dark w-100 py-3 fw-bold">
-                <div>活動介紹</div>
-                <div class="small text-muted">Introduction</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-2">
-            <button class="btn btn-outline-dark w-100 py-3 fw-bold">
-                <div>購票流程</div>
-                <div class="small text-muted">Procedure</div>
-            </button>
-        </div>
-        <div class="col-6 col-md-2">
-            <button class="btn btn-outline-dark w-100 py-3 fw-bold">
-                <div>退票申請</div>
-                <div class="small text-muted">Refund</div>
-            </button>
-        </div>
     </div>
 
-    <div class="alert alert-custom-danger border-0 rounded-0 p-4 mb-5 shadow-sm">
-        <h5 class="fw-bold text-danger mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>購票提醒</h5>
-        <ul class="mb-0 small text-dark">
-            <li>欲購票者，請先完成 <span class="text-danger fw-bold">加入會員</span> 及 <span class="text-danger fw-bold">手機號碼驗證</span>。</li>
-            <li>請勿於拍賣網站或執法單位公告之爭議網站購買票券，以免權益受損。</li>
-            <li>每筆訂單限購 @(Model.LimitPerOrder ?? 4) 張。</li>
+    @* 🚩 購票提醒：終端機警告框 *@
+    <div class="pixel-container-box border-pixel-pink bg-black bg-opacity-50 p-4 mb-5">
+        <h5 class="text-pixel-pink fw-bold mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>[購票提醒]
+        </h5>
+        <ul class="mb-0 fs-pixel-small text-white-50 lh-lg">
+            <li>欲購票者，請先完成 <span class="text-pixel-yellow">加入會員</span> 及 <span class="text-pixel-yellow">手機號碼驗證</span>。</li>
+            <li>每筆訂單限購 <span class="text-pixel-blue">@(Model.LimitPerOrder ?? 4)</span> 張。</li>
+            <li>請勿向非法終端（代購網站）購買票券，以免數據損毀。</li>
         </ul>
     </div>
 
-    <div id="intro" class="mt-5 pt-3">
-        <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
-            <li class="nav-item">
-                <button class="nav-link active fw-bold px-4 py-3" data-bs-toggle="tab" data-bs-target="#tab-1">節目介紹</button>
+    @* 🚩 介紹分頁：數據庫讀取風格 *@
+    <div id="intro" class="mt-5 pt-3 ">
+        <ul class="nav nav-tabs pixel-nav-tabs" role="tablist">
+            <li class="nav-item " id="Description">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-1">節目介紹</button>
             </li>
-            <li class="nav-item">
-                <button class="nav-link fw-bold px-4 py-3" data-bs-toggle="tab" data-bs-target="#tab-2">注意事項</button>
+            <li class="nav-item" id="Description">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-2">注意事項</button>
+            </li>
+            <li class="nav-item" id="PurchaseReminder">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-2">購票提醒</button>
+            </li>
+            <li class="nav-item" id="CollectionReminder">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-2">取票提醒</button>
+            </li>
+            <li class="nav-item" id="RefundPolicy">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-2">退票說明</button>
             </li>
         </ul>
-        <div class="tab-content border p-4 bg-white shadow-sm">
+        <div class="tab-content pixel-tab-content">
             <div class="tab-pane fade show active" id="tab-1">
-                @* 🚩 使用 Html.Raw 渲染資料庫中的 HTML 內容 *@
-                <div class="programme-description">
-                    @Html.Raw(Model.ProgrammeDescription)
-                </div>
+                <div class="text-white lh-lg"> @Html.Raw(Model.ProgrammeDescription) </div>
             </div>
-            <div class="tab-pane fade" id="tab-2">
-                <p>這裡可以放置通用的購票注意事項...</p>
+            <div class="tab-pane fade show active" id="tab-1">
+                <div class="text-white lh-lg"> @Html.Raw(Model.Notice) </div>
+            </div>
+            <div class="tab-pane fade show active" id="tab-1">
+                <div class="text-white lh-lg"> @Html.Raw(Model.PurchaseReminder) </div>
+            </div>
+            <div class="tab-pane fade show active" id="tab-1">
+                <div class="text-white lh-lg"> @Html.Raw(Model.CollectionReminder) </div>
+            </div>
+            <div class="tab-pane fade show active" id="tab-1">
+                <div class="text-white lh-lg"> @Html.Raw(Model.RefundPolicy) </div>
             </div>
         </div>
     </div>
 
+    @* 🚩 場次選擇：數據列表風格 *@
     <div id="sessions" class="mt-5 pt-5">
         <div class="d-flex align-items-center mb-4">
-            <div class="bg-primary" style="width: 8px; height: 35px; border-radius: 4px;"></div>
-            <h3 class="fw-bold mb-0 ms-3">選擇場次</h3>
+            <h3 class="text-pixel-yellow fw-bold mb-0">
+                <i class="bi bi-layers me-3"></i>選擇場次 
+            </h3>
         </div>
 
-        <div class="card border-0 shadow-sm">
+        <div class="pixel-container-box p-0 ">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 text-center">
-                    <thead class="bg-light text-secondary">
-                        <tr>
-                            <th class="py-3">時間 Time</th>
-                            <th class="py-3">場次名稱 Session</th>
-                            <th class="py-3">地點 Venue</th>
-                            <th class="py-3">操作 Action</th>
+                <table class="table pixel-table mb-0 align-middle">
+                    <thead>
+                        <tr class="text-center">
+                            <th class="py-3 text-pixel-blue">演出時間</th>
+                            <th class="py-3 text-pixel-blue">場次名稱</th>
+                            <th class="py-3 text-pixel-blue">地點</th>
+                            <th class="py-3 text-pixel-blue">購買狀態</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var session in Model.Session.OrderBy(s => s.StartTime))
                         {
-                            <tr>
-                                <td class="fw-bold">@session.StartTime.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td>@session.Programme.ProgrammeName</td>
-                                <td>@Model.Place?.PlaceName</td>
-                                <td>
-                                    @if (session.Programme.ProgrammeStatusID == "O")
+                            <tr class="text-center">
+                                <td class="text-white fw-bold">@session.StartTime.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td class="text-pixel-pink">@session.Programme.ProgrammeName</td>
+                                <td class="text-pixel-muted">@Model.Place?.PlaceName</td>
+                                <td class="py-3">
+                                    @{
+                                        // 🚩 判斷該場次是否還有票 (假設你已在 Controller 加了 ThenInclude(s => s.Tickets))
+                                        bool isSessionSoldOut = !session.TicketsArea.Any(t => t.TicketsAreaStatusID == "A");
+                                    }
+
+                                    @if (Model.ProgrammeStatusID == "O" && !isSessionSoldOut)
                                     {
+                                        @* 只有開賣中且有票，才給按鈕 *@
                                         <a asp-controller="Seats" asp-action="Index" asp-route-id="@session.SessionID"
-                                           class="btn btn-primary btn-sm px-4 fw-bold">立即訂購</a>
+                                           class="btn-pixel py-1 px-3 fs-pixel-small">立即訂購</a>
+                                    }
+                                    else if (Model.ProgrammeStatusID == "S" || isSessionSoldOut)
+                                    {
+                                        @* 只要主狀態是 S，或該場次沒票，就顯示完售 *@
+                                        <span class="text-pixel-pink fs-pixel-small shadow-glow">[ 已完售 ]</span>
                                     }
                                     else
                                     {
-                                        <span class="text-muted small">尚未開放</span>
+                                        @* 其他情況 (已結束、設定中) *@
+                                        <span class="text-pixel-muted fs-pixel-small">[ 停止售票 ]</span>
                                     }
                                 </td>
                             </tr>
@@ -174,4 +293,3 @@
         </div>
     </div>
 </div>
-

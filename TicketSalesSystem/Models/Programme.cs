@@ -20,6 +20,25 @@ namespace TicketSalesSystem.Models
         [DataType(DataType.MultilineText)]
         public string ProgrammeDescription { get; set; } = null!;
 
+        [Display(Name = "注意事項")]
+        [Required(ErrorMessage = "必填")]
+        [DataType(DataType.MultilineText)]
+        public string Notice { get; set; } = null!;
+
+        [Display(Name = "購票提醒")]
+        [Required(ErrorMessage = "必填")]
+        [DataType(DataType.MultilineText)]
+        public string PurchaseReminder { get; set; } = null!;
+
+        [Display(Name = "取票提醒")]
+        [Required(ErrorMessage = "必填")]
+        [DataType(DataType.MultilineText)]
+        public string CollectionReminder { get; set; } = null!;
+
+        [Display(Name = "退票說明")]
+        [Required(ErrorMessage = "必填")]
+        [DataType(DataType.MultilineText)]
+        public string RefundPolicy { get; set; } = null!;
 
         [Display(Name = "建立時間")]
         [Required(ErrorMessage = "必填")]

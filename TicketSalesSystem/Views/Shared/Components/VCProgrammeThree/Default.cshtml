@@ -3,65 +3,117 @@
 @{
     Layout = null;
 }
+
 <style>
-    /* 拓元色調與卡片美化 */
-    :root {
-        --tix-blue: #003a8c;
+    /* 🚩 數據節點卡片 (Data Node) */
+    .pixel-data-node {
+        background-color: rgba(0, 0, 0, 0.9) !important;
+        border: 2px solid var(--pixel-blue);
+        box-shadow: 4px 4px 0px var(--pixel-pink); /* 同步首頁霓虹投影 */
+        border-radius: 0;
+        transition: all 0.3s ease;
+        overflow: hidden;
     }
 
-    .programme-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-radius: 0; /* 拓元多用方正邊角 */
-    }
-
-        .programme-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+        .pixel-data-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 6px 6px 0px var(--pixel-yellow); /* 懸停變黃色發光 */
+            border-color: var(--pixel-yellow);
         }
 
-    /* 固定圖片比例 16:9 且不變形 */
+    /* 圖片容器與掃描線 */
+    .node-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-bottom: 2px solid var(--pixel-blue);
+    }
+
+        .node-image-wrapper::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 2px;
+            pointer-events: none;
+        }
+
     .custom-card-img {
         height: 200px;
         object-fit: cover;
+        filter: brightness(0.9);
         transition: transform 0.5s ease;
     }
 
-    .programme-card:hover .custom-card-img {
-        transform: scale(1.05);
+    .pixel-data-node:hover .custom-card-img {
+        transform: scale(1.1);
+        filter: brightness(1.1);
     }
 
-    .btn-tixcraft {
-        background-color: var(--tix-blue);
-        color: white;
-        border-radius: 4px;
-        border: none;
+    /* 🚩 狀態標籤：熱賣中 (HOT_SIGNAL) */
+    .signal-badge {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7rem !important; /* 像素字體寬，縮小但仍清晰 */
+        background-color: var(--pixel-pink);
+        color: #fff;
+        padding: 5px 10px;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 3;
+        box-shadow: 0 0 10px var(--pixel-pink);
     }
 
-        .btn-tixcraft:hover {
-            background-color: #002766;
-            color: white;
+    /* 文字規格控制 */
+    .node-title {
+        font-size: 1.4rem !important;
+        color: var(--pixel-yellow) !important;
+        font-weight: bold;
+        margin-bottom: 15px;
+        text-decoration: none;
+        display: block;
+    }
+
+        .node-title:hover {
+            color: #fff !important;
+            text-shadow: 0 0 5px var(--pixel-yellow);
         }
 
-    .hover-blue:hover {
-        color: var(--tix-blue) !important;
+    .node-info-text {
+        font-size: 1.2rem !important; /* 🚩 最小字體 1.2rem */
+        color: var(--pixel-text-muted);
+        margin-bottom: 8px;
+        font-family: monospace;
     }
+
+        .node-info-text i {
+            color: var(--pixel-blue);
+            margin-right: 10px;
+        }
 </style>
+
 @if (Model != null && Model.Any())
 {
-    <div class="text-end m-3">
-        <a asp-controller="Programmes" asp-action="Index" class="  text-primary text-decoration-none small">更多 <i class="bi bi-chevron-right"></i></a>
+    @* 頂部「更多」連結 *@
+    <div class="text-end mb-4">
+        <a asp-controller="Programmes" asp-action="Index" class="btn-pixel-text" style="font-size: 1.2rem;">
+            [ 更多 ]
+        </a>
     </div>
-    <div class="row row-cols-1 row-cols-md-3 g-4">        
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var item in Model)
         {
-            // 🚩 核心修正：從 Session 集合中抓取最接近的一場
-            var sortedSessions = item.Session.OrderBy(s => s.StartTime).ToList();
-            var firstSession = sortedSessions.FirstOrDefault();
-            var lastSession = sortedSessions.LastOrDefault();
+            var sortedSessions = item.Session?.OrderBy(s => s.StartTime).ToList();
+            var firstSession = sortedSessions?.FirstOrDefault();
+            var lastSession = sortedSessions?.LastOrDefault();
 
             <div class="col">
-                <div class="card h-100 border-0 shadow-sm programme-card">
-                    <div class="position-relative overflow-hidden">
+                <div class="card h-100 pixel-data-node">
+                    @* 🚩 圖片區塊 *@
+                    <div class="node-image-wrapper">
                         <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID">
                             @if (!string.IsNullOrEmpty(item.CoverImage))
                             {
@@ -72,39 +124,38 @@
                                 <img src="/Photos/CoverImage/nonoPhoto.jpg" alt="No Photo" class="card-img-top custom-card-img" />
                             }
                         </a>
-                        <span class="position-absolute top-0 start-0 badge bg-primary m-2 px-3 py-2">熱賣中</span>
+                        <span class="signal-badge">熱賣中...</span>
                     </div>
 
+                    @* 🚩 內容區塊 *@
                     <div class="card-body d-flex flex-column p-4">
-                        <h5 class="card-title fw-bold mb-3">
-                            <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID" class="text-decoration-none text-dark hover-blue">
-                                @item.ProgrammeName
-                            </a>
-                        </h5>
+                        <a asp-controller="Programmes" asp-action="Details" asp-route-id="@item.ProgrammeID" class="node-title">
+                             @item.ProgrammeName
+                        </a>
 
                         <div class="mt-auto">
-                            <div class="text-secondary small mb-2">
-                                <i class="bi bi-calendar3 me-2"></i>
+                            @* 日期資訊 *@
+                            <div class="node-info-text">
+                                <i class="bi bi-calendar3"></i>
                                 @if (firstSession != null)
                                 {
-                                    @firstSession.StartTime.ToString("yyyy/MM/dd (ddd)")
+                                    @firstSession.StartTime.ToString("yyyy.MM.dd")
                                     @if (sortedSessions.Count > 1)
                                     {
-                                        <span> ~ @lastSession.StartTime.ToString("MM/dd")</span>
+                                        <span> - @lastSession.StartTime.ToString("MM.dd")</span>
                                     }
                                 }
                                 else
                                 {
-                                    <span>場次尚未公布</span>
+                                    <span>TBA / 待定</span>
                                 }
                             </div>
 
-                            <div class="text-secondary small mb-3">
-                                <i class="bi bi-geo-alt-fill me-2"></i>
-                                @(item.Place?.PlaceName ?? "地點未定")
+                            @* 地點資訊 *@
+                            <div class="node-info-text">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                @(item.Place?.PlaceName ?? "未知區域")
                             </div>
-
-                           
                         </div>
                     </div>
                 </div>
@@ -112,4 +163,3 @@
         }
     </div>
 }
-

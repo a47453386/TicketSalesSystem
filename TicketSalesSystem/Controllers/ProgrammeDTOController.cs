@@ -59,6 +59,10 @@ namespace TicketSalesSystem.Controllers
         {
             dto.ProgrammeName = vm.ProgrammeName;
             dto.ProgrammeDescription = vm.ProgrammeDescription;
+            dto.Notice=vm.Notice;
+            dto.PurchaseReminder=vm.PurchaseReminder;
+            dto.CollectionReminder=vm.CollectionReminder;
+            dto.RefundPolicy=vm.RefundPolicy;
             dto.LimitPerOrder = vm.LimitPerOrder;
             dto.OnShelfTime = vm.OnShelfTime;
             dto.PlaceID = vm.PlaceID;
@@ -68,6 +72,10 @@ namespace TicketSalesSystem.Controllers
         {
             vm.ProgrammeName = dto.ProgrammeName;
             vm.ProgrammeDescription = dto.ProgrammeDescription;
+            vm.Notice = dto.Notice;
+            vm.PurchaseReminder = dto.PurchaseReminder;
+            vm.CollectionReminder = dto.CollectionReminder;
+            vm.RefundPolicy = dto.RefundPolicy;
             vm.LimitPerOrder = dto.LimitPerOrder;
             vm.OnShelfTime = dto.OnShelfTime;
             vm.PlaceID = dto.PlaceID;
@@ -521,6 +529,10 @@ namespace TicketSalesSystem.Controllers
                         ProgrammeID = pid,
                         ProgrammeName = dto.ProgrammeName,
                         ProgrammeDescription = dto.ProgrammeDescription,
+                        Notice = dto.Notice,
+                        PurchaseReminder = dto.PurchaseReminder,
+                        CollectionReminder = dto.CollectionReminder,
+                        RefundPolicy = dto.RefundPolicy,
                         CreatedTime = DateTime.Now,
                         UpdatedAt = DateTime.Now,
                         CoverImage = dto.CoverImage,

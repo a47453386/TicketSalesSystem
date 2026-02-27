@@ -11,6 +11,10 @@ namespace TicketSalesSystem.ViewModel.Programme.EditProgramme
         public string ProgrammeID { get; set; } = null!;
         public string ProgrammeName { get; set; } = null!;
         public string ProgrammeDescription { get; set; } = null!;
+        public string Notice { get; set; } 
+        public string PurchaseReminder { get; set; }
+        public string CollectionReminder { get; set; } 
+        public string RefundPolicy { get; set; }
         public string? CoverImage { get; set; }
         public string? SeatImage { get; set; }
 

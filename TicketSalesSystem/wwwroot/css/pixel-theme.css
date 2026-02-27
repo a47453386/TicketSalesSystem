@@ -68,29 +68,59 @@ a {
         background-color: rgba(255, 204, 0, 0.1);
         transform: translateY(-2px); /* 懸停跳動 */
     }
-
-/* --- 像素按鈕 (Btn) --- */
-.btn-pixel {
+/* ============================================================
+   [ 按鈕組件家族 - PIXEL BUTTON FAMILY ]
+   ============================================================ */
+/* 1. 基礎共享樣式 (所有像素按鈕共同擁有的靈魂) */
+.btn-pixel, .btn-pixel-text {
     font-family: 'Press Start 2P', cursive;
-    font-size: 0.7rem;
+    border-radius: 0 !important;
+    transition: all 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+/* 2. 標準方塊版 (具備立體陰影與背景) */
+.btn-pixel {
+    font-size: 1rem;
     background-color: var(--pixel-blue);
     color: #000 !important;
-    border: none;
     padding: 12px 24px;
     position: relative;
     /* 像素立體陰影 */
     box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4), 4px 4px 0px 0px #000;
-    transition: all 0.1s;
-    border-radius: 0 !important; /* 禁止圓角 */
 }
 
     .btn-pixel:hover {
         background-color: var(--pixel-yellow);
         color: #000 !important;
-        transform: translate(2px, 2px); /* 按下效果 */
+        transform: translate(2px, 2px); /* 模擬按下的位移 */
         box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.4), 2px 2px 0px 0px #000;
     }
 
+/* 3. 文字型版本 (無背景、無邊框，適用於取消或次要操作) */
+.btn-pixel-text {
+    background: none !important;
+    padding: 0 !important;
+    font-size: 0.8rem; /* 文字型通常建議縮小一點點比較精緻 */
+    color: var(--pixel-text-muted) !important;
+    box-shadow: none !important; /* 確保沒有陰影 */
+}
+
+    .btn-pixel-text:hover, .btn-pixel-text:focus {
+        background: none !important;
+        color: var(--pixel-yellow) !important;
+        transform: translateX(4px); /* 🚩 獨有的微小位移感，增加互動性 */
+        outline: none;
+    }
+
+    /* 確保按鈕內部的圖示 (Icon) 顏色繼承文字 */
+    .btn-pixel i, .btn-pixel-text i {
+        color: inherit !important;
+    }
 /* --- 像素下拉選單 (Dropdown) --- */
 .pixel-dropdown-menu {
     background-color: var(--pixel-bg-light) !important;

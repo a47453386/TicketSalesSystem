@@ -1,240 +1,303 @@
 ﻿@model TicketSalesSystem.ViewModel.Booking.VMBookingResponse
 
 @{
-    ViewData["Title"] = "支付訂單 - tixCraft 拓元風格";
+    ViewData["Title"] = "支付訂單 - TRANSACTION_GATEWAY";
     Layout = "_UserLayout";
 }
+
 <style>
-    :root {
-        --tixcraft-blue: #003a8c;
-        --tixcraft-hover: #002766;
-    }
-
-    /* 倒數計時列 */
-    .timer-bar {
-        background-color: #d9534f;
+    /* 🚩 專屬：賽博交易介面樣式 */
+    .pixel-timer-bar {
+        background-color: #000;
+        border-bottom: 4px solid var(--pixel-pink);
         z-index: 1020;
+        box-shadow: 0 5px 15px rgba(255, 0, 204, 0.3);
     }
 
-    /* 拓元色調 */
-    .bg-tixcraft {
-        background-color: var(--tixcraft-blue);
+    .timer-text {
+        font-family: 'Press Start 2P', cursive;
+        color: var(--pixel-pink);
+        text-shadow: 0 0 5px var(--pixel-pink);
     }
 
-    .text-primary {
-        color: var(--tixcraft-blue) !important;
-    }
-
-    /* 狀態圖示 */
-    .status-icon-circle {
-        width: 80px;
-        height: 80px;
-        background-color: #e8f5e9;
-        color: #2e7d32;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-    }
-
-    /* 支付方式選項 */
-    .payment-box label {
-        border-color: #dee2e6;
-        background-color: #fff;
-        border-width: 2px;
-        transition: 0.2s;
+    /* 支付方式像素按鈕 */
+    .payment-pixel-box label {
+        border: 2px solid var(--pixel-blue);
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #fff;
         border-radius: 0;
+        transition: all 0.2s;
+        cursor: pointer;
     }
 
-        .payment-box label:hover {
-            background-color: #f8f9fa;
-            border-color: #ced4da;
+        .payment-pixel-box label:hover {
+            background-color: rgba(0, 204, 255, 0.1);
+            border-color: var(--pixel-yellow);
         }
 
     .btn-check:checked + label {
-        border-color: var(--tixcraft-blue);
-        background-color: #f0f7ff;
+        border-color: var(--pixel-yellow) !important;
+        background-color: rgba(255, 204, 0, 0.15) !important;
+        box-shadow: -5px 0 0 var(--pixel-yellow);
     }
 
-    .check-mark {
+    .check-mark-pixel {
         display: none;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7rem;
     }
 
-    .btn-check:checked + label .check-mark {
+    .btn-check:checked + label .check-mark-pixel {
+        display: block;
+        color: var(--pixel-yellow);
+    }
+
+    .pixel-status-circle {
+        width: 100px;
+        height: 100px;
+        background-color: #000;
+        border: 4px solid var(--pixel-blue);
+        color: var(--pixel-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        box-shadow: 0 0 15px var(--pixel-blue);
+    }
+
+    .text-pixel-yellow {
+        color: var(--pixel-yellow) !important;
+    }
+
+    .text-pixel-blue {
+        color: var(--pixel-blue) !important;
+    }
+
+    .text-pixel-pink, .bg-pixel-pink {
+        color: var(--pixel-pink) !important;
+    }
+
+    .text-pixel-muted {
+        color: var(--pixel-text-muted) !important;
+    }
+
+    /* 1. 欄位標籤 (左側的：活動名稱、日期等) */
+    .pixel-label {
+        font-size: 1.1rem !important;
+        color: var(--pixel-blue) !important;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
         display: block;
     }
 
-    /* 操作按鈕 */
-    .btn-tixcraft-action {
-        background-color: var(--tixcraft-blue);
-        color: white;
-        border-radius: 4px;
-        letter-spacing: 1px;
+    /* 2. 數據數值 (右側的：@Model.ProgrammeName 等) */
+    .pixel-value {
+        font-size: 1.5rem !important; /* 核心數據要最大 */
+        color: #ffffff !important;
+        font-weight: bold;
+        text-shadow: 2px 2px 0px #000;
     }
 
-        .btn-tixcraft-action:hover {
-            background-color: var(--tixcraft-hover);
-            color: white;
-        }
-
-    /* 字體微調 */
-    .font-monospace {
-        font-family: 'Courier New', Courier, monospace;
+    /* 3. 修改原本覺得太小的 fs-pixel-small */
+    .fs-pixel-small {
+        font-size: 1.2rem !important; /* 這是最低限度，低於這個就看不清了 */
     }
+
+    /* 4. 針對支付授權區的小字 (原 0.7rem 太小了) */
+    .pixel-legal-text {
+        font-size: 1rem !important;
+        line-height: 1.6;
+        color: var(--pixel-muted) !important;
+    }
+    
 </style>
-<div class="timer-bar sticky-top shadow-sm">
+
+@* --- 🚩 頂部自爆倒數計時列 --- *@
+<div class="pixel-timer-bar sticky-top">
     <div class="container d-flex justify-content-between align-items-center py-2">
-        <span class="text-white small"><i class="bi bi-info-circle-fill me-2"></i>請於時限內完成付款，逾時訂單將失效。</span>
-        <div class="d-flex align-items-center bg-white text-danger px-3 py-1 rounded-pill">
-            <span class="small fw-bold me-2">結帳剩餘時間</span>
-            <span id="countdownTimer" class="fw-bold fs-5 font-monospace">--:--</span>
+        <span class="text-pixel-pink fs-pixel-small dot-blink">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>請於時間內付款
+        </span>
+        <div class="d-flex align-items-center bg-black border border-pixel-pink px-3 py-1">
+            <span class="text-white small me-3 font-monospace">倒數計時:</span>
+            <span id="countdownTimer" class="timer-text fs-4">--:--</span>
         </div>
     </div>
 </div>
 
 <div class="container mt-5 mb-5">
+    @* --- 🚩 狀態顯示 --- *@
     <div class="row mb-5">
         <div class="col-12 text-center">
-            <div class="status-icon-circle mb-3 mx-auto">
-                <i class="bi bi-cart-check"></i>
+            <div class="pixel-status-circle mb-4 mx-auto">
+                <i class="bi bi-hdd-network"></i>
             </div>
-            <h2 class="fw-bold">訂單建立成功，待支付</h2>
-            <p class="text-secondary">請確認以下訂購資訊並選擇付款方式</p>
-            <div class="d-inline-block px-4 py-2 bg-light border rounded text-dark">
-                訂單編號：<span class="fw-bold">@Model.OrderID</span>
+            <h2 class="text-pixel-yellow fw-bold">訂單建立成功</h2>
+            <div class="pixel-container-box d-inline-block py-2 px-4 mt-2">
+                訂單號碼: <span class="text-pixel-blue">@Model.OrderID</span>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
+        @* --- 🚩 左側：數據摘要 --- *@
         <div class="col-lg-7">
-            <div class="card border-0 shadow-sm rounded-0 h-100">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h5 class="mb-0 fw-bold border-start border-primary border-4 ps-3">訂購內容摘要</h5>
-                </div>
-                <div class="card-body p-4">
-                    <div class="row mb-4">
-                        <div class="col-sm-4 text-muted">活動節目</div>
-                        <div class="col-sm-8 fw-bold fs-5 text-primary">@Model.ProgrammeName</div>
+            <div class="pixel-container-box h-100">
+                <h5 class="text-pixel-yellow mb-4 pb-2 border-bottom border-secondary">
+                    [ 訂購內容 ]
+                </h5>
+                <div class="card-body">
+                    @* 使用自定義的 pixel-label 與 pixel-value *@
+                    <div class="mb-4">
+                        <span class="pixel-label">活動名稱E</span>
+                        <div class="pixel-value">@Model.ProgrammeName</div>
                     </div>
-                    <div class="row mb-4">
-                        <div class="col-sm-4 text-muted">場次時間</div>
-                        <div class="col-sm-8">@Model.StartTime</div>
+
+                    <div class="mb-4">
+                        <span class="pixel-label">演唱日期</span>
+                        <div class="pixel-value">@Model.StartTime</div>
                     </div>
-                    <div class="row mb-4">
-                        <div class="col-sm-4 text-muted">演出地點</div>
-                        <div class="col-sm-8">@Model.PlaceName</div>
+
+                    <div class="mb-4">
+                        <span class="pixel-label">演出地點</span>
+                        <div class="pixel-value text-pixel-blue">@Model.PlaceName</div>
                     </div>
-                    <div class="row mb-4">
-                        <div class="col-sm-4 text-muted">座位資訊</div>
-                        <div class="col-sm-8">
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach (var seatInfo in Model.Seats)
-                                {
-                                    <span class="badge bg-light text-dark border p-2 fw-normal">@seatInfo</span>
-                                }
-                            </div>
+
+                    <div class="mb-4">
+                        <span class="pixel-label">選定座位</span>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            @foreach (var seatInfo in Model.Seats)
+                            {
+                                @* 座位標籤也放大 *@
+                                <span class="border border-pixel-blue px-3 py-2 text-pixel-blue fw-bold" style="font-size: 1.2rem;">
+                                    @seatInfo
+                                </span>
+                            }
                         </div>
                     </div>
-                    <div class="border-top pt-4 mt-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fs-5 text-secondary">應付總金額</span>
-                            <span class="fs-1 fw-bold text-danger">TWD $@Model.FinalAmount.ToString("N0")</span>
+
+                    @* 應付總額區塊 *@
+                    <div class="border-top border-secondary pt-4 mt-5">
+                        <div class="d-flex justify-content-between align-items-end">
+                            <span class="text-pixel-muted fs-pixel-small">應付總額</span>
+                            <span class="fw-bold text-pixel-pink shadow-glow" style="font-size: 3rem;">
+                                $@Model.FinalAmount.ToString("N0")
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        @* --- 🚩 右側：支付授權 --- *@
         <div class="col-lg-5">
-            <div class="card border-0 shadow-sm rounded-0 h-100">
-                <div class="card-header bg-tixcraft text-white py-3">
-                    <h5 class="mb-0 fw-bold">選擇支付方式</h5>
-                </div>
-                <div class="card-body p-4">
-                    <div class="payment-group">
-                        @if (ViewData["PaymentMethods"] != null)
+            <div class="pixel-container-box h-100 border-pixel-pink">
+                <h5 class="text-pixel-pink mb-4 pb-2 border-bottom border-secondary">
+                    [ 支付方式 ]
+                </h5>
+                <div class="payment-group">
+                    @if (ViewData["PaymentMethods"] != null)
+                    {
+                        var methods = (List<TicketSalesSystem.Models.PaymentMethod>)ViewData["PaymentMethods"];
+                        for (int i = 0; i < methods.Count; i++)
                         {
-                            var methods = (List<TicketSalesSystem.Models.PaymentMethod>)ViewData["PaymentMethods"];
-                            for (int i = 0; i < methods.Count; i++)
+                            @* 🚩 根據名稱決定圖示與顏色類別 *@
+                            string iconClass = "bi-shield-lock"; // 預設
+                            string colorClass = "text-pixel-blue"; // 預設藍色
+
+                            if (methods[i].PaymentMethodID.Contains("A") || methods[i].PaymentMethodName.Contains("轉帳"))
                             {
-                                <div class="payment-box mb-3">
-                                    <input type="radio" class="btn-check" name="payType"
-                                           id="pay_@methods[i].PaymentMethodID"
-                                           value="@methods[i].PaymentMethodID"
-                                           @(i == 0 ? "checked" : "")>
-                                    <label class="btn btn-outline-light d-flex align-items-center p-3 text-start w-100"
-                                           for="pay_@methods[i].PaymentMethodID">
-                                        <i class="bi bi-credit-card-2-front fs-3 me-3"></i>
-                                        <div class="flex-grow-1">
-                                            <div class="fw-bold pay-name text-dark">@methods[i].PaymentMethodName</div>
-                                            <small class="text-muted">安全且加密的支付環境</small>
-                                        </div>
-                                        <i class="bi bi-check-circle-fill check-mark fs-4 text-primary"></i>
-                                    </label>
-                                </div>
+                                iconClass = "bi-bank2";
+                                colorClass = "text-pixel-blue"; // ATM 配藍色
                             }
+                            else if (methods[i].PaymentMethodID.Contains("C") || methods[i].PaymentMethodName.Contains("Card"))
+                            {
+                                iconClass = "bi-credit-card-2-front";
+                                colorClass = "text-pixel-pink"; // 信用卡配粉色
+                            }
+
+                            <div class="payment-pixel-box mb-3">
+                                <input type="radio" class="btn-check" name="payType"
+                                       id="pay_@methods[i].PaymentMethodID"
+                                       value="@methods[i].PaymentMethodID"
+                                       @(i == 0 ? "checked" : "")>
+                                <label class="btn d-flex align-items-center p-3 text-start w-100"
+                                       for="pay_@methods[i].PaymentMethodID">
+
+                                    @* 🚩 這裡會動態切換圖示與顏色 *@
+                                    <i class="bi @iconClass fs-3 me-3 @colorClass shadow-glow-@(colorClass.Contains("pink") ? "pink" : "blue")"></i>
+
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold text-white">@methods[i].PaymentMethodName</div>
+                                    </div>
+                                    <span class="check-mark-pixel">SELECTED</span>
+                                </label>
+                            </div>
                         }
+                    }
+                </div>
+
+                <div class="mt-5">
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" checked style="transform: scale(1.5); margin-right: 15px;">
+                        <label class="pixel-legal-text ms-2" for="agreeTerms">
+                            我已閱畢並同意數據傳輸條款
+                        </label>
                     </div>
 
-                    <div class="mt-5">
-                        <div class="form-check mb-4">
-                            <input class="form-check-input" type="checkbox" id="agreeTerms" checked>
-                            <label class="form-check-label small text-muted" for="agreeTerms">
-                                我已閱讀並同意購票須知與服務條款
-                            </label>
-                        </div>
-                        <button type="button" onclick="confirmPayment()"
-                                class="btn btn-tixcraft-action btn-lg w-100 py-3 shadow-sm fw-bold">
-                            確認付款並完成訂購
-                        </button>
+                    <button type="button" onclick="confirmPayment()" class="btn-pixel w-100 py-4" style="font-size: 1.6rem;">
+                        確認付款
+                    </button>
+
+                    <div class="mt-4 text-center">
+                        <form asp-controller="UserOrders" asp-action="UserCancelOrder" asp-route-id="@Model.OrderID" method="post" id="cancelForm">
+                            <button type="button" id="btnCancel" class="btn-pixel-text text-pixel-pink fs-pixel-small" onclick="confirmCancel()">
+                                [ 我要取消訂單 ]
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<form asp-controller="Orders" asp-action="UserCancelOrder" asp-route-id="@Model.OrderID" method="post" id="cancelForm">
-    <button type="button" id="btnCancel" class="btn btn-outline-danger" onclick="confirmCancel()">
-        <i class="bi bi-x-circle me-1"></i> 我不要了，取消訂單
-    </button>
-</form>
-
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // 🚩 統一 SweetAlert 風格為深色
+        const PixelSwal = Swal.mixin({
+            background: '#000',
+            color: '#fff',
+            confirmButtonColor: '#ff00cc',
+            cancelButtonColor: '#00ccff',
+            customClass: {
+                popup: 'border-pixel-pink border-4'
+            }
+        });
+
         function confirmCancel() {
-            Swal.fire({
-                title: '確定要取消訂單嗎？',
-                text: "取消後，您選購的座位將立即釋出給其他購票者！",
+            PixelSwal.fire({
+                title: '確定要取消訂單？',
+                text: "座位即將釋放!!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
                 confirmButtonText: '確定取消',
-                cancelButtonText: '再考慮一下',
-                // 防止點擊背景關閉，確保流程完整
+                cancelButtonText: '繼續支付',
                 allowOutsideClick: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // 🚩 顯示「正在處理」的狀態
-                    Swal.fire({
-                        title: '正在處理中...',
-                        html: '正在為您釋放名額，請稍候。',
+                    PixelSwal.fire({
+                        title: '正在清理數據...',
+                        html: 'DELETING_ASSET_RESERVATION...',
                         allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading(); // 顯示內建的轉圈圈動畫
-                        }
+                        didOpen: () => { Swal.showLoading(); }
                     });
-
-                    // 正式送出表單
                     document.getElementById('cancelForm').submit();
                 }
             })
         }
-        // 1. 倒數計時
+
         (function () {
             const timerDisplay = document.getElementById("countdownTimer");
             const expireTimeStr = "@Model.ExpireTimeText";
@@ -247,8 +310,9 @@
                 if (distance < 0) {
                     clearInterval(timerFunc);
                     timerDisplay.innerHTML = "00:00";
-                    alert("付款逾時，訂單已自動失效。");
-                    window.location.href = "/Home/Index";
+                    PixelSwal.fire("系統逾時", "數據連結已遺失，訂單失效。", "error").then(() => {
+                        window.location.href = "/Home/Index";
+                    });
                     return;
                 }
 
@@ -258,21 +322,24 @@
                 timerDisplay.innerHTML =
                     (minutes < 10 ? "0" : "") + minutes + ":" +
                     (seconds < 10 ? "0" : "") + seconds;
+
+                // 剩餘一分鐘變色警告
+                if (minutes < 1) {
+                    timerDisplay.style.animation = "dot-blink 0.5s infinite";
+                }
             }, 1000);
         })();
 
-        // 2. 確認付款
         window.confirmPayment = async function() {
             const selectedPayType = document.querySelector('input[name="payType"]:checked');
             if (!selectedPayType) {
-                alert("請選擇支付方式");
+                PixelSwal.fire("錯誤", "請選擇傳輸協定 (支付方式)", "error");
                 return;
             }
 
-            const btn = document.querySelector('.btn-tixcraft-action');
+            const btn = document.querySelector('.btn-pixel');
             btn.disabled = true;
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 處理中...';
+            btn.innerHTML = 'UPLOADING_AUTH...';
 
             try {
                 const res = await fetch('/Seats/Payment', {
@@ -286,17 +353,17 @@
 
                 const result = await res.json();
                 if (result.success) {
-                    alert("✅ 付款成功！系統將為您跳轉至訂單記錄。");
-                    window.location.href = "/UserOrders/UserIndex";
+                    PixelSwal.fire("成功", "✅ 授權成功！數據同步中。", "success").then(() => {
+                        window.location.href = "/UserOrders/UserIndex";
+                    });
                 } else {
-                    alert("❌ 付款失敗：" + result.message);
+                    PixelSwal.fire("拒絕", "❌ 授權失敗：" + result.message, "error");
                     btn.disabled = false;
-                    btn.innerHTML = originalHtml;
+                    btn.innerHTML = '重新授權 (RETRY)';
                 }
             } catch (error) {
-                alert("⚠️ 連線異常，請檢查網路狀態。");
+                PixelSwal.fire("異常", "⚠️ 訊號中斷，請檢查網路狀態。", "error");
                 btn.disabled = false;
-                btn.innerHTML = originalHtml;
             }
         };
     </script>

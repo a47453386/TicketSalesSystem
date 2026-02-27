@@ -1,63 +1,238 @@
 ﻿@model TicketSalesSystem.Models.Question
 
 @{
-    ViewData["Title"] = "提交新諮詢";
+    ViewData["Title"] = "我要發問";
     Layout = "_UserLayout";
 }
 
-<div class="container py-4">
+<style>
+    /* ============================================================
+           [ 1. 核心字體與輸入框規格 ] - 最小字體 1.2rem
+           ============================================================ */
+    .pixel-label {
+        font-size: 1.3rem !important; /* 標籤稍微大一點增加閱讀性 */
+        color: var(--pixel-blue) !important;
+        font-family: 'Press Start 2P', cursive;
+        margin-bottom: 12px;
+        display: block;
+        letter-spacing: 1px;
+    }
+
+    .pixel-input {
+        background-color: rgba(0, 0, 0, 0.9) !important;
+        border: 2px solid var(--pixel-blue) !important;
+        border-radius: 0 !important;
+        color: #fff !important;
+        font-size: 1.2rem !important;
+        padding: 15px !important;
+    }
+
+        .pixel-input:focus {
+            border-color: var(--pixel-yellow) !important;
+            box-shadow: 0 0 15px var(--pixel-yellow) !important;
+            background-color: #000 !important;
+        }
+
+        .pixel-input option {
+            background-color: #000;
+            color: #fff;
+        }
+
+    .pixel-form-text {
+        font-size: 1.2rem !important;
+        color: var(--pixel-text-muted) !important;
+        margin-top: 10px;
+    }
+
+    .text-danger {
+        font-size: 1.2rem !important;
+        color: var(--pixel-pink) !important;
+        display: block;
+        margin-top: 8px;
+    }
+
+    /* ============================================================
+           [ 2. 協議聲明區塊 ]
+           ============================================================ */
+    .protocol-notice {
+        background-color: rgba(255, 0, 204, 0.05);
+        border: 2px dashed var(--pixel-pink);
+        padding: 25px;
+        margin-bottom: 40px;
+    }
+
+        .protocol-notice li {
+            font-size: 1.2rem !important;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+    /* 🚩 動態必填閃爍標籤 */
+    .required-flash {
+        color: var(--pixel-yellow);
+        font-size: 1.2rem !important;
+        font-family: 'Press Start 2P', cursive;
+        animation: dot-blink 1s infinite;
+        margin-left: 15px;
+    }
+
+    @@keyframes dot-blink {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0;
+        }
+    }
+</style>
+
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white py-3">
-                    <h5 class="card-title mb-0"><i class="bi bi-pencil-square me-2"></i>填寫諮詢內容</h5>
+        <div class="col-md-11 col-lg-9">
+
+            <div class="pixel-container-box">
+
+                <div class="border-bottom border-secondary pb-4 mb-5 mt-0">
+                    <h2 class="text-pixel-yellow fw-bold mb-0">
+                        <i class="bi bi-terminal me-3"></i>[ 我有問題 ]
+                    </h2>
                 </div>
-                <div class="card-body p-4">
-                    <form asp-action="Create" enctype="multipart/form-data">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <div class="mb-3">
-                            <label asp-for="QuestionTypeID" class="form-label fw-bold">問題種類</label>
-                            <select asp-for="QuestionTypeID" class="form-select" asp-items="ViewBag.QuestionTypeID">
-                                <option value="">-- 請選擇問題類別 --</option>
-                            </select>
-                            <span asp-validation-for="QuestionTypeID" class="text-danger"></span>
+                @* 🚩 注意事項區塊 *@
+                <div class="protocol-notice">
+                    <h5 class="text-pixel-pink fw-bold mb-3">
+                        <i class="bi bi-patch-exclamation me-2"></i>注意事項
+                    </h5>
+                    <ul class="text-white mb-0" style="list-style: square; padding-left: 20px;">
+                        <li>於 7 個工作天內回覆(不包含國定假日)。</li>
+                        <li class="text-pixel-yellow">若為「訂單、票券、付款」等訂單相關問題，須提供<span class="fw-bold text-decoration-underline">訂單編號</span>。</li>
+                        <li class="text-pixel-yellow">退票必須上傳 <span class="fw-bold text-decoration-underline">PDF 申請書</span>。</li>
+                    </ul>
+                </div>
+
+                <form asp-action="Create" enctype="multipart/form-data" id="signalForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                    @* 1. 問題種類 (連動資料庫) *@
+                    <div class="mb-5">
+                        <label asp-for="QuestionTypeID" class="pixel-label">問題種類:</label>
+                        <select asp-for="QuestionTypeID" class="form-select pixel-input" id="typeSelect" asp-items="ViewBag.QuestionTypeID">
+                            <option value="">-- 請選取問題種類 --</option>
+                        </select>
+                        <span asp-validation-for="QuestionTypeID" class="text-danger"></span>
+                    </div>
+
+                    @* 🚩 2. 訂單編號 (退票時觸發必填) *@
+                    <div class="mb-5">
+                        <label class="pixel-label">
+                            訂單編號:
+                        </label>
+                        <input name="OrderID" id="orderIdInput" class="form-control pixel-input"
+                               placeholder="若為退票或訂單相關問題請務必填寫..." />
+                        <div class="pixel-form-text">一般諮詢可留空。</div>
+                    </div>
+
+                    @* 3. 問題主旨 *@
+                    <div class="mb-5">
+                        <label asp-for="QuestionTitle" class="pixel-label">主旨:</label>
+                        <input asp-for="QuestionTitle" class="form-control pixel-input" placeholder="請簡述您的問題..." />
+                        <span asp-validation-for="QuestionTitle" class="text-danger"></span>
+                    </div>
+
+                    @* 4. 詳細內容 *@
+                    <div class="mb-5">
+                        <label asp-for="QuestionDescription" class="pixel-label">詳細內容:</label>
+                        <textarea asp-for="QuestionDescription" class="form-control pixel-input" rows="6"
+                                  placeholder="請詳細描述您的狀況..."></textarea>
+                        <span asp-validation-for="QuestionDescription" class="text-danger"></span>
+                    </div>
+
+                    @* 🚩 5. 附件上傳 (退票時觸發必填) *@
+                    <div class="mb-5">
+                        <label class="pixel-label">
+                           附件上傳:
+                        </label>
+                        <input type="file" name="upload" id="fileInput" class="form-control pixel-input" accept=".pdf" />
+                        <div class="pixel-form-text">
+                            [ 退票請傳 PDF | 上限: 5MB ]
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="QuestionTitle" class="form-label fw-bold"></label>
-                            <input asp-for="QuestionTitle" class="form-control" placeholder="請簡述您的問題..." />
-                            <span asp-validation-for="QuestionTitle" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="QuestionDescription" class="form-label fw-bold"></label>
-                            <textarea asp-for="QuestionDescription" class="form-control" rows="5" placeholder="請詳細描述您的狀況，以便客服人員協助。"></textarea>
-                            <span asp-validation-for="QuestionDescription" class="text-danger"></span>
-                        </div>
-
-                        @* 如果你有處理上傳檔案的邏輯 *@
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">附件上傳 (可選)</label>
-                            <input type="file" name="upload" class="form-control" />
-                            <div class="form-text text-muted small">支援 JPG, PNG, PDF，檔案大小上限 5MB。</div>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill">
-                                <i class="bi bi-send-fill me-1"></i> 送出諮詢
+                    @* 🚩 操作按鈕 *@
+                    <div class="mt-5 pt-4 border-top border-secondary">
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn-pixel py-4" style="font-size: 1.6rem;">
+                                <i class="bi bi-broadcast me-2"></i> 提問
                             </button>
-                            <a asp-action="MyList" class="btn btn-link text-muted">返回我的紀錄</a>
+
+                            <a asp-action="MyList" class="btn-pixel-text text-center py-2">
+                                [問題總攬 ]
+                            </a>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
+
             </div>
         </div>
     </div>
 </div>
-<div asp-validation-summary="All" class="text-danger"></div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const typeSelect = document.getElementById('typeSelect');
+            const orderIdReq = document.getElementById('orderIdReq');
+            const fileReq = document.getElementById('fileReq');
+            const signalForm = document.getElementById('signalForm');
+
+            const PixelAlert = Swal.mixin({
+                background: '#000',
+                color: '#fff',
+                confirmButtonColor: '#ff00cc',
+                customClass: { popup: 'border-pixel-pink border-4' }
+            });
+
+            // 🚩 修改點：優化後的連動判斷
+            function updateRequiredStatus() {
+                const selectedText = typeSelect.options[typeSelect.selectedIndex].text;
+                // 定義哪些關鍵字需要「必填」
+                const requiredKeywords = ["訂單", "付款", "票券", "退票"];
+                // 檢查選中的文字是否包含陣列中的任何一個關鍵字
+                const isRequired = requiredKeywords.some(keyword => selectedText.includes(keyword));
+
+                if (isRequired) {
+                    orderIdReq.classList.remove('d-none');
+                    fileReq.classList.remove('d-none');
+                } else {
+                    orderIdReq.classList.add('d-none');
+                    fileReq.classList.add('d-none');
+                }
+             }
+
+            typeSelect.addEventListener('change', updateRequiredStatus);
+
+            // 送出前檢查
+            signalForm.addEventListener('submit', function (e) {
+                const selectedText = typeSelect.options[typeSelect.selectedIndex].text;
+                const orderId = document.getElementById('orderIdInput').value.trim();
+                const file = document.getElementById('fileInput').value;
+
+                if (selectedText.includes("退票")) {
+                    if (!orderId || !file) {
+                        e.preventDefault();
+                        PixelAlert.fire({
+                            icon: 'error',
+                            title: '數據缺失',
+                            text: '退票申請必須包含「訂單編號」與「申請書」！'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
 }

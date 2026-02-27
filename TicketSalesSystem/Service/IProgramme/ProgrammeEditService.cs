@@ -38,6 +38,10 @@ namespace TicketSalesSystem.Service.IProgramme
             vm.ProgrammeID=db.ProgrammeID;
             vm.ProgrammeName=db.ProgrammeName;
             vm.ProgrammeDescription=db.ProgrammeDescription;
+            vm.Notice=db.Notice;
+            vm.PurchaseReminder=db.PurchaseReminder;
+            vm.CollectionReminder=db.CollectionReminder;
+            vm.RefundPolicy=db.RefundPolicy;
             vm.CoverImage=db.CoverImage;
             vm.SeatImage=db.SeatImage;
             vm.LimitPerOrder=db.LimitPerOrder;
@@ -103,6 +107,10 @@ namespace TicketSalesSystem.Service.IProgramme
             // 2.更新活動主檔
             programme.ProgrammeName = vm.ProgrammeName;
             programme.ProgrammeDescription = vm.ProgrammeDescription;
+            programme.Notice = vm.Notice;
+            programme.PurchaseReminder = vm.PurchaseReminder;
+            programme.CollectionReminder = vm.CollectionReminder;
+            programme.RefundPolicy = vm.RefundPolicy;
             programme.LimitPerOrder = vm.LimitPerOrder;
             programme.UpdatedAt=DateTime.Now;
             programme.CoverImage=vm.CoverImage;

@@ -118,7 +118,7 @@ namespace TicketSalesSystem.Controllers
             return View(member);
         }
 
-
+        [AllowAnonymous]
         // GET: Members/Create
         public IActionResult Create()
         {

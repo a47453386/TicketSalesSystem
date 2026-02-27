@@ -8,7 +8,11 @@ namespace TicketSalesSystem.DTOs
     {
         public string ProgrammeID { get; set; } = null!;     
         public string ProgrammeName { get; set; } = null!;      
-        public string ProgrammeDescription { get; set; } = null!;          
+        public string ProgrammeDescription { get; set; } = null!;
+        public string Notice { get; set; } = null!;
+        public string PurchaseReminder { get; set; } = null!;
+        public string CollectionReminder { get; set; } = null!;
+        public string RefundPolicy { get; set; } = null!;
         public string? CoverImage { get; set; }
         public string? SeatImage { get; set; }
         public int? LimitPerOrder { get; set; }

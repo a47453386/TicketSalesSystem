@@ -30,7 +30,7 @@ namespace TicketSalesSystem.Controllers
             // 🚩 加入 OrderBy 確保每次讀取的順序一致，才不會覺得圖片跳來跳去
             var programme = await _context.Programme
                 .Where(p => p.ProgrammeStatusID == "O") // 照你之前的需求，只看開賣中
-                .OrderBy(p => p.ProgrammeID)            // 🚩 穩定排序
+                .OrderByDescending(p => p.ProgrammeID)            // 🚩 穩定排序
                 .Select(p => new VMProgramme
                 {
                     ProgrammeID = p.ProgrammeID,
@@ -46,9 +46,9 @@ namespace TicketSalesSystem.Controllers
                     Capacity = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Capacity),
                     Remaining = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Remaining),
 
-                    StartTime = p.Session.OrderBy(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
-                    SaleStartTime = p.Session.OrderBy(s => s.StartTime).Select(s => s.SaleStartTime).FirstOrDefault(),
-                    SessionID = p.Session.OrderBy(s => s.StartTime).Select(s => s.SessionID).FirstOrDefault() ?? ""
+                    StartTime = p.Session.OrderByDescending(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
+                    SaleStartTime = p.Session.OrderByDescending(s => s.StartTime).Select(s => s.SaleStartTime).FirstOrDefault(),
+                    SessionID = p.Session.OrderByDescending(s => s.StartTime).Select(s => s.SessionID).FirstOrDefault() ?? ""
                 }).ToListAsync();
 
             return View(programme);
@@ -67,6 +67,7 @@ namespace TicketSalesSystem.Controllers
                 .Include(p => p.Place)
                 .Include(p => p.ProgrammeStatus)
                 .Include(p => p.Session) 
+                .ThenInclude(s => s.TicketsArea)
                 .FirstOrDefaultAsync(m => m.ProgrammeID == id);
             if (programme == null)
             {

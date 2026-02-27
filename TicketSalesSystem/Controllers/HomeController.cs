@@ -6,6 +6,7 @@ using TicketSalesSystem.Models;
 
 namespace TicketSalesSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "MemberScheme,EmployeeScheme")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -16,7 +17,7 @@ namespace TicketSalesSystem.Controllers
             _logger = logger;
             _context = context;
         }
-
+        [AllowAnonymous]
         public IActionResult Index()
         {
             var programmes = _context.Programme
