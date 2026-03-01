@@ -1,115 +1,138 @@
 ﻿@model TicketSalesSystem.ViewModel.Place.VMPlaceCreate
 
 @{
-    ViewData["Title"] = "新增場地配置";
+    ViewData["Title"] = "新增場地配置 / CONFIG_NEW_VENUE";
 }
+<link rel="stylesheet" href="~/css/Admin/Place/PlaceCreate.css" asp-append-version="true" />
 
-<div class="container py-5">
+<div class="admin-body p-4">
     <form asp-action="Create" method="post" enctype="multipart/form-data" id="createForm">
         @Html.AntiForgeryToken()
-
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>第一步：場地基本資訊</h5>
+        <h1 class="neon-text-sharp m-0">
+            <i class="bi bi-map me-3"></i>新增場館
+        </h1>
+        @* --- 第一步：基本資訊 --- *@
+        <div class="cyber-card p-4 mb-4">
+            <div class="border-bottom border-info border-opacity-25 mb-4 pb-2">
+                <h5 class="neon-text-sharp mb-0">
+                    <i class="bi bi-geo-alt me-2"></i>步驟一: 場館基本資訊 
+                </h5>
             </div>
-            <div class="card-body row g-3">
+
+            <div class="row g-4">
                 <div class="col-md-6">
-                    <label asp-for="PlaceName" class="form-label fw-bold"></label>
-                    <input asp-for="PlaceName" class="form-control" placeholder="輸入場地名稱" />
-                    <span asp-validation-for="PlaceName" class="text-danger"></span>
+                    <label asp-for="PlaceName" class="tech-label">場館名稱 </label>
+                    <input asp-for="PlaceName" class="form-control tech-input" placeholder="高雄巨蛋..." />
+                    <span asp-validation-for="PlaceName" class="text-danger small"></span>
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="PlaceAddress" class="form-label fw-bold"></label>
-                    <input asp-for="PlaceAddress" class="form-control" placeholder="輸入場地地址" />
-                    <span asp-validation-for="PlaceAddress" class="text-danger"></span>
+                    <label asp-for="PlaceAddress" class="tech-label">場地地址</label>
+                    <input asp-for="PlaceAddress" class="form-control tech-input" placeholder="請輸入所在地址..." />
+                    <span asp-validation-for="PlaceAddress" class="text-danger small"></span>
                 </div>
                 <div class="col-md-12">
-                    <label class="form-label fw-bold">場地平面圖</label>
-                    <input type="file" name="file" class="form-control" id="imageInput" accept="image/*" />
-                    <img id="imagePreview" src="#" class="mt-2 d-none img-thumbnail" style="max-height: 150px;" />
+                    <label class="tech-label">場地平面圖</label>
+                    <input type="file" name="file" class="form-control tech-input" id="imageInput" accept="image/*" />
+                    <div class="mt-3 p-2 border border-info border-opacity-25 d-inline-block">
+                        <img id="imagePreview" src="#" class="d-none" style="max-height: 200px; filter: contrast(1.1) brightness(0.9);" />
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-layers me-2"></i>第二步：配置區域</h5>
-                <button type="button" class="btn btn-light btn-sm" id="btnAddVenue">
+        @* --- 第二步：配置區域 --- *@
+        <div class="cyber-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center border-bottom border-info border-opacity-25 mb-4 pb-2">
+                <h5 class="neon-text-sharp mb-0">
+                    <i class="bi bi-layers me-2"></i>步驟二: 區域配置
+                </h5>
+                <button type="button" class="btn-cyber" id="btnAddVenue" style="padding: 5px 15px; font-size: 0.9rem;">
                     <i class="bi bi-plus-circle me-1"></i>新增區域
                 </button>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 20%">區域名稱</th>
-                                <th style="width: 10%">樓層</th>
-                                <th style="width: 10%">顏色</th>
-                                <th style="width: 15%">排數 x 座位</th>
-                                <th style="width: 30%">狀態</th>
-                                <th style="width: 5%">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="venueBody">
-                            @* 初始第一列 *@
-                            <tr class="venue-row">
-                                <td><input name="VenueItem[0].VenueName" class="form-control form-control-sm" required /></td>
-                                <td><input name="VenueItem[0].FloorName" class="form-control form-control-sm" required /></td>
-                                <td><input name="VenueItem[0].AreaColor" type="color" class="form-control form-control-color w-100" value="#003a8c" /></td>
-                                <td>
-                                    <div class="input-group input-group-sm">
-                                        <input name="VenueItem[0].RowCount" type="number" class="form-control" min="1" />
-                                        <span class="input-group-text">x</span>
-                                        <input name="VenueItem[0].SeatCount" type="number" class="form-control" min="1" />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="input-group input-group-sm">
-                                        <select name="VenueItem[0].VenueStatusID" class="form-select status-select" asp-items="ViewBag.VenueStatus">
-                                            <option value="">-- 請選擇 --</option>
-                                        </select>
-                                        <button class="btn btn-outline-primary btn-status-modal" type="button" data-mode="add"><i class="bi bi-plus"></i></button>
-                                        <button class="btn btn-outline-warning btn-status-modal" type="button" data-mode="edit"><i class="bi bi-pencil"></i></button>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-danger btn-sm remove-venue" disabled><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+
+            <div class="table-responsive">
+                <table class="cyber-table align-middle">
+                    <thead>
+                        <tr class="text-center">
+                            <th style="width: 20%">區域名稱</th>
+                            <th style="width: 10%">樓層</th>
+                            <th style="width: 10%">配色</th>
+                            <th style="width: 30%">排數 x 座位</th>
+                            <th style="width: 15%">系統狀態</th>
+                            <th style="width: 5%">移除</th>
+                        </tr>
+                    </thead>
+                    <tbody id="venueBody">
+                        <tr class="venue-row">
+                            <td><input name="VenueItem[0].VenueName" class="form-control tech-input py-1" required /></td>
+                            <td><input name="VenueItem[0].FloorName" class="form-control tech-input py-1" required /></td>
+                            <td><input name="VenueItem[0].AreaColor" type="color" class="form-control tech-input p-1" style="height: 45px;" value="#00f2ff" /></td>
+                            <td>
+                                <div class="input-group">
+                                    <input name="VenueItem[0].RowCount" type="number" class="form-control tech-input py-1" placeholder="ROW" min="1" />
+                                    <span class="input-group-text bg-transparent text-info border-info border-opacity-25">X</span>
+                                    <input name="VenueItem[0].SeatCount" type="number" class="form-control tech-input py-1" placeholder="SEAT" min="1" />
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <select name="VenueItem[0].VenueStatusID" class="form-select tech-input py-1" asp-items="ViewBag.VenueStatus">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                    <button class="btn btn-outline-info btn-status-modal" type="button" data-mode="add"><i class="bi bi-plus"></i></button>
+                                    <button class="btn btn-outline-warning btn-status-modal" type="button" data-mode="edit"><i class="bi bi-pencil"></i></button>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="text-danger bg-transparent border-0 remove-venue" disabled><i class="bi bi-trash3 fs-4"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2">
-            <a asp-action="Index" class="btn btn-secondary px-4">取消</a>
-            <button type="submit" class="btn btn-success px-5">儲存配置</button>
+        @* --- 底部操作 --- *@
+        <div class="d-flex justify-content-end gap-3 mt-5">
+            <a asp-action="Index" class="btn-cyber border-secondary text-secondary">
+                <i class="bi bi-x-circle me-2"></i>放新增
+            </a>
+            <button type="submit" class="btn-cyber btn-cyber-success">
+                <i class="bi bi-cloud-arrow-up me-2"></i>儲存配置
+            </button>
         </div>
     </form>
 </div>
 
+
 <partial name="_VenueStatusModal" />
-<div asp-validation-summary="All" class="text-danger"></div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    
-    <script>
-        // 🚩 建立橋樑：外部 JS 檔案看不懂 Razor (小老鼠)，所以我們在這裡把資料準備好
-        window.venueConfig = {
-            // 產出下拉選單的 HTML 字串，供新增列時使用
-            statusOptionsHtml: `@if (ViewBag.VenueStatus != null) {
-                foreach (var item in (SelectList)ViewBag.VenueStatus) {
-                    <option value="@item.Value">@item.Text</option>
-                }
-            }`,
-            // 控制器 API 路徑
-            updateStatusUrl: '@Url.Action("UpdateVenueStatus", "Places")',
-            createStatusUrl: '@Url.Action("QuickCreateStatus", "Places")' // 注意 Action 名稱
-        };
-    </script>
 
-    @* 🚩 載入獨立 JS 檔案 (加上版本號防止瀏覽器快取舊檔) *@
-    <script src="~/js/venue-logic.js?v=@DateTime.Now.Ticks"></script>
+    <script>
+        window.venueConfig = {
+            statusOptionsHtml: `@if (ViewBag.VenueStatus != null) {
+                foreach (var item in (SelectList)ViewBag.VenueStatus)
+                {
+                        <option value="@item.Value">@item.Text</option>
+                }
+        }
+`,
+        updateStatusUrl: '@Url.Action("UpdateVenueStatus", "Places")',
+        createStatusUrl: '@Url.Action("QuickCreateStatus", "Places")'
+    };
+
+    // 圖片預覽邏輯增強
+    document.getElementById('imageInput').onchange = function (evt) {
+        const [file] = this.files;
+        if (file) {
+            const preview = document.getElementById('imagePreview');
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('d-none');
+        }
+    };
+</script>
+<script src="~/js/venue-logic.js?v=@DateTime.Now.Ticks"></script>
 }

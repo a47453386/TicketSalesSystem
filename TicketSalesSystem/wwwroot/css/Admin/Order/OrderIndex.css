@@ -1,0 +1,369 @@
+﻿/* ==========================================================================
+   訂單管理系統專屬 CSS - ORDER_MONITOR_HUD_v3
+   風格繼承：MISSION_BRIEFING_v3 (Cyberpunk HUD)
+   特性：1.2rem 基礎字體、Scoped 區域化鎖定、獨立物流配色
+   ========================================================================== */
+
+/* --- [1. 核心變數與區域鎖定] --- */
+.order-management-scope {
+    --tech-cyan: #00f2ff;
+    --tech-bg: rgba(10, 10, 10, 0.9);
+    --tech-border: rgba(0, 242, 255, 0.25);
+    --tech-warning: #ffcc00;
+    --tech-danger: #ff3333;
+    --tech-success: #00ff88;
+    --base-font-size: 1.2rem;
+    --header-font-size: 3.5rem;
+    --base-font: 1.2rem;
+    background-color: #000 !important;
+    background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    color: #e0e0e0 !important;
+    font-size: var(--base-font-size);
+    font-family: 'Segoe UI', 'Roboto', '微軟正黑體', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+    /* --- [2. 字體強制繼承 1.2rem] --- */
+    .order-management-scope p,
+    .order-management-scope div,
+    .order-management-scope td,
+    .order-management-scope th,
+    .order-management-scope span,
+    .order-management-scope input,
+    .order-management-scope select {
+        font-size: var(--base-font-size) !important;
+        color: #e0e0e0;
+    }
+
+    /* --- [3. 標題與標籤系統] --- */
+    .order-management-scope .neon-header {
+        font-size: var(--header-font-size);
+        font-weight: 900;
+        letter-spacing: 6px;
+        color: var(--tech-cyan) !important;
+        text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+        text-transform: uppercase;
+        margin-bottom: 0;
+    }
+
+    .order-management-scope .tech-sub-label {
+        font-size: 0.9rem !important;
+        color: var(--tech-cyan);
+        opacity: 0.6;
+        letter-spacing: 3px;
+        font-family: 'Consolas', monospace;
+    }
+
+    .order-management-scope .tech-key {
+        font-size: 1.3rem !important;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--tech-cyan), transparent);
+        color: #000 !important;
+        padding: 4px 20px;
+        clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+        display: inline-block;
+        margin-bottom: 1.2rem;
+        text-transform: uppercase;
+    }
+
+    /* --- [4. 搜尋與篩選面板 (基於 cyber-card)] --- */
+    .order-management-scope .cyber-card {
+        background: var(--tech-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--tech-border);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        border-radius: 4px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .order-management-scope .form-control,
+    .order-management-scope .form-select {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid var(--tech-border) !important;
+        color: #fff !important;
+    }
+
+        .order-management-scope .form-control:focus,
+        .order-management-scope .form-select:focus {
+            border-color: var(--tech-cyan) !important;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+    /* --- [5. 訂單數據表格 (HUD 表格化)] --- */
+    .order-management-scope .table-container {
+        background: var(--tech-bg);
+        border: 1px solid var(--tech-border);
+        padding: 1rem;
+    }
+
+    .order-management-scope .table {
+        background-color: transparent !important;
+        --bs-table-bg: transparent !important;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+        .order-management-scope .table thead th {
+            font-size: 1rem !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--tech-cyan) !important;
+            border-bottom: 2px solid rgba(0, 242, 255, 0.2) !important;
+            padding: 1rem;
+        }
+
+        .order-management-scope .table tbody tr {
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+
+            .order-management-scope .table tbody tr:hover {
+                background: rgba(0, 242, 255, 0.05);
+                transform: translateX(5px);
+            }
+
+        .order-management-scope .table tbody td {
+            padding: 1.2rem 1rem !important;
+            border: none;
+            vertical-align: middle;
+        }
+
+    /* --- [6. 狀態標籤與信號燈] --- */
+    .order-management-scope .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        font-size: var(--base-font) !important; /* 🚩 要求的 1.2rem */
+        font-weight: 800;
+        text-transform: uppercase;
+        text-align: center;
+        min-width: 110px;
+        clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%);
+        transition: all 0.3s ease;
+        letter-spacing: 1px;
+    }
+
+    .order-management-scope .bg-primary {
+        background: var(--tech-cyan) !important;
+        color: #000 !important;
+    }
+
+    .order-management-scope .bg-success {
+        background: var(--tech-success) !important;
+        color: #000 !important;
+    }
+
+    .order-management-scope .bg-danger {
+        background: var(--tech-danger) !important;
+        color: #fff !important;
+    }
+
+    .order-management-scope .bg-warning {
+        background: var(--tech-warning) !important;
+        color: #000 !important;
+    }
+
+    .order-management-scope .bg-secondary {
+        background: #444 !important;
+        opacity: 0.7;
+    }
+
+    /* 提問通知脈衝動畫 */
+    .order-management-scope .animate-pulse-danger {
+        animation: cyber-pulse 1.5s infinite;
+        box-shadow: 0 0 15px var(--tech-danger);
+    }
+    /* --- [訂單狀態顏色] --- */
+
+    /* Y - 已完成 (青色 HUD) */
+    .order-management-scope .tag-active {
+        background-color: var(--tech-cyan) !important;
+        color: #000 !important;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+    }
+
+    /* C - 已取消 (紅色警報) */
+    .order-management-scope .tag-danger {
+        background-color: var(--tech-danger) !important;
+        color: #fff !important;
+        animation: signal-pulse 1.5s infinite;
+    }
+
+    /* N - 逾期 (黃色警告) */
+    .order-management-scope .tag-warning {
+        background-color: var(--tech-warning) !important;
+        color: #000 !important;
+    }
+
+    /* 預設/其他 (灰色) */
+    .order-management-scope .tag-secondary {
+        background-color: var(--tech-secondary) !important;
+        color: #aaa !important;
+        opacity: 0.8;
+    }
+
+    /* --- [金流狀態顏色] --- */
+
+    /* 已付款 (線框風格) */
+    .order-management-scope .tag-paid-outline {
+        background-color: transparent !important;
+        border: 2px solid var(--tech-cyan) !important;
+        color: var(--tech-cyan) !important;
+        text-shadow: 0 0 5px var(--tech-cyan);
+    }
+    .order-management-scope .order-input {
+        background-color: rgba(20, 20, 20, 0.95) !important; /* 深色背景 */
+        color: var(--tech-cyan) !important; /* 青色文字 */
+        border: 1px solid var(--order-border) !important;
+        font-size: 1.2rem !important; /* 🚩 確保 1.2rem */
+        padding: 10px 15px;
+        cursor: pointer;
+        appearance: none; /* 移除瀏覽器預設箭頭，稍後自定義 */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300f2ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+    }
+
+        /* 🚩 關鍵：強制修改下拉選項後的背景 (Option) */
+        .order-management-scope .order-input option {
+            background-color: #111 !important; /* 確保下拉後的底色是黑的 */
+            color: #fff !important; /* 選項文字為白色 */
+            padding: 10px;
+            font-size: 1.2rem !important;
+        }
+
+        /* 當選單被聚焦時的發光效果 */
+        .order-management-scope .order-input:focus {
+            border-color: var(--tech-cyan) !important;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+            outline: none;
+        }
+
+        /* 針對行動裝置或特定瀏覽器的優化 */
+        .order-management-scope .order-input:-webkit-autofill {
+            -webkit-text-fill-color: var(--tech-cyan) !important;
+            -webkit-box-shadow: 0 0 0px 1000px #111 inset !important;
+        }
+@keyframes cyber-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+/* 動態脈衝動畫 (用於 Danger 狀態) */
+@keyframes signal-pulse {
+    0% {
+        opacity: 1;
+        box-shadow: 0 0 0px var(--tech-danger);
+    }
+
+    50% {
+        opacity: 0.7;
+        box-shadow: 0 0 15px var(--tech-danger);
+    }
+
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 0px var(--tech-danger);
+    }
+}
+
+/* 表格內的文字間距優化 */
+.order-management-scope .btn-order-action {
+    font-size: 1.1rem !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 8px 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 90% 100%, 0 100%);
+    border-radius: 0; /* 配合斜切角 */
+    cursor: pointer;
+    transition: none !important; /* 🚩 徹底移除所有轉場動畫 */
+}
+    /* 🚩 徹底移除所有 Hover 樣式變化 */
+    .order-management-scope .btn-order-action:hover,
+    .order-management-scope .btn-order-action:active,
+    .order-management-scope .btn-order-action:focus {
+        transform: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+.order-management-scope .table td {
+    vertical-align: middle;
+    padding: 1.2rem 1rem !important;
+}
+
+/* --- [7. 操作按鈕] --- */
+.order-management-scope .btn-order-action {
+    font-size: 1.1rem !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 8px 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 90% 100%, 0 100%);
+    border-radius: 0; /* 配合斜切角 */
+    cursor: pointer;
+    transition: none !important; /* 🚩 徹底移除所有轉場動畫 */
+}
+
+    /* 🚩 徹底移除所有 Hover 樣式變化 */
+    .order-management-scope .btn-order-action:hover,
+    .order-management-scope .btn-order-action:active,
+    .order-management-scope .btn-order-action:focus {
+        transform: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+/* --- [INFO 詳細 - 靜態青色] --- */
+.order-management-scope .btn-info-static {
+    background: rgba(0, 242, 255, 0.1) !important;
+    border: 1px solid var(--tech-cyan) !important;
+    color: var(--tech-cyan) !important;
+}
+
+    /* 確保 Hover 時維持原樣 */
+    .order-management-scope .btn-info-static:hover {
+        background: rgba(0, 242, 255, 0.1) !important;
+        color: var(--tech-cyan) !important;
+        border: 1px solid var(--tech-cyan) !important;
+    }
+
+/* --- [AUDIT 審核 - 靜態警告黃] --- */
+.order-management-scope .btn-audit-static {
+    background: rgba(255, 204, 0, 0.1) !important;
+    border: 1px solid var(--tech-warning) !important;
+    color: var(--tech-warning) !important;
+}
+
+    /* 確保 Hover 時維持原樣 */
+    .order-management-scope .btn-audit-static:hover {
+        background: rgba(255, 204, 0, 0.1) !important;
+        color: var(--tech-warning) !important;
+        border: 1px solid var(--tech-warning) !important;
+    }
+
+/* 圖示大小微調 */
+.order-management-scope .btn-order-action i {
+    font-size: 1.2rem;
+}
+
+/* 按鈕組間距 */
+.order-management-scope .btn-group .btn-order-action:not(:last-child) {
+    margin-right: 12px;
+}

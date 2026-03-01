@@ -1,0 +1,229 @@
+﻿/* ==========================================================================
+   CORE_SYSTEM_VARIABLES (戰術變數)
+   ========================================================================== */
+:root {
+    --tech-cyan: #00f2ff;
+    --tech-cyan-dim: rgba(0, 242, 255, 0.2);
+    --warn-yellow: #ffc107;
+    --danger-red: #dc3545;
+    /* 🚩 透明玻璃感核心設定 */
+    --glass-bg: rgba(10, 15, 20, 0.5); /* 50% 透明黑 */
+    --glass-border: rgba(0, 242, 255, 0.25);
+    --glass-blur: blur(12px) saturate(160%);
+    --body-bg: #050505;
+    --font-main: 'Share Tech Mono', 'Consolas', '微軟正黑體', monospace;
+}
+
+/* ==========================================================================
+   GLOBAL_SPECIFICATIONS (全域規格)
+   ========================================================================== */
+body.admin-body {
+    font-size: 1.2rem !important; /* 🚩 統一 1.2rem 大字體 */
+    background-color: var(--body-bg);
+    color: #fff;
+    font-family: var(--font-main);
+    line-height: 1.6;
+    /* 🚩 強化底圖裝飾：電子網格線 */
+    background-image: linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+}
+
+/* ==========================================================================
+   CYBER_COMPONENTS (組件樣式)
+   ========================================================================== */
+
+/* 🚩 1. 透明玻璃卡片容器 */
+.cyber-card {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 242, 255, 0.05);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+    /* 卡片角落裝飾 (Tech Corners) */
+    .cyber-card::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        width: 20px;
+        height: 20px;
+        border-top: 3px solid var(--tech-cyan);
+        border-left: 3px solid var(--tech-cyan);
+        pointer-events: none;
+    }
+
+/* 🚩 2. 科技感標籤 (Tech Key) */
+.tech-key {
+    display: inline-block;
+    color: var(--tech-cyan);
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: rgba(0, 242, 255, 0.15);
+    padding: 4px 15px;
+    border-right: 5px solid var(--tech-cyan);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 🚩 3. 霓虹標題 */
+.neon-header {
+    color: var(--tech-cyan);
+    text-shadow: 0 0 12px rgba(0, 242, 255, 0.6);
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border-left: 6px solid var(--tech-cyan);
+    padding-left: 15px;
+}
+
+.neon-text-sharp {
+    color: var(--tech-cyan);
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+
+/* 🚩 4. 文本描述塊 */
+.desc-block {
+    border-left: 4px solid var(--tech-cyan);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 25px;
+    margin-bottom: 1.5rem;
+}
+
+    .desc-block.warning {
+        border-left-color: var(--warn-yellow);
+    }
+
+    .desc-block.danger {
+        border-left-color: var(--danger-red);
+    }
+
+/* ==========================================================================
+   INPUTS_AND_FORMS (輸入框美化)
+   ========================================================================== */
+.form-control, .form-select {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    font-size: 1.15rem; /* 微縮以適應高度 */
+    padding: 12px 18px;
+    border-radius: 0;
+    transition: 0.3s;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--tech-cyan) !important;
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.3) !important;
+        background: rgba(0, 0, 0, 0.75) !important;
+        outline: none;
+    }
+
+/* ==========================================================================
+   MATRIX_TABLE (數據表格)
+   ========================================================================== */
+.cyber-table-edit {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+    .cyber-table-edit th {
+        background: rgba(0, 242, 255, 0.12);
+        color: var(--tech-cyan);
+        font-weight: bold;
+        padding: 15px;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--tech-cyan);
+    }
+
+    .cyber-table-edit td {
+        background: rgba(255, 255, 255, 0.04);
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+/* ==========================================================================
+   BUTTONS_AND_ASSETS (按鈕與媒體)
+   ========================================================================== */
+.btn-cyber-submit {
+    background: var(--tech-cyan);
+    color: #000;
+    font-weight: bold;
+    font-size: 1.3rem;
+    clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+    padding: 18px 70px;
+    border: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+    .btn-cyber-submit:hover {
+        background: #fff;
+        box-shadow: 0 0 40px var(--tech-cyan);
+        transform: scale(1.05) translateY(-5px);
+    }
+
+.img-preview-tech {
+    background: #000;
+    border: 1px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 定製滾動條 (Scrollbar Custom) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--body-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--tech-cyan-dim);
+    border-radius: 10px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--tech-cyan);
+    }
+/* 🚩 專屬詳情頁：霓虹進度條 */
+.cyber-progress {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 242, 255, 0.2);
+}
+
+.cyber-progress-bar {
+    background: linear-gradient(90deg, var(--tech-cyan), #fff);
+    box-shadow: 0 0 10px var(--tech-cyan);
+    height: 100%;
+    transition: width 1s ease-in-out;
+}
+
+/* 狀態標籤 (Status Badges) */
+.status-badge {
+    padding: 5px 15px;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #00ff88;
+    color: #000;
+}
+
+.status-pending {
+    background: #ffcc00;
+    color: #000;
+}

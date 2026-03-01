@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
@@ -67,6 +68,8 @@ namespace TicketSalesSystem.Controllers
                 .OrderByDescending(o => o.OrderCreatedTime)
                 .Take(5)
                 .ToListAsync();
+
+            
 
             return View(latestOrders);
             

@@ -1,0 +1,91 @@
+﻿/* 🚩 1. 核心規格與戰情室背景 */
+body.admin-body {
+    font-size: 1.2rem !important;
+    background-color: var(--tech-bg);
+    color: #fff;
+    font-family: 'Share Tech Mono', 'Orbitron', monospace;
+    background-image: radial-gradient(circle at 50% 50%, #001a33 0%, #000b1a 100%), linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-attachment: fixed;
+}
+
+/* 🚩 2. 霓虹銳利字體 */
+.neon-text-sharp {
+    color: #ffffff !important;
+    text-shadow: 0 0 5px var(--tech-cyan), 0 0 1px #ffffff;
+    font-weight: bold;
+}
+
+/* 🚩 3. 數據矩陣樣式 */
+.tech-data-row {
+    border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+}
+
+.tech-key {
+    color: var(--tech-cyan);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    width: 180px;
+    flex-shrink: 0;
+}
+
+.tech-value {
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* 🚩 4. 戰術表格樣式 */
+.cyber-table-confirm {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px;
+    margin-top: 15px;
+}
+
+    .cyber-table-confirm thead th {
+        color: var(--tech-cyan);
+        background: rgba(0, 242, 255, 0.05);
+        padding: 15px;
+        font-size: 0.9rem;
+        border-bottom: 2px solid var(--tech-cyan);
+        text-transform: uppercase;
+    }
+
+    .cyber-table-confirm td {
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.4);
+        border-top: 1px solid rgba(0, 242, 255, 0.05);
+    }
+
+/* 🚩 5. 長文本區塊 */
+.text-block-tech {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 242, 255, 0.1);
+    padding: 20px;
+    height: 100%;
+}
+
+/* 🚩 6. 最終部署按鈕 */
+.btn-cyber-confirm {
+    background: #198754;
+    color: #fff;
+    border: none;
+    padding: 15px 50px;
+    font-weight: bold;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+    box-shadow: 0 0 15px rgba(25, 135, 84, 0.4);
+    transition: all 0.3s;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+}
+
+    .btn-cyber-confirm:hover {
+        background: #157347;
+        box-shadow: 0 0 30px rgba(25, 135, 84, 0.6);
+        transform: scale(1.05);
+    }

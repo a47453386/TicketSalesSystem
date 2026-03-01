@@ -2,61 +2,57 @@
 
 @{
     ViewData["Title"] = "員工管理系統登入";
+    Layout = null; 
 }
 
-<div class="container">
-    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
-        <div class="col-md-5">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-dark text-white text-center py-4 rounded-top-4">
-                    <div class="mb-2">
-                        <i class="bi bi-shield-lock-fill" style="font-size: 3rem;"></i>
-                    </div>
-                    <h3 class="fw-bold mb-0">員工管理系統</h3>
-                    <p class="text-secondary small mb-0">TICKET SYSTEM INTERNAL ONLY</p>
-                </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="~/css/Admin/Login.css" asp-append-version="true" />
 
-                <div class="card-body p-5">
-                    <form asp-action="EmployeeLogin" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
 
-                        <div class="mb-4">
-                            <label asp-for="Account" class="form-label fw-bold text-secondary">員工帳號</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
-                                <input asp-for="Account" class="form-control bg-light border-start-0" placeholder="請輸入帳號" autocomplete="off" />
-                            </div>
-                            <span asp-validation-for="Account" class="text-danger small"></span>
-                        </div>
+<div class="login-panel">
+    <div class="scanline"></div>
 
-                        <div class="mb-4">
-                            <label asp-for="Password" class="form-label fw-bold text-secondary">安全密碼</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-key"></i></span>
-                                <input asp-for="Password" type="password" class="form-control bg-light border-start-0" placeholder="請輸入密碼" />
-                            </div>
-                            <span asp-validation-for="Password" class="text-danger small"></span>
-                        </div>
-
-                        <div class="d-grid gap-2 mt-5">
-                            <button type="submit" class="btn btn-dark btn-lg rounded-pill fw-bold">
-                                驗證身分並登入
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card-footer bg-light text-center py-3 rounded-bottom-4">
-                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small">
-                        <i class="bi bi-arrow-left"></i> 回到購票首頁
-                    </a>
-                </div>
-            </div>
-
-            <p class="text-center text-muted mt-4 small">
-                &copy; 2026 TicketSalesSystem IT Department. All rights reserved.
-            </p>
+    <div class="login-header text-center mb-5">
+        <div class="mb-3">
+            <i class="bi bi-shield-lock" style="font-size: 3.5rem; filter: drop-shadow(0 0 10px var(--tech-cyan));"></i>
         </div>
+        <h3 class="fw-bold mb-1">演唱會售票系統後台管理</h3>
+        <p class="text-white-50" style="font-size: 0.8rem; letter-spacing: 2px;">僅限內部員工登入! 如忘記密碼，請洽人資部!!</p>
+       
+    </div>
+
+    <form asp-action="EmployeeLogin" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" style="background: rgba(255,0,0,0.1); padding: 10px; border-left: 3px solid red;"></div>
+
+        <div class="tech-input-group">
+            <label asp-for="Account">員工帳號</label>
+            <div class="tech-input-container">
+                <div class="tech-icon"><i class="bi bi-person-fill"></i></div>
+                <input asp-for="Account" class="tech-input" placeholder="請輸入帳號..." autocomplete="off" />
+            </div>
+            <span asp-validation-for="Account" class="text-danger" style="font-size: 0.8rem;"></span>
+        </div>
+
+        <div class="tech-input-group">
+            <label asp-for="Password">員工密碼</label>
+            <div class="tech-input-container">
+                <div class="tech-icon"><i class="bi bi-key-fill"></i></div>
+                <input asp-for="Password" type="password" class="tech-input" placeholder="請輸入密碼..." />
+            </div>
+            <span asp-validation-for="Password" class="text-danger" style="font-size: 0.8rem;"></span>
+        </div>
+
+        <button type="submit" class="btn-cyber">
+            [ 登入 ]
+        </button>
+    </form>
+
+    <div class="mt-5 pt-3 border-top border-secondary text-center">
+        <a asp-controller="Home" asp-action="Index" class="text-decoration-none" style="color: rgba(0, 242, 255, 0.5); font-size: 0.9rem;">
+            <i class="bi bi-chevron-left"></i> 回到首頁
+        </a>
     </div>
 </div>
 

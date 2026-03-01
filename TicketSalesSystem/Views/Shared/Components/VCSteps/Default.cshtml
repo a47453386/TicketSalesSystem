@@ -1,22 +1,25 @@
 ﻿@model int
 
-<div class="container mb-5">
-    <div class="d-flex justify-content-between position-relative mt-4">
-        <div class="progress position-absolute start-0 top-50 translate-middle-y w-100" style="height: 2px; z-index: -1;">
-            <div class="progress-bar bg-primary" style="width: @((Model - 1) * 33)%;"></div>
-        </div>
+<link rel="stylesheet" href="~/css/Admin/Programme/Create/step0.css" asp-append-version="true" />
 
-        @for (int i = 1; i <= 4; i++)
+<div class="container mb-5 mt-4">
+    <div class="tech-step-container">
+        @* 進度底線 *@
+        <div class="tech-progress-bg"></div>
+
+        @* 🚩 動態計算進度：5 步代表有 4 個間隔，所以每步是 25% *@
+        <div class="tech-progress-fill" style="width: @((Model - 1) * 25)%;"></div>
+
+        @for (int i = 1; i <= 5; i++)
         {
             var isActive = i <= Model;
             var isCurrent = i == Model;
 
-            <div class="text-center">
-                <div class="rounded-circle d-inline-flex align-items-center justify-content-center @(isActive ? "bg-primary text-white" : "bg-light border text-muted")"
-                     style="width: 40px; height: 40px; font-weight: bold; border-width: 2px !important;">
+            <div class="step-node @(isActive ? "active" : "") @(isCurrent ? "current" : "")">
+                <div class="step-number">
                     @i
                 </div>
-                <div class="mt-2 small @(isCurrent ? "fw-bold text-primary" : "text-muted")">
+                <div class="step-label">
                     @GetStepName(i)
                 </div>
             </div>
@@ -33,7 +36,8 @@
             2 => "場次設定",
             3 => "票區設定",
             4 => "圖片上傳",
-            5 => "最後確認"
+            5 => "最後確認",
+            _ => "UNKNOWN"
         };
     }
 }

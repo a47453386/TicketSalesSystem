@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Text.Json;
 
-
+// JsonConvert.DeserializeObject<IEnumerable<PetFoodData>>(response);//將JSON資料反序列化為List<PetFoodData>物件集合應該改成這個
 namespace TicketSalesSystem.Helpers
 {
     public static class SessionHelper

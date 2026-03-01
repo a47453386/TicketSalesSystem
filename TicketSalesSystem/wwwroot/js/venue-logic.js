@@ -20,28 +20,28 @@
         const newRow = `
         <tr class="venue-row">
             <input type="hidden" name="VenueItem[${index}].VenueID" value="" />
-            <td><input name="VenueItem[${index}].VenueName" class="form-control form-control-sm" required /></td>
-            <td><input name="VenueItem[${index}].FloorName" class="form-control form-control-sm" required /></td>
-            <td><input name="VenueItem[${index}].AreaColor" type="color" class="form-control form-control-color w-100" value="#003a8c" /></td>
+            <td><input name="VenueItem[${index}].VenueName" class="form-control form-control-sm tech-input" required /></td>
+            <td><input name="VenueItem[${index}].FloorName" class="form-control form-control-sm tech-input" required /></td>
+            <td><input name="VenueItem[${index}].AreaColor"type="color" class="form-control tech-input p-1" style="height: 45px;" value="#00f2ff" /></td>
             <td>
                 <div class="input-group input-group-sm">
-                    <input name="VenueItem[${index}].RowCount" type="number" class="form-control" min="1" />
-                    <span class="input-group-text">x</span>
-                    <input name="VenueItem[${index}].SeatCount" type="number" class="form-control" min="1" />
+                    <input name="VenueItem[${index}].RowCount" type="number" class="form-control tech-input" min="1" placeholder="ROW" />
+                    <span class="input-group-text bg-transparent text-info border-info border-opacity-25">x</span>
+                    <input name="VenueItem[${index}].SeatCount" type="number" class="form-control tech-input" min="1"  placeholder="SEATS"/>
                 </div>
             </td>
             <td>
                 <div class="input-group input-group-sm">
-                    <select name="VenueItem[${index}].VenueStatusID" class="form-select status-select">
+                    <select name="VenueItem[${index}].VenueStatusID" class="form-select status-select tech-input">
                         <option value="">-- 請選擇 --</option>
                         ${window.venueConfig.statusOptionsHtml}
                     </select>
-                    <button class="btn btn-outline-primary btn-status-modal" type="button" data-mode="add"><i class="bi bi-plus"></i></button>
-                    <button class="btn btn-outline-warning btn-status-modal" type="button" data-mode="edit"><i class="bi bi-pencil"></i></button>
+                   <button class="btn btn-outline-info btn-status-modal" type="button" data-mode="add"><i class="bi bi-plus"></i></button>
+                   <button class="btn btn-outline-warning btn-status-modal" type="button" data-mode="edit"><i class="bi bi-pencil"></i></button>
                 </div>
             </td>
             <td class="text-center">
-                <button type="button" class="btn btn-outline-danger btn-sm remove-venue"><i class="bi bi-trash"></i></button>
+               <button type="button" class="text-danger bg-transparent border-0 remove-venue" disabled><i class="bi bi-trash3 fs-4"></i></button>
             </td>
         </tr>`;
 

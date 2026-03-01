@@ -1,24 +1,113 @@
-﻿<div class="modal fade" id="statusModal" tabindex="-1">
+﻿
+
+<style>
+    /* 🚩 彈窗內容：戰術面板化 */
+    #statusModal .modal-content {
+        background: var(--panel-bg);
+        border: 2px solid var(--tech-cyan);
+        box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        color: #ffffff;
+        font-family: 'Share Tech Mono', monospace;
+        border-radius: 0;
+        /* 銳利切角設計 */
+        clip-path: polygon(0 0, 92% 0, 100% 8%, 100% 100%, 8% 100%, 0 92%);
+        font-size: 1.2rem !important;
+    }
+
+    #statusModal .modal-header {
+        border-bottom: 1px solid var(--tech-border);
+        background: rgba(0, 242, 255, 0.05);
+        padding: 1.5rem;
+    }
+
+    #statusModal .modal-title {
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 2px;
+        /* 🚩 白字核心藍光暈 */
+        color: #ffffff !important;
+        text-shadow: 0 0 5px var(--tech-cyan), 0 0 10px rgba(0, 242, 255, 0.5);
+    }
+
+    /* 🚩 科技感輸入框：解決字體太灰的問題 */
+    .tech-input-modal {
+        background: rgba(0, 0, 0, 0.6) !important;
+        border: 1px solid var(--tech-border) !important;
+        color: #ffffff !important; /* 🚩 修正為純白 */
+        font-size: 1.2rem !important;
+        padding: 12px;
+        border-radius: 0 !important;
+        transition: all 0.3s;
+    }
+
+        .tech-input-modal:focus {
+            border-color: var(--tech-cyan) !important;
+            background: rgba(0, 242, 255, 0.1) !important;
+            box-shadow: 0 0 10px var(--tech-cyan) !important;
+            outline: none;
+        }
+
+    /* 標籤樣式 */
+    .modal-body .tech-label {
+        color: var(--tech-cyan);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        font-weight: bold;
+        display: block;
+    }
+
+    /* 🚩 關閉按鈕改為白色 */
+    #statusModal .btn-close {
+        filter: invert(1) grayscale(1) brightness(2);
+        opacity: 0.8;
+    }
+
+    /* 🚩 確認儲存按鈕：戰甲式設計 */
+    .btn-cyber-confirm {
+        background: transparent;
+        border: 2px solid var(--tech-cyan);
+        color: var(--tech-cyan);
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        padding: 12px;
+        width: 100%;
+        transition: all 0.3s;
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+        font-size: 1.2rem;
+    }
+
+        .btn-cyber-confirm:hover {
+            background: var(--tech-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--tech-cyan);
+        }
+</style>
+
+<div class="modal fade" id="statusModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title" id="statusModalTitle">區域狀態管理</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalTitle">
+                    <i class="bi bi-cpu me-2"></i>狀態管理
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">狀態代碼 (ID)</label>
-                    <input type="text" id="newStatusID" class="form-control" placeholder="例如: A">
+            <div class="modal-body p-4">
+                <div class="mb-4">
+                    <label class="tech-label">> 狀態代碼</label>
+                    <input type="text" id="newStatusID" class="form-control tech-input-modal" placeholder="例如: A, B, C...">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">狀態名稱</label>
-                    <input type="text" id="newStatusName" class="form-control" placeholder="例如: 正常使用">
+                <div class="mb-2">
+                    <label class="tech-label">> 狀態名稱</label>
+                    <input type="text" id="newStatusName" class="form-control tech-input-modal" placeholder="例如: 正常使用, 維修中...">
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                @* 🚩 這裡的 ID 必須是 btnConfirmStatus *@
-                <button type="button" class="btn btn-primary w-100" id="btnConfirmStatus">確認儲存</button>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-link text-white-50 text-decoration-none me-auto" data-bs-dismiss="modal" style="font-size: 0.9rem;">
+                    [ 取消變更  ]
+                </button>
+                <button type="button" class="btn-cyber-confirm" id="btnConfirmStatus">
+                    [ 確認儲存 ]
+                </button>
             </div>
         </div>
     </div>

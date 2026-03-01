@@ -1,0 +1,120 @@
+﻿.tech-step-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    font-size: 1.2rem !important;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* 🚩 2. 背景進度線 (暗色) */
+.tech-progress-bg {
+    position: absolute;
+    top: 35%; /* 對齊數字中心 */
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 242, 255, 0.1);
+    z-index: 1;
+}
+
+/* 🚩 3. 電流進度線 (發光 + 動畫) */
+.tech-progress-fill {
+    position: absolute;
+    top: 35%;
+    left: 0;
+    height: 2px;
+    background: var(--tech-cyan);
+    box-shadow: 0 0 15px var(--tech-cyan);
+    z-index: 2;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 電流跑動動畫 */
+    background-image: linear-gradient(90deg, transparent, #fff, transparent);
+    background-size: 200% 100%;
+    animation: electricity-flow 2s linear infinite;
+}
+
+@@keyframes electricity-flow {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* 🚩 4. 步驟節點：改為菱形或方塊更有科技感 */
+.step-node {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.step-number {
+    width: 45px;
+    height: 45px;
+    background: var(--tech-bg);
+    border: 2px solid rgba(0, 242, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.4s;
+    /* 多邊形切角 */
+    clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+}
+
+/* 🚩 啟用狀態：白字藍光 */
+.step-node.active .step-number {
+    border-color: var(--tech-cyan);
+    color: #ffffff;
+    text-shadow: 0 0 8px var(--tech-cyan);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+    background: rgba(0, 242, 255, 0.1);
+}
+
+/* 🚩 當前步驟：呼吸燈閃爍 */
+.step-node.current .step-number {
+    animation: tech-pulse 2s infinite;
+    border-width: 3px;
+}
+
+@@keyframes tech-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 5px var(--tech-cyan);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px var(--tech-cyan);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 5px var(--tech-cyan);
+    }
+}
+
+.step-label {
+    margin-top: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 1rem;
+}
+
+.step-node.active .step-label {
+    color: var(--tech-cyan);
+    text-shadow: 0 0 5px var(--tech-cyan);
+}
+
+.step-node.current .step-label {
+    color: #fff;
+    text-shadow: 0 0 8px var(--tech-cyan);
+}

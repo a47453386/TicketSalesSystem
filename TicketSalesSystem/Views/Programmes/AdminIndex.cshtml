@@ -1,110 +1,88 @@
 ﻿@model IEnumerable<TicketSalesSystem.ViewModel.Programme.VMProgramme>
 
-<style>
-    /* 🚩 核心：限制列表最大寬度，不要讓它在寬螢幕上無限延伸 */
-    .admin-list-container {
-        width: 100%;
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-    /* 🚩 鎖定特定欄位寬度，讓內容往中間靠攏 */
-    .col-id {
-        width: 80px;
-    }
+@{
+    ViewData["Title"] = "活動管理";
+}
 
-    .col-img {
-        width: 70px;
-    }
-
-    .col-status {
-        width: 100px;
-    }
-
-    .col-action {
-        width: 140px;
-    }
-
-    /* 壓縮行高 */
-    .table-sm td, .table-sm th {
-        padding: 0.6rem 0.4rem;
-    }
-</style>
-
-<div class="admin-list-container-fluid mt-4 pb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold mb-0"><i class="bi bi-gear-fill me-2 text-primary"></i>活動節目管理</h3>
-        <a asp-controller="ProgrammeDTO" asp-action="CreateStep1" class="btn btn-success btn-sm shadow-sm">
-            <i class="bi bi-plus-lg"></i> 新增活動
+<link rel="stylesheet" href="~/css/Admin/Programme/ProgrammeIndex.css" asp-append-version="true" />
+<div class="admin-body p-3">
+    @* --- 頂部標題與操作 --- *@
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-info border-opacity-25 pb-2">
+        <h3 class="neon-text-sharp m-0" style="font-size: 1.4rem;">
+            <i class="bi bi-gear-fill me-2"></i>活動節目管理
+        </h3>
+        <a asp-controller="ProgrammeDTO" asp-action="CreateStep1" class="btn-cyber-sm">
+            <i class="bi bi-plus-lg me-1"></i>[ 新增活動 ]
         </a>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-
-                <table class="table table-sm table-hover align-middle mb-0">
-                    <thead class="table-dark">
-                        <tr class="small">
-                            <th class="ps-3 col-id">ID</th>
-                            <th class="col-img">縮圖</th>
-                            <th style="width: 35%">活動名稱</th>
-                            <th class="text-nowrap">地點</th>
-                            <th class="text-nowrap">開演時間</th>
-                            <th class="text-center text-nowrap">庫存 / 餘票</th>
-                            <th class="text-center col-status">狀態</th>
-                            <th class="text-center col-action">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody class="small">
-                        @if (Model != null && Model.Any())
+    @* --- 數據表格主體 --- *@
+    <div class="cyber-card p-2">
+        <div class="table-responsive">
+            <table class="cyber-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;" class="ps-3">ID</th>
+                        <th style="width: 70px;">縮圖</th>
+                        <th style="width: 30%;">活動名稱</th>
+                        <th>場館</th>
+                        <th>開演時間</th>
+                        <th class="text-center">庫存 / 餘票</th>
+                        <th class="text-center">狀態</th>
+                        <th class="text-center">系統操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
                         {
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="ps-3 text-muted font-monospace">@item.ProgrammeID</td>
-                                    <td>
-                                        <img src="@Url.Content("~/Photos/CoverImage/" + item.CoverImage)"
-                                             style="width: 50px; height: 35px; object-fit: cover;"
-                                             class="rounded border"
-                                             onerror="this.src='https://via.placeholder.com/50x35?text=No+Img'">
-                                    </td>
-                                    <td class="fw-bold">@item.ProgrammeName</td>
-                                    <td class="text-secondary text-nowrap small">@item.PlaceName</td>
-                                    <td class="text-nowrap small">
-                                        @(item.StartTime?.ToString("yyyy-MM-dd HH:mm") ?? "未排定")
-                                    </td>
-                                    <td class="text-center text-nowrap">
-                                        <span class="fw-bold">@item.Capacity</span>
-                                        <span class="text-muted">/</span>
-                                        <span class="@(item.Remaining < 10 && item.Remaining > 0 ? "text-danger fw-bold" : "text-primary")">@item.Remaining</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge rounded-pill bg-@item.StatusColor" style="font-size: 0.7rem;">
-                                            @item.ProgrammeStatusName
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm">
-                                            <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                            <a asp-action="Details" asp-route-id="@item.ProgrammeID" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
-                                            <button type="button"
-                                                    class="btn btn-outline-danger"
-                                                    data-delete-id="@item.ProgrammeID"
-                                                    onclick="globalDelete('@item.ProgrammeID', '@item.ProgrammeName', 'Programmes')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
+                            <tr>
+                                <td class="ps-3 text-info opacity-75 font-monospace">#@item.ProgrammeID</td>
+                                <td>
+                                    <img src="@Url.Content("~/Photos/CoverImage/" + item.CoverImage)"
+                                         class="cover-img-tech"
+                                         onerror="this.onerror=null; this.src='https://via.placeholder.com/50x35?text=NA'">
+                                </td>
+                                <td>
+                                    <div class="neon-text-sm">@item.ProgrammeName</div>
+                                </td>
+                                <td class="text-white">@item.PlaceName</td>
+                                <td class="font-monospace" style="font-size: 0.8rem;">
+                                    @(item.StartTime?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold">@item.Capacity</span>
+                                    <span class="opacity-25 mx-1">/</span>
+                                    <span class="@(item.Remaining < 10 && item.Remaining > 0 ? "text-danger fw-bold shadow-glow" : "text-info")">
+                                        @item.Remaining
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge-tech text-@item.StatusColor">
+                                        ● @item.ProgrammeStatusName
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID" class="tech-link-icon px-2" title="編輯數據">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a asp-action="AdminDetail" asp-route-id="@item.ProgrammeID" class="tech-link-icon px-2" title="查看日誌">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="tech-link-icon px-2 bg-transparent border-0 text-danger"
+                                                onclick="globalDelete('@item.ProgrammeID', '@item.ProgrammeName', 'Programmes')">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
-
-@section Scripts {
-  
-}

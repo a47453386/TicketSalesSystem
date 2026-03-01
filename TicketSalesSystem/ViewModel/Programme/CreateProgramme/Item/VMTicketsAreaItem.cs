@@ -18,6 +18,8 @@
         public string? TicketsAreaStatusID { get; set; } 
 
         public string TempId { get; set; } = Guid.NewGuid().ToString();
+
+        public string? AreaColor { get; set; }
     }
         
 }

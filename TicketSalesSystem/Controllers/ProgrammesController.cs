@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.ViewModel.Programme;
+using TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -54,7 +55,6 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
-        
         // GET: Programmes/Details/5
         public async Task<IActionResult> Details(string id)
         {
@@ -63,10 +63,10 @@ namespace TicketSalesSystem.Controllers
                 return NotFound();
             }
 
-            var programme = await _context.Programme                
+            var programme = await _context.Programme
                 .Include(p => p.Place)
                 .Include(p => p.ProgrammeStatus)
-                .Include(p => p.Session) 
+                .Include(p => p.Session)
                 .ThenInclude(s => s.TicketsArea)
                 .FirstOrDefaultAsync(m => m.ProgrammeID == id);
             if (programme == null)
@@ -75,6 +75,77 @@ namespace TicketSalesSystem.Controllers
             }
 
             return View(programme);
+        }
+
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
+        // GET: Programmes/Details/5
+        public async Task<IActionResult> AdminDetail(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            // 1. 一口氣抓出活動、場次、票區、狀態、地點與建立者
+            var programme = await _context.Programme
+                .Include(p => p.ProgrammeStatus)
+                .Include(p => p.Place)
+                .Include(p => p.Employee)
+                .Include(p => p.DescriptionImage)
+                .Include(p => p.Session)
+                    .ThenInclude(s => s.TicketsArea)
+                .FirstOrDefaultAsync(p => p.ProgrammeID == id);
+
+            if (programme == null) return NotFound();
+
+            // 2. 對應基本資料到 ViewModel
+            var vm = new VMProgrammeAdminDetail
+            {
+                ProgrammeID = programme.ProgrammeID,
+                ProgrammeName = programme.ProgrammeName,
+                StatusName = programme.ProgrammeStatus?.ProgrammeStatusName,
+                PlaceName = programme.Place?.PlaceName,
+                ProgrammeDescription = programme.ProgrammeDescription,
+                Notice = programme.Notice,
+                RefundPolicy = programme.RefundPolicy,
+                CoverImage = programme.CoverImage,
+                SeatImage= programme.SeatImage,
+                OnShelfTime = programme.OnShelfTime,
+                UpdatedAt = programme.UpdatedAt ?? DateTime.Now,
+                EmployeeName = programme.Employee?.Name,
+                DescriptionImages = programme.DescriptionImage.Select(di => di.DescriptionImageName).ToList(),
+            };
+
+            // 3. 核心：計算每個票區的即時銷售量 (Sold Count)
+            foreach (var s in programme.Session)
+            {
+                var sessionVM = new VMSessionDetail
+                {
+                    SessionID = s.SessionID,
+                    StartTime = s.StartTime,
+                    TicketsAreas = new List<VMAreaDetail>()
+                };
+
+                foreach (var a in s.TicketsArea)
+                {
+                    // 🚩 從 Tickets 表中統計該票區已售出的張數
+                    // 排除掉狀態為 'N' (已取消) 的訂單
+                    int soldCount = await _context.Tickets
+                        .CountAsync(t => t.TicketsAreaID == a.TicketsAreaID && t.Order.OrderStatusID != "N");
+
+                    sessionVM.TicketsAreas.Add(new VMAreaDetail
+                    {
+                        TicketsAreaID = a.TicketsAreaID,
+                        TicketsAreaName = a.TicketsAreaName,
+                        Price = a.Price,
+                        RowCount = a.RowCount,
+                        SeatCount = a.SeatCount,
+                        Capacity = a.Capacity,
+                        Sold = soldCount,
+                        Remaining = a.Remaining
+                    });
+                }
+                vm.Sessions.Add(sessionVM);
+            }
+
+            return View(vm);
         }
 
         [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]

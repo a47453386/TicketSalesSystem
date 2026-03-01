@@ -1,109 +1,128 @@
 ﻿@using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep
 @model VMProgrammeStep4
 
-<div class="container mt-4">
+@{
+    ViewData["Title"] = "圖片上傳";
+}
+<link rel="stylesheet" href="~/css/Admin/Programme/Create/step4.css" asp-append-version="true" />
+<div class="admin-body p-4">
     @await Component.InvokeAsync("VCSteps", new { currentStep = 4 })
 
     <form asp-action="CreateStep4" method="post" enctype="multipart/form-data" id="uploadForm">
         @Html.AntiForgeryToken()
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white"><h5>1. 活動封面圖</h5></div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <div id="coverPreviewContainer" class="mb-2">
+        <div class="d-flex justify-content-between align-items-center mb-5 tech-label border-bottom border-info border-opacity-25 pb-3">
+            <h3 class="neon-text-sharp m-0">
+                <i class="bi bi-images me-2"></i>步驟四: 圖片上傳區
+            </h3>
+        </div>
+
+        @* --- 1. 活動封面圖 --- *@
+        <div class="cyber-card p-4 mb-4">
+            <label class="tech-label">> 01_活動主視覺封面</label>
+            <div class="row align-items-center">
+                <div class="col-md-5">
+                    <div id="coverPreviewContainer" class="mb-3">
                         @if (!string.IsNullOrEmpty(Model.CoverImage))
                         {
-                            <img src="@Model.CoverImage" class="img-thumbnail" style="max-height: 200px;" />
+                            <div class="img-preview-tech d-inline-block">
+                                <img src="@Model.CoverImage" style="max-height: 200px;" />
+                            </div>
                             <input type="hidden" asp-for="CoverImage" />
                         }
-                    </div>
-                    <input type="file" asp-for="CoverImageFile" class="form-control" accept="image/*" onchange="previewSingle(this, 'coverPreviewContainer')" />
-                    <small class="text-muted">建議尺寸：1200 x 600 px</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-info text-white"><h5>2. 場地座位圖</h5></div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <div id="seatPreviewContainer" class="mb-2">
-                        @if (!string.IsNullOrEmpty(Model.SeatImage))
+                        else
                         {
-                            <img src="@Model.SeatImage" class="img-thumbnail" style="max-height: 200px;" />
-                            <input type="hidden" asp-for="SeatImage" />
-                        }
-                    </div>
-                    <input type="file" asp-for="SeatImageFile" class="form-control" accept="image/*" onchange="previewSingle(this, 'seatPreviewContainer')" />
-                </div>
-            </div>
-        </div>
-
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-secondary text-white"><h5>3. 活動描述圖片 (多選)</h5></div>
-            <div class="card-body">
-                <div id="descPreviewContainer" class="row g-2 mb-3">
-                    @* 顯示已有的圖片 *@
-                    @if (Model.DescriptionImages != null)
-                    {
-                        foreach (var img in Model.DescriptionImages)
-                        {
-                            <div class="col-md-2 position-relative">
-                                <img src="@img.TempUrl" class="img-thumbnail w-100" style="height: 100px; object-fit: cover;" />
-                                @* 這裡可以加一個 Hidden 存 ID，代表這些是舊有的圖 *@
+                            <div class="img-preview-tech text-center py-5 opacity-25" style="width: 300px;">
+                                <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                沒有資料
                             </div>
                         }
-                    }
+                    </div>
                 </div>
-                <input type="file" asp-for="DescriptionImageFiles" class="form-control" accept="image/*" multiple onchange="previewMultiple(this, 'descPreviewContainer')" />
-                <p class="mt-2 small text-danger">* 再次選擇圖片將會預覽新選取的檔案。</p>
+                <div class="col-md-7">
+                    <input type="file" asp-for="CoverImageFile" class="form-control tech-input tech-file-input" accept="image/*" onchange="previewSingle(this, 'coverPreviewContainer')" />
+                    <div class="mt-3 text-info small opacity-75">
+                        <i class="bi bi-info-circle me-1"></i> 建議解析度：1200 x 600 像素
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-between mb-5">
-            <a asp-action="CreateStep3" class="btn btn-outline-secondary px-4">上一步</a>
-            <button type="submit" class="btn btn-primary px-5">下一步：最後確認</button>
+        @* --- 2. 場地座位圖 --- *@
+        <div class="cyber-card p-4 mb-4">
+            <label class="tech-label">> 02_場地配置圖</label>
+            <div class="row align-items-center">
+                <div class="col-md-5">
+                    <div id="seatPreviewContainer" class="mb-3">
+                        @if (!string.IsNullOrEmpty(Model.SeatImage))
+                        {
+                            <div class="img-preview-tech d-inline-block">
+                                <img src="@Model.SeatImage" style="max-height: 200px;" />
+                            </div>
+                            <input type="hidden" asp-for="SeatImage" />
+                        }
+                        else
+                        {
+                            <div class="img-preview-tech text-center py-5 opacity-25" style="width: 300px;">
+                                <i class="bi bi-geo-alt fs-1 d-block mb-2"></i>
+                                WAITING_FOR_MAP...
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <input type="file" asp-for="SeatImageFile" class="form-control tech-input tech-file-input" accept="image/*" onchange="previewSingle(this, 'seatPreviewContainer')" />
+                </div>
+            </div>
+        </div>
+
+        @* --- 3. 活動描述圖片 (多選) --- *@
+        <div class="cyber-card p-4 mb-4">
+            <label class="tech-label">> 03_活動詳情描述圖</label>
+
+            @* 🚩 圖片顯示區域 *@
+            <div id="descPreviewContainer" class="row g-3 mb-4">
+                @* 已存在於 Server 的圖片 (編輯模式時) *@
+                @if (Model.DescriptionImages != null)
+                {
+                    foreach (var img in Model.DescriptionImages)
+                    {
+                        <div class="col-md-3 preview-item" data-existing="true">
+                            <div class="img-preview-tech">
+                                <img src="@img.TempUrl" class="w-100" style="height: 120px; object-fit: cover;" />
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            @* 🚩 上傳控制項 *@
+            <input type="file" id="DescriptionImageFiles" name="DescriptionImageFiles"
+                   class="form-control tech-input tech-file-input"
+                   accept="image/*" multiple />
+
+            <p class="mt-3 text-info small" style="text-shadow: 0 0 5px rgba(0, 242, 255, 0.3);">
+                [ 狀態: 系統已支援檔案累加模式，您可以多次選取圖片 ]
+            </p>
+        </div>
+
+        @* --- 底部導覽 --- *@
+        <div class="d-flex justify-content-between mt-5 pt-4 border-top border-info border-opacity-10">
+            <a asp-action="CreateStep3" class="btn-cyber border-secondary text-secondary">
+                <i class="bi bi-chevron-left me-2"></i>上一步
+            </a>
+            <button type="submit" class="btn-cyber">
+                下一步：最後確認 <i class="bi bi-chevron-right ms-2"></i>
+            </button>
         </div>
     </form>
-    <div asp-validation-summary="All" class="text-danger"></div>
+    <div asp-validation-summary="All" class="text-danger mt-4"></div>
 </div>
 
 @section Scripts {
-    <script>
-               // 單張圖片預覽 (封面圖 & 座位圖)
-        function previewSingle(input, containerId) {
-            const container = document.getElementById(containerId);
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    container.innerHTML = `<img src="${e.target.result}" class="img-thumbnail" style="max-height: 200px;" />`;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
 
-        // 多張圖片預覽 (描述圖)
-        function previewMultiple(input, containerId) {
-            const container = document.getElementById(containerId);
-            // 每次選新檔案時，通常會清空原本的預覽內容 (視你的邏輯而定)
-            container.innerHTML = "";
-
-            if (input.files) {
-                Array.from(input.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const div = document.createElement("div");
-                        div.className = "col-md-2";
-                        div.innerHTML = `
-                            <img src="${e.target.result}" class="img-thumbnail w-100" style="height: 100px; object-fit: cover;" />
-                            <div class="small text-truncate text-muted">${file.name}</div>
-                        `;
-                        container.appendChild(div);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        }
-    </script>
+        <script src="~/js/Programme/Create/step4.js" asp-append-version="true"></script>
+    }
 }

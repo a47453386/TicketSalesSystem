@@ -1,111 +1,151 @@
 ﻿@model TicketSalesSystem.ViewModel.Place.VMPlaceCreate
 
 @{
-    ViewData["Title"] = "編輯場地配置";
-}
+    ViewData["Title"] = "場館管理";
+} 
 
-<div class="container py-5">
+<link rel="stylesheet" href="~/css/Admin/Place/PlaceEdit.css" asp-append-version="true" />
+
+<div class="admin-body p-4">
     <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editForm">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="PlaceID" />
         <input type="hidden" asp-for="VenueImages" />
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-dark text-white d-flex justify-content-between">
-                <h5 class="mb-0">編輯場地：@Model.PlaceName</h5>
+        @* --- STEP 01: 核心資訊編輯 --- *@
+        <div class="cyber-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center border-bottom border-info border-opacity-25 mb-4 pb-2">
+                <h5 class="neon-text-sharp mb-0">
+                    <i class="bi bi-cpu me-2"></i>場館更新：@Model.PlaceName 
+                </h5>
+                <span class="badge bg-info bg-opacity-10 text-info border border-info">ID: @Model.PlaceID</span>
             </div>
-            <div class="card-body row g-3">
+
+            <div class="row g-4">
                 <div class="col-md-6">
-                    <label asp-for="PlaceName" class="form-label fw-bold"></label>
-                    <input asp-for="PlaceName" class="form-control" />
-                    <span asp-validation-for="PlaceName" class="text-danger"></span>
+                    <label asp-for="PlaceName" class="tech-label">場館名稱</label>
+                    <input asp-for="PlaceName" class="form-control tech-input" />
+                    <span asp-validation-for="PlaceName" class="text-danger small"></span>
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="PlaceAddress" class="form-label fw-bold"></label>
-                    <input asp-for="PlaceAddress" class="form-control" />
-                    <span asp-validation-for="PlaceAddress" class="text-danger"></span>
+                    <label asp-for="PlaceAddress" class="tech-label">場館地址</label>
+                    <input asp-for="PlaceAddress" class="form-control tech-input" />
+                    <span asp-validation-for="PlaceAddress" class="text-danger small"></span>
                 </div>
                 <div class="col-md-12">
-                    <label class="form-label fw-bold">平面圖 (不換請留空)</label>
-                    <input type="file" name="file" class="form-control" id="imageInput" accept="image/*" />
-                    <img id="imagePreview" src="/Photos/VenueImage/@Model.VenueImages" class="mt-2 img-thumbnail" style="max-height: 150px;" />
+                    <label class="tech-label">平面圖</label>
+                    <input type="file" name="file" class="form-control tech-input" id="imageInput" accept="image/*" />
+
+                    <div class="mt-3 p-2 border border-info border-opacity-25 d-inline-block position-relative" style="background: #000;">
+                        <img id="imagePreview" src="/Photos/VenueImage/@Model.VenueImages"
+                             style="max-height: 200px; filter: contrast(1.2) brightness(0.8);" />
+                        <div class="position-absolute bottom-0 end-0 p-1 tech-label" style="font-size: 0.6rem; background: rgba(0,0,0,0.7);">
+                           
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">區域配置管理</h5>
-                <button type="button" class="btn btn-light btn-sm" id="btnAddVenue">新增區域</button>
+        @* --- STEP 02: 區域參數調整 --- *@
+        <div class="cyber-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center border-bottom border-info border-opacity-25 mb-4 pb-2">
+                <h5 class="neon-text-sharp mb-0">
+                    <i class="bi bi-layers me-2"></i>區域配置管理
+                </h5>
+                <button type="button" class="btn-cyber" id="btnAddVenue" style="padding: 5px 15px; font-size: 0.9rem;">
+                    <i class="bi bi-plus-circle me-1"></i>新增區域
+                </button>
             </div>
-            <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
+
+            <div class="table-responsive">
+                <table class="cyber-table align-middle">
+                    <thead>
+                        <tr class="text-center">
                             <th style="width: 20%">區域名稱</th>
                             <th style="width: 10%">樓層</th>
                             <th style="width: 10%">顏色</th>
-                            <th style="width: 15%">排數 x 座位</th>
-                            <th style="width: 30%">狀態</th>
-                            <th style="width: 5%">操作</th>
+                            <th style="width: 25%">排數 x 座位</th>
+                            <th style="width: 20%">系統狀態</th>
+                            <th style="width: 5%">移除</th>
                         </tr>
                     </thead>
                     <tbody id="venueBody">
                         @for (int i = 0; i < Model.VenueItem.Count; i++)
                         {
                             <tr class="venue-row">
-                                @* 🚩 關鍵隱藏欄位 *@
                                 <input type="hidden" name="VenueItem[@i].VenueID" value="@Model.VenueItem[i].VenueID" />
-                                <td><input name="VenueItem[@i].VenueName" value="@Model.VenueItem[i].VenueName" class="form-control form-control-sm" required /></td>
-                                <td><input name="VenueItem[@i].FloorName" value="@Model.VenueItem[i].FloorName" class="form-control form-control-sm" required /></td>
-                                <td><input name="VenueItem[@i].AreaColor" type="color" value="@Model.VenueItem[i].AreaColor" class="form-control form-control-color w-100" /></td>
+                                <td><input name="VenueItem[@i].VenueName" value="@Model.VenueItem[i].VenueName" class="form-control tech-input py-1" required /></td>
+                                <td><input name="VenueItem[@i].FloorName" value="@Model.VenueItem[i].FloorName" class="form-control tech-input py-1" required /></td>
+                                <td><input name="VenueItem[@i].AreaColor" type="color" value="@Model.VenueItem[i].AreaColor" class="form-control tech-input p-1" style="height: 45px;" /></td>
                                 <td>
-                                    <div class="input-group input-group-sm">
-                                        <input name="VenueItem[@i].RowCount" value="@Model.VenueItem[i].RowCount" type="number" class="form-control" />
-                                        <span class="input-group-text">x</span>
-                                        <input name="VenueItem[@i].SeatCount" value="@Model.VenueItem[i].SeatCount" type="number" class="form-control" />
+                                    <div class="input-group">
+                                        <input name="VenueItem[@i].RowCount" value="@Model.VenueItem[i].RowCount" type="number" class="form-control tech-input py-1" />
+                                        <span class="input-group-text bg-transparent text-info border-info border-opacity-25">X</span>
+                                        <input name="VenueItem[@i].SeatCount" value="@Model.VenueItem[i].SeatCount" type="number" class="form-control tech-input py-1" />
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="input-group input-group-sm">
-                                        <select name="VenueItem[@i].VenueStatusID" class="form-select status-select" asp-items="ViewBag.VenueStatus">
+                                    <div class="input-group">
+                                        <select name="VenueItem[@i].VenueStatusID" class="form-select tech-input py-1 status-select" asp-items="ViewBag.VenueStatus">
                                             <option value="@Model.VenueItem[i].VenueStatusID">@Model.VenueItem[i].VenueStatusID - @Model.VenueItem[i].VenueStatusName</option>
                                         </select>
-                                        <button class="btn btn-outline-primary btn-status-modal" type="button" data-mode="add"><i class="bi bi-plus"></i></button>
+                                        <button class="btn btn-outline-info btn-status-modal" type="button" data-mode="add"><i class="bi bi-plus"></i></button>
                                         <button class="btn btn-outline-warning btn-status-modal" type="button" data-mode="edit"><i class="bi bi-pencil"></i></button>
                                     </div>
                                 </td>
-                                <td><button type="button" class="btn btn-outline-danger btn-sm remove-venue"><i class="bi bi-trash"></i></button></td>
+                                <td class="text-center">
+                                    <button type="button" class="text-danger bg-transparent border-0 remove-venue">
+                                        <i class="bi bi-trash3 fs-4"></i>
+                                    </button>
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
         </div>
-        <button type="submit" class="btn btn-success w-100">儲存所有變更</button>
+
+        @* --- 底部操作控制列 --- *@
+        <div class="d-flex justify-content-end gap-3 mt-5">
+            <a asp-action="Index" class="btn-cyber border-secondary text-secondary">
+                <i class="bi bi-x-circle me-2"></i>取消變更 (DISCARD)
+            </a>
+            <button type="submit" class="btn-cyber btn-cyber-success">
+                <i class="bi bi-shield-check me-2"></i>確認更新 (COMMIT_DATA)
+            </button>
+        </div>
     </form>
 </div>
 
+
+
 <partial name="_VenueStatusModal" />
-<div asp-validation-summary="All" class="text-danger"></div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    
-    <script>
-        // 🚩 建立橋樑：外部 JS 檔案看不懂 Razor (小老鼠)，所以我們在這裡把資料準備好
-        window.venueConfig = {
-            // 產出下拉選單的 HTML 字串，供新增列時使用
-            statusOptionsHtml: `@if (ViewBag.VenueStatus != null) {
-                foreach (var item in (SelectList)ViewBag.VenueStatus) {
-                    <option value="@item.Value">@item.Text</option>
-                }
-            }`,
-            // 控制器 API 路徑
-            updateStatusUrl: '@Url.Action("UpdateVenueStatus", "Places")',
-            createStatusUrl: '@Url.Action("QuickCreateStatus", "Places")' // 注意 Action 名稱
-        };
-    </script>
 
-    @* 🚩 載入獨立 JS 檔案 (加上版本號防止瀏覽器快取舊檔) *@
-    <script src="~/js/venue-logic.js?v=@DateTime.Now.Ticks"></script>
+    <script>
+        window.venueConfig = {
+            statusOptionsHtml: `@if (ViewBag.VenueStatus != null) {
+                foreach (var item in (SelectList)ViewBag.VenueStatus)
+                {
+                        <option value="@item.Value">@item.Text</option>
+                }
+        }
+`,
+        updateStatusUrl: '@Url.Action("UpdateVenueStatus", "Places")',
+        createStatusUrl: '@Url.Action("QuickCreateStatus", "Places")'
+    };
+
+    // 圖片即時預覽
+    document.getElementById('imageInput').onchange = function (evt) {
+        const [file] = this.files;
+        if (file) {
+            const preview = document.getElementById('imagePreview');
+            preview.src = URL.createObjectURL(file);
+        }
+    };
+</script>
+<script src="~/js/venue-logic.js?v=@DateTime.Now.Ticks"></script>
 }

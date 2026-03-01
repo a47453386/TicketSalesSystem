@@ -48,7 +48,13 @@ namespace TicketSalesSystem.Service.IProgramme
             vm.OnShelfTime=db.OnShelfTime;
             vm.PlaceID=db.PlaceID;
             vm.ProgrammeStatusID=db.ProgrammeStatusID;
-            
+
+            vm.DescriptionImage = db.DescriptionImage.Select(img => new DescriptionImageDTO
+            {
+                DescriptionImageID = img.DescriptionImageID,
+                DescriptionImageName = img.DescriptionImageName,
+                TempUrl = null
+            }).ToList();
 
             vm.Session=db.Session.Select(s=>new VMSessionItem
             {
@@ -65,7 +71,7 @@ namespace TicketSalesSystem.Service.IProgramme
                     SeatCount=a.SeatCount,
                     Capacity=a.Capacity,
                     Remaining=a.Remaining,
-                    VenueID =a.VenueID
+                    VenueID =a.VenueID,
                 }).ToList()
             }).ToList();
 
@@ -101,10 +107,9 @@ namespace TicketSalesSystem.Service.IProgramme
         // 更新 (PUT)
         public async Task UpdateProgrammeAsync(Programme programme, VMProgrammeEdit vm)
         {
-            
             var employeeID = _userAccessorService.GetEmployeeId();
 
-            // 2.更新活動主檔
+            // 1. 更新活動主檔基本資料
             programme.ProgrammeName = vm.ProgrammeName;
             programme.ProgrammeDescription = vm.ProgrammeDescription;
             programme.Notice = vm.Notice;
@@ -112,31 +117,31 @@ namespace TicketSalesSystem.Service.IProgramme
             programme.CollectionReminder = vm.CollectionReminder;
             programme.RefundPolicy = vm.RefundPolicy;
             programme.LimitPerOrder = vm.LimitPerOrder;
-            programme.UpdatedAt=DateTime.Now;
-            programme.CoverImage=vm.CoverImage;
-            programme.SeatImage=vm.SeatImage;
-            programme.LimitPerOrder=vm.LimitPerOrder;
-            programme.OnShelfTime=vm.OnShelfTime;
-            programme.PlaceID=vm.PlaceID;
-            programme.ProgrammeStatusID=vm.ProgrammeStatusID;
+            programme.UpdatedAt = DateTime.Now;
+            programme.CoverImage = vm.CoverImage;
+            programme.SeatImage = vm.SeatImage;
+            programme.OnShelfTime = vm.OnShelfTime;
+            programme.PlaceID = vm.PlaceID; // 🚩 注意：這裡的 PlaceID 會影響票區驗證
+            programme.ProgrammeStatusID = vm.ProgrammeStatusID;
             programme.EmployeeID = employeeID;
 
-            ////3.處理圖片清單同步 (說明圖)
-            //if(vm.DescriptionImage!=null)
-            //{
-            //    await 
-            //}
+            // 🚩 2. 處理說明圖片同步 (包含：勾選刪除、新增上傳)
+            // 我們之前改過這個方法，讓他直接收 vm 才能讀到 DeleteImageIds
+            await SyncImagesAsync(programme, vm);
 
-            //// 4. 呼叫場次同步 (這裡面你可以繼續用你剛才寫的手動更新 Session)
-            //await SyncProgrammeDetailsAsync(programmeID, vm);
-            //// 5. 存檔
-            //await _context.SaveChangesAsync();
+            // 🚩 3. 處理場次與票區同步
+            // 這個方法會處理票區的 VenueID 與規格更新
+            await SyncProgrammeDetailsAsync(programme, vm);
+
+            // 🚩 4. 執行資料庫存檔
+            // 所有的 Remove、Add、Update 都會在這一刻正式生效
+            await _context.SaveChangesAsync();
         }
 
 
 
 
-        
+
         // 票區更新
         private async Task SyncTicketsAreasAsync(Session dbSession, List<VMTicketsAreaItem> vmTicketsAreas)
         {
@@ -298,68 +303,51 @@ namespace TicketSalesSystem.Service.IProgramme
         }
 
         // 圖片更新
-        public async Task SyncImagesAsync(Programme programme, List<DescriptionImageDTO> image)
+        public async Task SyncImagesAsync(Programme programme, VMProgrammeEdit vm)
         {
             //取得資料庫中該活動目前所有的說明圖片
             var dbImages = programme.DescriptionImage.ToList();
 
-            //找出哪些該刪除：DB 有，但 VM 沒給
-            var vmImageIds = image
-                .Select(i => i.DescriptionImageID)
-                .Where(id => id != null)
-                .ToList();
-
-            var toDelete = dbImages
-                .Where(s => !vmImageIds.Contains(s.DescriptionImageID))
-                .ToList();
-
-            if (toDelete.Any())
+            
+            if (vm.DeleteImageID != null && vm.DeleteImageID.Any())
             {
-                foreach (var s in toDelete)
-                {
-                    bool isDeleted =await _fileService.DeleteFileAsync(s.DescriptionImageName,"Photos", "DescriptionImage");
-                    if (isDeleted)
-                    {
-                        _context.DescriptionImage.Remove(s);
-                    }
-                }
+                // 找出資料庫中「確實被勾選要刪除」的圖片實體
+                var toDelete = dbImages
+                    .Where(img => vm.DeleteImageID.Contains(img.DescriptionImageID))
+                    .ToList();
 
+                foreach (var img in toDelete)
+                {
+                    // 刪除實體檔案
+                    await _fileService.DeleteFileAsync(img.DescriptionImageName, "Photos", "DescriptionImage");
+
+                    // 從資料庫上下文移除
+                    _context.DescriptionImage.Remove(img);
+                }
             }
 
-            //更新與新增
-            foreach(var imgVM in image)
-            {
-                if (imgVM.ImageFile != null && imgVM.ImageFile.Length > 0)
-                {
-                    //新增
-                    string uploadedFileName = await _fileService.SaveFileAsync(imgVM.ImageFile, "DescriptionImage");
 
-                    if (imgVM.DescriptionImageID == null)
+
+            //更新與新增
+            if (vm.NewDescriptionFiles != null && vm.NewDescriptionFiles.Any())
+            {
+                foreach (var file in vm.NewDescriptionFiles)
+                {
+                    if (file.Length > 0)
                     {
-                        var newDescriptionImage = new DescriptionImage
+                        // 新增
+                        string uploadedFileName = await _fileService.SaveFileAsync(file, "DescriptionImage");
+
+                        var newImg = new DescriptionImage
                         {
                             DescriptionImageID = Guid.NewGuid().ToString(),
                             DescriptionImageName = uploadedFileName,
                             ProgrammeID = programme.ProgrammeID,
                             ImagePath = uploadedFileName
-
                         };
-
-                        _context.DescriptionImage.Add(newDescriptionImage);
+                        _context.DescriptionImage.Add(newImg);
                     }
-                    else
-                    {
-                        var dbImage = dbImages.FirstOrDefault(i => i.DescriptionImageID == imgVM.DescriptionImageID);
-                        if (dbImage != null)
-                        {
-                            await _fileService.DeleteFileAsync(dbImage.DescriptionImageName, "Photos", "DescriptionImage");
-                            dbImage.DescriptionImageName = uploadedFileName;
-                            dbImage.ImagePath = uploadedFileName;
-                        }
-                    }
-
                 }
-
             }
 
 

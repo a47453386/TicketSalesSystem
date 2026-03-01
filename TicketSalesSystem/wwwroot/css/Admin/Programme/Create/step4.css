@@ -1,0 +1,160 @@
+﻿/* --- 1. 核心規格與背景 --- */
+:root {
+    --tech-cyan: #00f2ff;
+    --tech-blue: #004d66;
+    --tech-bg: #000b1a;
+    --tech-border: rgba(0, 242, 255, 0.3);
+    --panel-bg: rgba(0, 20, 40, 0.85);
+}
+
+body.admin-body {
+    font-size: 1.2rem !important;
+    background-color: var(--tech-bg);
+    color: #fff;
+    font-family: 'Share Tech Mono', 'Orbitron', monospace;
+    background-image: radial-gradient(circle at 50% 50%, #001a33 0%, #000b1a 100%), linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-attachment: fixed;
+}
+
+/* --- 2. 霓虹字體與標籤 --- */
+.neon-text-sharp {
+    color: #ffffff !important;
+    text-shadow: 0 0 5px var(--tech-cyan), 0 0 1px #ffffff;
+    font-weight: bold;
+}
+
+.tech-label {
+    color: var(--tech-cyan) !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* --- 3. 檔案上傳控制項 (消除白底核心修正) --- */
+/* 這是輸入框本體 */
+.tech-file-input {
+    background-color: rgba(0, 0, 0, 0.8) !important; /* 深黑底防止變白 */
+    border: 1px solid var(--tech-border) !important;
+    color: #ffffff !important;
+    border-radius: 0 !important;
+}
+
+    /* 🚩 消除按鈕白底：針對 Chrome, Edge, Safari 的按鈕本體 */
+    .tech-file-input::-webkit-file-upload-button {
+        background: rgba(0, 242, 255, 0.15) !important; /* 半透明青色底 */
+        color: var(--tech-cyan) !important;
+        border: 1px solid var(--tech-cyan) !important;
+        border-radius: 0;
+        padding: 8px 20px;
+        margin-right: 20px;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+        transition: all 0.3s;
+    }
+
+    /* 🚩 消除按鈕白底：針對 Firefox 或現代瀏覽器標準規格 */
+    .tech-file-input::file-selector-button {
+        background: rgba(0, 242, 255, 0.15) !important;
+        color: var(--tech-cyan) !important;
+        border: 1px solid var(--tech-cyan) !important;
+        border-radius: 0;
+        padding: 8px 20px;
+        margin-right: 20px;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: 'Orbitron', sans-serif;
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+        transition: all 0.3s;
+    }
+
+        .tech-file-input:hover::-webkit-file-upload-button,
+        .tech-file-input::file-selector-button:hover {
+            background: var(--tech-cyan) !important;
+            color: #000 !important;
+            box-shadow: 0 0 15px var(--tech-cyan);
+        }
+
+/* --- 4. 數位掃描預覽框 --- */
+.img-preview-tech {
+    border: 1px solid var(--tech-cyan);
+    padding: 5px;
+    background: #000;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    max-width: 100%;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+    .img-preview-tech::after {
+        content: "SCAN_ACTIVE";
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 0.6rem;
+        background: var(--tech-cyan);
+        color: #000;
+        padding: 2px 5px;
+        font-weight: bold;
+        z-index: 5;
+    }
+
+/* --- 5. 圖片預覽容器與移除按鈕 --- */
+.preview-item {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* 移除按鈕：霓虹紅光小圓點 */
+.btn-remove-img {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff0000;
+    color: #fff;
+    border: 2px solid var(--tech-cyan);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-remove-img:hover {
+        transform: scale(1.2) rotate(90deg);
+        background: #ff4d4d;
+        box-shadow: 0 0 20px #ff0000;
+    }
+
+/* --- 6. 戰甲式按鈕 (通用) --- */
+.btn-cyber {
+    background: transparent;
+    border: 2px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    padding: 12px 35px;
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 90% 100%, 0 100%);
+    transition: all 0.3s;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+}
+
+    .btn-cyber:hover {
+        background: var(--tech-cyan);
+        color: #000b1a;
+        box-shadow: 0 0 25px var(--tech-cyan);
+    }

@@ -1,0 +1,101 @@
+﻿/* 🚩 1. 核心規格：字體縮小至 0.9rem */
+body.admin-body {
+    font-size: 0.9rem !important;
+    background-color: var(--tech-bg);
+    color: #fff;
+    font-family: 'Share Tech Mono', 'Orbitron', monospace;
+}
+
+/* 🚩 2. 銳利霓虹字 (白核心藍光) */
+.neon-text-sharp {
+    color: #ffffff !important;
+    text-shadow: 0 0 5px var(--tech-cyan), 0 0 10px rgba(0, 242, 255, 0.5);
+    font-weight: bold;
+}
+
+/* 🚩 3. 科技卡片與切角 */
+.cyber-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--tech-cyan);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+    position: relative;
+}
+
+/* 🚩 4. 數據表格流 (0.9rem 版) */
+.cyber-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px; /* 縮小行距 */
+}
+
+    .cyber-table thead th {
+        color: var(--tech-cyan);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        border-bottom: 2px solid var(--tech-cyan);
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+
+    .cyber-table tbody tr {
+        background: rgba(0, 242, 255, 0.05);
+        transition: all 0.2s;
+    }
+
+        .cyber-table tbody tr:hover {
+            background: rgba(0, 242, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+    .cyber-table td {
+        padding: 8px;
+        border-top: 1px solid rgba(0, 242, 255, 0.1);
+        border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+    }
+
+/* 🚩 5. 圖片數位框 (縮小版) */
+.cover-img-tech {
+    width: 50px;
+    height: 35px;
+    object-fit: cover;
+    border: 1px solid var(--tech-cyan);
+    padding: 1px;
+    background: #000;
+}
+
+/* 戰術按鈕 */
+.btn-cyber-sm {
+    background: transparent;
+    border: 1px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+    .btn-cyber-sm:hover {
+        background: var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 10px var(--tech-cyan);
+    }
+
+/* 狀態標籤 */
+.badge-tech {
+    background: rgba(0, 242, 255, 0.1);
+    border: 1px solid currentColor;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+.neon-text-sm {
+    color: #ffffff !important;
+    /* 縮小光暈半徑 (3px)，避免小字糊掉 */
+    text-shadow: 0 0 3px var(--tech-cyan), 0 0 1px #ffffff;
+    font-size: 0.8rem !important;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}

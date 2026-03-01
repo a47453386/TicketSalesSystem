@@ -1,0 +1,84 @@
+﻿/* 🚩 1. 核心規格同步 (1.2rem + 科技背景) */
+body.admin-body {
+    font-size: 1.2rem !important;
+    background-color: var(--tech-bg);
+    color: #fff;
+    font-family: 'Share Tech Mono', 'Orbitron', monospace;
+}
+
+/* 🚩 2. 銳利霓虹字 */
+.neon-text-sharp {
+    color: #ffffff !important;
+    text-shadow: 0 0 5px var(--tech-cyan), 0 0 10px rgba(0, 242, 255, 0.5);
+    font-weight: bold;
+}
+
+/* 🚩 3. 科技標籤與輸入框 */
+.tech-label {
+    color: var(--tech-cyan) !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.tech-input {
+    background-color: rgba(0, 0, 0, 0.8) !important; /* 🚩 絕對黑底防止變白 */
+    border: 1px solid var(--tech-border) !important;
+    color: #ffffff !important; /* 🚩 強制純白文字 (#ffffff) */
+    font-size: 1.2rem !important;
+    border-radius: 0 !important;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+    .tech-input:focus {
+        border-color: var(--tech-cyan) !important;
+        box-shadow: 0 0 12px rgba(0, 242, 255, 0.4) !important;
+        background: rgba(0, 242, 255, 0.05) !important;
+        outline: none;
+    }
+
+select.tech-input,
+.admin-body select {
+    background-color: rgba(0, 0, 0, 0.9) !important; /* 🚩 提高不透明度，徹底壓制白底 */
+    color: #ffffff !important;
+    appearance: none !important; /* 🚩 停用系統原生外觀 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+    .tech-input option,
+    select.tech-input option,
+    .admin-body select option {
+        background-color: #000b1a !important; /* 🚩 使用與背景一致的深藍黑色 */
+        color: #ffffff !important; /* 🚩 確保選項文字是白的 */
+        padding: 10px;
+    }
+/* 🚩 4. 戰甲式按鈕 */
+.btn-cyber-next {
+    background: transparent;
+    border: 2px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    padding: 12px 40px;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+    transition: all 0.3s;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+}
+
+    .btn-cyber-next:hover {
+        background: var(--tech-cyan);
+        color: #000b1a;
+        box-shadow: 0 0 20px var(--tech-cyan);
+        transform: translateY(-2px);
+    }
+
+/* 修正 datetime-local 圖示顏色 */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) sepia(100%) saturate(500%) hue-rotate(140deg);
+    cursor: pointer;
+}

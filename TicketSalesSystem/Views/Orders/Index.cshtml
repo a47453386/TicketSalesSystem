@@ -3,115 +3,117 @@
 @{
     ViewData["Title"] = "訂單管理總覽";
 }
-<style>
-    /* 讓有提問的標籤稍微跳動，提醒管理員 */
-    .animate__infinite {
-        animation-iteration-count: infinite;
-    }
+<link rel="stylesheet" href="~/css/Admin/Order/OrderIndex.css" asp-append-version="true" />
 
-    .badge i {
-        margin-right: 4px;
-    }
-</style>
-<div class="container-fluid mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="bi bi-list-ul"></i> 訂單管理總覽</h4>
-        </div>
-
-        <div class="card-body">
-            <form asp-action="Index" method="get" class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" name="searchString" class="form-control" placeholder="搜尋訂單編號或會員帳號..." value="@Context.Request.Query["searchString"]" />
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select name="statusFilter" class="form-select" asp-items="ViewBag.StatusList">
-                        <option value="">-- 所有狀態 --</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">執行篩選</button>
-                </div>
-                <div class="col-md-1">
-                    <a asp-action="Index" class="btn btn-outline-secondary w-100">重置</a>
-                </div>
-            </form>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>訂單編號</th>
-                            <th>會員帳號</th>
-                            <th>建立時間</th>
-                            <th>金流狀態</th>
-                            <th>訂單狀態</th>
-                            <th class="text-center">退票申請</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="fw-bold">@item.OrderID</td>
-                                <td>@item.Member?.MemberID</td>
-                                <td>@item.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td>
-                                    @if (item.PaymentStatus)
-                                    {
-                                        <span class="badge bg-success">已付款</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">未付款</span>
-                                    }
-                                </td>
-                                <td>
-                                    @* 根據不同狀態顯示不同顏色 *@
-                                    @{
-                                        var statusClass = item.OrderStatusID switch
-                                        {
-                                            "Y" => "bg-primary",   // 已完成
-                                            "C" => "bg-danger",    // 已取消
-                                            "N" => "bg-warning text-dark", // 逾期
-                                            _ => "bg-info"         // 其他
-                                        };
-                                    }
-                                    <span class="badge @statusClass">@item.OrderStatus?.OrderStatusName</span>
-                                </td>
-                                <td class="text-center">
-                                    @if (item.Question != null && item.Question.Any())
-                                    {
-                                        <span class="badge rounded-pill bg-danger animate__animated animate__pulse animate__infinite">
-                                            <i class="bi bi-exclamation-triangle-fill"></i> @item.Question.Count 筆提問
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted small">-</span>
-                                    }
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a asp-action="Details" asp-route-id="@item.OrderID" class="btn btn-outline-secondary">
-                                            詳情
-                                        </a>
-                                        <a asp-action="Edit" asp-route-id="@item.OrderID" class="btn btn-outline-primary">
-                                            <i class="bi bi-pencil-square"></i> 審核/編輯
-                                        </a>
-                                       
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+<div class="order-management-scope">
+    @* --- [Header] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="neon-header"><i class="bi bi-cart-check-fill"></i>@ViewData["Title"]</h2>
         </div>
     </div>
-</div>
 
+    @* --- [Filter Section] --- *@
+    <div class="cyber-card">
+        <div class="tech-key small">搜尋</div>
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="opacity-50 small mb-2"><i class="bi bi-search me-1"></i>尋找</label>
+                <input type="text" name="searchString" class="form-control order-input" placeholder="請輸入關鍵字..." value="@Context.Request.Query["searchString"]" />
+            </div>
+            <div class="col-md-3">
+                <label class="opacity-50 small mb-2"><i class="bi bi-filter-left me-1"></i>狀態篩選</label>
+                <select name="statusFilter" class="form-select order-input" asp-items="ViewBag.StatusList">
+                    <option value="" class="text-white-50">-- 請選擇 --</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-order-action w-100 py-2">
+                    <i class="bi bi- lightning-charge-fill me-2"></i>查詢
+                </button>
+            </div>
+            <div class="col-md-1">
+                <a asp-action="Index" class="btn btn-outline-secondary w-100 py-2" style="font-size: 1rem;">
+                    <i class="bi bi-arrow-counterclockwise"></i>取消
+                </a>
+            </div>
+        </form>
+    </div>
+
+    
+
+    @* --- [Data Matrix] --- *@
+    <div class="table-container">
+        <table class="table order-table">
+            <thead>
+                <tr class="text-center">
+                    <th>訂單編號</th>
+                    <th>會員姓名</th>
+                    <th>建立時間</th>
+                    <th>付款狀態</th>
+                    <th>訂單狀態</th>
+                    <th>問題</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-monospace text-info">@item.OrderID</td>
+                        <td class="opacity-75">@item.Member?.Name</td>
+                        <td class="font-monospace opacity-50">@item.OrderCreatedTime.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            @if (item.PaymentStatus)
+                            {
+                                <span class="status-badge tag-paid-outline">已付款</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge tag-secondary">未付款</span>
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var (tagClass, statusName) = item.OrderStatusID switch
+                                {
+                                    "Y" => ("tag-active", item.OrderStatus?.OrderStatusName),
+                                    "C" => ("tag-danger", item.OrderStatus?.OrderStatusName),
+                                    "N" => ("tag-warning", item.OrderStatus?.OrderStatusName),
+                                    _ => ("tag-secondary", item.OrderStatus?.OrderStatusName)
+                                };
+                            }
+                            <span class="status-badge @tagClass">@statusName</span>
+                        </td>
+                        <td class="text-center">
+                            @if (item.Question != null && item.Question.Any())
+                            {
+                                <span class="status-badge tag-danger">
+                                    <i class="bi bi-broadcast"></i> @item.Question.Count 個
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="opacity-25">-</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                @* 詳情按鈕：鎖定為青色 (Cyan) *@
+                                <a asp-action="Details" asp-route-id="@item.OrderID" class="btn btn-sm btn-order-action btn-info-static px-3">
+                                    <i class="bi bi-eye-fill me-2"></i>詳細
+                                </a>
+
+                                @* 審核按鈕：鎖定為警告黃 (Warning Yellow) *@
+                                <a asp-action="Edit" asp-route-id="@item.OrderID" class="btn btn-sm btn-order-action btn-audit-static px-3">
+                                    <i class="bi bi-shield-check me-2"></i>審核
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+</div>

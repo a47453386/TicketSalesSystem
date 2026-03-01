@@ -114,8 +114,28 @@ header.cyber-header {
     clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
 }
 
-.neon-text {
-    text-shadow: 0 0 5px var(--tech-cyan);
+/*.neon-text {
+    text-shadow: 0 0 1px var(--tech-cyan);
+}*/
+
+
+/* 🚩 強化清晰度的霓虹文字樣式 */
+.neon-text-sharp {
+    color: #ffffff !important; /* 🚩 核心顏色必須是純白，才能保證清晰度 */
+    font-size: 1.2rem !important;
+    font-weight: 700;
+    letter-spacing: 1.5px; /* 🚩 增加字距，防止光暈互相干擾 */
+    /* 核心修改：大幅縮減模糊半徑 (從 10px 降至 2px) */
+    text-shadow: 0 0 2px var(--tech-cyan), /* 第一層：緊貼邊緣的青色 */
+    0 0 5px rgba(0, 242, 255, 0.4); /* 第二層：極淡的遠處擴散 */
+
+    transition: all 0.3s ease;
+}
+
+/* 只有滑鼠指上去時才稍微變亮，平時保持穩定 */
+.dropdown-toggle:hover .neon-text-sharp {
+    color: var(--tech-cyan) !important;
+    text-shadow: 0 0 8px var(--tech-cyan);
 }
 
 .btn-outline-cyan {
@@ -130,3 +150,76 @@ header.cyber-header {
         color: #000;
     }
 
+/* --- 6. HUD 狀態列專用 (Tech Style) --- */
+.tech-hud-bar {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    padding: 0 20px;
+    height: 100%;
+    font-size: 1.2rem !important; /* 🚩 統一 1.2rem */
+    color: var(--tech-cyan);
+}
+
+.status-item-tech {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 15px;
+    background: rgba(0, 242, 255, 0.05);
+    border-left: 2px solid var(--tech-cyan);
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+}
+
+/* 科技感閃爍動畫 */
+.dot-blink-tech {
+    width: 8px;
+    height: 8px;
+    background-color: #00ff88; /* 科技綠 */
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ff88;
+    animation: tech-pulse 2s infinite;
+}
+
+@keyframes tech-pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 滾動條美化 (Cyber Style) */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--tech-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--tech-blue);
+    border: 1px solid var(--tech-cyan);
+}
+.user-avatar-tech {
+    width: 38px; /* 🚩 配合 fs-4 的大小 */
+    height: 38px;
+    border-radius: 50%; /* 圓形 */
+    border: 2px solid var(--tech-cyan); /* 青色邊框 */
+    box-shadow: 0 0 8px rgba(0, 242, 255, 0.5); /* 微弱光暈 */
+    object-fit: cover; /* 🚩 關鍵：圖片不變形 */
+    object-position: center;
+    background-color: var(--tech-bg);
+    transition: all 0.3s ease;
+    padding: 2px; /* 讓圖片與邊框有一點點間隙，更有層次感 */
+}

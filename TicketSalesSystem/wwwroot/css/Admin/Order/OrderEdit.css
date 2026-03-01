@@ -1,0 +1,154 @@
+﻿/* 整合 CSS 區塊：確保 1.2rem 與靜態風格
+           此處僅列出關鍵覆寫，建議將完整 CSS 放入 OrderEdit.css
+        */
+
+/* --- [1. 核心變數與區域鎖定] --- */
+.order-management-scope {
+    --tech-cyan: #00f2ff;
+    --tech-bg: rgba(10, 10, 10, 0.9);
+    --tech-border: rgba(0, 242, 255, 0.25);
+    --tech-warning: #ffcc00;
+    --tech-danger: #ff3333;
+    --tech-success: #00ff88;
+    --tech-secondary: #444;
+    --base-font-size: 1.2rem;
+    --header-font-size: 3.5rem;
+    background-color: #000 !important;
+    background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    color: #e0e0e0 !important;
+    font-size: var(--base-font-size);
+    font-family: 'Segoe UI', 'Roboto', '微軟正黑體', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+    /* --- [2. 字體強制繼承 1.2rem] --- */
+    .order-management-scope p,
+    .order-management-scope div,
+    .order-management-scope td,
+    .order-management-scope th,
+    .order-management-scope span,
+    .order-management-scope label,
+    .order-management-scope input,
+    .order-management-scope select,
+    .order-management-scope textarea {
+        font-size: var(--base-font-size) !important;
+        color: #e0e0e0;
+    }
+
+    /* --- [3. 標題與裝飾] --- */
+    .order-management-scope .terminal-header {
+        font-size: var(--header-font-size);
+        font-weight: 900;
+        letter-spacing: 6px;
+        color: var(--tech-cyan) !important;
+        text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+        text-transform: uppercase;
+        margin-bottom: 0;
+    }
+
+    /* --- [4. 卡片系統 - 標頭透明化] --- */
+    .order-management-scope .audit-card {
+        background: var(--tech-bg);
+        border: 1px solid var(--tech-border);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        margin-bottom: 2rem;
+    }
+
+    .order-management-scope .audit-card-header {
+        font-size: 1.3rem !important;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--tech-cyan), transparent);
+        color: #000 !important;
+        padding: 4px 20px;
+        clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+        display: inline-block;
+        margin-bottom: 1.2rem;
+        text-transform: uppercase;
+    }
+
+    /* --- [5. 下拉選單與輸入框黑化] --- */
+    .order-management-scope .order-input,
+    .order-management-scope .audit-input {
+        background-color: rgba(20, 20, 20, 0.95) !important;
+        color: var(--tech-cyan) !important;
+        border: 1px solid var(--tech-border) !important;
+        padding: 10px 15px;
+    }
+
+        .order-management-scope .order-input option {
+            background-color: #111 !important;
+            color: #fff !important;
+        }
+
+    /* --- [6. 靜態戰術按鈕] --- */
+    .order-management-scope .btn-order-action {
+        font-size: 1.1rem !important;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        padding: 8px 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        clip-path: polygon(0 0, 100% 0, 100% 75%, 90% 100%, 0 100%);
+        border-radius: 0;
+        transition: none !important;
+    }
+
+        .order-management-scope .btn-order-action:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+    .order-management-scope .btn-info-static {
+        background: rgba(0, 242, 255, 0.1) !important;
+        border: 1px solid var(--tech-cyan) !important;
+        color: var(--tech-cyan) !important;
+    }
+
+    .order-management-scope .btn-audit-static {
+        background: rgba(255, 204, 0, 0.1) !important;
+        border: 1px solid var(--tech-warning) !important;
+        color: var(--tech-warning) !important;
+    }
+
+    /* --- [7. 狀態標籤與表格] --- */
+    .order-management-scope .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        font-weight: 800;
+        text-transform: uppercase;
+        text-align: center;
+        min-width: 110px;
+        clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%);
+    }
+
+    .order-management-scope .bg-danger {
+        background: var(--tech-danger) !important;
+        animation: signal-pulse 1.5s infinite;
+    }
+
+    .order-management-scope .bg-success {
+        background: var(--tech-success) !important;
+        color: #000 !important;
+    }
+
+    .order-management-scope .bg-warning {
+        background: var(--tech-warning) !important;
+        color: #000 !important;
+    }
+
+@keyframes signal-pulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0px var(--tech-danger);
+    }
+
+    50% {
+        opacity: 0.7;
+        box-shadow: 0 0 15px var(--tech-danger);
+    }
+}

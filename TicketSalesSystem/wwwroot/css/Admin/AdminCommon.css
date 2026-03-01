@@ -1,0 +1,68 @@
+﻿/* ==========================================================================
+   UniversalCyber.css - 核心戰術規格
+   包含：1rem 規格、透明斜切卡片、HUD 大小標題
+   ========================================================================== */
+
+:root {
+    --tech-cyan: #00f2ff;
+    --tech-bg: #000b1a;
+    --panel-bg: rgba(0, 20, 40, 0.6); /* 透明背景 */
+    --tech-border: rgba(0, 242, 255, 0.3);
+    --base-font: 1rem; /* 🚩 要求的 1rem 字體 */
+}
+
+/* --- [1. 基礎規格設定] --- */
+body.admin-body, .admin-body {
+    background-color: var(--tech-bg) !important;
+    background-image: linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: #fff !important;
+    font-family: 'Share Tech Mono', 'Orbitron', '微軟正黑體', monospace;
+    font-size: var(--base-font) !important;
+}
+
+    /* 強制所有標準文字、清單、表格儲存格繼承 1rem */
+    .admin-body p, .admin-body div, .admin-body td, .admin-body th, .admin-body span, .admin-body a {
+        font-size: var(--base-font) !important;
+    }
+
+/* --- [2. 標題系統] --- */
+
+/* 主標題：銳利霓虹風格 (由第二份優化) */
+.neon-header {
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: #ffffff !important;
+    text-shadow: 0 0 8px var(--tech-cyan), 0 0 20px rgba(0, 242, 255, 0.5);
+    text-transform: uppercase;
+}
+
+/* 戰術標題標籤：斜切漸層 (你要求的票題樣式) */
+.tech-key {
+    font-size: 1rem !important; /* 標籤文字與基準字體一致 */
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--tech-cyan), transparent);
+    color: #000 !important;
+    padding: 3px 20px;
+    clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    display: inline-block;
+    margin-bottom: 1.2rem;
+    text-transform: uppercase;
+}
+
+/* --- [3. 卡片系統 - 第一份樣式] --- */
+.cyber-card {
+    background: var(--panel-bg) !important;
+    border: 1px solid var(--tech-cyan) !important;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    backdrop-filter: blur(8px); /* 增加背景模糊，提昇透明質感 */
+    /* 🚩 第一份的斜切角公式 */
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+    transition: all 0.3s ease;
+}
+
+    .cyber-card:hover {
+        background: rgba(0, 30, 60, 0.8) !important;
+        box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);
+    }

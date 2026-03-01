@@ -21,6 +21,8 @@ namespace TicketSalesSystem.DTOs
 
         public string? ProgrammeStatusID { get; set; }
         public string VenueID { get; set; }= null!;
+       
+
         public string TicketsAreaStatusID { get; set; } = null!;
 
         public List<DescriptionImageDTO> DescriptionImage { get; set; } = new List<DescriptionImageDTO>();

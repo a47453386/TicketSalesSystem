@@ -56,7 +56,7 @@
                                 <li><a class="dropdown-item" asp-controller="Members" asp-action="Details" asp-route-id="你的測試ID">個人詳情</a></li>
                                 <li><a class="dropdown-item" asp-controller="Members" asp-action="UserEdit" asp-route-id="你的測試ID">修改個資</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="#">登出</a></li>
+                                <li><a asp-controller="Login" asp-action="MemberLogout" class="dropdown-item text-danger">登出</a></li>
                             </ul>
                         </li>
                     </ul>

@@ -1,164 +1,250 @@
 ﻿@model TicketSalesSystem.DTOs.ProgrammeDTO
 
 @{
-    ViewData["Title"] = "最後確認 - 建立活動";
-   
+    ViewData["Title"] = "部署核對 / FINAL_CONFIRMATION";
 }
 
-<div class="container mt-4">
-    @await Component.InvokeAsync("VCSteps", new { currentStep = 5 }) @* 假設你進度條有第五步 *@
+<div class="admin-body p-4">
+    @* 步驟指示器 *@
+    @await Component.InvokeAsync("VCSteps", new { currentStep = 5 })
 
-    <div class="alert alert-info shadow-sm d-flex align-items-center" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-3 fs-3"></i>
+    @* --- 警告面板 --- *@
+    <div class="tech-alert mb-5 d-flex align-items-center animate__animated animate__pulse animate__infinite"
+         style="background: rgba(0, 242, 255, 0.05); border: 1px solid var(--tech-cyan); padding: 20px; clip-path: polygon(2% 0, 100% 0, 100% 70%, 98% 100%, 0 100%, 0 30%);">
+        <i class="bi bi-shield-lock-fill me-3 fs-2 text-info"></i>
         <div>
-            請再次確認以下資訊是否正確。一旦按下「正式發布」，系統將會建立活動並開放購票設定。
+            <div class="fw-bold text-info" style="letter-spacing: 2px;">最後確認</div>
+            <div class="small opacity-75">請執行最後數據核對。</div>
         </div>
     </div>
 
-    @* 1. 基本資料確認 *@
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark text-white"><h5>1. 基本資料</h5></div>
-        <div class="card-body">
-            <dl class="row mb-0">
-                <dt class="col-sm-2">活動名稱</dt>
-                <dd class="col-sm-10">@Model.ProgrammeName</dd>
+    @* --- 1. 基本資料與任務說明 --- *@
+    <div class="cyber-card p-4 mb-4">
+        <div class="border-bottom border-info border-opacity-25 mb-4 pb-2">
+            <h5 class="neon-text-sharp mb-0"><i class="bi bi-info-circle me-2"></i>第一部份: 基本資料與詳細說明</h5>
+        </div>
 
-                <dt class="col-sm-2">場地 ID</dt>
-                <dd class="col-sm-4">@ViewData["PlaceName"]</dd>
+        @* A. 短數據 (2欄) *@
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="tech-data-row"><span class="tech-key">活動名稱:</span> <span class="tech-value">@Model.ProgrammeName</span></div>
+                <div class="tech-data-row"><span class="tech-key">演出地點:</span> <span class="tech-value">@ViewData["PlaceName"]</span></div>
+            </div>
+            <div class="col-md-6">
+                <div class="tech-data-row"><span class="tech-key">購票上限:</span> <span class="tech-value">@Model.LimitPerOrder 張</span></div>
+                <div class="tech-data-row"><span class="tech-key">預計上架:</span> <span class="tech-value">@Model.OnShelfTime.ToString("yyyy-MM-dd HH:mm:ss")</span></div>
+            </div>
+        </div>
 
-                <dt class="col-sm-2">單筆限購</dt>
-                <dd class="col-sm-4">@Model.LimitPerOrder 張</dd>
-
-                <dt class="col-sm-2">上架時間</dt>
-                <dd class="col-sm-10">@Model.OnShelfTime.ToString("yyyy-MM-dd HH:mm")</dd>
-            </dl>
+        @* B. 長文本描述 (全寬與半寬) *@
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="text-block-tech">
+                    <span class="tech-key mb-2 d-block"><i class="bi bi-text-left me-2"></i>節目說明</span>
+                    <div class="tech-value small opacity-75" style="white-space: pre-wrap; line-height: 1.6;">@Model.ProgrammeDescription</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-block-tech border-warning border-opacity-20">
+                    <span class="tech-key mb-2 d-block text-warning"><i class="bi bi-exclamation-triangle me-2"></i>注意事項</span>
+                    <div class="tech-value small opacity-75" style="white-space: pre-wrap;">@Model.Notice</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-block-tech">
+                    <span class="tech-key mb-2 d-block text-info"><i class="bi bi-cart-check me-2"></i>購票提醒</span>
+                    <div class="tech-value small opacity-75" style="white-space: pre-wrap;">@Model.PurchaseReminder</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-block-tech">
+                    <span class="tech-key mb-2 d-block text-info"><i class="bi bi-ticket-perforated me-2"></i>取票提醒</span>
+                    <div class="tech-value small opacity-75" style="white-space: pre-wrap;">@Model.CollectionReminder</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-block-tech border-danger border-opacity-20">
+                    <span class="tech-key mb-2 d-block text-danger"><i class="bi bi-arrow-counterclockwise me-2"></i>退票政策</span>
+                    <div class="tech-value small opacity-75" style="white-space: pre-wrap;">@Model.RefundPolicy</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    @* 2. 場次與票區彙整 *@
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-secondary text-white">
-            <h5>3. 場次與票區詳細設定</h5>
+    @* --- 2. 場次與票區彙整 --- *@
+    <div class="cyber-card p-4 mb-4">
+        <div class="border-bottom border-info border-opacity-25 mb-3 pb-2">
+            <h5 class="neon-text-sharp mb-0"><i class="bi bi-calendar-check me-2"></i>SECTION_02: 場次、票區、票價矩陣</h5>
         </div>
-        <div class="card-body p-0">
-            @if (Model.Session != null && Model.Session.Any())
+
+        @if (Model?.Session != null && Model.Session.Any())
+        {
+            @foreach (var session in Model.Session)
             {
-                @foreach (var session in Model.Session)
-                {
-                    <div class="p-3 border-bottom bg-light">
-                        <span class="fw-bold text-primary">
-                            <i class="bi bi-clock-history me-2"></i>
-                            場次開演時間：@session.StartTime.ToString("yyyy-MM-dd HH:mm")
-                        </span>
-                        <span class="ms-3 badge bg-info">場地：@ViewData["VenueName"]</span>
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-3 p-2" style="background: rgba(0, 242, 255, 0.05); border-left: 3px solid var(--tech-cyan);">
+                        <span class="badge bg-info text-dark fw-bold me-3">SESSION_NODE</span>
+                        @* 🚩 修正時間顯示 *@
+                        <span class="neon-text-sharp me-3">演出日期: @session.StartTime.ToString("yyyy-MM-dd HH:mm")</span>
+                        <span class="text-info opacity-75 small">開賣日期: @session.SaleStartTime.ToString("yyyy-MM-dd HH:mm")</span>
+                        <span class="text-info opacity-75 small ms-3">結束銷售: @session.SaleEndTime.ToString("yyyy-MM-dd HH:mm")</span>
                     </div>
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr class="small">
-                                <th class="ps-4">票區名稱</th>
-                                <th class="text-center">價格</th>
-                                <th class="text-center">排數</th>
-                                <th class="text-center">每排座位</th>
-                                <th class="text-center">該場次總座位</th>
-                            </tr>
-                        </thead>
-                        <tbody class="align-middle">
-                            @if (Model.Session != null && Model.Session.Any())
-                            {
-                                @foreach (var sessions in Model.Session)
-                                {
-                                    @* 🚩 增加一個小標題行，標示這是哪一個場次的票區 *@
-                                    <tr class="table-secondary">
-                                        <td colspan="4" class="fw-bold">
-                                            <i class="bi bi-clock-fill me-2"></i>
-                                            場次：@sessions.StartTime.ToString("yyyy-MM-dd HH:mm")
-                                        </td>
-                                    </tr>
 
-                                    @foreach (var area in sessions.TicketsArea)
+                    <div class="table-responsive">
+                        <table class="cyber-table-confirm text-center">
+                            <thead>
+                                <tr class="text-center">
+                                    @* 1. 票區名稱：靠左對齊並保持縮排 *@
+                                    <th class="text-start ps-4" style="width: 25%;">票區名稱</th>
+                                    @* 其他欄位統一居中 *@
+                                    <th style="width: 20%;">演出地點</th>
+                                    <th style="width: 15%;">區域顏色</th>
+                                    <th style="width: 15%;">單價</th>
+                                    <th style="width: 15%;">票區座位數</th>
+                                    @* 6. 小計：靠右對齊並保持縮排 *@
+                                    <th class="text-end pe-4" style="width: 10%;">小計</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* 🚩 增加 Null 檢查，防止第 106 行報錯 *@
+                                @if (session.TicketsArea != null && session.TicketsArea.Any())
+                                {
+                                    @foreach (var area in session.TicketsArea)
                                     {
-                                        <tr>
-                                            <td class="ps-4">@area.TicketsAreaName</td>
-                                            <td>
-                                                @* 🚩 顯示場館名稱 (若 ViewData 有傳入名稱對照) *@
-                                                <span class="badge bg-light text-dark border">
-                                                    <i class="bi bi-geo-alt-fill me-1"></i>
-                                                    @area.VenueID
-                                                </span>
+                                        <tr class="animate__animated animate__fadeIn text-center">
+                                            @* 1. 票區名稱：對齊 text-start *@
+                                            <td class="text-start ps-4 fw-bold text-white">
+                                                <span class="neon-text-sharp">@area.TicketsAreaName</span>
                                             </td>
-                                            <td class="text-danger fw-bold">$@area.Price.ToString("N0")</td>
+
+                                            @* 2. 演出地點：對齊 text-center *@
                                             <td>
-                                                @((area.RowCount * area.SeatCount).ToString("N0")) <span class="small text-muted">(位)</span>
+                                                <span class="text-white small">@(area.VenueName ?? "未指定場館")</span>
+                                            </td>
+
+                                            @* 3. 區域顏色：對齊 text-center *@
+                                            <td>
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <span class="badge shadow-sm" style="background-color: @area.AreaColor; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 0 10px @(area.AreaColor)80; padding: 5px 12px; font-size: 0.75rem; min-width: 80px;">
+                                                        @(area.AreaColor?.ToUpper() ?? "#000000")
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            @* 4. 單價：對齊 text-center *@
+                                            <td class="text-info fw-bold font-monospace">
+                                                TWD @area.Price.ToString("N0")
+                                            </td>
+
+                                            @* 5. 票區座位數：對齊 text-center *@
+                                            <td class="font-monospace opacity-75" style="font-size: 0.9rem;">
+                                                @area.RowCount <span class="text-info opacity-50">x</span> @area.SeatCount
+                                            </td>
+
+                                            @* 6. 小計：對齊 text-end *@
+                                            <td class="text-end pe-4">
+                                                <span class="neon-text-sharp">@((area.RowCount * area.SeatCount).ToString("N0"))</span>
+                                                <div class="small opacity-50" style="font-size: 0.6rem;">UNIT</div>
                                             </td>
                                         </tr>
                                     }
                                 }
-                            }
-                            else
-                            {
+                                else
+                                {
+                                    <tr><td colspan="6" class="py-4 opacity-50 text-center">[ 無票區數據 ]</td></tr>
+                                }
+                            </tbody>
+                            <tfoot>
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">目前尚未設定任何場次或票區。</td>
+                                    <td colspan="5" class="text-end py-3 opacity-50">該場次總座位數:</td>
+                                    <td class="py-3 text-info fw-bold font-monospace">
+                                        @* 🚩 使用 ?.Sum() 避免 null 引用 *@
+                                        @(session.TicketsArea?.Sum(a => a.RowCount * a.SeatCount).ToString("N0") ?? "0") UNIT
+                                    </td>
                                 </tr>
-                            }
-                        </tbody>
-                        <tfoot class="table-light">
-                            <tr>
-                                <td colspan="4" class="text-end fw-bold">該場次總計售票數：</td>
-                                <td class="text-center fw-bold text-decoration-underline">
-                                    @session.TicketsArea?.Sum(a => a.RowCount * a.SeatCount).ToString("N0")
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                }
-            }
-            else
-            {
-                <div class="p-5 text-center text-muted">
-                    請回上一步確認場次設定。
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             }
-        </div>
+        }
     </div>
 
-    @* 3. 圖片預覽 *@
-    @* 4. 已上傳圖片 *@
-    <div class="card shadow-sm mb-5">
-        <div class="card-header bg-secondary text-white"><h5>4. 已上傳圖片</h5></div>
-        <div class="card-body">
-            <div class="row g-2">
-                @* 🚩 這裡加上 null 檢查 *@
+    @* --- 3. 媒體資產清單 --- *@
+    <div class="cyber-card p-4 mb-5">
+        <div class="border-bottom border-info border-opacity-25 mb-4 pb-2">
+            <h5 class="neon-text-sharp mb-0"><i class="bi bi-images me-2"></i>第三部分:圖片</h5>
+        </div>
+
+        <div class="row g-4 mb-5 border-bottom border-info border-opacity-10 pb-4">
+            <div class="col-md-6">
+                <span class="tech-label text-info mb-3 d-block">> 01_活動封面</span>
+                <div class="img-preview-tech">
+                    @if (!string.IsNullOrEmpty(Model.CoverImage))
+                    {
+                        <img src="~/Photos/CoverImage/@Model.CoverImage" class="w-100" style="height: 250px; object-fit: contain; background: #000;" />
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 opacity-25 font-monospace">[沒有圖片]</div>
+                    }
+                </div>
+            </div>
+            <div class="col-md-6">
+                <span class="tech-label text-info mb-3 d-block">> 02_場地配置圖</span>
+                <div class="img-preview-tech">
+                    @if (!string.IsNullOrEmpty(Model.SeatImage))
+                    {
+                        <img src="~/Photos/SeatImage/@Model.SeatImage" class="w-100" style="height: 250px; object-fit: contain; background: #000;" />
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 opacity-25 font-monospace">[沒有圖片]</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <span class="tech-label text-info mb-3 d-block">> 03_活動說明圖</span>
+            <div class="row g-3">
                 @if (Model.DescriptionImage != null && Model.DescriptionImage.Any())
                 {
                     @foreach (var img in Model.DescriptionImage)
                     {
-                        <div class="col-md-2 text-center">
-                            @* 檢查 TempUrl 是否有值，否則顯示預設圖 *@
-                            <img src="~/Photos/DescriptionImage/@img.DescriptionImageName"
-                                 class="img-thumbnail" style="height: 100px; width: 100%; object-fit: cover;" />
-                            <div class="small text-muted text-truncate">@img.DescriptionImageName</div>
+                        <div class="col-md-2">
+                            <div class="img-preview-tech">
+                                @* 🚩 現在 DescriptionImageName 就是 GUID.jpg，直接拼接絕對不會錯 *@
+                                <img src="@Url.Content("~/Photos/DescriptionImage/" + img.DescriptionImageName)"
+                                     class="w-100"
+                                     style="height: 120px; object-fit: cover;"
+                                     onerror="this.src='https://placehold.co/120x120/000000/00f2ff?text=IMAGE_ERROR'" />
+
+                                <div class="small text-info text-truncate mt-1" style="font-size: 0.6rem; opacity: 0.7;">
+                                    @* 這裡可以顯示 ID 的前 8 碼，增加科技感 *@
+                                    ID: @img.DescriptionImageID.Substring(0, 8)...
+                                </div>
+                            </div>
                         </div>
                     }
                 }
                 else
                 {
-                    <div class="col-12 text-center py-4">
-                        <p class="text-muted">（此活動未上傳描述圖片）</p>
-                    </div>
+                    <div class="col-12 py-3 text-center opacity-25 font-monospace">[沒有圖片]</div>
                 }
             </div>
         </div>
     </div>
 
-    @* 最後提交表單 *@
+    @* --- 最後提交表單 --- *@
     <form asp-action="CreateConfirm" method="post">
-        <div class="d-flex justify-content-between align-items-center mb-5 border-top pt-4">
-            <a asp-action="CreateStep4" class="btn btn-outline-secondary px-4">
-                <i class="bi bi-arrow-left"></i> 回上一步修改
+        <div class="d-flex justify-content-between align-items-center mb-5 border-top border-info border-opacity-10 pt-5">
+            <a asp-action="CreateStep4" class="btn-cyber border-secondary text-secondary" style="text-decoration: none;">
+                <i class="bi bi-chevron-left me-2"></i>回上一步
             </a>
 
-            <button type="submit" class="btn btn-success btn-lg px-5 shadow">
-                <i class="bi bi-check-circle-fill me-2"></i> 確認無誤，正式發布
+            <button type="submit" class="btn-cyber-confirm px-5">
+                <i class="bi bi-cloud-upload-fill me-2"></i> 資料確認無誤送出
             </button>
         </div>
     </form>

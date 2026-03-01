@@ -1,56 +1,69 @@
 ﻿@using TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeStep
 @model VMProgrammeStep2
 
-@await Component.InvokeAsync("VCSteps", new { currentStep = 2 })
+@{
+    ViewData["Title"] = "場次配置";
+}
+<link rel="stylesheet" href="~/css/Admin/Programme/Create/step2.css" asp-append-version="true" />
 
-<div class="container mt-4">
-    <form asp-action="CreateStep2" method="post" id="sessionForm">
-       
-        @* 🚩 務必加入這個隱藏欄位 *@
-        <input type="hidden" asp-for="PlaceID"  />
-       
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">場次設定</h5>
-                <button type="button" class="btn btn-light btn-sm" id="btnAddSession">
-                    <i class="bi bi-plus-circle"></i> 新增一場
+<div class="admin-body p-4">
+    @await Component.InvokeAsync("VCSteps", new { currentStep = 2 })
+
+    <div class="cyber-card p-4 mt-4">
+        <form asp-action="CreateStep2" method="post" id="sessionForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PlaceID" />
+
+            @* --- 表頭控制 --- *@
+            <div class="d-flex justify-content-between align-items-center border-bottom border-info border-opacity-25 mb-4 pb-2">
+                <h4 class="neon-text-sharp mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>步驟二: 場次排程設定
+                </h4>
+                <button type="button" class="btn-cyber" id="btnAddSession" style="padding: 5px 15px; font-size: 0.9rem;">
+                    <i class="bi bi-plus-circle me-1"></i>新增場次
                 </button>
             </div>
-            <div class="card-body">
-                <div id="sessionContainer">
-                    @* 這裡預留給 JS 動態產生，或是顯示已有的資料 *@
-                    @for (int i = 0; i < Model.Session.Count; i++)
-                    {
-                        <div class="session-item border p-3 mb-3 position-relative">
-                            <h6>場次 #<span class="row-number">@(i + 1)</span></h6>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">活動開始時間</label>
-                                    <input asp-for="Session[i].StartTime" class="form-control" type="datetime-local" />
-                                    <span asp-validation-for="Session[i].StartTime" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">啟售時間</label>
-                                    <input asp-for="Session[i].SaleStartTime" class="form-control" type="datetime-local" />
-                                    <span asp-validation-for="Session[i].SaleStartTime" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">截止銷售時間</label>
-                                    <input asp-for="Session[i].SaleEndTime" class="form-control" type="datetime-local" />
-                                </div>
+
+            <div id="sessionContainer">
+                @for (int i = 0; i < Model.Session.Count; i++)
+                {
+                    <div class="session-item-tech">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-info fw-bold mb-0"># 序號.<span class="row-number">@(i + 1)</span></h6>
+                            <i class="bi bi-trash3-fill remove-session-btn remove-session"></i>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <label class="tech-label">活動演出時間</label>
+                                <input asp-for="Session[i].StartTime" class="form-control tech-input" type="datetime-local" />
+                                <span asp-validation-for="Session[i].StartTime" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="tech-label">啟售時間</label>
+                                <input asp-for="Session[i].SaleStartTime" class="form-control tech-input" type="datetime-local" />
+                                <span asp-validation-for="Session[i].SaleStartTime" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="tech-label">截止銷售時間</label>
+                                <input asp-for="Session[i].SaleEndTime" class="form-control tech-input" type="datetime-local" />
+                                <span asp-validation-for="Session[i].SaleEndTime" class="text-danger small"></span>
                             </div>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
-        </div>
-        
-        <div class="d-flex justify-content-between mt-4">
-            <a asp-action="CreateStep1" class="btn btn-secondary px-4">上一步</a>
-            <button type="submit" class="btn btn-primary px-5">下一步：票區設定</button>
-        </div>
-    </form>
-    <div asp-validation-summary="All" class="text-danger"></div>
+
+            @* --- 底部導覽 --- *@
+            <div class="d-flex justify-content-between mt-5 pt-3 border-top border-info border-opacity-10">
+                <a asp-action="CreateStep1" class="btn-cyber border-secondary text-secondary">
+                    <i class="bi bi-chevron-left me-2"></i>上一步
+                </a>
+                <button type="submit" class="btn-cyber btn-cyber-success" style="border-color: var(--tech-cyan); color: var(--tech-cyan);">
+                    下一步：票區設定 <i class="bi bi-chevron-right ms-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
@@ -58,32 +71,34 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
-
     <script>
-        let sessionIndex = @Model.Session.Count; // 從現有的筆數開始算
+        let sessionIndex = @Model.Session.Count;
 
         document.getElementById('btnAddSession').addEventListener('click', function () {
             const container = document.getElementById('sessionContainer');
 
-            // 建立新的場次 HTML 字串
+            // 🚩 修改：JS 模板內的所有標籤都套用 tech- 類別，確保不變白底
             const html = `
-                <div class="session-item border p-3 mb-3 position-relative shadow-sm bg-light">
-                    <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-session"></button>
-                    <h6>場次 #<span class="row-number">${sessionIndex + 1}</span></h6>
-                    <div class="row g-3">
-                               <div class="col-md-4">
-                                <label class="form-label">活動開始時間</label>
-                                <input name="Session[${sessionIndex}].StartTime" class="form-control" type="datetime-local" required />
-                                @* JS 動態產生的部分，雖然 asp-validation-for 不能直接用，但可以手動留一個 span *@
-                                <span class="field-validation-valid text-danger" data-valmsg-for="Session[${sessionIndex}].StartTime" data-valmsg-replace="true"></span>
-                            </div>
-        <div class="col-md-4">
-                <label class="form-label">啟售時間</label>
-                <input name="Session[${sessionIndex}].SaleStartTime" class="form-control" type="datetime-local" required />
-                <span class="field-validation-valid text-danger" data-valmsg-for="Session[${sessionIndex}].SaleStartTime" data-valmsg-replace="true"></span> </div>
+                <div class="session-item-tech">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-info fw-bold mb-0"># 序號.<span class="row-number">${sessionIndex + 1}</span></h6>
+                        <i class="bi bi-trash3-fill remove-session-btn remove-session"></i>
+                    </div>
+                    <div class="row g-4">
                         <div class="col-md-4">
-                            <label class="form-label">截止銷售時間</label>
-                            <input name="Session[${sessionIndex}].SaleEndTime" class="form-control" type="datetime-local" required />
+                            <label class="tech-label">> 活動演出時間</label>
+                            <input name="Session[${sessionIndex}].StartTime" class="form-control tech-input" type="datetime-local" required />
+                            <span class="field-validation-valid text-danger small" data-valmsg-for="Session[${sessionIndex}].StartTime" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="tech-label">> 啟售時間</label>
+                            <input name="Session[${sessionIndex}].SaleStartTime" class="form-control tech-input" type="datetime-local" required />
+                            <span class="field-validation-valid text-danger small" data-valmsg-for="Session[${sessionIndex}].SaleStartTime" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="tech-label">> 截止銷售時間</label>
+                            <input name="Session[${sessionIndex}].SaleEndTime" class="form-control tech-input" type="datetime-local" required />
+                            <span class="field-validation-valid text-danger small" data-valmsg-for="Session[${sessionIndex}].SaleEndTime" data-valmsg-replace="true"></span>
                         </div>
                     </div>
                 </div>
@@ -91,30 +106,36 @@
 
             container.insertAdjacentHTML('beforeend', html);
             sessionIndex++;
-                    const form = document.getElementById('sessionForm');
-        $(form).removeData("validator").removeData("unobtrusiveValidation");
-        $.validator.unobtrusive.parse(form);
+
+            // 重新解析驗證
+            const form = document.getElementById('sessionForm');
+            $(form).removeData("validator").removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse(form);
         });
 
         // 處理刪除功能
         document.addEventListener('click', function (e) {
             if (e.target.classList.contains('remove-session')) {
-                e.target.closest('.session-item').remove();
+                e.target.closest('.session-item-tech').remove();
                 reIndexSessions();
             }
         });
 
-        // 重新排序索引 (防止中間刪掉一筆導致斷號)
         function reIndexSessions() {
-            const items = document.querySelectorAll('.session-item');
+            const items = document.querySelectorAll('.session-item-tech');
             sessionIndex = 0;
             items.forEach((item, index) => {
                 item.querySelector('.row-number').innerText = index + 1;
                 item.querySelectorAll('input').forEach(input => {
                     const name = input.getAttribute('name');
                     if (name) {
-                        // 取代中間的數字，例如 Sessions[2].StartTime -> Sessions[0].StartTime
                         input.setAttribute('name', name.replace(/\[\d+\]/, `[${index}]`));
+                        // 同時更新 validation span 的 data-valmsg-for
+                        const span = input.closest('div').querySelector('.field-validation-valid, .field-validation-error');
+                        if (span) {
+                            const valMsg = span.getAttribute('data-valmsg-for');
+                            if (valMsg) span.setAttribute('data-valmsg-for', valMsg.replace(/\[\d+\]/, `[${index}]`));
+                        }
                     }
                 });
                 sessionIndex++;
@@ -122,10 +143,3 @@
         }
     </script>
 }
-
-
-
-
-
-
-

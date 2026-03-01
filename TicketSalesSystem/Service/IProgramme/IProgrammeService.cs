@@ -23,6 +23,6 @@ namespace TicketSalesSystem.Service.IProgramme
         // 場次票區更新
         Task SyncProgrammeDetailsAsync(Programme programme, VMProgrammeEdit vm);
         //圖片更新
-        Task SyncImagesAsync(Programme programme, List<DescriptionImageDTO> image);
+        Task SyncImagesAsync(Programme programme, VMProgrammeEdit vm);
     }
 }

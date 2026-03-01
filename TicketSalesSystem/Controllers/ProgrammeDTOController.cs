@@ -460,14 +460,16 @@ namespace TicketSalesSystem.Controllers
             foreach (var file in vm.DescriptionImageFiles)
             {
                 //先產生ID
-                string newID = Guid.NewGuid().ToString();
+                string extension = Path.GetExtension(file.FileName); // 拿 .jpg
+                string newID = Guid.NewGuid().ToString(); // 拿 GUID 前八碼
+                string newFileName = newID + extension; // 變成 8a2b3c4d.jpg
 
                 //呼叫多載A
                 var savedPath = await _fileService.SaveFileAsync(file, newID, "DescriptionImage");
                 dto.DescriptionImage.Add(new DescriptionImageDTO
                 {
                     DescriptionImageID = newID,
-                    DescriptionImageName = file.FileName,
+                    DescriptionImageName = newFileName,
                     TempUrl = savedPath
                 });
             }
@@ -491,6 +493,22 @@ namespace TicketSalesSystem.Controllers
                 dto.TicketsArea ??= new List<TicketsAreaDTO>();
                 dto.DescriptionImage ??= new List<DescriptionImageDTO>();
 
+                if (dto.Session != null)
+                {
+                    foreach (var session in dto.Session)
+                    {
+                        if (session.TicketsArea != null)
+                        {
+                            foreach (var area in session.TicketsArea)
+                            {
+                                // 根據 VenueID 找出名稱
+                                area.VenueName = _context.Venue.Find(area.VenueID)?.VenueName ?? "未知區域";
+                                area.AreaColor = _context.Venue.Find(area.VenueID)?.AreaColor ?? "#CCCCCC"; // 預設灰色
+                            }
+                        }
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(dto.PlaceID))
                     ViewData["PlaceName"] = _context.Place.Find(dto.PlaceID)?.PlaceName;
 
@@ -508,22 +526,22 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateConfirm(IFormCollection col)
         {
-            
             var employeeID = _userAccessorService.GetEmployeeId();
+            var dto = GetCurrentDTO(); // 取得 Session 中的暫存資料
 
-
-            var dto = GetCurrentDTO();
-            
             if (dto == null || string.IsNullOrEmpty(dto.ProgrammeName))
             {
                 return RedirectToAction("CreateStep1");
             }
 
-            using (var transction = await _context.Database.BeginTransactionAsync())
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
+                    // --- 1. 建立活動本體 (Programme) ---
                     string pid = await _iIDService.GetNextProgrammeID();
+                    if (string.IsNullOrEmpty(pid)) throw new Exception("無法生成活動 ID (pid)。");
+
                     var programme = new Programme
                     {
                         ProgrammeID = pid,
@@ -543,81 +561,104 @@ namespace TicketSalesSystem.Controllers
                         EmployeeID = employeeID,
                         PlaceID = dto.PlaceID
                     };
+
                     _context.Programme.Add(programme);
+                    // 🚩 必須先存檔，後續的 SessionID 生成函數才能在 DB 裡找到這個 pid
                     await _context.SaveChangesAsync();
 
-                    foreach (var sDto in dto.Session)
+                    // --- 2. 處理場次 (Session) 與票區 (TicketsArea) ---
+                    if (dto.Session != null)
                     {
-                        string sid = await _iIDService.GetNextSessionID(pid);
-                        var session = new Session
+                        foreach (var sDto in dto.Session)
                         {
-                            SessionID = sid,
-                            ProgrammeID = pid,
-                            StartTime = sDto.StartTime,
-                            SaleStartTime = sDto.SaleStartTime,
-                            SaleEndTime = sDto.SaleEndTime
-                        };
-                        _context.Session.Add(session);
-                        await _context.SaveChangesAsync();
+                            // 生成場次 ID
+                            string sid = await _iIDService.GetNextSessionID(pid);
+                            if (string.IsNullOrWhiteSpace(sid)) throw new Exception($"場次 ID 生成失敗 (pid: {pid})");
 
-
-                        foreach (var aDto in dto.TicketsArea)
-                        {
-                            string taid = await _iIDService.GetNextTicketsAreaID(sid);
-                            var ticketsArea = new TicketsArea
+                            // 🚩 修正點：將資料確實填入 Session 物件
+                            var session = new Session
                             {
-                                TicketsAreaID = taid,
-                                SessionID = sid,
-                                VenueID = aDto.VenueID,
-                                TicketsAreaName = aDto.TicketsAreaName,
-                                RowCount = aDto.RowCount,
-                                SeatCount = aDto.SeatCount,
-                                Price = aDto.Price,
-                                Capacity = aDto.Capacity,
-                                Remaining = aDto.Remaining,
-                                TicketsAreaStatusID = aDto.TicketsAreaStatusID ?? "A"
+                                SessionID = sid.Trim(), // 確保去掉 char(10) 的空白
+                                ProgrammeID = pid,
+                                StartTime = sDto.StartTime,
+                                SaleStartTime = sDto.SaleStartTime,
+                                SaleEndTime = sDto.SaleEndTime
                             };
-                            _context.TicketsArea.Add(ticketsArea);
+
+                            _context.Session.Add(session);
+                            // 🚩 必須先存場次，後續的 TicketsArea 才能建立關聯
                             await _context.SaveChangesAsync();
+
+                            // 處理該場次下的票區
+                            if (sDto.TicketsArea != null)
+                            {
+                                foreach (var aDto in sDto.TicketsArea)
+                                {
+                                    string taid = await _iIDService.GetNextTicketsAreaID(sid);
+                                    var ticketsArea = new TicketsArea
+                                    {
+                                        TicketsAreaID = taid,
+                                        SessionID = sid,
+                                        VenueID = aDto.VenueID,
+                                        TicketsAreaName = aDto.TicketsAreaName,
+                                        RowCount = aDto.RowCount,
+                                        SeatCount = aDto.SeatCount,
+                                        Price = aDto.Price,
+                                        // 計算總容量與初始餘額
+                                        Capacity = aDto.RowCount * aDto.SeatCount,
+                                        Remaining = aDto.RowCount * aDto.SeatCount,
+                                        TicketsAreaStatusID = "A" // 預設為可用
+                                    };
+                                    _context.TicketsArea.Add(ticketsArea);
+                                    // 存入該場次的所有票區
+                                    await _context.SaveChangesAsync();
+                                }
+                                
+                            }
                         }
                     }
 
+                    // --- 3. 處理活動描述圖片 (DescriptionImage) ---
                     if (dto.DescriptionImage != null)
                     {
                         foreach (var diDto in dto.DescriptionImage)
                         {
-
                             var descriptionImage = new DescriptionImage
                             {
-                                DescriptionImageID = diDto.DescriptionImageID,
+                                // 如果 ID 是自動生成的，這裡可以不填
+                                DescriptionImageID = diDto.DescriptionImageID ?? Guid.NewGuid().ToString().Substring(0, 10),
                                 ProgrammeID = pid,
                                 DescriptionImageName = diDto.DescriptionImageName,
                                 ImagePath = diDto.TempUrl
                             };
                             _context.DescriptionImage.Add(descriptionImage);
+                            
                         }
                     }
 
+                    // 最終統一存檔並提交事務
                     await _context.SaveChangesAsync();
-                    await transction.CommitAsync();
+                    await transaction.CommitAsync();
 
-                    // 修正：清除正確的 Session Key
+                    // 清除 Session 並導向成功頁面
                     HttpContext.Session.Remove("programme");
-
-                    return RedirectToAction("AdminIndex", "Programmes", new { msg = "活動建立成功！" });
+                    return RedirectToAction("AdminIndex", "Programmes", new { msg = "活動部署完成，系統已啟動！" });
 
                 }
                 catch (Exception ex)
                 {
-                    await transction.RollbackAsync();
+                    await transaction.RollbackAsync();
                     var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "無底層訊息";
 
-                    return Content($"存檔失敗！<br/>" +
-                                   $"主錯誤：{ex.Message}<br/>" +
-                                   $"底層原因：{innerMessage}"); // 這裡會直接寫「String or binary data would be truncated」或是「FK conflict」
+                    // 🚩 戰情室錯誤回報介面
+                    return Content($"<div style='background:#000; color:#ff4d4d; padding:20px; font-family:monospace; border:2px solid #ff4d4d;'>" +
+                                   $"<h3>[SYSTEM_DEPLOY_FAILED]</h3>" +
+                                   $"<p>ERROR_MSG: {ex.Message}</p>" +
+                                   $"<p>INNER_CAUSE: {innerMessage}</p>" +
+                                   $"<p>STACK_TRACE: {ex.StackTrace}</p>" +
+                                   $"</div>", "text/html");
                 }
             }
-
         }
 
 
@@ -632,7 +673,8 @@ namespace TicketSalesSystem.Controllers
                     VenueID = v.VenueID,   // 🚩 明確名稱
                     VenueName = v.VenueName,
                     RowCount = v.RowCount,
-                    SeatCount = v.SeatCount
+                    SeatCount = v.SeatCount,
+                    AreaColor = v.AreaColor ?? "#00f2ff"
                 })
                 .ToListAsync();
             return Json(venues);
@@ -658,13 +700,31 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, VMProgrammeEdit vm)
         {
+            // 🚩 修正：清除既有圖片的必填驗證，因為編輯時不會有 ImageFile
+            // 清除 DescriptionImage[0].ImageFile, DescriptionImage[1].TempUrl 等路徑
+            var imageValidationKeys = ModelState.Keys
+                .Where(k => k.Contains("DescriptionImage") && (k.EndsWith("ImageFile") || k.EndsWith("TempUrl")));
+
+            foreach (var key in imageValidationKeys)
+            {
+                ModelState.Remove(key);
+            }
+
+            // 🚩 同時清除「追加上傳」的新檔案驗證 (如果它是選填)
+            ModelState.Remove("NewDescriptionFiles");
+
+            if (id != vm.ProgrammeID) return NotFound();
             if (id != vm.ProgrammeID) return NotFound();
 
             // 🚩 1. 效能優化：一次抓出該場地 (PlaceID) 下所有的實體區域設定
             // 這包含了我們在 CreateStep3 用的 RowCount 與 SeatCount 物理上限
             var allPhysicalVenues = await _context.Venue
-                .Where(v => v.PlaceID == vm.PlaceID)
-                .ToDictionaryAsync(v => v.VenueID);
+                 .Where(v => v.PlaceID == vm.PlaceID)
+                 .ToDictionaryAsync(
+                     v => v.VenueID,
+                     v => v,
+                     StringComparer.OrdinalIgnoreCase
+                 );
 
             // 🚩 2. 業務邏輯驗證迴圈
             if (vm.Session != null)
@@ -681,7 +741,8 @@ namespace TicketSalesSystem.Controllers
                     foreach (var area in session.TicketsArea)
                     {
                         // B. 驗證區域歸屬：確保選的 VenueID 真的屬於這個 Place
-                        if (!allPhysicalVenues.TryGetValue(area.VenueID, out var physical))
+                        var venueId = area.VenueID?.Trim();
+                        if (string.IsNullOrEmpty(venueId) || !allPhysicalVenues.TryGetValue(venueId, out var physical))
                         {
                             ModelState.AddModelError("", $"票區【{area.TicketsAreaName}】所選區域不屬於目前場地。");
                             continue;
@@ -699,7 +760,7 @@ namespace TicketSalesSystem.Controllers
                             ModelState.AddModelError("",
                                 $"區域【{physical.VenueName}】物理上限為 {physical.RowCount}排 x {physical.SeatCount}座，您的設定已超出限制。");
                         }
-
+                        
                         // E. 核心業務驗證：呼叫你的 ValidationService 檢查已售票券
                         // 確保縮減後的容量不會「壓碎」已經賣出去的票
                         var (isCapacityValid, capacityMsg) = await _programmeValidationService.ValidateAreaCapacityAsync(
@@ -742,7 +803,7 @@ namespace TicketSalesSystem.Controllers
                     await _programmeService.UpdateProgrammeAsync(programmeDb, vm);
 
                     // 2. 同步說明圖片 (處理刪除舊圖與新增新圖)
-                    await _programmeService.SyncImagesAsync(programmeDb, vm.DescriptionImage);
+                    await _programmeService.SyncImagesAsync(programmeDb, vm);
 
                     // 3. 同步場次與票區 (處理刪除、更新、與新增 ID 生成)
                     await _programmeService.SyncProgrammeDetailsAsync(programmeDb, vm);

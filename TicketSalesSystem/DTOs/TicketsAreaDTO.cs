@@ -12,6 +12,8 @@
 
         public string TicketsAreaStatusID { get; set; } = "A";
         public string VenueID { get; set; } = null!;
+        public string? VenueName { get; set; }
+        public string? AreaColor { get; set; } 
         public string SessionID { get; set; } = null!;
     }
 }

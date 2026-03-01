@@ -2,77 +2,110 @@
 @model VMProgrammeStep1
 
 @{
-    ViewData["Title"] = "建立活動 - 第一步";
-    
+    ViewData["Title"] = "建立活動：基本配置";
 }
+<link rel="stylesheet" href="~/css/Admin/Programme/Create/step1.css" asp-append-version="true" />
 
-<div class="container mt-4">
-    @await Component.InvokeAsync("VCSteps", new { currentStep = 1 })
+<div class="admin-body p-4">
+    @* 步驟指示器 (建議 VCSteps 也套用藍色系樣式) *@
+    <div class="mb-5">
+        @await Component.InvokeAsync("VCSteps", new { currentStep = 1 })
+    </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white border-bottom py-3">
-            <h4 class="card-title mb-0 text-primary"><i class="bi bi-info-circle me-2"></i>基本資料設定</h4>
+    <div class="cyber-card p-4">
+        @* --- 表頭 --- *@
+        <div class="border-bottom border-info border-opacity-25 mb-4 pb-2">
+            <h4 class="neon-text-sharp mb-0">
+                <i class="bi bi-info-circle me-2"></i>步驟一: 基本資料設定
+            </h4>
         </div>
-        <div class="card-body p-4">
-            <form asp-action="CreateStep1" method="post">
-                @Html.AntiForgeryToken()
 
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="CreateStep1" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <div class="row g-3">
-                    <div class="col-md-12">
-                        <label asp-for="ProgrammeName" class="form-label fw-bold">活動名稱</label>
-                        <input asp-for="ProgrammeName" class="form-control form-control-lg" placeholder="請輸入活動完整名稱" />
-                        <span asp-validation-for="ProgrammeName" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-">
-                        <label asp-for="PlaceID" class="form-label fw-bold">活動場地</label>
-                        <select asp-for="PlaceID" class="form-select" asp-items="ViewBag.PlaceID">
-                            <option value="">-- 請選擇場地 --</option>                           
-                        </select>
-                        <span asp-validation-for="PlaceID" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label asp-for="LimitPerOrder" class="form-label fw-bold">單筆購票上限</label>
-                        <div class="input-group">
-                            <input asp-for="LimitPerOrder" class="form-control" type="number" min="1" />
-                            <span class="input-group-text">張</span>
-                        </div>
-                        <span asp-validation-for="LimitPerOrder" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label asp-for="OnShelfTime" class="form-label fw-bold">官網預計上架時間</label>
-                        <input asp-for="OnShelfTime" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="OnShelfTime" class="text-danger small"></span>
-                    </div>
-                    <div class="col-md-4">
-                        <label asp-for="ProgrammeStatusID" class="form-label fw-bold">活動狀態</label>
-                        <select asp-for="ProgrammeStatusID" class="form-select" asp-items="ViewBag.ProgrammeStatusID">
-                            <option value="">-- 請選擇狀態 --</option>
-                        </select>
-                        <span asp-validation-for="ProgrammeStatusID" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-12">
-                        <label asp-for="ProgrammeDescription" class="form-label fw-bold">活動詳細描述</label>
-                        <textarea asp-for="ProgrammeDescription" class="form-control" rows="5" placeholder="請填寫活動介紹、注意事項等..."></textarea>
-                        <span asp-validation-for="ProgrammeDescription" class="text-danger small"></span>
-                    </div>
+            <div class="row g-4">
+                @* 活動名稱 *@
+                <div class="col-md-12">
+                    <label asp-for="ProgrammeName" class="tech-label">活動名稱</label>
+                    <input asp-for="ProgrammeName" class="form-control tech-input" placeholder="請輸入活動名稱..." />
+                    <span asp-validation-for="ProgrammeName" class="text-danger small"></span>
                 </div>
 
-
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
-                        下一步：設定場次 <i class="bi bi-arrow-right ms-1"></i>
-                    </button>
+                @* 活動場地 *@
+                <div class="col-md-6">
+                    <label asp-for="PlaceID" class="tech-label">活動場地</label>
+                    <select asp-for="PlaceID" class="form-select tech-input" asp-items="ViewBag.PlaceID">
+                        <option value="">-- 請選擇場地 --</option>
+                    </select>
+                    <span asp-validation-for="PlaceID" class="text-danger small"></span>
                 </div>
-            </form>
-        </div>
+
+                @* 單筆購票上限 *@
+                <div class="col-md-6">
+                    <label asp-for="LimitPerOrder" class="tech-label">單筆購票上限</label>
+                    <div class="input-group">
+                        <input asp-for="LimitPerOrder" class="form-control tech-input" type="number" min="1" />
+                        <span class="input-group-text bg-transparent text-info border-info border-opacity-25">張</span>
+                    </div>
+                    <span asp-validation-for="LimitPerOrder" class="text-danger small"></span>
+                </div>
+
+                @* 上架時間 *@
+                <div class="col-md-6">
+                    <label asp-for="OnShelfTime" class="tech-label">官網預計上架時間</label>
+                    <input asp-for="OnShelfTime" class="form-control tech-input" type="datetime-local" />
+                    <span asp-validation-for="OnShelfTime" class="text-danger small"></span>
+                </div>
+
+                @* 活動狀態 *@
+                <div class="col-md-6">
+                    <label asp-for="ProgrammeStatusID" class="tech-label">活動狀態</label>
+                    <select asp-for="ProgrammeStatusID" class="form-select tech-input" asp-items="ViewBag.ProgrammeStatusID">
+                        <option value="">-- 請選擇狀態 --</option>
+                    </select>
+                    <span asp-validation-for="ProgrammeStatusID" class="text-danger small"></span>
+                </div>
+
+                @* 詳細描述 *@
+                <div class="col-md-12">
+                    <label asp-for="ProgrammeDescription" class="tech-label">活動詳細描</label>
+                    <textarea asp-for="ProgrammeDescription" class="form-control tech-input" rows="5" placeholder="詳細介紹..."></textarea>
+                    <span asp-validation-for="ProgrammeDescription" class="text-danger small"></span>
+                </div>
+                 <div class="col-md-12">
+                    <label asp-for="Notice" class="tech-label">注意事項</label>
+                    <textarea asp-for="Notice" class="form-control tech-input" rows="5" placeholder="注意事項..."></textarea>
+                    <span asp-validation-for="Notice" class="text-danger small"></span>
+                </div>
+                <div class="col-md-12">
+                    <label asp-for="PurchaseReminder" class="tech-label">購票提醒</label>
+                    <textarea asp-for="PurchaseReminder" class="form-control tech-input" rows="5" placeholder="購票提醒..."></textarea>
+                    <span asp-validation-for="PurchaseReminder" class="text-danger small"></span>
+                </div>
+                <div class="col-md-12">
+                    <label asp-for="CollectionReminder" class="tech-label">取票提醒</label>
+                    <textarea asp-for="CollectionReminder" class="form-control tech-input" rows="5" placeholder="取票提醒..."></textarea>
+                    <span asp-validation-for="CollectionReminder" class="text-danger small"></span>
+                </div>
+                <div class="col-md-12">
+                    <label asp-for="RefundPolicy" class="tech-label">退票說明</label>
+                    <textarea asp-for="RefundPolicy" class="form-control tech-input" rows="5" placeholder="取票提醒..."></textarea>
+                    <span asp-validation-for="RefundPolicy" class="text-danger small"></span>
+                </div>
+            </div>
+
+            @* --- 底部導覽 --- *@
+            <div class="d-flex justify-content-end mt-5">
+                <button type="submit" class="btn-cyber-next">
+                    下一步：設定場次 <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
+
 
 @section Scripts {
     @{
