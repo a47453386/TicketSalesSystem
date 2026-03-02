@@ -3,59 +3,87 @@
 @{
     ViewData["Title"] = "新增公告";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/PublicNotice/PublicCreate.css" asp-append-version="true" />
+@* 🚩 確保外層套用 admin-body 基底與作用域 *@
+<div class="order-management-scope admin-body p-4">
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-plus-circle me-2"></i>新增公告</h2>
-        <a asp-action="Index" class="btn btn-outline-secondary">返回列表</a>
+    @* --- [1. 頂部標頭：霓虹發光感] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <div>
+           @*  <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb m-0 p-0 bg-transparent">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">NOTICE_LIST</a></li>
+                    <li class="breadcrumb-item active text-white">CREATE_NEW</li>
+                </ol>
+            </nav> *@
+            <h1 class="neon-header m-0">
+                <i class="bi bi-plus-circle me-3"></i>@ViewData["Title"]
+            </h1>
+        </div>
+        <a asp-action="Index" class="btn-cyber btn-cyber-warning">
+            <i class="bi bi-arrow-left me-2"></i>回清單
+        </a>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input asp-for="PublicNoticeID" type="hidden" value="@Guid.NewGuid().ToString()" />
-                
-                @* <input asp-for="FAQID" type="hidden" value="@Guid.NewGuid().ToString()" /> *@
-                <div class="row">
-                    <div class="col-md-12 mb-3">
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label asp-for="PublicNoticeTitle" class="form-label fw-bold">公告標題</label>
-                        <input asp-for="PublicNoticeTitle" class="form-control" placeholder="例如：系統維護公告" />
-                        <span asp-validation-for="PublicNoticeTitle" class="text-danger"></span>
-                    </div>
+    @* --- [2. 主編輯卡片：Cyber-Card] --- *@
+    <div class="cyber-card p-5">
+        <form asp-action="Create">
+            @* 隱藏欄位與驗證摘要 *@
+            <div asp-validation-summary="ModelOnly" class="text-danger small font-monospace mb-4"></div>
+            <input asp-for="PublicNoticeID" type="hidden" value="@Guid.NewGuid().ToString()" />
 
-                    <div class="col-md-12 mb-3">
-                        <label asp-for="PublicNoticeDescription" class="form-label fw-bold">公告內容</label>
-                        <textarea asp-for="PublicNoticeDescription" class="form-control" rows="5" placeholder="請輸入詳細公告內容..."></textarea>
-                        <span asp-validation-for="PublicNoticeDescription" class="text-danger"></span>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <label asp-for="PublishTime" class="control-label"></label>
-                            <input asp-for="PublishTime" class="form-control" />
-                            <span asp-validation-for="PublishTime" class="text-danger"></span>
-                        </div>
-                        <div class="col">
-                            <label asp-for="RemovalTime" class="control-label"></label>
-                            <input asp-for="RemovalTime" class="form-control" />
-                            <span asp-validation-for="RemovalTime" class="text-danger"></span>
-                        </div>
-                    </div>
-
-
-
-                    <div class="mt-4 border-top pt-3">
-                        <button type="submit" class="btn btn-success px-5">新增</button>
+            <div class="row g-4">
+                @* --- A. 核心標題區 --- *@
+                <div class="col-12">
+                    <div class="tech-key">公告標題</div>
+                    <div class="mt-2">
+                        <input asp-for="PublicNoticeTitle" class="form-control order-input"
+                               placeholder="請輸入標題..." />
+                        <span asp-validation-for="PublicNoticeTitle" class="text-danger small"></span>
                     </div>
                 </div>
-            </form>
-        </div>
+
+                @* --- B. 詳細內容區 --- *@
+                <div class="col-12">
+                    <div class="tech-key">公告內容</div>
+                    <div class="mt-2">
+                        <textarea asp-for="PublicNoticeDescription" class="form-control order-input custom-scroll"
+                                  rows="6" placeholder="請輸入公告內容..."></textarea>
+                        <span asp-validation-for="PublicNoticeDescription" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* --- C. 排程設定區 --- *@
+                <div class="col-md-6">
+                    <div class="tech-key">預計上架日</div>
+                    <div class="mt-2">
+                        <input asp-for="PublishTime" class="form-control order-input" type="datetime-local" />
+                        <span asp-validation-for="PublishTime" class="text-danger small"></span>
+                        <div class="small text-info opacity-50 mt-1 font-monospace">時間到即自動上架</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="tech-key">預計下架日</div>
+                    <div class="mt-2">
+                        <input asp-for="RemovalTime" class="form-control order-input" type="datetime-local" />
+                        <span asp-validation-for="RemovalTime" class="text-danger small"></span>
+                        <div class="small text-danger opacity-50 mt-1 font-monospace">時間到即自動下架</div>
+                    </div>
+                </div>
+
+                @* --- D. 底部提交區 --- *@
+                <div class="col-12 mt-5 pt-4 border-top border-info border-opacity-10 text-center">
+                    <button type="submit" class="btn-cyber px-5 py-2 fs-5">
+                        <i class="bi bi-cloud-upload-fill me-2"></i>新增並儲存
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
-<div asp-validation-summary="All" class="text-danger"></div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

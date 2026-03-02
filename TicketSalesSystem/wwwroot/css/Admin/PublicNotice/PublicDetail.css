@@ -1,0 +1,53 @@
+﻿/* 🚩 專屬詳情頁樣式補強 */
+
+/* 終端視窗感內容區 */
+.terminal-window {
+    background: rgba(0, 5, 10, 0.8);
+    border: 1px solid rgba(0, 242, 255, 0.1);
+    min-height: 400px;
+    white-space: pre-wrap;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: '微軟正黑體', monospace;
+    position: relative;
+}
+
+    .terminal-window::before {
+        content: "READ_ONLY_STREAM";
+        position: absolute;
+        top: 5px;
+        right: 15px;
+        font-size: 0.6rem;
+        color: var(--tech-cyan);
+        opacity: 0.3;
+        letter-spacing: 2px;
+    }
+
+.text-cyan {
+    color: var(--tech-cyan);
+}
+
+/* 狀態切換 Switch 顏色修正 */
+.form-check-input:checked {
+    background-color: var(--tech-cyan);
+    border-color: var(--tech-cyan);
+    box-shadow: 0 0 10px var(--tech-cyan);
+}
+
+.info-block {
+    border-left: 2px solid rgba(0, 242, 255, 0.2);
+    padding-left: 15px;
+}
+
+.status-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    background-color: #00ffc8;
+    color: #000;
+    border-radius: 50%;
+    margin-right: 8px;
+    font-size: 0.6rem;
+}

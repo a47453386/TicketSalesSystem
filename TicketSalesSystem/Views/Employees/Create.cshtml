@@ -57,7 +57,7 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label asp-for="Name" class="text-info small mb-2 d-block">姓名</label>
-                            <input asp-for="Name" class="form-control order-input" placeholder="INPUT_NAME..." />
+                            <input asp-for="Name" class="form-control order-input" placeholder="請輸入姓名..." />
                             <span asp-validation-for="Name" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6">
@@ -106,7 +106,7 @@
 
                     <div class="mb-4">
                         <label asp-for="Address" class="text-info small mb-2 d-block">通訊地址</label>
-                        <textarea asp-for="Address" class="form-control order-input" rows="2" placeholder="LOCATION_DETAILS..."></textarea>
+                        <textarea asp-for="Address" class="form-control order-input" rows="2" placeholder="請輸入地址..."></textarea>
                     </div>
                 </div>
 
@@ -118,10 +118,10 @@
 
                         @* --- 職位分配模組 --- *@
                         <div class="mb-4">
-                            <label class="text-info small mb-2 d-block">ASSIGN_ROLE / 職位分配</label>
+                            <label class="text-info small mb-2 d-block">職位</label>
                             <div class="input-group">
                                 <select asp-for="RoleID" class="form-select order-input" asp-items="ViewBag.RoleID">
-                                    <option value="">-- SELECT_ROLE --</option>
+                                    <option value="">-- 請選擇 --</option>
                                 </select>
                                 @* 快速操作按鈕群 *@
                                 <button type="button" class="btn-cyber py-0 px-2" onclick="openQuickModal('Role', 'CREATE')"><i class="bi bi-plus-lg"></i></button>
@@ -134,7 +134,7 @@
                             <label class="text-info small mb-2 d-block">帳號狀態</label>
                             <div class="input-group">
                                 <select asp-for="AccountStatusID" class="form-select order-input" asp-items="ViewBag.AccountStatusID">
-                                    <option value="">-- SELECT_STATUS --</option>
+                                    <option value="">-- 請選擇 --</option>
                                 </select>
                                 <button type="button" class="btn-cyber py-0 px-2" onclick="openQuickModal('Status', 'CREATE')"><i class="bi bi-plus-lg"></i></button>
                                 <button type="button" class="btn-cyber btn-cyber-warning py-0 px-2" onclick="openQuickModal('Status', 'EDIT')"><i class="bi bi-pencil"></i></button>
@@ -145,13 +145,13 @@
 
                         <div class="mb-4">
                             <label asp-for="Account" class="text-warning small mb-2 d-block">登入帳號</label>
-                            <input asp-for="Account" class="form-control order-input" placeholder="CREATE_USERNAME" />
+                            <input asp-for="Account" class="form-control order-input" placeholder="請輸入帳號" />
                             <span asp-validation-for="Account" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-4">
                             <label asp-for="Password" class="text-warning small mb-2 d-block">初始密碼</label>
-                            <input asp-for="Password" class="form-control order-input" type="password" placeholder="MIN_8_CHARACTERS" />
+                            <input asp-for="Password" class="form-control order-input" type="password" placeholder="請輸入密碼 (最少 8 個字元)" />
                             <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
 

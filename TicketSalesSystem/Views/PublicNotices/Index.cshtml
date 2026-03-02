@@ -2,103 +2,124 @@
 @Html.AntiForgeryToken()
 
 @{
-    ViewData["Title"] = "公告後台管理";
+    ViewData["Title"] = "公告管理";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/PublicNotice/PublicNoticeIndex.css" asp-append-version="true" />
 
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center my-4">
-        <h1 class="h3 m-0">@ViewData["Title"]</h1>
-        <a asp-action="Create" class="btn btn-primary shadow-sm">
-            <i class="bi bi-plus-lg"></i> 新增公告
+@* 🚩 2. 主容器：鎖定暗色網格背景 *@
+<div class="order-management-scope admin-body p-4">
+
+    @* --- [頂部標頭：HUD 儀表板] --- *@
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <h1 class="neon-header m-0">
+            <i class="bi bi-broadcast me-3"></i>@ViewData["Title"]
+        </h1>
+        <a asp-action="Create" class="btn-cyber px-4">
+            <i class="bi bi-plus-lg me-2"></i>新增公告
         </a>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light text-muted">
-                        <tr>
-                            <th class="ps-4">公告標題</th>
-                            <th style="width: 25%;">摘要</th>
-                            <th>排程期間</th>
-                            <th>系統紀錄</th>
-                            <th class="text-center">狀態</th>
-                            <th class="text-center">負責人</th>
-                            <th class="text-end pe-4">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="ps-4">
-                                    <span class="fw-bold text-dark">@item.PublicNoticeTitle</span>
-                                </td>
-                                <td>
-                                    <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;">
-                                        @item.PublicNoticeDescription
-                                    </p>
-                                </td>
-                                <td>
-                                    <div class="small">
-                                        <div class="text-primary">
-                                            <i class="bi bi-calendar-check"></i> 上：@(item.PublishTime?.ToString("yyyy/MM/dd") ?? "未設定")
-                                        </div>
-                                        <div class="text-danger">
-                                            <i class="bi bi-calendar-x"></i> 下：@(item.RemovalTime?.ToString("yyyy/MM/dd") ?? "永久")
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="small text-muted">
-                                        <div>建：@item.CreatedTime.ToString("yyyy/MM/dd HH:mm")</div>
-                                        @if (item.UpdatedAt.HasValue)
-                                        {
-                                            <div class="fst-italic text-info">更：@item.UpdatedAt.Value.ToString("yyyy/MM/dd HH:mm")</div>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <div class="form-check form-switch d-inline-block">
-                                        <input class="form-check-input status-toggle" type="checkbox"
-                                               id="switch_@item.PublicNoticeID"
-                                               data-id="@item.PublicNoticeID"
-                                               @(item.PublicNoticeStatus ? "checked" : "")>
-                                        <label class="form-check-label small" for="switch_@item.PublicNoticeID" id="label_@item.PublicNoticeID">
-                                            @(item.PublicNoticeStatus ? "已發佈" : "待發佈")
-                                        </label>
-                                    </div>
-                                </td>
-                                <td class="text-center text-muted small">
-                                    @item.Employee?.EmployeeID
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="btn-group btn-group-sm">
-                                        <a asp-action="Edit" asp-route-id="@item.PublicNoticeID" class="btn btn-outline-secondary" title="編輯">
-                                            編輯
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@item.PublicNoticeID" class="btn btn-outline-secondary" title="詳情">
-                                            詳情
-                                        </a>
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger"
-                                                data-delete-id="@item.PublicNoticeID"
-                                                onclick="globalDelete('@item.PublicNoticeID', '@item.PublicNoticeTitle', 'PublicNotices')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
+    @* --- [主數據卡片：半透明磨砂感] --- *@
+    <div class="cyber-card">
+        <div class="table-responsive custom-scroll">
+            <table class="table table-hover align-middle mb-0 border-0">
+                <thead>
+                    <tr class="text-center border-bottom border-info border-opacity-25">
+                        <th class="pt-4 border-0" style="width: 22%;">
+                            <div class="tech-key">標題</div>
+                        </th>
 
-                                    @* 隱藏的刪除 Form *@
-                                    <form id="delete-form-@item.PublicNoticeID" asp-action="Delete" method="post" class="d-none">
-                                        <input type="hidden" name="id" value="@item.PublicNoticeID" />
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        <th class="pt-4 border-0" style="width: 22%;">
+                            <div class="tech-key">摘要</div>
+                        </th>
+
+                        <th class="pt-4 border-0" style="width: 14%;"> 
+                            <div class="tech-key">排程</div>
+                        </th>
+
+                        <th class="pt-4  border-0" style="width: 15%;">
+                            <div class="tech-key">狀態</div>
+                        </th>
+
+                        <th class="pt-4  border-0" >
+                            <div class="tech-key">負責人</div>
+                        </th>
+
+                        <th class="text-end pe-4 border-0" style="width: 10%;">
+                            <div class="tech-key">操作</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="border-bottom border-info border-opacity-10">
+                            @* 標題 *@
+                            <td class="ps-4">
+                                <div class="fw-bold text-info" style="font-size: 1.1rem; letter-spacing: 1px;">@item.PublicNoticeTitle</div>
+                            </td>
+
+                            @* 摘要 *@
+                            <td>
+                                <div class="synopsis-text">@item.PublicNoticeDescription</div>
+                            </td>
+
+                            @* 排程 *@
+                            <td>
+                                <div class="font-monospace small">
+                                    <div class="text-cyan mb-1">
+                                        <i class="bi bi-arrow-up-right-circle me-1"></i>上架: @(item.PublishTime?.ToString("yyyy-MM-dd") ?? "IMMEDIATE")
+                                    </div>
+                                    <div class="text-danger opacity-75">
+                                        <i class="bi bi-arrow-down-left-circle me-1"></i>下架: @(item.RemovalTime?.ToString("yyyy-MM-dd") ?? "PERSISTENT")
+                                    </div>
+                                </div>
+                            </td>
+
+                           
+
+                            @* 狀態標籤：套用右圓角戰術樣式 *@
+                            <td class="text-center">
+                                @if (item.PublicNoticeStatus)
+                                {
+                                    <div class="status-badge" style="cursor: pointer;" onclick="toggleNoticeStatus('@item.PublicNoticeID')">
+                                        <span class="status-badge-icon">✓</span> 已上架
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="status-badge" style="cursor: pointer; color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;" onclick="toggleNoticeStatus('@item.PublicNoticeID')">
+                                        <span class="status-badge-icon" style="background-color: #ff3333;">✕</span> 未上架
+                                    </div>
+                                }
+                            </td>
+
+                            @* 負責人 *@
+                            <td class="text-center font-monospace small text-info opacity-75">
+                                @(item.Employee?.EmployeeID ?? "Name")
+                            </td>
+
+                            @* 操作按鈕 *@
+                            <td class="text-end pe-4">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a asp-action="Edit" asp-route-id="@item.PublicNoticeID" class="btn-cyber-icon" title="編輯">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.PublicNoticeID" class="btn-cyber-icon" title="詳細資料">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn-cyber-icon border-danger text-danger"
+                                            onclick="globalDelete('@item.PublicNoticeID', '@item.PublicNoticeTitle', 'PublicNotices')">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+

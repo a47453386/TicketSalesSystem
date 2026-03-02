@@ -1,0 +1,46 @@
+﻿/* 確保表格在暗色背景下不產生 Bootstrap 預設的白邊 */
+.table {
+    --bs-table-bg: transparent !important;
+    --bs-table-color: #fff !important;
+    --bs-table-hover-bg: rgba(0, 242, 255, 0.08) !important;
+    border-color: rgba(0, 242, 255, 0.1) !important;
+}
+
+/* 迷你戰術圖示按鈕 */
+.btn-cyber-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    background: transparent;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+    transition: 0.3s;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+    .btn-cyber-icon:hover {
+        background: var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 15px var(--tech-cyan);
+    }
+
+.text-cyan {
+    color: var(--tech-cyan) !important;
+}
+
+/* 摘要文字截斷優化 */
+.synopsis-text {
+    opacity: 0.6;
+    font-size: 0.85rem;
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cyber-card th .status-badge {
+    font-size: 0.75rem !important;
+}

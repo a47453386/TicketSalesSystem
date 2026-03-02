@@ -143,10 +143,10 @@
                         @* 職位變更區 *@
                         @* --- 職位分配模組 --- *@
                         <div class="mb-4">
-                            <label class="text-info small mb-2 d-block">ASSIGN_ROLE / 職位分配</label>
+                            <label class="text-info small mb-2 d-block">職位</label>
                             <div class="input-group">
                                 <select asp-for="RoleID" class="form-select order-input" asp-items="ViewBag.RoleID">
-                                    <option value="">-- SELECT_ROLE --</option>
+                                    <option value="">-- 請選擇 --</option>
                                 </select>
                                 @* 快速操作按鈕群 *@
                                 <button type="button" class="btn-cyber py-0 px-2" onclick="openQuickModal('Role', 'CREATE')"><i class="bi bi-plus-lg"></i></button>
@@ -156,7 +156,7 @@
 
                         @* --- 帳號狀態模組 --- *@
                         <div class="mb-4">
-                            <label class="text-info small mb-2 d-block">ACCOUNT_STATUS / 帳號狀態</label>
+                            <label class="text-info small mb-2 d-block">帳號狀態</label>
                             <div class="input-group">
                                 <select asp-for="AccountStatusID" class="form-select order-input" asp-items="ViewBag.AccountStatusID">
                                     <option value="">-- SELECT_STATUS --</option>

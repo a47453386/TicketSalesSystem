@@ -1,124 +1,159 @@
 ﻿@model TicketSalesSystem.Models.PublicNotice
 @Html.AntiForgeryToken()
-@{
-    ViewData["Title"] = "公告詳細資訊";
-}
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0"><i class="bi bi-info-circle me-2"></i>@ViewData["Title"]</h1>
+@{
+    ViewData["Title"] = "公告詳細資訊 / NOTICE_DIAGNOSTICS";
+}
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/PublicNotice/PublicEdit.css" asp-append-version="true" />
+
+@* 🚩 確保外層套用 admin-body 基底 *@
+<div class="order-management-scope admin-body p-4">
+
+    @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
         <div>
-            <a asp-action="Edit" asp-route-id="@Model?.PublicNoticeID" class="btn btn-warning shadow-sm">
-                <i class="bi bi-pencil-square"></i> 編輯
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb m-0 p-0 bg-transparent">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">NOTICE_LIST</a></li>
+                    <li class="breadcrumb-item active text-white">FILE_DIAGNOSTICS</li>
+                </ol>
+            </nav>
+            <h1 class="neon-header m-0">
+                <i class="bi bi-info-circle me-3"></i>NOTICE_DETAILS
+            </h1>
+        </div>
+        <div class="d-flex gap-3">
+            <a asp-action="Edit" asp-route-id="@Model?.PublicNoticeID" class="btn-cyber">
+                <i class="bi bi-pencil-square me-2"></i>AUTHORIZE_EDIT
             </a>
-            <a asp-action="Index" class="btn btn-outline-secondary ms-2 shadow-sm">
-                <i class="bi bi-arrow-left"></i> 返回列表
+            <a asp-action="Index" class="btn-cyber btn-cyber-warning">
+                <i class="bi bi-arrow-left me-2"></i>ESC_BACK
             </a>
         </div>
     </div>
 
-    <div class="row">
-        @* 左側：公告核心內容 *@
+    <div class="row g-4">
+        @* --- [2. 左側：公告主體內容 (Core Data Stream)] --- *@
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0 text-primary">公告主體內容</h5>
-                </div>
-                <div class="card-body p-4">
-                    <h2 class="h4 fw-bold mb-3">@Model.PublicNoticeTitle</h2>
-                    <hr />
-                    <div class="p-3 bg-light rounded" style="min-height: 250px; white-space: pre-wrap; line-height: 1.6;">
-                        @Model.PublicNoticeDescription
-                    </div>
+            <div class="cyber-card p-4 h-100">
+                <div class="tech-key mb-4">CORE_CONTENT / 公告主體</div>
+
+                <h2 class="text-info fw-bold mb-4 font-monospace" style="letter-spacing: 2px;">
+                    @Model.PublicNoticeTitle
+                </h2>
+
+                <div class="terminal-window p-4 custom-scroll">
+                    @Model.PublicNoticeDescription
                 </div>
             </div>
         </div>
 
-        @* 右側：狀態、時間與負責人資訊 *@
+        @* --- [3. 右側：發佈管理與日誌 (Metadata Panel)] --- *@
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0 text-primary">發佈管理資訊</h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                        <span class="text-muted">目前狀態</span>
-                        <div class="form-check form-switch">
-                            @* 注意：這裡只有一筆，不需要 foreach，直接用 Model *@
-                            <input class="form-check-input status-toggle" type="checkbox"
-                                   id="statusSwitch"
-                                   data-id="@Model.PublicNoticeID"
-                                   @(Model.PublicNoticeStatus ? "checked" : "")>
+            @* 發佈管理卡片 *@
+            <div class="cyber-card p-4 mb-4">
+                <div class="tech-key mb-4">MANAGEMENT_INFO / 發佈資訊</div>
 
-                            <label class="form-check-label small ms-2" for="statusSwitch" id="label_@Model.PublicNoticeID">
-                                @(Model.PublicNoticeStatus ? "已發佈" : "待發佈")
-                            </label>
+                <div class="d-flex flex-column gap-4">
+                    @* 狀態切換區 *@
+                    <div class="info-block">
+                        <small class="text-info opacity-50 d-block font-monospace mb-2">CURRENT_SIGNAL</small>
+                        <div class="d-flex align-items-center justify-content-between bg-dark bg-opacity-50 p-3 border border-info border-opacity-10">
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input status-toggle" type="checkbox"
+                                       id="statusSwitch"
+                                       data-id="@Model.PublicNoticeID"
+                                       @(Model.PublicNoticeStatus ? "checked" : "")>
+                            </div>
+                            <div id="statusIndicator">
+                                @if (Model.PublicNoticeStatus)
+                                {
+                                    <div class="status-badge"><span class="status-badge-icon">✓</span> PUBLISHED</div>
+                                }
+                                else
+                                {
+                                    <div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;">
+                                        <span class="status-badge-icon" style="background-color: #ff3333;">✕</span> STANDBY
+                                    </div>
+                                }
+                            </div>
                         </div>
-                    </li>
-                    <li class="list-group-item py-3">
-                        <small class="text-muted d-block mb-1">負責員工</small>
-                        <div class="fw-bold"><i class="bi bi-person-badge me-2"></i>@Model.Employee?.EmployeeID</div>
-                    </li>
-                    <li class="list-group-item py-3">
-                        <small class="text-muted d-block mb-1">上架排程</small>
-                        <div class="text-dark"><i class="bi bi-calendar-event me-2"></i>@(Model.PublishTime?.ToString("yyyy-MM-dd HH:mm") ?? "立即上架")</div>
-                    </li>
-                    <li class="list-group-item py-3">
-                        <small class="text-muted d-block mb-1">自動下架</small>
-                        <div class="@(Model.RemovalTime < DateTime.Now ? "text-danger" : "text-dark")">
-                            <i class="bi bi-calendar-x me-2"></i>@(Model.RemovalTime?.ToString("yyyy-MM-dd HH:mm") ?? "手動控制")
+                    </div>
+
+                    @* 負責人與時間 *@
+                    <div class="info-block">
+                        <small class="text-info opacity-50 d-block font-monospace mb-1">OPERATOR_ID</small>
+                        <div class="fs-5 text-white fw-bold"># @(Model.Employee?.EmployeeID ?? "SYSTEM_AUTO")</div>
+                    </div>
+
+                    <div class="info-block">
+                        <small class="text-info opacity-50 d-block font-monospace mb-1">UP_LINK_SCHEDULE</small>
+                        <div class="text-cyan font-monospace">
+                            <i class="bi bi-calendar-event me-2"></i>@(Model.PublishTime?.ToString("yyyy-MM-dd HH:mm") ?? "IMMEDIATE")
                         </div>
-                    </li>
-                </ul>
+                    </div>
+
+                    <div class="info-block">
+                        <small class="text-info opacity-50 d-block font-monospace mb-1">DOWN_LINK_EXPIRY</small>
+                        <div class="font-monospace @(Model.RemovalTime < DateTime.Now ? "text-danger" : "text-white")">
+                            <i class="bi bi-calendar-x me-2"></i>@(Model.RemovalTime?.ToString("yyyy-MM-dd HH:mm") ?? "MANUAL_ONLY")
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0 text-primary">系統日誌</h5>
-                </div>
-                <div class="card-body small text-muted">
-                    <div class="mb-2">
-                        <strong>建立時間：</strong><br />
-                        @Model.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")
+            @* 系統日誌卡片 *@
+            <div class="cyber-card p-4">
+                <div class="tech-key mb-4" style="background: linear-gradient(90deg, #ff3333, transparent 120%); color: #fff;">SECURITY_LOGS / 系統日誌</div>
+                <div class="font-monospace" style="font-size: 0.8rem;">
+                    <div class="mb-3 p-2 border-start border-info">
+                        <div class="opacity-50">ENTRY_CREATED:</div>
+                        <div class="text-info">@Model.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
                     </div>
-                    <div>
-                        <strong>最後更新：</strong><br />
-                        @(Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "尚無更新紀錄")
+                    <div class="p-2 border-start border-warning">
+                        <div class="opacity-50">LAST_OVERRIDE:</div>
+                        <div class="text-warning">@(Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "NO_MODIFICATION_DETECTED")</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
 @section Scripts {
     <script>
-
-        // 狀態切換 AJAX (承接之前的邏輯)
         $('.status-toggle').change(function () {
             const checkbox = $(this);
             const noticeId = checkbox.data('id');
-            const label = $('#label_' + noticeId);
+            const indicator = $('#statusIndicator');
             const token = $('input[name="__RequestVerificationToken"]').val();
+
+            // 視覺預饋
+            indicator.css('opacity', '0.5');
 
             $.ajax({
                 url: '@Url.Action("ToggleStatus", "PublicNotices")',
                 type: 'POST',
                 data: { id: noticeId, __RequestVerificationToken: token },
                 success: function (res) {
+                    indicator.css('opacity', '1');
                     if (res.success) {
-                        label.text(res.newStatus ? "已發佈" : "待發佈");
-                        if(res.newStatus) {
-                                label.addClass('text-success').removeClass('text-muted');
-                            } else {
-                                label.addClass('text-muted').removeClass('text-success');
-                            }
+                        // 🚩 動態更新為符合 CSS 規範的 Badge
+                        if (res.newStatus) {
+                            indicator.html('<div class="status-badge"><span class="status-badge-icon">✓</span> PUBLISHED</div>');
+                        } else {
+                            indicator.html('<div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;"><span class="status-badge-icon" style="background-color: #ff3333;">✕</span> STANDBY</div>');
+                        }
                     } else {
                         alert(res.message);
                         checkbox.prop('checked', !checkbox.prop('checked'));
                     }
                 },
                 error: function () {
-                    alert("連線失敗");
+                    indicator.css('opacity', '1');
+                    alert("連線失敗 / PROTOCOL_ERR");
                     checkbox.prop('checked', !checkbox.prop('checked'));
                 }
             });
