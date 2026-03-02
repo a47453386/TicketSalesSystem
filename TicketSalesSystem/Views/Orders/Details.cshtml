@@ -2,111 +2,146 @@
 
 @{
     ViewData["Title"] = "訂單詳情 - " + Model.OrderID;
-    Layout = "_AdminLayout"; // 確保套用後台版面
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Order/OrderDetail.css" asp-append-version="true" />
 
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center my-4">
-        <h2><i class="bi bi-file-earmark-text"></i> 訂單詳情：@Model.OrderID</h2>
+
+<div class="admin-body p-4">
+
+    @* --- [1. 頁面標頭：診斷報告風格] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
         <div>
-            <a asp-action="Index" class="btn btn-secondary">返回列表</a>
-            <a asp-action="Edit" asp-route-id="@Model.OrderID" class="btn btn-warning text-white">去管理/退票</a>
+            <h1 class="neon-header m-0">
+                <i class="bi bi-file-earmark-text me-3"></i>訂單詳情：@Model.OrderID
+            </h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.OrderID" class="btn-cyber btn-cyber-warning">
+                <i class="bi bi-shield-check me-2"></i>[ 訂單編輯]
+            </a>
+            <a asp-action="Index" class="btn-cyber">
+                <i class="bi bi-arrow-left-circle me-2"></i>[ 回到清單 ]
+            </a>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4">
+        @* --- [2. 左側：基本資訊與客戶數據] --- *@
         <div class="col-lg-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-dark text-white">基本資訊</div>
-                <div class="card-body">
-                    <table class="table table-borderless mb-0">
-                        <tr>
-                            <th class="ps-0" style="width: 100px;">訂單狀態</th>
-                            <td>
-                                <span class="badge @(Model.OrderStatusID == "S" ? "bg-success" : (Model.OrderStatusID == "P" ? "bg-warning text-dark" : "bg-danger"))">
-                                    @Model.OrderStatus?.OrderStatusName
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0">成立時間</th>
-                            <td>@Model.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm:ss")</td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0">付款方式</th>
-                            <td>@(Model.PaymentMethod?.PaymentMethodName ?? "未指定")</td>
-                        </tr>
-                        <tr>
-                            <th class="ps-0">總金額</th>
-                            <td class="fs-5 fw-bold text-danger">TWD $@Model.Tickets.Sum(t => t.TicketsArea.Price).ToString("N0")</td>
-                        </tr>
+            <div class="cyber-card p-4 mb-4">
+                <div class="tech-key mb-4">訂單概覽</div>
+                
+                <div class="tech-data-row">
+                    <div class="data-label">訂單狀態:</div>
+                    <div class="data-value">
+                        @{
+                            var badgeClass = Model.OrderStatusID == "Y" ? "bg-success" : 
+                                            (Model.OrderStatusID == "N" ? "bg-warning" : "bg-danger");
+                        }
+                        <span class="status-badge-tech @badgeClass">@Model.OrderStatus?.OrderStatusName</span>
+                    </div>
+                </div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">建立時間:</div>
+                    <div class="data-value font-monospace">@Model.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm:ss")</div>
+                </div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">付款方式:</div>
+                    <div class="data-value">@(Model.PaymentMethod?.PaymentMethodName ?? "UNSPECIFIED")</div>
+                </div>
+
+                <div class="tech-data-row border-0">
+                    <div class="data-label">訂單總金額:</div>
+                    <div class="data-value fs-4 fw-bold text-pixel-yellow">
+                        TWD $@Model.Tickets.Sum(t => t.TicketsArea.Price).ToString("N0")
+                    </div>
+                </div>
+            </div>
+
+            <div class="cyber-card p-4">
+                <div class="tech-key mb-4">會員</div>
+                <div class="tech-data-row">
+                    <div class="data-label">ID:</div>
+                    <div class="data-value font-monospace text-info">#@Model.MemberID</div>
+                </div>
+                <div class="tech-data-row">
+                    <div class="data-label">Identity:</div>
+                    <div class="data-value fw-bold">@Model.Member?.Name</div>
+                </div>
+            </div>
+        </div>
+
+        @* --- [3. 右側：票券明細與紀錄] --- *@
+        <div class="col-lg-8">
+            <div class="cyber-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="tech-key mb-0">票券明細</div>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info px-3">
+                        票券數: @Model.Tickets.Count 張
+                    </span>
+                </div>
+
+                <div class="table-responsive custom-scroll">
+                    <table class="cyber-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%"><div class="tech-key">活動名稱 / 場次</div></th>
+                                <th><div class="tech-key">票區</div></th>
+                                <th><div class="tech-key">座次</div></th>
+                                <th class="text-end"><div class="tech-key">單價</div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ticket in Model.Tickets)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-white">@ticket.Session?.Programme?.ProgrammeName</div>
+                                        <div class="small font-monospace text-info opacity-75">
+                                            @ticket.Session?.StartTime.ToString("yyyy/MM/dd HH:mm")
+                                        </div>
+                                    </td>
+                                    <td class="text-center">@ticket.TicketsArea?.TicketsAreaName</td>
+                                    <td class="text-center font-monospace">@ticket.RowIndex <span class="opacity-50">R</span> @ticket.SeatIndex <span class="opacity-50">S</span></td>
+                                    <td class="text-end fw-bold text-pixel-yellow">
+                                        $@ticket.TicketsArea?.Price.ToString("N0")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: rgba(0, 242, 255, 0.05);">
+                                <td colspan="3" class="text-end py-3 text-info font-monospace">總額:</td>
+                                <td class="text-end py-3 px-3">
+                                    <div class="fs-4 fw-bold text-pixel-yellow">
+                                        $@Model.Tickets.Sum(t => t.TicketsArea.Price).ToString("N0")
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">會員資訊</div>
-                <div class="card-body">
-                    <p class="mb-1"><strong>會員 ID：</strong><br />@Model.MemberID</p>
-                    <p class="mb-1"><strong>會員帳號：</strong><br />@Model.Member?.Name</p>
-                    <hr />
-                    <small class="text-muted">若需聯絡會員，請至會員管理系統查詢詳細 Email 與電話。</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white fw-bold text-primary">票券明細 (@Model.Tickets.Count 張)</div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>活動名稱 / 場次</th>
-                                    <th>票區</th>
-                                    <th>座位</th>
-                                    <th class="text-end">價格</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var ticket in Model.Tickets)
-                                {
-                                    <tr>
-                                        <td>
-                                            <div class="fw-bold">@ticket.Session?.Programme?.ProgrammeName</div>
-                                            <small class="text-muted">@ticket.Session?.StartTime.ToString("yyyy/MM/dd HH:mm")</small>
-                                        </td>
-                                        <td>@ticket.TicketsArea?.TicketsAreaName</td>
-                                        <td>@ticket.RowIndex 排 @ticket.SeatIndex 號</td>
-                                        <td class="text-end fw-bold">$@ticket.TicketsArea?.Price.ToString("N0")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                            <tfoot class="table-light">
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold">合計：</td>
-                                    <td class="text-end fw-bold text-danger fs-5">$@Model.Tickets.Sum(t => t.TicketsArea.Price).ToString("N0")</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
+           
             @if (Model.Question != null && Model.Question.Any())
             {
-                <div class="card shadow-sm mt-4">
-                    <div class="card-header bg-info text-white text-white fw-bold">相關客服紀錄</div>
-                    <div class="card-body">
-                        @foreach (var q in Model.Question)
-                        {
-                            <div class="border-start border-info border-4 ps-3 mb-3">
-                                <div class="small text-muted">@q.CreatedTime.ToString("yyyy/MM/dd") - 提問</div>
-                                <div>@q.QuestionDescription</div>
-                            </div>
-                        }
+                <div class="cyber-card p-4 mt-4" style="border-color: var(--tech-danger) !important;">
+                    <div class="tech-key mb-4" style="background: linear-gradient(90deg, var(--tech-danger), transparent) !important;">
+                        <i class="bi bi-broadcast me-2"></i> 客服紀錄
                     </div>
+                    @foreach (var q in Model.Question)
+                    {
+                        <div class="border-start border-danger border-2 ps-3 mb-4">
+                            <div class="small text-danger opacity-75 font-monospace">
+                                TIMESTAMP: @q.CreatedTime.ToString("yyyy.MM.dd HH:mm")
+                            </div>
+                            <div class="text-white mt-1">@q.QuestionDescription</div>
+                        </div>
+                    }
                 </div>
             }
         </div>

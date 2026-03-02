@@ -1,90 +1,127 @@
 ﻿@model TicketSalesSystem.Models.Place
 
 @{
-    ViewData["Title"] = "場館詳情";
+    ViewData["Title"] = "演出地點詳細資料";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Place/PlaceDetail.css" asp-append-version="true" />
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-info-circle-fill me-2 text-primary"></i>場館詳情</h2>
+<div class="admin-body p-4">
+    @* --- [1. 頂部標頭與操作] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
         <div>
-            <a asp-action="Edit" asp-route-id="@Model.PlaceID" class="btn btn-warning">
-                <i class="bi bi-pencil me-1"></i>編輯此場館
+            <h1 class="neon-header m-0">
+                <i class="bi bi-info-circle-fill me-3"></i>@ViewData["Title"]
+            </h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.PlaceID" class="btn-cyber btn-cyber-warning">
+                <i class="bi bi-pencil-square me-2"></i>修改
             </a>
-            <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+            <a asp-action="Index" class="btn-cyber">
+                <i class="bi bi-arrow-left-circle me-2"></i>回到清單
+            </a>
         </div>
     </div>
 
     <div class="row g-4">
+        @* --- [2. 左側：基本與影像資訊] --- *@
         <div class="col-lg-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold">基本資訊</div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="text-muted small d-block">場館 ID</label>
-                        <span class="fw-bold">@Model.PlaceID</span>
-                    </div>
-                    <div class="mb-3">
-                        <label class="text-muted small d-block">場館名稱</label>
-                        <span class="h5">@Model.PlaceName</span>
-                    </div>
-                    <div class="mb-3">
-                        <label class="text-muted small d-block">場館地址</label>
-                        <span>@Model.PlaceAddress</span>
-                    </div>
+            <div class="cyber-card p-4 mb-4">
+                <div class="tech-key">基本資訊</div>
+
+                <div class="row mb-3 align-items-center">
+                    <div class="col-4 col-md-3 data-label mb-0">場館編號:</div>
+                    <div class="col-8 col-md-9 data-value">#@Model.PlaceID</div>
+                </div>
+
+                <div class="row mb-3 align-items-center">
+                    <div class="col-4 col-md-3 data-label mb-0">場館名稱:</div>
+                    <div class="col-8 col-md-9 data-value fs-4">@Model.PlaceName</div>
+                </div>
+
+                <div class="row mb-3 align-items-center">
+                    <div class="col-4 col-md-3 data-label mb-0">場館地址:</div>
+                    <div class="col-8 col-md-9 data-value">@Model.PlaceAddress</div>
                 </div>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-white fw-bold">場地平面圖</div>
-                <div class="card-body text-center">
-                    <img src="/Photos/VenueImage/@Model.VenueImage" class="img-fluid rounded border"
-                         onerror="this.src='/images/default-place.jpg'" />
+            <div class="cyber-card p-4">
+                <div class="tech-key">座位圖</div>
+                <div class="venue-map-scanner">
+                    <img src="/Photos/VenueImage/@Model.VenueImage" class="img-fluid"
+                         onerror="this.src='/Photos/VenueImage/default-place.jpg'" />
                 </div>
             </div>
         </div>
 
+        @* --- [3. 右側：區域配置矩陣] --- *@
         <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">區域配置列表</span>
-                    <span class="badge bg-primary">共 @Model.Venue.Count 個區域</span>
+            <div class="cyber-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="tech-key mb-0">區域配置列表</div>
+                    <span class="badge bg-dark bg-opacity-20 text-info border border-info px-3 py-2">
+                        區域數: @Model.Venue.Count
+                    </span>
                 </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+
+                <div class="table-responsive custom-scroll">
+                    <table class="cyber-table align-middle">
+                        <thead>
                             <tr>
-                                <th>區域</th>
-                                <th>樓層</th>
-                                <th class="text-center">顏色</th>
-                                <th class="text-center">配置</th>
-                                <th class="text-center">小計座位</th>
-                                <th class="text-center">目前狀態</th>
+                                <th><div class="tech-key1">區域</div></th>
+                                <th><div class="tech-key1">樓層</div></th>
+                                <th><div class="tech-key1">顏色</div></th>
+                                <th><div class="tech-key1">矩陣配置</div></th>
+                                <th><div class="tech-key1">小計</div></th>
+                                <th><div class="tech-key1">狀態</div></th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var v in Model.Venue.OrderBy(x => x.VenueID))
                             {
                                 <tr>
-                                    <td><strong>@v.VenueName</strong><br /><small class="text-muted">@v.VenueID</small></td>
-                                    <td>@v.FloorName</td>
+                                    @* 1. 區域名稱與 ID (已修正置中) *@
                                     <td class="text-center">
-                                        <div class="rounded-circle mx-auto" style="width: 20px; height: 20px; background-color: @v.AreaColor; border: 1px solid #ddd;"></div>
+                                        <div class="text-white fw-bold">@v.VenueName</div>
+                                        <div class="small font-monospace text-info opacity-50">UID: @v.VenueID</div>
                                     </td>
-                                    <td class="text-center text-muted">@v.RowCount 排 x @v.SeatCount 座</td>
-                                    <td class="text-center fw-bold">@(v.RowCount* v.SeatCount)</td>
+
+                                    @* 2. 樓層 *@
+                                    <td class="text-center">@v.FloorName</td>
+
+                                    @* 3. 顏色標示 (維持 mx-auto 確保置中) *@
                                     <td class="text-center">
-                                        <span class="badge rounded-pill @(v.VenueStatusID == "A" ? "bg-success" : "bg-secondary")">
+                                        <div class="mx-auto" style="width: 30px; height: 10px; background-color: @v.AreaColor; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 0 10px @v.AreaColor;"></div>
+                                    </td>
+
+                                    @* 4. 矩陣配置 *@
+                                    <td class="text-center font-monospace opacity-75">
+                                        @v.RowCount <span class="text-info">R</span> x @v.SeatCount <span class="text-info">S</span>
+                                    </td>
+
+                                    @* 5. 小計座位 *@
+                                    <td class="text-center">
+                                        <span class="text-pixel-yellow fw-bold">@(v.RowCount* v.SeatCount)</span>
+                                    </td>
+
+                                    @* 6. 目前狀態 *@
+                                    <td class="text-center">
+                                        <span class="status-badge-tech @(v.VenueStatusID == "A" ? "bg-success" : "bg-secondary")">
                                             @v.VenueStatus?.VenueStatusName
                                         </span>
                                     </td>
                                 </tr>
                             }
                         </tbody>
-                        <tfoot class="table-light">
-                            <tr class="fw-bold">
-                                <td colspan="4" class="text-end text-uppercase">總載客量合計：</td>
-                                <td class="text-center text-danger">@Model.Venue.Sum(v => v.RowCount * v.SeatCount)</td>
+                        <tfoot>
+                            <tr style="background: rgba(0, 242, 255, 0.05);">
+                                <td colspan="4" class="text-end py-3 font-monospace text-info">場館總座位數:</td>
+                                <td class="text-center py-3">
+                                    <div class="h4 m-0 text-pixel-yellow fw-bold" style="text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);">
+                                        @Model.Venue.Sum(v => v.RowCount * v.SeatCount)
+                                    </div>
+                                </td>
                                 <td></td>
                             </tr>
                         </tfoot>

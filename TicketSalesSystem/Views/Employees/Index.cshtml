@@ -1,112 +1,138 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.Employee>
 
 @{
-    ViewData["Title"] = "員工管理系統";
+    ViewData["Title"] = "員工管理";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Employee/EmployeeIndex.css" asp-append-version="true" />
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2><i class="bi bi-people-fill text-primary"></i> 員工列表</h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-person-plus"></i> 新增員工
+@* 🚩 確保外層有 scope 鎖定，並套用 admin-body 基底 *@
+<div class="order-management-scope admin-body p-4">
+
+    @* --- [1. 頂部標頭：霓虹發光感] --- *@
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <h1 class="neon-header m-0">
+            <i class="bi bi-people-fill me-3"></i>@ViewData["Title"]
+        </h1>
+        <a asp-action="Create" class="btn-cyber">
+            <i class="bi bi-person-plus me-2"></i>新增員工
         </a>
     </div>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <form asp-action="Index" method="get" class="row g-3">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <input type="text" name="searchString" class="form-control"
-                               placeholder="輸入姓名或員工編號..." value="@ViewData["CurrentFilter"]" />
-                        <button class="btn btn-outline-secondary" type="submit">
-                            <i class="bi bi-search"></i> 搜尋
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <a asp-action="Index" class="btn btn-link text-decoration-none">清除搜尋</a>
-                </div>
-            </form>
-        </div>
+    @* --- [2. 搜尋面板：利用 cyber-card 與黑化 input] --- *@
+    <div class="cyber-card mb-5 p-4">
+        <div class="tech-key mb-4">SEARCH_PROTOCOL / 搜尋協定</div>
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="text-info small mb-2"><i class="bi bi-search me-1"></i>搜尋姓名或員工編號...</label>
+                <input type="text" name="searchString" class="form-control order-input"
+                       placeholder="INPUT_QUERY_HERE..." value="@ViewData["CurrentFilter"]" />
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn-cyber w-100 py-2">
+                    <i class="bi bi-lightning-charge-fill me-2"></i>執行查詢
+                </button>
+                @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+                {
+                    <a asp-action="Index" class="btn-cyber btn-cyber-warning py-2 px-3">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                }
+            </div>
+        </form>
     </div>
 
-    <table class="table table-hover align-middle shadow-sm bg-white">
-        <thead class="table-dark">
-            <tr>
-                <th style="width: 80px;">照片</th>
-                <th>員工編號 / 姓名</th>
-                <th>職位</th>
-                <th>性別</th>
-                <th>聯絡資訊</th>
-                <th>帳號狀態</th>
-                <th class="text-center">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        @if (!string.IsNullOrEmpty(item.Photo))
-                        {
-                            <img src="~/Photos/employeePhotos/@item.Photo"
-                                 class="rounded-circle border" width="50" height="50" style="object-fit: cover;" />
-                        }
-                        else
-                        {
-                            <img src="~/images/default-avatar.png"
-                                 class="rounded-circle border" width="50" height="50" />
-                        }
-                    </td>
-                    <td>
-                        <div class="fw-bold text-primary">@item.EmployeeID</div>
-                        <div>@item.Name</div>
-                    </td>
-                    <td>
-                        <span class="badge bg-info text-dark">@item.Role?.RoleName</span>
-                    </td>
-                    <td>
-                        @(item.Gender ? "♂ 男" : "♀ 女")
-                    </td>
-                    <td>
-                        <div class="small"><i class="bi bi-telephone"></i> @item.Tel</div>
-                        <div class="small"><i class="bi bi-envelope"></i> @item.Email</div>
-                    </td>
-                    <td>
-                        @if (item.AccountStatusID == "A") // 假設 A 為啟用
-                        {
-                            <span class="badge bg-success">@item.AccountStatus?.AccountStatusName</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">@item.AccountStatus?.AccountStatusName</span>
-                        }
-                    </td>
-                    <td class="text-center">
-                        <div class="btn-group btn-group-sm">
-                            <a asp-action="Edit" asp-route-id="@item.EmployeeID" class="btn btn-outline-primary" title="編輯">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a asp-action="Details" asp-route-id="@item.EmployeeID" class="btn btn-outline-info" title="詳情">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <form asp-action="Delete" method="post" style="display:inline;">
-                                @* 🚩 確保傳遞的是 EmployeeID *@
-                                <input type="hidden" name="id" value="@item.EmployeeID" />
+    @* --- [3. 數據矩陣：戰術表格] --- *@
+    <div class="table-container custom-scroll" style="overflow-x: auto;">
+        <div class="cyber-card">
+            <table class="cyber-table-fixed align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;"><div class="tech-key w-100 m-0">照片</div></th>
+                        <th style="width: 200px;"><div class="tech-key w-100 m-0">識別編號 / 姓名</div></th>
+                        <th style="width: 120px;"><div class="tech-key w-100 m-0">職位</div></th>
+                        <th style="width: 100px;"><div class="tech-key w-100 m-0">性別</div></th>
+                        <th style="width: 250px;"><div class="tech-key w-100 m-0">聯絡通訊</div></th>
+                        <th style="width: 180px;"><div class="tech-key w-100 m-0">帳號狀態</div></th>
+                        <th style="width: 150px;"><div class="tech-key w-100 m-0">系統操作</div></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="text-center">
+                            @* 照片：使用 profile-scanner 風格 *@
+                            <td>
+                                <div class="avatar-scanner-small">
+                                    @if (!string.IsNullOrEmpty(item.Photo))
+                                    {
+                                        <img src="~/Photos/employeePhotos/@item.Photo" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/images/default-avatar.png" />
+                                    }
+                                </div>
+                            </td>
 
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-danger"
-                                        data-delete-id="@item.EmployeeID"
-                                        onclick="globalDelete('@item.EmployeeID', '@item.Name', 'Employees')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                            @* 識別編號 / 姓名 *@
+                            <td>
+                                <div class="font-monospace text-info fw-bold">#@item.EmployeeID</div>
+                                <div class="text-white">@item.Name</div>
+                            </td>
+
+                            @* 職位 *@
+                            <td>
+                                <span class="text-info opacity-100 font-monospace">@item.Role?.RoleName</span>
+                            </td>
+
+                            @* 性別 *@
+                            <td class="opacity-100">
+                                @(item.Gender ? "男" : "女")
+                            </td>
+
+                            @* 聯絡資訊 *@
+                            <td class="font-monospace small ">
+                                <div class="text-info"><i class="bi bi-telephone me-2"></i>@item.Tel</div>
+                                <div class="opacity-100 text-truncate"><i class="bi bi-envelope me-2"></i>@item.Email</div>
+                            </td>
+
+                            @* 帳號狀態：套用您指定的右圓角 Status Badge *@
+                            <td>
+                                @if (item.AccountStatusID == "A")
+                                {
+                                    <div class="status-badge">
+                                        <span class="status-badge-icon">✓</span> @item.AccountStatus?.AccountStatusName
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;">
+                                        <span class="status-badge-icon" style="background-color: #ff3333;">✕</span> @item.AccountStatus?.AccountStatusName
+                                    </div>
+                                }
+                            </td>
+
+                            @* 操作 *@
+                            <td>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a asp-action="Edit" asp-route-id="@item.EmployeeID" class="btn-cyber-icon" title="EDIT">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.EmployeeID" class="btn-cyber-icon" title="DETAILS">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn-cyber-icon border-danger text-danger"
+                                            onclick="globalDelete('@item.EmployeeID', '@item.Name', 'Employees')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
 </div>
-

@@ -18,65 +18,81 @@
     <link rel="stylesheet" href="~/css/admin-cyber.css" asp-append-version="true" />  
 </head>
 <body class="admin-body">
-    <div class="d-flex">
+    <div class="d-flex min-height: 100vh; overflow-x: hidden;">
         <div class="sidebar d-flex flex-column p-3 flex-shrink-0">
             <h4 class="text-center mb-4 fw-bold mt-2">
                 <i class="bi bi-cpu-fill me-2"></i>售票系統後台管理
             </h4>
 
             <ul class="nav nav-pills flex-column mb-auto admin-nav">
+                @* 1. 控制面板 *@
                 <li class="nav-item nav-item-tech">
                     <a asp-controller="Admin" asp-action="Dashboard"
-                       class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
                         <i class="bi bi-terminal-fill me-2"></i> 控制面板
                     </a>
                 </li>
 
+                @* 2. 場地管理 *@
                 <li class="nav-item nav-item-tech">
-                    <a asp-controller="Places" asp-action="Index" class="nav-link">
+                    <a asp-controller="Places" asp-action="Index"
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Places" ? "active" : "")">
                         <i class="bi bi-geo-fill me-2"></i> 場地管理
                     </a>
                 </li>
 
+                @* 3. 活動管理 *@
                 <li class="nav-item nav-item-tech">
                     <a asp-controller="Programmes" asp-action="AdminIndex"
-                       class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "AdminIndex" ? "active" : "")">
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Programmes" ? "active" : "")">
                         <i class="bi bi-broadcast-pin me-2"></i> 活動管理
                     </a>
                 </li>
 
+                @* 4. 訂單管理 *@
                 <li class="nav-item nav-item-tech">
-                    <a asp-controller="Orders" asp-action="Index" class="nav-link">
+                    <a asp-controller="Orders" asp-action="Index"
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Orders" ? "active" : "")">
                         <i class="bi bi-database-fill-check me-2"></i> 訂單管理
                     </a>
                 </li>
 
+                @* 5. 會員管理 *@
                 <li class="nav-item nav-item-tech">
-                    <a asp-controller="Members" asp-action="Index" class="nav-link">
+                    <a asp-controller="Members" asp-action="Index"
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Members" ? "active" : "")">
                         <i class="bi bi-person-bounding-box me-2"></i> 會員管理
                     </a>
                 </li>
 
+                @* 6. 員工管理 *@
                 <li class="nav-item nav-item-tech">
-                    <a asp-controller="Employees" asp-action="Index" class="nav-link">
+                    <a asp-controller="Employees" asp-action="Index"
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employees" ? "active" : "")">
                         <i class="bi bi-fingerprint me-2"></i> 員工管理
                     </a>
                 </li>
 
+                @* 7. 公告管理 *@
                 <li class="nav-item nav-item-tech">
-                    <a asp-controller="PublicNotices" asp-action="Index" class="nav-link">
+                    <a asp-controller="PublicNotices" asp-action="Index"
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "PublicNotices" ? "active" : "")">
                         <i class="bi bi-reception-4 me-2"></i> 公告管理
                     </a>
                 </li>
 
+                @* 8. 常見問題管理 *@
                 <li class="nav-item nav-item-tech">
-                    <a asp-controller="FAQs" asp-action="Index" class="nav-link">
+                    <a asp-controller="FAQs" asp-action="Index"
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "FAQs" ? "active" : "")">
                         <i class="bi bi-cpu me-2"></i> 常見問題管理
                     </a>
                 </li>
 
+                @* 9. 客服管理 *@
                 <li class="nav-item nav-item-tech">
-                    <a asp-controller="Questions" asp-action="Index" class="nav-link">
+                    <a asp-controller="Questions" asp-action="Index"
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Questions" ? "active" : "")">
                         <i class="bi bi-headset-vr me-2"></i> 客服管理
                     </a>
                 </li>
@@ -115,8 +131,8 @@
             </div>
         </div>
 
-        <div class="main-wrapper">
-            <header class="cyber-header d-flex align-items-center justify-content-between px-4" style="height: 70px;">
+        <div class="main-wrapper d-flex flex-column flex-grow-1" style="min-width: 0;">
+            <header class="cyber-header d-flex align-items-center justify-content-between px-4" style="height: 70px; flex-shrink: 0;">
 
                 <div class="tech-hud-bar">
 
@@ -142,12 +158,12 @@
                 @RenderBody()
             </main>
 
-            <footer class="py-2 px-4 d-flex justify-content-between align-items-center">
+            <footer class="py-3 px-4 d-flex justify-content-between align-items-center" style="flex-shrink: 0; background: rgba(0,0,0,0.3); border-top: 1px solid var(--tech-border);">
                 <div class="small">
-                    &copy; 2026 - <span class="neon-text">TICKET_SALES_KERNEL</span> v2.4.0
+                    &copy; 2026 - <span class="neon-text">演唱會售票系統</span>
                 </div>
                 <div class="small">
-                    <i class="bi bi-shield-check me-1"></i> SSL_ENCRYPTED: AES-256
+                    <i class="bi bi-shield-check me-1"></i> 
                     <span class="ms-3 text-cyan">
                         <i class="bi bi-clock me-1"></i> @DateTime.Now.ToString("HH:mm:ss")
                     </span>

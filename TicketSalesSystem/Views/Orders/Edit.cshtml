@@ -1,160 +1,166 @@
 ﻿@model TicketSalesSystem.Models.Order
 
 @{
-    ViewData["Title"] = "審核訂單 - " + Model.OrderID;
+    ViewData["Title"] = "訂單修改";
 }
+
+@* 🚩 載入戰術規格 CSS *@
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Order/OrderEdit.css" asp-append-version="true" />
 
-
-<div class="order-management-scope">
-    @* --- [Header] --- *@
-    <div class="d-flex justify-content-between align-items-end mb-5">
-        <div>
-            <div class="tech-sub-label">DECISION_TERMINAL_v4.2</div>
-            <h2 class="terminal-header">ORDER: @Model.OrderID</h2>
-        </div>
-        @* 返回列表按鈕：使用靜態 INFO 風格 *@
-        <a asp-action="Index" class="btn btn-order-action btn-info-static px-4 py-2">
-            <i class="bi bi-arrow-left me-2"></i>ESC_BACK
-        </a>
+<div class="order-management-scope admin-body">
+    @* --- [1. 頂部標頭：終端控制模式] --- *@
+    <div class="d-flex justify-content-between align-items-center mb-5 tech-label border-bottom border-info border-opacity-25 pb-3">
+        <h1 class="neon-header m-0">
+            <i class="bi bi-shield-lock-fill me-3"></i>ORDER: @Model.OrderID
+        </h1>
+            <a asp-action="Index" class="btn-order-action btn-info-static px-4 py-2">
+                <i class="bi bi-arrow-left me-2"></i>[ 回到清單 ]
+            </a>
+        
     </div>
 
     <form asp-action="Edit">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <input type="hidden" asp-for="OrderID" />
         <input type="hidden" asp-for="MemberID" />
         <input type="hidden" asp-for="SessionID" />
         <input type="hidden" asp-for="OrderCreatedTime" />
         <input type="hidden" asp-for="PaymentMethodID" />
 
-        <div class="row g-4">
-            @* --- [左側：決策核心] --- *@
+        <div class="row g-4 align-items-stretch">
+            @* --- [左側：決策核心區] --- *@
             <div class="col-lg-7">
-                <div class="audit-card">
-                    <div class="audit-card-header text-info">
-                        <i class="bi bi-cpu me-2"></i> CORE_DATA / 核心數據
+                <div class="cyber-card h-100 p-4">
+                    <div class="audit-card-header mb-4">
+                        <i class="bi bi-cpu me-2"></i> 基本資料
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="opacity-50 small mb-1">MEMBER_ACCOUNT / 會員帳號</label>
-                                <input class="form-control audit-input" value="@Model.Member?.MemberLogin?.Account" readonly />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="opacity-50 small mb-1">REAL_NAME / 會員姓名</label>
-                                <input class="form-control audit-input" value="@Model.Member?.Name" readonly />
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="OrderStatusID" class="text-warning small mb-1">ORDER_STATUS / 訂單狀態變更</label>
-                                @* 下拉選單套用黑化類別 order-input *@
-                                <select asp-for="OrderStatusID" class="form-select order-input border-warning" asp-items="ViewBag.OrderStatusID"></select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="opacity-50 small mb-1">PAYMENT_METHOD / 原始支付方式</label>
-                                <select class="form-select order-input opacity-75" asp-items="ViewBag.PaymentMethodID" disabled></select>
-                            </div>
-                        </div>
 
-                        <div class="mt-4 p-4 border border-info border-opacity-10" style="background: rgba(0, 242, 255, 0.05);">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" asp-for="PaymentStatus" id="paySwitch">
-                                <label class="form-check-label fw-bold text-info" for="paySwitch">付款核可：確認款項已入帳 (SET_PAID)</label>
-                            </div>
-                            <div>
-                                <label asp-for="PaymentDescription" class="opacity-50 small mb-1">DECISION_MEMO / 決策備註</label>
-                                <textarea asp-for="PaymentDescription" class="form-control audit-input" rows="3" placeholder="輸入審核理由、退款批號..."></textarea>
-                            </div>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="opacity-100 small mb-2 text-info">會員帳號</label>
+                            <input class="form-control audit-input" value="@Model.Member?.MemberLogin?.Account" readonly />
                         </div>
+                        <div class="col-md-6">
+                            <label class="opacity-100 small mb-2 text-info">會員姓名</label>
+                            <input class="form-control audit-input" value="@Model.Member?.Name" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="OrderStatusID" class="text-warning small mb-2">狀態變更</label>
+                            <select asp-for="OrderStatusID" class="form-select order-input border-warning" asp-items="ViewBag.OrderStatusID"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="opacity-100 small mb-2">支付狀態</label>
+                            <select class="form-select order-input opacity-50" asp-items="ViewBag.PaymentMethodID" disabled></select>
+                        </div>
+                    </div>
 
-                        <div class="mt-4">
-                            @* 執行決策按鈕：使用靜態 AUDIT 風格並放大 *@
-                            <button type="submit" class="btn btn-order-action btn-audit-static w-100 py-3 fw-bold" style="font-size: 1.3rem !important;">
-                                <i class="bi bi-shield-lock-fill me-2"></i> EXECUTE_DECISION / 儲存並執行變更
-                            </button>
+                    @* 付款核可區塊 *@
+                    <div class="mt-5 p-4 border border-info border-opacity-20" style="background: rgba(0, 242, 255, 0.02); position: relative;">
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" asp-for="PaymentStatus" id="paySwitch" style="cursor:pointer;">
+                            <label class="form-check-label fw-bold text-info" for="paySwitch">
+                                <i class="bi bi-cash-stack me-2"></i>付款核可：確認款項已入帳
+                            </label>
                         </div>
+                        <div>
+                            <label asp-for="PaymentDescription" class="opacity-100 small mb-2">備註</label>
+                            <textarea asp-for="PaymentDescription" class="form-control audit-input" rows="3"
+                                      placeholder="請輸入審核理由、手動退款或其他管理備註..."></textarea>
+                        </div>
+                    </div>
+
+                    @* 執行按鈕 *@
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-order-action btn-audit-static w-100 py-3 fw-bold">
+                            <i class="bi bi-shield-check me-2"></i> 儲存並執行變更
+                        </button>
                     </div>
                 </div>
 
-                @* --- 票券列表 --- *@
-                <div class="audit-card">
-                    <div class="audit-card-header text-white">
-                        <i class="bi bi-ticket-perforated me-2"></i> ASSET_DETAILS / 票券明細
-                    </div>
-                    <div class="table-container">
-                        <table class="table table-dark table-borderless align-middle mb-0">
-                            <thead class="opacity-50 small border-bottom border-white border-opacity-10">
-                                <tr>
-                                    <th>活動名稱/時間</th>
-                                    <th>區域</th>
-                                    <th>座位</th>
-                                    <th class="text-center">狀態</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model.Tickets != null && Model.Tickets.Any())
-                                {
-                                    foreach (var ticket in Model.Tickets)
+                @* --- 票券明細面板 --- *@
+                <div class="audit-card p-4">
+                    <div class="cyber-card h-100 p-4">
+                        <div class="audit-card-header mb-4">
+                            <i class="bi bi-ticket-perforated me-2"></i> 票券明細
+                        </div>
+                        <div class="table-responsive custom-scroll">
+                            <table class="table table-dark table-borderless align-middle mb-0">
+                                <thead class="border-bottom border-white border-opacity-10">
+                                    <tr class="text-info small opacity-75">
+                                        <th>活動名稱/場次</th>
+                                        <th>票區</th>
+                                        <th>座位</th>
+                                        <th class="text-center">目前狀態</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Tickets != null && Model.Tickets.Any())
                                     {
-                                        <tr class="border-bottom border-white border-opacity-5">
-                                            <td>
-                                                <div class="text-info fw-bold">@ticket.Session?.Programme?.ProgrammeName</div>
-                                                <div class="small opacity-50 font-monospace">@ticket.Session?.StartTime.ToString("yyyy-MM-dd HH:mm")</div>
-                                            </td>
-                                            <td><span class="opacity-75">@ticket.TicketsArea?.TicketsAreaName</span></td>
-                                            <td class="font-monospace text-warning">@ticket.RowIndex 排 @ticket.SeatIndex 號</td>
-                                            <td class="text-center">
-                                                @{
-                                                    var bClass = ticket.TicketsStatusID switch
-                                                    {
-                                                        "Y" => "bg-success",
-                                                        "C" => "bg-danger",
-                                                        "N" => "bg-warning",
-                                                        _ => "bg-secondary"
-                                                    };
-                                                }
-                                                <span class="status-badge @bClass">@ticket.TicketsStatus?.TicketsStatusName</span>
-                                            </td>
-                                        </tr>
+                                        foreach (var ticket in Model.Tickets)
+                                        {
+                                            <tr class="border-bottom border-white border-opacity-5">
+                                                <td class="py-3">
+                                                    <div class="text-white fw-bold">@ticket.Session?.Programme?.ProgrammeName</div>
+                                                    <div class="font-monospace small text-info opacity-50">@ticket.Session?.StartTime.ToString("yyyy-MM-dd HH:mm")</div>
+                                                </td>
+                                                <td><span class="opacity-75">@ticket.TicketsArea?.TicketsAreaName</span></td>
+                                                <td class="font-monospace text-warning">@ticket.RowIndex <span class="small">R</span> @ticket.SeatIndex <span class="small">S</span></td>
+                                                <td class="text-center">
+                                                    @{
+                                                        var bClass = ticket.TicketsStatusID switch { "Y" => "bg-success", "C" => "bg-danger", "N" => "bg-warning", _ => "bg-secondary" };
+                                                    }
+                                                    <span class="status-badge @bClass">@ticket.TicketsStatus?.TicketsStatusName</span>
+                                                </td>
+                                            </tr>
+                                        }
                                     }
-                                }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
                 </div>
             </div>
 
-            @* --- [右側：通訊日誌] --- *@
+            @* --- [右側：通訊與訊號日誌] --- *@
             <div class="col-lg-5">
-                <div class="audit-card border-warning border-opacity-25">
-                    <div class="audit-card-header text-warning">
-                        <i class="bi bi-broadcast me-2"></i> SIGNAL_LOG / 客服通訊日誌
+                <div class="cyber-card h-100 p-4" style="border-color: rgba(255, 204, 0, 0.3) !important;">
+                    <div class="audit-card-header text-warning" style="background: linear-gradient(90deg, var(--tech-warning), transparent) !important;">
+                        <i class="bi bi-broadcast me-2"></i> 客訴處理
                     </div>
-                    <div class="card-body custom-scroll" style="max-height: 800px; overflow-y: auto;">
+
+                    <div class="custom-scroll pe-2" style="max-height: 850px; overflow-y: auto;">
                         @if (Model.Question != null && Model.Question.Any())
                         {
                             foreach (var q in Model.Question)
                             {
-                                <div class="signal-packet p-3 mb-3 border-start border-warning border-opacity-50" style="background: rgba(255, 204, 0, 0.02);">
-                                    <div class="d-flex justify-content-between mb-2 border-bottom border-white border-opacity-10 pb-1">
+                                <div class="p-3 mb-4 border-start border-warning border-opacity-50" style="background: rgba(255, 204, 0, 0.03);">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-white border-opacity-10 pb-2">
                                         <div class="text-warning fw-bold"># @q.QuestionTitle</div>
-                                        <div class="font-monospace opacity-50 small">@q.CreatedTime.ToString("MM/dd HH:mm")</div>
+                                        <div class="font-monospace opacity-50 small">@q.CreatedTime.ToString("MM/dd HH:mm:ss")</div>
                                     </div>
-                                    <div class="p-2 mb-3 text-white-50 small">@q.QuestionDescription</div>
+                                    <div class="text-white-50 mb-3" style="line-height: 1.5;">@q.QuestionDescription</div>
+
                                     @if (!string.IsNullOrEmpty(q.UploadFile))
                                     {
-                                        <label class="text-success small fw-bold mb-2 d-block">證明附件：</label>
-                                        <a href="~/uploads/@q.UploadFile" target="_blank">
-                                            <img src="~/uploads/@q.UploadFile" class="w-100 proof-img" style="filter: brightness(0.8);" alt="證明附件" />
-                                        </a>
+                                        <div class="mt-2">
+                                            <label class="text-success small fw-bold mb-2 d-block"><i class="bi bi-paperclip me-1"></i> 附件</label>
+                                            <a href="~/uploads/@q.UploadFile" target="_blank" class="d-block overflow-hidden border border-white border-opacity-10">
+                                                <img src="~/uploads/@q.UploadFile" class="w-100" style="filter: contrast(1.1) brightness(0.9); transition: 0.3s;"
+                                                     onmouseover="this.style.filter='contrast(1.2) brightness(1.1)'"
+                                                     onmouseout="this.style.filter='contrast(1.1) brightness(0.9)'" alt="Proof" />
+                                            </a>
+                                        </div>
                                     }
                                 </div>
                             }
                         }
                         else
                         {
-                            <div class="text-center py-5 opacity-25">
-                                <i class="bi bi-chat-dots display-1"></i>
-                                <p class="mt-3">無任何記錄訊號</p>
+                            <div class="text-center py-5 opacity-20">
+                                <i class="bi bi- Reception-0 display-1"></i>
+                                <p class="mt-3 font-monospace">目前沒有客訴</p>
                             </div>
                         }
                     </div>
@@ -169,11 +175,12 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+        // 戰術警示邏輯
         const statusSelect = document.querySelector('#OrderStatusID');
         const initialVal = statusSelect.value;
         statusSelect.addEventListener('change', function() {
             if (['C', 'N'].includes(this.value)) {
-                if (!confirm("🚨 警告：此操作將註銷所有關聯票券並釋放庫存。確定要執行此決策嗎？")) {
+                if (!confirm("🚨 [注意!!]\n\n此操作將會註銷所有關聯票券並釋放座位庫存。\n該程序為不可逆轉之決策。確定要執行嗎？")) {
                     this.value = initialVal;
                 }
             }

@@ -3,160 +3,190 @@
 @{
     ViewData["Title"] = "新增員工";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Employee/EmployeeCreate.css" asp-append-version="true" />
+@* 🚩 確保外層有 scope 鎖定，套用戰術背景與字體 *@
+<div class="order-management-scope admin-body p-4">
 
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="bi bi-person-plus-fill"></i> 新增員工資料</h4>
-            <span class="badge bg-light text-primary">系統自動編號預覽：F26XXX</span>
+    @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <div>
+           @*  <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb m-0 p-0 bg-transparent">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">EMP_LIST</a></li>
+                    <li class="breadcrumb-item active text-white">NEW_REGISTRY</li>
+                </ol>
+            </nav> *@
+            <h1 class="neon-header m-0">
+                <i class="bi bi-person-plus-fill me-3"></i>@ViewData["Title"]
+            </h1>
         </div>
-        <div class="card-body">
-            <form asp-action="Create" method="post" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+       @*  <div class="text-end">
+            <div class="tech-key mb-0" style="background: linear-gradient(90deg, var(--tech-cyan), transparent);">
+                PREVIEW_ID: F26XXX
+            </div>
+        </div> *@
+    </div>
 
-                <div class="mb-4 text-center">
-                    <div class="position-relative d-inline-block">
-                        <img id="imgPreview" src="~/images/default-avatar.png"
-                             class="rounded-circle border shadow-sm"
-                             style="width: 140px; height: 140px; object-fit: cover;" />
-                        <label for="PhotoFile" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow" style="cursor: pointer;">
-                            <i class="bi bi-camera-fill"></i>
-                        </label>
-                    </div>
-                    <div class="mt-2">
+    @* --- [2. 主編輯卡片] --- *@
+    <div class="cyber-card p-4">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger small font-monospace mb-4"></div>
+
+            <div class="row g-5">
+                @* --- 左側：生物識別與基本資料 --- *@
+                <div class="col-lg-7 border-end border-info border-opacity-10">
+
+                    @* 照片上傳區：圓形掃描器樣式 *@
+                    <div class="mb-5 text-center">
+                        <div class="tech-key mb-4">照片</div>
+                        <div class="position-relative d-inline-block">
+                            <div class="profile-avatar-edit-wrap">
+                                <img id="imgPreview" src="~/images/default-avatar.png" />
+                                <label for="PhotoFile" class="avatar-edit-label">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                            </div>
+                        </div>
                         <input asp-for="PhotoFile" type="file" class="d-none" accept="image/*" onchange="previewImage(this)" id="PhotoFile" />
-                        <small class="text-muted">點擊相機圖示上傳照片</small>
+                        
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-7 border-end">
-                        <h5 class="text-primary mb-3 border-bottom pb-2">基本資訊</h5>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Name" class="form-label fw-bold"></label>
-                                <input asp-for="Name" class="form-control" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="NationalID" class="form-label fw-bold"></label>
-                                <input asp-for="NationalID" class="form-control" placeholder="A123456789" />
-                                <span asp-validation-for="NationalID" class="text-danger"></span>
-                            </div>
+                    <div class="tech-key mb-4">基本資料</div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="text-info small mb-2 d-block">姓名</label>
+                            <input asp-for="Name" class="form-control order-input" placeholder="INPUT_NAME..." />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Birthday" class="form-label fw-bold"></label>
-                                <input asp-for="Birthday" type="date" class="form-control" />
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Gender" class="form-label fw-bold"></label>
-                                <div class="mt-2">
-                                    <input type="radio" asp-for="Gender" value="true" checked /> 男
-                                    <input type="radio" asp-for="Gender" value="false" class="ms-3" /> 女
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label fw-bold"></label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-8">
-                                <label asp-for="Tel" class="form-label fw-bold"></label>
-                                <input asp-for="Tel" class="form-control" />
-                            </div>
-                            <div class="col-md-4">
-                                <label asp-for="Extension" class="form-label fw-bold"></label>
-                                <input asp-for="Extension" class="form-control" />
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Address" class="form-label fw-bold"></label>
-                            <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                        <div class="col-md-6">
+                            <label asp-for="NationalID" class="text-info small mb-2 d-block">身分證字號</label>
+                            <input asp-for="NationalID" class="form-control order-input" placeholder="A123456789" />
+                            <span asp-validation-for="NationalID" class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <div class="col-md-5 bg-light p-3 rounded">
-                        <h5 class="text-success mb-3 border-bottom pb-2">權限與帳號設定</h5>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">職位分配</label>
-                            <div id="roleSelectArea">
-                                <div class="input-group">
-                                    <select asp-for="RoleID" class="form-select" asp-items="ViewBag.RoleID">
-                                        <option value="">-- 請選擇職位 --</option>
-                                    </select>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleInput('Role')">新增</button>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Birthday" class="text-info small mb-2 d-block">生日</label>
+                            <input asp-for="Birthday" type="date" class="form-control order-input" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-info small mb-2 d-block">性別</label>
+                            <div class="d-flex gap-4 mt-2">
+                                <div class="form-check custom-cyber-radio">
+                                    <input class="form-check-input" type="radio" asp-for="Gender" value="true" id="genderM" checked>
+                                    <label class="form-check-label text-white" for="genderM">男</label>
                                 </div>
-                            </div>
-                            <div id="roleInputArea" style="display:none;" class="p-2 border rounded bg-white mt-1">
-                                <div class="d-flex justify-content-between mb-1"><small class="fw-bold text-primary">手動新增角色</small><button type="button" class="btn-close btn-sm" onclick="toggleInput('Role', false)"></button></div>
-                                <div class="row g-1">
-                                    <div class="col-4"><input asp-for="NewRoleID" class="form-control form-control-sm" placeholder="編號" /></div>
-                                    <div class="col-8"><input asp-for="NewRoleName" class="form-control form-control-sm" placeholder="名稱" /></div>
+                                <div class="form-check custom-cyber-radio">
+                                    <input class="form-check-input" type="radio" asp-for="Gender" value="false" id="genderF">
+                                    <label class="form-check-label text-white" for="genderF">女</label>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">帳號狀態</label>
-                            <div id="statusSelectArea">
-                                <div class="input-group">
-                                    <select asp-for="AccountStatusID" class="form-select" asp-items="ViewBag.AccountStatusID">
-                                        <option value="">-- 請選擇狀態 --</option>
-                                    </select>
-                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="toggleInput('Status')">新增</button>
-                                </div>
-                            </div>
-                            <div id="statusInputArea" style="display:none;" class="p-2 border rounded bg-white mt-1">
-                                <div class="d-flex justify-content-between mb-1"><small class="fw-bold text-success">手動新增狀態</small><button type="button" class="btn-close btn-sm" onclick="toggleInput('Status', false)"></button></div>
-                                <div class="row g-1">
-                                    <div class="col-4"><input asp-for="NewAccountStatusID" class="form-control form-control-sm" placeholder="編號" /></div>
-                                    <div class="col-8"><input asp-for="NewAccountStatusName" class="form-control form-control-sm" placeholder="名稱" /></div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mb-4">
+                        <label asp-for="Email" class="text-info small mb-2 d-block">信箱</label>
+                        <input asp-for="Email" class="form-control order-input" placeholder="example@tech.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Account" class="form-label fw-bold"></label>
-                            <input asp-for="Account" class="form-control" />
-                            <span asp-validation-for="Account" class="text-danger"></span>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label asp-for="Tel" class="text-info small mb-2 d-block">手機號碼</label>
+                            <input asp-for="Tel" class="form-control order-input" placeholder="09XX-XXX-XXX" />
                         </div>
+                        <div class="col-md-4">
+                            <label asp-for="Extension" class="text-info small mb-2 d-block">分機</label>
+                            <input asp-for="Extension" class="form-control order-input" placeholder="XXXX" />
+                        </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label fw-bold"></label>
-                            <input asp-for="Password" class="form-control" type="password" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="HireDate" class="form-label fw-bold"></label>
-                            <input asp-for="HireDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-                        </div>
+                    <div class="mb-4">
+                        <label asp-for="Address" class="text-info small mb-2 d-block">通訊地址</label>
+                        <textarea asp-for="Address" class="form-control order-input" rows="2" placeholder="LOCATION_DETAILS..."></textarea>
                     </div>
                 </div>
 
-                <div class="text-center mt-4 border-top pt-3">
-                    <a asp-action="Index" class="btn btn-secondary me-2">取消</a>
-                    <button type="submit" class="btn btn-primary px-5">建立員工帳號</button>
+                @* --- 右側：權限帳號與核心安全 --- *@
+                <div class="col-lg-5">
+                    <div class="tech-key mb-4" style="background: linear-gradient(90deg, #ffcc00, transparent);">權限設定</div>
+
+                    <div class="p-4 bg-dark bg-opacity-50 border border-info border-opacity-10 mb-4">
+
+                        @* --- 職位分配模組 --- *@
+                        <div class="mb-4">
+                            <label class="text-info small mb-2 d-block">ASSIGN_ROLE / 職位分配</label>
+                            <div class="input-group">
+                                <select asp-for="RoleID" class="form-select order-input" asp-items="ViewBag.RoleID">
+                                    <option value="">-- SELECT_ROLE --</option>
+                                </select>
+                                @* 快速操作按鈕群 *@
+                                <button type="button" class="btn-cyber py-0 px-2" onclick="openQuickModal('Role', 'CREATE')"><i class="bi bi-plus-lg"></i></button>
+                                <button type="button" class="btn-cyber btn-cyber-warning py-0 px-2" onclick="openQuickModal('Role', 'EDIT')"><i class="bi bi-pencil"></i></button>
+                            </div>
+                        </div>
+
+                        @* --- 帳號狀態模組 --- *@
+                        <div class="mb-4">
+                            <label class="text-info small mb-2 d-block">帳號狀態</label>
+                            <div class="input-group">
+                                <select asp-for="AccountStatusID" class="form-select order-input" asp-items="ViewBag.AccountStatusID">
+                                    <option value="">-- SELECT_STATUS --</option>
+                                </select>
+                                <button type="button" class="btn-cyber py-0 px-2" onclick="openQuickModal('Status', 'CREATE')"><i class="bi bi-plus-lg"></i></button>
+                                <button type="button" class="btn-cyber btn-cyber-warning py-0 px-2" onclick="openQuickModal('Status', 'EDIT')"><i class="bi bi-pencil"></i></button>
+                            </div>
+                        </div>
+
+                        <hr class="border-info opacity-25 my-4" />
+
+                        <div class="mb-4">
+                            <label asp-for="Account" class="text-warning small mb-2 d-block">登入帳號</label>
+                            <input asp-for="Account" class="form-control order-input" placeholder="CREATE_USERNAME" />
+                            <span asp-validation-for="Account" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Password" class="text-warning small mb-2 d-block">初始密碼</label>
+                            <input asp-for="Password" class="form-control order-input" type="password" placeholder="MIN_8_CHARACTERS" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-0">
+                            <label asp-for="HireDate" class="text-info small mb-2 d-block">到職日</label>
+                            <input asp-for="HireDate" type="date" class="form-control order-input" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+
+                    <div class="alert  border border-info border-opacity-10 small text-warning font-monospace">
+                        <i class="bi bi-shield-exclamation me-2"></i>提醒：帳號建立後將自動啟動系統監視器，所有存取紀錄均會被加密儲存。
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            @* --- 底部操作區 --- *@
+            <div class="mt-5 pt-4 border-top border-info border-opacity-10 text-center">
+                <a asp-action="Index" class="btn-cyber btn-cyber-warning me-3">
+                    <i class="bi bi-x-circle me-2"></i>取消新增
+                </a>
+                <button type="submit" class="btn-cyber px-5">
+                    <i class="bi bi-cloud-upload-fill me-2"></i>新增並儲存
+                </button>
+            </div>
+        </form>
     </div>
 </div>
-<div asp-validation-summary="All" class="text-danger"></div>
+
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        // 1. 照片預覽
+        // 照片預覽
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
@@ -165,17 +195,51 @@
             }
         }
 
-        // 2. 切換行內新增區塊
-        function toggleInput(type, show = true) {
-            const selectArea = document.getElementById(`${type.toLowerCase()}SelectArea`);
-            const inputArea = document.getElementById(`${type.toLowerCase()}InputArea`);
-            selectArea.style.display = show ? 'none' : 'block';
-            inputArea.style.display = show ? 'block' : 'none';
+                // 🚩 戰術彈窗邏輯
+        function openQuickModal(type, mode) {
+            let title = (mode === 'CREATE') ? `NEW_${type}_REGISTRY` : `UPDATE_${type}_NAME`;
+            let currentId = (mode === 'EDIT') ? $(`#${type}ID`).val() : '';
+            let currentName = (mode === 'EDIT') ? $(`#${type}ID option:selected`).text() : '';
 
-            if (!show) { // 如果取消，清空手動輸入內容
-                document.getElementById(`New${type}ID`).value = '';
-                document.getElementById(`New${type}Name`).value = '';
+            if (mode === 'EDIT' && !currentId) {
+                alert("請先從選單中選擇要修改的項目");
+                return;
             }
+
+            // 使用 SweetAlert2 或自定義 Modal
+            Swal.fire({
+                title: title,
+                html: `
+                    <input id="qId" class="swal2-input" placeholder="ID (編號)" value="${currentId}" ${mode === 'EDIT' ? 'readonly' : ''}>
+                    <input id="qName" class="swal2-input" placeholder="Name (名稱)" value="${currentName}">
+                `,
+                background: '#000b1a',
+                confirmButtonColor: '#00f2ff',
+                showCancelButton: true,
+                preConfirm: () => {
+                    return { id: $('#qId').val(), name: $('#qName').val() };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = (mode === 'CREATE') ? `/Employees/QuickCreate${type}` : `/Employees/Update${type}`;
+
+                    $.post(url, result.value, function(res) {
+                        if (res.success) {
+                            if (mode === 'CREATE') {
+                                // 新增選項並選中
+                                const newOpt = new Option(res.name, res.id, true, true);
+                                $(`#${type}ID`).append(newOpt).trigger('change');
+                            } else {
+                                // 更新現有選項文字
+                                $(`#${type}ID option:selected`).text(res.name);
+                            }
+                            Swal.fire('PROTOCOL_COMPLETED', '數據庫同步成功', 'success');
+                        } else {
+                            Swal.fire('ERROR', res.message, 'error');
+                        }
+                    });
+                }
+            });
         }
     </script>
 }

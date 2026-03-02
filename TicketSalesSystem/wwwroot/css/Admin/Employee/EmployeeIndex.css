@@ -1,0 +1,77 @@
+﻿/* 🚩 表格數據行 (TD) 補強 */
+.cyber-table-fixed {
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* 行與行之間的間距 */
+}
+
+    .cyber-table-fixed td {
+        background: rgba(0, 242, 255, 0.03);
+        padding: 15px 10px !important;
+        border: none;
+        vertical-align: middle;
+    }
+    .cyber-table-fixed th .tech-key {
+        font-size: 1.2rem;
+    }
+    /* 🚩 迷你照片掃描器 */
+    .avatar-scanner-small {
+        width: 50px;
+        height: 50px;
+        border: 1px solid var(--tech-cyan); /* 保留原本的青色邊框 */
+        background: rgba(0, 242, 255, 0.1); /* 保留原本的半透明背景 */
+        /* 🚩 關鍵修改 1：刪除原本的 clip-path polygon 切角 */
+        /* clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%); */
+        /* 🚩 關鍵修改 2：加入 border-radius 變為圓形 */
+        border-radius: 50% !important;
+        overflow: hidden; /* 確保內部的圖片超出圓形的部分被剪裁 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-scanner-small img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* 確保圖片縮放填滿而不變形 */
+    }
+
+/* 🚩 狀態標籤內部圖示 (您要求的勾號圖示) */
+.status-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    background-color: #00ffc8;
+    color: #000;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-size: 0.7rem;
+    font-weight: 900;
+}
+
+/* 🚩 迷你操作按鈕 */
+.btn-cyber-icon {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    background: transparent;
+    transition: 0.3s;
+    text-decoration: none;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+}
+
+    .btn-cyber-icon:hover {
+        background: var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 10px var(--tech-cyan);
+    }
+.font-monospace small {
+    font-size: 1rem;
+}

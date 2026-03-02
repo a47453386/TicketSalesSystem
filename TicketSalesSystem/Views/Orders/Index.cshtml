@@ -3,67 +3,72 @@
 @{
     ViewData["Title"] = "訂單管理總覽";
 }
+
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Order/OrderIndex.css" asp-append-version="true" />
-
+@* 🚩 確保外層有 scope 鎖定 *@
 <div class="order-management-scope">
-    @* --- [Header] --- *@
-    <div class="d-flex justify-content-between align-items-end mb-4">
-        <div>
-            <h2 class="neon-header"><i class="bi bi-cart-check-fill"></i>@ViewData["Title"]</h2>
-        </div>
-    </div>
 
-    @* --- [Filter Section] --- *@
-    <div class="cyber-card">
-        <div class="tech-key small">搜尋</div>
+    @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
+    <div class="d-flex justify-content-between align-items-center mb-5 tech-label border-bottom border-info border-opacity-25 pb-3">
+        <h1 class="neon-header m-0">
+            <i class="bi bi-cart-check-fill me-3"></i>@ViewData["Title"]
+        </h1>
+        
+    </div>
+    
+
+    @* --- [2. 搜尋面板：利用 cyber-card 與 tech-key] --- *@
+    <div class="cyber-card mb-4">
+        <div class="tech-key">尋找</div>
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
             <div class="col-md-4">
-                <label class="opacity-50 small mb-2"><i class="bi bi-search me-1"></i>尋找</label>
-                <input type="text" name="searchString" class="form-control order-input" placeholder="請輸入關鍵字..." value="@Context.Request.Query["searchString"]" />
+                <label class="opacity-100 small mb-2"><i class="bi bi-search me-1"></i>關鍵字查詢</label>
+                <input type="text" name="searchString" class="form-control order-input"
+                       placeholder="輸入編號或姓名..." value="@Context.Request.Query["searchString"]" />
             </div>
             <div class="col-md-3">
-                <label class="opacity-50 small mb-2"><i class="bi bi-filter-left me-1"></i>狀態篩選</label>
+                <label class="opacity-100 small mb-2"><i class="bi bi-filter-left me-1"></i>狀態篩選</label>
                 <select name="statusFilter" class="form-select order-input" asp-items="ViewBag.StatusList">
                     <option value="" class="text-white-50">-- 請選擇 --</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-order-action w-100 py-2">
-                    <i class="bi bi- lightning-charge-fill me-2"></i>查詢
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-order-action btn-info-static w-100 py-2" style="background: rgba(0, 242, 255, 0.2) !important;">
+                    <i class="bi bi-lightning-charge-fill me-2"></i>查詢
                 </button>
-            </div>
-            <div class="col-md-1">
-                <a asp-action="Index" class="btn btn-outline-secondary w-100 py-2" style="font-size: 1rem;">
-                    <i class="bi bi-arrow-counterclockwise"></i>取消
+                <a asp-action="Index" class="btn btn-order-action border-secondary text-secondary py-2 px-3">
+                    <i class="bi bi-arrow-counterclockwise"></i>
                 </a>
             </div>
         </form>
     </div>
 
-    
-
-    @* --- [Data Matrix] --- *@
+    @* --- [3. 數據矩陣：HUD 表格化] --- *@
     <div class="table-container">
-        <table class="table order-table">
+        <table class="table order-table align-middle">
             <thead>
-                <tr class="text-center">
-                    <th>訂單編號</th>
-                    <th>會員姓名</th>
-                    <th>建立時間</th>
-                    <th>付款狀態</th>
-                    <th>訂單狀態</th>
-                    <th>問題</th>
-                    <th>操作</th>
+                <tr>
+                    @* 標頭統一採用 tech-key 風格 (置中且符合 1.2rem) *@
+                    <th style="width: 15%"><div class="tech-key w-100 m-0">訂單編號</div></th>
+                    <th style="width: 15%"><div class="tech-key w-100 m-0">會員姓名</div></th>
+                    <th style="width: 20%"><div class="tech-key w-100 m-0">建立時間</div></th>
+                    <th style="width: 12%"><div class="tech-key w-100 m-0">付款</div></th>
+                    <th style="width: 12%"><div class="tech-key w-100 m-0">狀態</div></th>
+                    <th style="width: 10%"><div class="tech-key w-100 m-0">客訴</div></th>
+                    <th style="width: 16%"><div class="tech-key w-100 m-0">系統操作</div></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td class="font-monospace text-info">@item.OrderID</td>
-                        <td class="opacity-75">@item.Member?.Name</td>
-                        <td class="font-monospace opacity-50">@item.OrderCreatedTime.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>
+                        <td class="font-monospace text-info fw-bold">@item.OrderID</td>
+                        <td class="opacity-100">@item.Member?.Name</td>
+                        <td class="font-monospace opacity-100">@item.OrderCreatedTime.ToString("yyyy-MM-dd HH:mm")</td>
+
+                        @* 🚩 保持原本的付款狀態樣態 *@
+                        <td class="text-center">
                             @if (item.PaymentStatus)
                             {
                                 <span class="status-badge tag-paid-outline">已付款</span>
@@ -73,7 +78,9 @@
                                 <span class="status-badge tag-secondary">未付款</span>
                             }
                         </td>
-                        <td>
+
+                        @* 🚩 保持原本的訂單狀態樣態 *@
+                        <td class="text-center">
                             @{
                                 var (tagClass, statusName) = item.OrderStatusID switch
                                 {
@@ -85,11 +92,13 @@
                             }
                             <span class="status-badge @tagClass">@statusName</span>
                         </td>
+
+                        @* 🚩 保持原本的問題樣態 (加上脈衝動畫) *@
                         <td class="text-center">
                             @if (item.Question != null && item.Question.Any())
                             {
-                                <span class="status-badge tag-danger">
-                                    <i class="bi bi-broadcast"></i> @item.Question.Count 個
+                                <span class="status-badge tag-danger animate-pulse-danger">
+                                    <i class="bi bi-broadcast me-1"></i>@item.Question.Count
                                 </span>
                             }
                             else
@@ -97,14 +106,13 @@
                                 <span class="opacity-25">-</span>
                             }
                         </td>
-                        <td class="text-end">
-                            <div class="btn-group">
-                                @* 詳情按鈕：鎖定為青色 (Cyan) *@
-                                <a asp-action="Details" asp-route-id="@item.OrderID" class="btn btn-sm btn-order-action btn-info-static px-3">
-                                    <i class="bi bi-eye-fill me-2"></i>詳細
-                                </a>
 
-                                @* 審核按鈕：鎖定為警告黃 (Warning Yellow) *@
+                        @* 🚩 保持原本的操作樣態 *@
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@item.OrderID" class="btn btn-sm btn-order-action btn-info-static px-3">
+                                    <i class="bi bi-eye-fill me-2"></i>
+                                </a>
                                 <a asp-action="Edit" asp-route-id="@item.OrderID" class="btn btn-sm btn-order-action btn-audit-static px-3">
                                     <i class="bi bi-shield-check me-2"></i>審核
                                 </a>
@@ -115,5 +123,4 @@
             </tbody>
         </table>
     </div>
-    
 </div>

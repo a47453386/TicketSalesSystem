@@ -1,0 +1,89 @@
+﻿/* 🚩 1. 會員頭像雷達風格 */
+.avatar-scanner {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--tech-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 242, 255, 0.1);
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+}
+
+/* 🚩 2. 表格比例分配 (確保 1.2rem 下不跑位) */
+.cyber-table-fixed {
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+    .cyber-table-fixed th {
+        padding: 0 !important;
+        border: none;
+    }
+
+        .order-management-scope .cyber-table-fixed th .tech-key {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 95% !important;
+    margin: 0 auto !important;
+    padding: 6px 5px;
+    font-size: 0.85rem;
+    color: #000 !important;
+    font-weight: 900;
+    white-space: nowrap;
+    overflow: hidden;
+    
+    /* 1. 形狀裁切 */
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%) !important;
+
+    /* 2. 強化版漸層：青色佔 85%，剩下的 15% 才變暗 */
+    /* 這裡使用 0% 和 85% 雙重鎖定實色區域 */
+    background: linear-gradient(90deg, 
+        var(--tech-cyan) 0%, 
+        var(--tech-cyan) 70%, 
+        rgba(0, 242, 255, 0.1) 100%
+    ) !important;
+}
+
+    .cyber-table-fixed td {
+        font-size: 0.95rem !important;
+        text-align: center !important;
+        vertical-align: middle;
+        padding: 12px 5px !important;
+        background: rgba(0, 242, 255, 0.02);
+        color: rgba(255,255,255,0.9);
+        overflow: hidden;
+        text-overflow: ellipsis; /* 超出部分顯示 ... */
+        white-space: nowrap; /* 強制不換行 */
+        vertical-align: middle;
+        padding: 12px 8px !important;
+    }
+        .cyber-table-fixed td:first-child {
+            white-space: normal;
+        }
+/* 🚩 3. 操作按鈕優化 */
+.btn-action-tech {
+    background: transparent;
+    border: 1px solid var(--tech-border);
+    color: var(--tech-cyan);
+    padding: 5px 10px;
+    transition: 0.3s;
+}
+
+    .btn-action-tech:hover {
+        background: var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 10px var(--tech-cyan);
+    }
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 20px;
+    font-weight: 900;
+    clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+    color: #000 !important;
+    font-size: 0.85rem;
+}

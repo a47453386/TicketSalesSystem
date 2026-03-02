@@ -1,0 +1,104 @@
+﻿/* 🚩 1. 詳情頁專屬戰術元件 */
+.tech-data-row {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+    .tech-data-row .data-label {
+        width: 110px; /* 固定寬距確保冒號對齊 */
+        flex-shrink: 0;
+        color: var(--tech-cyan);
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+    .tech-data-row .data-value {
+        flex-grow: 1;
+        color: #fff;
+        font-size: 1rem;
+    }
+
+/* 🚩 2. 戰術按鈕修正 */
+.btn-cyber {
+    background: transparent;
+    border: 1px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    padding: 6px 20px;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+    font-weight: 800;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+    .btn-cyber:hover {
+        background: var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 15px var(--tech-cyan);
+    }
+
+.btn-cyber-warning {
+    border-color: var(--tech-warning, #ffcc00);
+    color: var(--tech-warning, #ffcc00);
+}
+
+    .btn-cyber-warning:hover {
+        background: var(--tech-warning, #ffcc00);
+        color: #000;
+    }
+
+/* 🚩 3. 狀態標籤 (平行四邊形) */
+.status-badge-tech {
+    display: inline-block;
+    padding: 4px 15px;
+    font-weight: 900;
+    clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+    color: #000 !important;
+    font-size: 0.85rem;
+}
+
+/* 🚩 4. 表格欄位分配 */
+.cyber-table {
+    table-layout: fixed;
+    width: 100%;
+    border-spacing: 0 5px;
+}
+
+    .cyber-table th {
+        padding: 0 !important;
+        border: none;
+    }
+
+    .cyber-table td {
+        font-size: 0.9rem !important;
+        vertical-align: middle;
+        padding: 12px 10px !important;
+        background: rgba(0, 242, 255, 0.03);
+    }
+
+    .cyber-table th .tech-key {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 90%;
+        margin: 0 auto;
+        padding: 5px;
+        font-size: 0.75rem;
+        clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+        background: linear-gradient(180deg, var(--tech-cyan), rgba(0, 242, 255, 0.5));
+        color: #000 !important;
+    }
+
+.text-pixel-yellow {
+    color: #ffcc00;
+    text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+

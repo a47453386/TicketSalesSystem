@@ -1,0 +1,65 @@
+﻿/* 🚩 詳情頁專屬：數據列樣式 */
+.tech-data-row {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+    background: rgba(0, 242, 255, 0.02);
+    margin-bottom: 5px;
+}
+
+    .tech-data-row .data-label {
+        width: 140px;
+        color: var(--tech-cyan);
+        font-size:1.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+    .tech-data-row .data-value {
+        flex-grow: 1;
+        color: #fff;
+        font-size: 1.2rem;
+    }
+
+/* 🚩 頭像掃描器 */
+.profile-scanner {
+    width: 120px;
+    height: 120px;
+    border: 2px solid var(--tech-cyan);
+    position: relative;
+    background: rgba(0, 242, 255, 0.05);
+    clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+}
+
+    .profile-scanner i {
+        font-size: 4rem;
+        color: var(--tech-cyan);
+        text-shadow: 0 0 15px var(--tech-cyan);
+    }
+/* 🚩 已驗證：靜態綠 (Success Static) */
+.order-management-scope .btn-success-static,
+.order-management-scope .btn-success-static:hover {
+    background: rgba(0, 255, 136, 0.15) !important;
+    color: #00ff88 !important;
+    border: 1px solid #00ff88 !important;
+    opacity: 1 !important;
+    cursor: default !important;
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+}
+
+/* 🚩 未驗證：靜態紅 (Danger Static) */
+.order-management-scope .btn-danger-static,
+.order-management-scope .btn-danger-static:hover {
+    background: rgba(255, 51, 51, 0.15) !important;
+    color: #ff3333 !important;
+    border: 1px solid #ff3333 !important;
+    opacity: 1 !important;
+    cursor: default !important;
+    transform: none !important;
+    transition: none !important;
+}

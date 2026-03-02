@@ -1,0 +1,21 @@
+﻿/* 針對編輯頁面的細節微調 */
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--tech-cyan);
+    content: ">>";
+}
+
+/* 強化 Switch 在賽博風下的視覺 */
+.form-check-input:checked {
+    background-color: var(--tech-cyan);
+    border-color: var(--tech-cyan);
+    box-shadow: 0 0 8px var(--tech-cyan);
+}
+
+/* 唯讀輸入框模擬數據顯示 */
+.order-input[readonly] {
+    border-style: dashed !important;
+    color: rgba(0, 242, 255, 0.6) !important;
+}
+.tech-key {
+    font-size:1.5rem !important;
+}

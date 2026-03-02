@@ -1,154 +1,236 @@
-﻿/* 整合 CSS 區塊：確保 1.2rem 與靜態風格
-           此處僅列出關鍵覆寫，建議將完整 CSS 放入 OrderEdit.css
-        */
+﻿/* ==========================================================================
+   ORDER_TERMINAL_SPEC - 戰術決策終端規格 (v3.2)
+   適用於：審核、編輯、數據診斷頁面
+   ========================================================================== */
 
-/* --- [1. 核心變數與區域鎖定] --- */
+/* --- [1. 環境協議：全域 1.2rem 鎖定] --- */
+.order-management-scope .cyber-card {
+    /* 1. 確保寬度絕對跟隨 Bootstrap 欄位 */
+    width: 100% !important;
+    max-width: 100%;
+    /* 2. 建議改為 flex 佈局，方便內部內容垂直撐開 */
+    display: flex;
+    flex-direction: column;
+    /* 3. 在並排佈局中，讓卡片填滿 col 的高度 */
+    height: 100%;
+    /* 4. 修正 margin，避免左右擠壓到 Bootstrap 的 padding */
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 2rem;
+    /* 5. 確保 clip-path 不會切掉重要內容 (特別是右下角有按鈕時) */
+    /* 如果你的內容很擠，建議把 15px 縮小到 10px */
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+
+/* 🚩 解決 col-lg-5 內容太少導致「沒效果」的視覺問題 */
+.order-management-scope .row {
+    display: flex;
+    align-items: stretch; /* 🚩 關鍵：讓左右兩邊的 col 一樣高 */
+}
 .order-management-scope {
     --tech-cyan: #00f2ff;
-    --tech-bg: rgba(10, 10, 10, 0.9);
-    --tech-border: rgba(0, 242, 255, 0.25);
+    --tech-bg: rgba(6, 12, 20, 0.98);
+    --tech-border: rgba(0, 242, 255, 0.3);
     --tech-warning: #ffcc00;
     --tech-danger: #ff3333;
     --tech-success: #00ff88;
-    --tech-secondary: #444;
-    --base-font-size: 1.2rem;
-    --header-font-size: 3.5rem;
     background-color: #000 !important;
-    background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+    background-image: linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
     background-size: 50px 50px;
-    color: #e0e0e0 !important;
-    font-size: var(--base-font-size);
-    font-family: 'Segoe UI', 'Roboto', '微軟正黑體', sans-serif;
-    line-height: 1.6;
+    color: #fff !important;
+    font-size: 1.2rem !important; /* 強制執行 1.2rem */
+    font-family: 'Share Tech Mono', 'Orbitron', monospace;
     min-height: 100vh;
-    padding: 2rem;
 }
 
-    /* --- [2. 字體強制繼承 1.2rem] --- */
-    .order-management-scope p,
-    .order-management-scope div,
-    .order-management-scope td,
-    .order-management-scope th,
-    .order-management-scope span,
-    .order-management-scope label,
-    .order-management-scope input,
-    .order-management-scope select,
-    .order-management-scope textarea {
-        font-size: var(--base-font-size) !important;
-        color: #e0e0e0;
+    /* 強制所有文字元素繼承 1.2rem */
+    .order-management-scope :is(td, th, span, label, input, select, textarea, div, p) {
+        font-size: 1.2rem !important;
     }
 
-    /* --- [3. 標題與裝飾] --- */
+    /* --- [2. 標題與 HUD 顯示元件] --- */
     .order-management-scope .terminal-header {
-        font-size: var(--header-font-size);
+        font-size: 3.5rem !important;
         font-weight: 900;
-        letter-spacing: 6px;
-        color: var(--tech-cyan) !important;
-        text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
-        text-transform: uppercase;
-        margin-bottom: 0;
-    }
-
-    /* --- [4. 卡片系統 - 標頭透明化] --- */
-    .order-management-scope .audit-card {
-        background: var(--tech-bg);
-        border: 1px solid var(--tech-border);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-        margin-bottom: 2rem;
-    }
-
-    .order-management-scope .audit-card-header {
-        font-size: 1.3rem !important;
-        font-weight: 700;
-        background: linear-gradient(90deg, var(--tech-cyan), transparent);
-        color: #000 !important;
-        padding: 4px 20px;
-        clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
-        display: inline-block;
-        margin-bottom: 1.2rem;
+        letter-spacing: 8px;
+        color: #fff !important;
+        /* 多層霓虹光暈疊加 */
+        text-shadow: 0 0 5px #fff, 0 0 10px var(--tech-cyan), 0 0 20px var(--tech-cyan), 0 0 40px rgba(0, 242, 255, 0.5) !important;
         text-transform: uppercase;
     }
 
-    /* --- [5. 下拉選單與輸入框黑化] --- */
-    .order-management-scope .order-input,
-    .order-management-scope .audit-input {
-        background-color: rgba(20, 20, 20, 0.95) !important;
-        color: var(--tech-cyan) !important;
-        border: 1px solid var(--tech-border) !important;
-        padding: 10px 15px;
+    .order-management-scope .tech-sub-label {
+        font-size: 0.9rem !important; /* 副標題保持小字以利層次感 */
+        color: var(--tech-cyan);
+        opacity: 0.6;
+        letter-spacing: 4px;
+        margin-left: 5px;
     }
 
-        .order-management-scope .order-input option {
-            background-color: #111 !important;
-            color: #fff !important;
+    /* --- [3. 數據錄入模組：黑化 Input 與 Select] --- */
+    .order-management-scope .order-input.form-control,
+    .order-management-scope .order-input.form-select,
+    .order-management-scope .audit-input.form-control {
+        background-color: rgba(10, 10, 10, 0.9) !important;
+        /* 🚩 顯性顏色設定，避免變數失效 */
+        color: #00f2ff !important;
+        border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        border-radius: 0 !important;
+        /* 🚩 顯性字體與行高設定 */
+        font-size: 1.2rem !important;
+        line-height: 1.5 !important;
+        height: auto !important;
+        padding: 12px 15px;
+        opacity: 1 !important; /* 確保沒有被設定為透明 */
+        visibility: visible !important;
+    }
+        /* 🚩 強制修正自動填入導致的字體隱形 */
+        .order-management-scope .order-input.form-control:-webkit-autofill,
+        .order-management-scope .order-input.form-control:-webkit-autofill:hover,
+        .order-management-scope .order-input.form-control:-webkit-autofill:focus {
+            /* 使用內陰影蓋掉自動填入的黃/白色背景 */
+            -webkit-box-shadow: 0 0 0px 1000px rgba(10, 10, 10, 0.95) inset !important;
+            /* 強制文字顏色保持為青色 */
+            -webkit-text-fill-color: var(--tech-cyan) !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
+    /* 聚焦時的發光效果 */
+    .order-management-scope .order-input:focus {
+        border-color: var(--tech-cyan) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+        outline: none !important;
+    }
 
-    /* --- [6. 靜態戰術按鈕] --- */
+    /* 下拉選單內部選項黑化 */
+    .order-management-scope .order-input option {
+        background-color: #0c0c0c !important;
+        color: #fff !important;
+    }
+
+    /* --- [4. 靜態戰術按鈕：防位移、高對比] --- */
     .order-management-scope .btn-order-action {
-        font-size: 1.1rem !important;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 2px;
-        padding: 8px 18px;
+        padding: 10px 25px;
+        clip-path: polygon(0 0, 100% 0, 100% 75%, 90% 100%, 0 100%);
+        border-radius: 0;
+        transition: none !important; /* 🚩 移除所有動畫，維持靜態美感 */
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        clip-path: polygon(0 0, 100% 0, 100% 75%, 90% 100%, 0 100%);
-        border-radius: 0;
-        transition: none !important;
     }
 
-        .order-management-scope .btn-order-action:hover {
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
+    /* 資訊/返回 (靜態青色) */
     .order-management-scope .btn-info-static {
-        background: rgba(0, 242, 255, 0.1) !important;
+        background: rgba(0, 242, 255, 0.15) !important;
         border: 1px solid var(--tech-cyan) !important;
         color: var(--tech-cyan) !important;
     }
 
+    /* 審核/執行 (靜態警告黃) */
     .order-management-scope .btn-audit-static {
-        background: rgba(255, 204, 0, 0.1) !important;
+        background: rgba(255, 204, 0, 0.15) !important;
         border: 1px solid var(--tech-warning) !important;
         color: var(--tech-warning) !important;
     }
 
-    /* --- [7. 狀態標籤與表格] --- */
+    /* --- [5. 狀態標籤與脈衝動畫] --- */
     .order-management-scope .status-badge {
         display: inline-block;
-        padding: 6px 16px;
-        font-weight: 800;
-        text-transform: uppercase;
+        padding: 6px 20px;
+        font-weight: 900;
+        color: #000 !important;
         text-align: center;
-        min-width: 110px;
-        clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%);
-    }
-
-    .order-management-scope .bg-danger {
-        background: var(--tech-danger) !important;
-        animation: signal-pulse 1.5s infinite;
+        min-width: 120px;
+        clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
     }
 
     .order-management-scope .bg-success {
         background: var(--tech-success) !important;
-        color: #000 !important;
     }
 
     .order-management-scope .bg-warning {
         background: var(--tech-warning) !important;
-        color: #000 !important;
     }
 
-@keyframes signal-pulse {
+    .order-management-scope .bg-danger {
+        background: var(--tech-danger) !important;
+        color: #fff !important;
+        animation: signal-pulse-danger 1.5s infinite; /* 紅色狀態持續脈衝 */
+    }
+
+@keyframes signal-pulse-danger {
     0%, 100% {
-        opacity: 1;
         box-shadow: 0 0 0px var(--tech-danger);
+        opacity: 1;
     }
 
     50% {
-        opacity: 0.7;
-        box-shadow: 0 0 15px var(--tech-danger);
+        box-shadow: 0 0 20px var(--tech-danger);
+        opacity: 0.8;
     }
 }
+
+/* 戰術卡片標頭 (Tech-Key 改良版) */
+.order-management-scope .audit-card-header {
+    background: linear-gradient(90deg, var(--tech-cyan), transparent);
+    color: #000 !important;
+    font-weight: 900;
+    padding: 5px 25px;
+    clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    margin-bottom: 2rem;
+    display: inline-block;
+}
+/* 🚩 強化 Row 的 Flex 行為 */
+.order-management-scope .row {
+    display: flex !important;
+    flex-wrap: wrap;
+}
+
+/* 🚩 讓 Col 內部的子元素（cyber-card）自動撐滿高度 */
+.order-management-scope .col-lg-7,
+.order-management-scope .col-lg-5 {
+    display: flex;
+    flex-direction: column;
+}
+
+.order-management-scope .cyber-card {
+    flex: 1 1 auto; /* 🚩 讓卡片自動填滿父層 Col 的高度 */
+    width: 100% !important;
+    margin-bottom: 0 !important; /* 並排時移除底部外距 */
+}
+/* 🚩 1. 專門針對 textarea 的文字與背景修正 */
+.order-management-scope textarea.audit-input,
+.order-management-scope textarea.form-control {
+    background-color: rgba(10, 10, 10, 0.95) !important;
+    color: #00f2ff !important; /* 🚩 強制顯示青色文字 */
+    border: 1px solid var(--tech-border) !important;
+    /* 修正 Bootstrap 可能導致的文字裁切 */
+    background-clip: border-box !important;
+    line-height: 1.6 !important;
+    font-family: 'Share Tech Mono', '微軟正黑體', monospace !important;
+    /* 確保輸入時不會變成白色 */
+    -webkit-text-fill-color: #00f2ff !important;
+}
+
+    /* 🚩 2. 修正 Placeholder (提示文字) - 讓它呈現暗青色 */
+    .order-management-scope textarea.audit-input::placeholder {
+        color: rgba(0, 242, 255, 0.3) !important;
+        font-size: 1rem !important;
+        font-style: italic;
+    }
+
+    /* 🚩 3. 修正文字選取顏色 (選取時背景變青色，字變黑色) */
+    .order-management-scope textarea.audit-input::selection {
+        background: var(--tech-cyan);
+        color: #000;
+    }
+
+    /* 🚩 4. 聚焦時的邊框發光 */
+    .order-management-scope textarea.audit-input:focus {
+        border-color: var(--tech-cyan) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+        outline: none !important;
+        background-color: rgba(20, 20, 20, 1) !important;
+    }

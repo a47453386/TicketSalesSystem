@@ -1,103 +1,149 @@
 ﻿@model TicketSalesSystem.Models.Employee
 
 @{
-    ViewData["Title"] = "員工詳細資訊";
+    ViewData["Title"] = "員工詳細資訊 / BIO_REGISTRY";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Employee/EmployeeDetail.css" asp-append-version="true" />
 
-<div class="container mt-4">
-    <div class="card shadow-lg border-0">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="bi bi-person-badge"></i> 員工個人檔案</h4>
-            <span class="badge bg-primary">建立日期：@Model.CreatedTime.ToString("yyyy/MM/dd")</span>
+@* 🚩 確保外層有 scope 鎖定，套用戰術背景與字體 *@
+<div class="order-management-scope admin-body p-4">
+
+    @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <div>
+           @*  <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb m-0 p-0 bg-transparent">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">EMP_LIST</a></li>
+                    <li class="breadcrumb-item active text-white">PROFILE_DIAGNOSTICS</li>
+                </ol>
+            </nav> *@
+            <h1 class="neon-header m-0">
+                <i class="bi bi-person-badge me-3"></i>員工詳細資料
         </div>
+        <div class="text-end">
+            <div class="tech-key mb-0">建立日期: @Model.CreatedTime.ToString("yyyy-MM-dd")</div>
+        </div>
+    </div>
 
-        <div class="card-body p-4">
-            <div class="row">
-                <div class="col-md-4 text-center border-end">
-                    <div class="mb-3">
-                        @if (!string.IsNullOrEmpty(Model.Photo))
+    <div class="row g-4 align-items-stretch">
+        @* --- [2. 左側：身分識別面板] --- *@
+        <div class="col-lg-4">
+            <div class="cyber-card p-4 h-100 d-flex flex-column text-center">
+                <div class="tech-key mb-4 w-100">職位</div>
+
+                @* 🚩 修改後的圓形頭像 *@
+                <div class="profile-avatar-wrap mb-4">
+                    @if (!string.IsNullOrEmpty(Model.Photo))
+                    {
+                        <img src="~/Photos/employeePhotos/@Model.Photo" />
+                    }
+                    else
+                    {
+                        <img src="~/images/default-avatar.png" />
+                    }
+                </div>
+
+                <h2 class="text-white fw-bold mb-1">@Model.Name</h2>
+                <div class="font-monospace text-info opacity-100 mb-4">ID: #@Model.EmployeeID</div>
+
+                <hr class="border-info opacity-25" />
+
+                @* 快速狀態區 *@
+                <div class="d-grid gap-3 mt-3 text-start">
+                    <div class="p-3 border border-info border-opacity-10 bg-dark">
+                        <small class="text-info d-block opacity-100 font-monospace mb-1">職位</small>
+                        <span class="fw-bold text-white fs-5">@Model.Role?.RoleName</span>
+                    </div>
+
+                    <div class="p-3 border border-info border-opacity-10 bg-dark">
+                        <small class="text-info d-block opacity-100 font-monospace mb-1">帳號狀態</small>
+                        @if (Model.AccountStatusID == "A")
                         {
-                            <img src="~/Photos/employeePhotos/@Model.Photo"
-                                 class="img-thumbnail rounded-circle shadow"
-                                 style="width: 180px; height: 180px; object-fit: cover;" />
+                            <div class="status-badge">
+                                <span class="status-badge-icon">✓</span> @Model.AccountStatus?.AccountStatusName
+                            </div>
                         }
                         else
                         {
-                            <img src="~/images/default-avatar.png"
-                                 class="img-thumbnail rounded-circle shadow"
-                                 style="width: 180px; height: 180px;" />
+                            <div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;">
+                                <span class="status-badge-icon" style="background-color: #ff3333;">✕</span> @Model.AccountStatus?.AccountStatusName
+                            </div>
                         }
                     </div>
-                    <h3 class="fw-bold">@Model.Name</h3>
-                    <p class="text-muted">@Model.EmployeeID</p>
-                    <hr />
-                    <div class="d-grid gap-2">
-                        <div class="p-2 border rounded bg-light">
-                            <small class="text-muted d-block">目前職位</small>
-                            <span class="fw-bold">@Model.Role?.RoleName</span>
-                        </div>
-                        <div class="p-2 border rounded bg-light">
-                            <small class="text-muted d-block">帳號狀態</small>
-                            @if (Model.AccountStatusID == "A")
-                            {
-                                <span class="badge bg-success">@Model.AccountStatus?.AccountStatusName</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">@Model.AccountStatus?.AccountStatusName</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-8 ps-md-5">
-                    <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-card-list"></i> 基本資料</h5>
-                    <dl class="row">
-                        <dt class="col-sm-4 text-muted">身分證字號</dt>
-                        <dd class="col-sm-8 fw-bold">@Model.NationalID</dd>
-
-                        <dt class="col-sm-4 text-muted">性別</dt>
-                        <dd class="col-sm-8">@(Model.Gender ? "男" : "女")</dd>
-
-                        <dt class="col-sm-4 text-muted">生日</dt>
-                        <dd class="col-sm-8">@Model.Birthday.ToString("yyyy年MM月dd日")</dd>
-
-                        <dt class="col-sm-4 text-muted">到職日期</dt>
-                        <dd class="col-sm-8">@Model.HireDate.ToString("yyyy年MM月dd日")</dd>
-                    </dl>
-
-                    <h5 class="text-primary border-bottom pb-2 mb-3 mt-4"><i class="bi bi-telephone-inbound"></i> 聯絡資訊</h5>
-                    <dl class="row">
-                        <dt class="col-sm-4 text-muted">電子郵件</dt>
-                        <dd class="col-sm-8"><a href="mailto:@Model.Email">@Model.Email</a></dd>
-
-                        <dt class="col-sm-4 text-muted">手機電話</dt>
-                        <dd class="col-sm-8">@Model.Tel</dd>
-
-                        <dt class="col-sm-4 text-muted">公司分機</dt>
-                        <dd class="col-sm-8">@Model.Extension</dd>
-
-                        <dt class="col-sm-4 text-muted">通訊地址</dt>
-                        <dd class="col-sm-8">@Model.Address</dd>
-                    </dl>
-
-                    <h5 class="text-primary border-bottom pb-2 mb-3 mt-4"><i class="bi bi-shield-lock"></i> 帳號資訊</h5>
-                    <dl class="row">
-                        <dt class="col-sm-4 text-muted">登入帳號</dt>
-                        <dd class="col-sm-8 fw-bold">@Model.EmployeeLogin?.Account</dd>
-
-                        <dt class="col-sm-4 text-muted">最後登入時間</dt>
-                        <dd class="col-sm-8">@(Model.LastLoginTime?.ToString("yyyy/MM/dd HH:mm") ?? "尚未登入過")</dd>
-                    </dl>
                 </div>
             </div>
         </div>
 
-        <div class="card-footer bg-light text-end p-3">
-            <a asp-action="Index" class="btn btn-secondary me-2">返回列表</a>
-            <a asp-action="Edit" asp-route-id="@Model.EmployeeID" class="btn btn-primary px-4">
-                <i class="bi bi-pencil-square"></i> 編輯此員工
-            </a>
+        @* --- [3. 右側：核心數據矩陣] --- *@
+        <div class="col-lg-8">
+            <div class="cyber-card p-4 h-100">
+
+                @* 基本資料段 *@
+                <div class="tech-key mb-4">基本資料</div>
+                <div class="row g-0 mb-5">
+                    <div class="col-md-6 cyber-data-item">
+                        <label>身分證字號</label>
+                        <span class="font-monospace">@Model.NationalID</span>
+                    </div>
+                    <div class="col-md-6 cyber-data-item">
+                        <label>性別</label>
+                        <span>@(Model.Gender ? " 男" : "女")</span>
+                    </div>
+                    <div class="col-md-6 cyber-data-item">
+                        <label>生日</label>
+                        <span class="font-monospace">@Model.Birthday.ToString("yyyy-MM-dd")</span>
+                    </div>
+                    <div class="col-md-6 cyber-data-item">
+                        <label>入職日</label>
+                        <span class="font-monospace text-info">@Model.HireDate.ToString("yyyy-MM-dd")</span>
+                    </div>
+                </div>
+
+                @* 聯絡資訊段 *@
+                <div class="tech-key mb-4">聯絡資訊</div>
+                <div class="row g-0 mb-5">
+                    <div class="col-12 cyber-data-item">
+                        <label>信箱</label>
+                        <span class="text-info">@Model.Email</span>
+                    </div>
+                    <div class="col-md-6 cyber-data-item">
+                        <label>手機號碼</label>
+                        <span class="font-monospace">@Model.Tel</span>
+                    </div>
+                    <div class="col-md-6 cyber-data-item">
+                        <label>分機號碼</label>
+                        <span class="font-monospace">@Model.Extension</span>
+                    </div>
+                    <div class="col-12 cyber-data-item">
+                        <label>通訊地址</label>
+                        <span>@Model.Address</span>
+                    </div>
+                </div>
+
+                @* 帳號安全段 *@
+                <div class="tech-key mb-4">帳號資訊</div>
+                <div class="row g-0">
+                    <div class="col-md-6 cyber-data-item">
+                        <label>帳號</label>
+                        <span class="text-white fw-bold">@Model.EmployeeLogin?.Account</span>
+                    </div>
+                    <div class="col-md-6 cyber-data-item">
+                        <label>最後登入時間</label>
+                        <span class="font-monospace opacity-50">@(Model.LastLoginTime?.ToString("yyyy/MM/dd HH:mm") ?? "N/A")</span>
+                    </div>
+                </div>
+
+                @* 底部操作區 *@
+                <div class="mt-auto pt-5 text-end">
+                    <a asp-action="Index" class="btn-cyber btn-cyber-warning me-3">
+                        <i class="bi bi-arrow-left me-2"></i>回清單
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.EmployeeID" class="btn-cyber">
+                        <i class="bi bi-pencil-square me-2"></i>更新
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

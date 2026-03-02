@@ -1,110 +1,135 @@
 ﻿@model TicketSalesSystem.Models.Member
 
 @{
-    ViewData["Title"] = "會員詳細資料";    
+    ViewData["Title"] = "會員詳細資料";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Member/MemberDetail.css" asp-append-version="true" />
 
-<div class="container mt-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-action="Index">會員管理</a></li>
-            <li class="breadcrumb-item active">會員詳情</li>
-        </ol>
-    </nav>
+<div class="order-management-scope admin-body p-4">
 
-    <div class="row">
+    @* --- [1. 頂部導航與標頭] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <div>
+@*             <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb m-0 p-0 bg-transparent">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">MEMBER_LIST</a></li>
+                    <li class="breadcrumb-item active text-white opacity-100">DIAGNOSTICS</li>
+                </ol>
+            </nav> *@
+            <h1 class="neon-header m-0">
+                <i class="bi bi-person-badge-fill me-3"></i>會員詳細資訊
+            </h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="AdminEdit" asp-route-id="@Model.MemberID" class="btn-cyber btn-cyber-warning">
+                <i class="bi bi-shield-check me-2"></i>[ 會員資料更新 ]
+            </a>
+            <a asp-action="Index" class="btn-cyber">
+                <i class="bi bi-arrow-left-circle me-2"></i>[ 回到清單 ]
+            </a>
+        
+        </div>
+    </div>
+
+    <div class="row g-4 align-items-stretch">
+        @* --- [2. 左側：識別與驗證終端] --- *@
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body text-center py-5">
-                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
-                        <i class="bi bi-person-fill display-3"></i>
-                    </div>
-                    <h4 class="fw-bold mb-1">@Model.Name</h4>
-                    <p class="text-muted mb-3">@@@ViewData["Account"]</p>
+            <div class="cyber-card p-4 h-100 d-flex flex-column">
+                <div class="tech-key mb-4">狀態</div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">手機認證狀態</label>
-                        <div class="input-group">
-                            <input asp-for="Tel" class="form-control" readonly /> @* 認證時手機通常不讓改 *@
-
-                            @if (Model.IsPhoneVerified)
-                            {
-                                <span class="btn btn-success disabled"><i class="bi bi-check-circle"></i> 已認證</span>
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-outline-primary" id="btnSendSMS">發送驗證碼</button>
-                            }
-                        </div>
-
-                        @if (!Model.IsPhoneVerified)
-                        {
-                            <div class="mt-2 card bg-light border-0 shadow-sm" id="verifyBox" style="display:none;">
-                                <div class="card-body">
-                                    <div class="input-group">
-                                        <input type="text" id="inputVerifyCode" class="form-control" placeholder="請輸入 6 位驗證碼" maxlength="6">
-                                        <button type="button" class="btn btn-primary" id="btnSubmitSMS">提交驗證</button>
-                                    </div>
-                                    <small class="text-muted mt-2 d-block" id="timerText"></small>
-                                </div>
-                            </div>
-                        }
+                <div class="text-center py-4 mb-4" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(0, 242, 255, 0.1);">
+                    <div class="profile-scanner d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="bi bi-person-fill"></i>
                     </div>
-                    <hr />
-                    <div class="text-start px-3">
-                        <small class="text-muted d-block">會員編號 (GUID)</small>
-                        <code class="small text-break">@Model.MemberID</code>
-                    </div>
+                    <h3 class="text-white fw-bold mb-1">@Model.Name</h3>
+                    <div class="font-monospace text-info small opacity-100">@@@ViewData["Account"]</div>
+                </div>
+
+                @* 手機驗證終端 *@
+                <div class="input-group">
+                    @* 手機號碼欄位 *@
+                    <input asp-for="Tel" class="form-control order-input opacity-100" readonly />
+
+                    @if (Model.IsPhoneVerified)
+                    {
+                        @* 🚩 TRUE: 已驗證狀態 (靜態綠色) *@
+                        <span class="btn btn-order-action btn-success-static disabled px-3">
+                            <i class="bi bi-patch-check-fill me-1"></i> [ 已驗證 ]
+                        </span>
+                    }
+                    else
+                    {
+                        @* 🚩 FALSE: 未驗證狀態 (標籤 + 發送按鈕) *@
+                        <span class="btn btn-order-action btn-danger-static disabled px-2" style="border-right: none;">
+                            <i class="bi bi-exclamation-octagon-fill me-1"></i> [ 未驗證 ]
+                        </span>
+
+                        <button type="button" class="btn btn-order-action btn-audit-static px-3" id="btnSendSMS">
+                            <i class="bi bi-broadcast me-1"></i> [ DISPATCH_SIGNAL ]
+                        </button>
+                    }
+                </div>
+
+                <div class="mt-4 p-3 border border-info border-opacity-10 font-monospace">
+                    <div class="text-info small opacity-50 mb-1">會員編號:</div>
+                    <div class="small text-break opacity-75">@Model.MemberID</div>
                 </div>
             </div>
         </div>
 
+        @* --- [3. 右側：數據矩陣詳情] --- *@
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-card-text me-2"></i>詳細資料</h5>
-                    <div class="btn-group">
-                        <a asp-action="AdminEdit" asp-route-id="@Model.MemberID" class="btn btn-sm btn-dark">
-                            <i class="bi bi-pencil-square me-1"></i>編輯此會員
-                        </a>
+            <div class="cyber-card p-4 h-100">
+                <div class="tech-key mb-4">基本資料</div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">身份證字號</div>
+                    <div class="data-value font-monospace">@Model.NationalID</div>
+                </div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">性別</div>
+                    <div class="data-value">@(Model.Gender == true ? "男" : "女")</div>
+                </div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">生日</div>
+                    <div class="data-value font-monospace">@Model.Birthday.ToString("yyyy-MM-dd")</div>
+                </div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">電話</div>
+                    <div class="data-value text-info fw-bold font-monospace">@Model.Tel</div>
+                </div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">信箱</div>
+                    <div class="data-value">@Model.Email</div>
+                </div>
+
+                <div class="tech-data-row">
+                    <div class="data-label">地址</div>
+                    <div class="data-value">@Model.Address</div>
+                </div>
+
+                <div class="tech-data-row border-0">
+                    <div class="data-label">建立時間</div>
+                    <div class="data-value font-monospace opacity-100">
+                        @Model.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <table class="table mb-0">
-                        <tbody>
-                            <tr>
-                                <th class="ps-4 py-3 bg-light" style="width: 30%;">身分證字號</th>
-                                <td class="ps-4 py-3">@Model.NationalID</td>
-                            </tr>
-                            <tr>
-                                <th class="ps-4 py-3 bg-light">性別</th>
-                                <td class="ps-4 py-3">@(Model.Gender == true ? "男" : "女")</td>
-                            </tr>
-                            <tr>
-                                <th class="ps-4 py-3 bg-light">出生日期</th>
-                                <td class="ps-4 py-3">@Model.Birthday.ToString("yyyy-MM-dd")</td>
-                            </tr>
-                            <tr>
-                                <th class="ps-4 py-3 bg-light">手機號碼</th>
-                                <td class="ps-4 py-3 text-primary fw-bold">@Model.Tel</td>
-                            </tr>
-                            <tr>
-                                <th class="ps-4 py-3 bg-light">電子郵件</th>
-                                <td class="ps-4 py-3">@Model.Email</td>
-                            </tr>
-                            <tr>
-                                <th class="ps-4 py-3 bg-light">通訊地址</th>
-                                <td class="ps-4 py-3">@Model.Address</td>
-                            </tr>
-                            <tr>
-                                <th class="ps-4 py-3 bg-light">註冊時間</th>
-                                <td class="ps-4 py-3 text-muted">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer bg-white py-3 text-end">
-                    <a asp-action="Index" class="btn btn-outline-secondary">返回列表</a>
+
+                @* 底部修飾裝飾線 *@
+                <div class="mt-5 pt-4 border-top border-info border-opacity-10 d-flex justify-content-between align-items-center">
+                    <div class="small font-monospace text-info opacity-100">會員狀態</div>
+                    <div class="text-end">
+                        @* 🚩 顏色維持 ID 判斷，文字改為讀取 AccountStatusName *@
+                        <span class="status-badge  @(Model.AccountStatusID == "A" ? "bg-success" : "bg-danger")">
+                            <i class="bi bi-shield-shaded me-1"></i>
+                            @(Model.AccountStatus?.AccountStatusName ?? "STATUS_UNKNOWN")
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -113,74 +138,53 @@
 
 @section Scripts {
     <script>
-            $(function() {
-            // 🚩 建議改用 .on 綁定，確保按鈕狀態切換後事件依然存在
+        $(function() {
             $(document).on("click", "#btnSendSMS", function() {
                 var $btn = $(this);
-
-                // 防止重複點擊 (發送中...)
-                $btn.prop('disabled', true).text("處理中...");
+                $btn.prop('disabled', true).text("SYNCING...");
 
                 $.post("/Members/SendSmsCode", { id: "@Model.MemberID" }, function(res) {
                     if (res.success) {
-                        // 🚩 清除舊的輸入內容，讓使用者知道是新的開始
                         $("#inputVerifyCode").val("");
                         $("#verifyBox").slideDown();
                         startTimer(60, $btn);
                     } else {
                         alert(res.message);
-                        $btn.prop('disabled', false).text("重新發送驗證碼");
+                        $btn.prop('disabled', false).text("RETRY_SIGNAL");
                     }
                 }).fail(function() {
-                    alert("系統錯誤，請稍後再試");
-                    $btn.prop('disabled', false).text("重新發送驗證碼");
+                    alert("SYSTEM_CRITICAL_ERROR");
+                    $btn.prop('disabled', false).text("RETRY_SIGNAL");
                 });
             });
 
             function startTimer(duration, $button) {
                 var timer = duration;
-                $button.prop('disabled', true);
-
                 var interval = setInterval(function () {
                     var seconds = parseInt(timer % 60, 10);
-                    $button.text(seconds + " 秒後可重發");
-
+                    $button.text(seconds + "s RE-ARM");
                     if (--timer < 0) {
                         clearInterval(interval);
-                        // 🚩 倒數結束，徹底恢復按鈕
-                        $button.prop('disabled', false).text("重新發送驗證碼");
+                        $button.prop('disabled', false).text("RE-SEND SIGNAL");
                     }
                 }, 1000);
             }
 
             $(document).on("click", "#btnSubmitSMS", function() {
-            var code = $("#inputVerifyCode").val(); // 取得輸入框的 6 位數
-            var memberId = "@Model.MemberID";
-
-            if (code.length < 6) {
-                alert("請輸入完整的 6 位驗證碼");
-                return;
-            }
-
-            // 傳送到後端的 VerifySmsCode Action
-            $.post("/Members/SubmitVerifyCode", { id: memberId, inputCode: code }, function(res) {
-                if (res.success) {
-                    alert("✅ " + res.message);
-                    // 驗證成功後，通常會直接重新整理頁面，顯示「已驗證」的標籤
-                    location.reload();
-                } else {
-                    alert("❌ " + res.message);
-                    $("#inputVerifyCode").val(""); // 密碼錯了就清空，讓使用者重打
+                var code = $("#inputVerifyCode").val();
+                if (code.length < 6) {
+                    alert("INVALID_SIGNAL_LENGTH");
+                    return;
                 }
-            }).fail(function() {
-                alert("系統連線失敗，請稍後再試");
+                $.post("/Members/SubmitVerifyCode", { id: "@Model.MemberID", inputCode: code }, function(res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("❌ VERIFICATION_FAILED: " + res.message);
+                        $("#inputVerifyCode").val("");
+                    }
+                });
             });
         });
-
-
-        });
-
-
-                
     </script>
 }

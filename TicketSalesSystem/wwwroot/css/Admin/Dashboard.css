@@ -1,0 +1,69 @@
+﻿.cyber-table .status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: var(--base-font) !important; /* 🚩 要求的 1.2rem */
+    font-weight: 800;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 110px;
+    clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%);
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+/* --- 數據矩陣滿版優化 --- */
+.cyber-table {
+    width: 100% !important;
+    table-layout: fixed; /* 🚩 這是防止往左擠的關鍵，強制平分或按比例分配空間 */
+    border-collapse: separate;
+    border-spacing: 0 8px; /* 增加行距，營造 HUD 懸浮感 */
+    margin: 0 !important;
+}
+
+    /* 🚩 手動定義每一欄的寬度比例，加起來必須是 100% */
+    .cyber-table th:nth-child(1), .cyber-table td:nth-child(1) {
+        width: 35%;
+        text-align: left;
+        padding-left: 20px !important;
+    }
+    /* 時間 */
+    .cyber-table th:nth-child(2), .cyber-table td:nth-child(2) {
+        width: 25%;
+        text-align: center;
+    }
+    /* 帳號 */
+    .cyber-table th:nth-child(3), .cyber-table td:nth-child(3) {
+        width: 15%;
+        text-align: center;
+    }
+    /* 金額 */
+    .cyber-table th:nth-child(4), .cyber-table td:nth-child(4) {
+        width: 25%;
+        text-align: center;
+    }
+    /* 狀態 */
+
+    /* 標頭與儲存格通用設定 */
+    .cyber-table th, .cyber-table td {
+        vertical-align: middle;
+        white-space: nowrap; /* 防止字數多時換行擠壓排版 */
+        overflow: hidden;
+        text-overflow: ellipsis; /* 萬一文字太長會顯示 ... */
+        background: rgba(0, 242, 255, 0.03); /* 淡淡的底色增加層次 */
+    }
+
+    /* 狀態標籤維持固定寬度，在置中的單元格內呈現 */
+    .cyber-table .status-badge {
+        display: inline-block;
+        width: 110px; /* 🚩 固定寬度，避免斜切角變形 */
+        padding: 6px 0;
+        font-size: 1rem !important;
+        font-weight: 800;
+        clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%);
+        border: none;
+    }
+
+/* 移除容器可能造成的縮放問題 */
+.table-responsive {
+    overflow-x: hidden !important; /* 滿版時隱藏水平捲軸 */
+    padding: 0 !important;
+}

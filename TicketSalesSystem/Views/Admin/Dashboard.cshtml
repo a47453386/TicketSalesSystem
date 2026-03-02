@@ -1,16 +1,17 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.Order>
 
 @{
-    ViewData["Title"] = "營運戰情室 / OPERATIONS_CENTER";
+    ViewData["Title"] = "營運戰情室";
 }
 
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Dashboard.css" asp-append-version="true" />
 <div class="admin-body p-3">
     @* --- 1. 頂部標題 (套用 Neon-Header 與 Cyber-Card 組合) --- *@
     <div class="text-center mb-5">
         <div class="d-inline-block p-3 cyber-card px-5">
             <h1 class="neon-header mb-0">
-                <i class="bi bi-shield-shaded me-3"></i>售票後台管理系統
+                <i class="bi bi-shield-shaded me-3"></i>售票後台管理系統即時監測
             </h1>
         </div>
     </div>
@@ -19,13 +20,13 @@
     <div class="row text-center g-3 mb-4">
         <div class="col-md-3">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key">TOTAL_REVENUE / 總累計營收</div>
+                <div class="tech-key">總累計營收</div>
                 <h3 class="fw-bold mb-0 text-white">NT$ @ViewBag.TotalSales.ToString("N0")</h3>
             </div>
         </div>
         <div class="col-md-3">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key">SALES_RATE / 銷售率</div>
+                <div class="tech-key">銷售率</div>
                 <h3 class="fw-bold mb-0">@ViewBag.SalesRate% <span class="small opacity-50">(@ViewBag.TotalTicketsSold 張)</span></h3>
                 <div class="progress mt-2" style="height: 6px;">
                     <div class="progress-bar bg-info shadow-glow" style="width: @ViewBag.SalesRate%"></div>
@@ -34,13 +35,13 @@
         </div>
         <div class="col-md-3">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key">MEMBERS / 累計會員數</div>
+                <div class="tech-key">累計會員數</div>
                 <h3 class="fw-bold mb-0">@ViewBag.MemberCount <span class="small opacity-50">位</span></h3>
             </div>
         </div>
         <div class="col-md-3">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger), transparent);">TASKS / 客訴數量</div>
+                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger), transparent 140%);">客訴數量</div>
                 <h3 class="fw-bold text-danger mb-0">@ViewBag.PendingRefunds <span class="small opacity-50 text-white">Pending</span></h3>
             </div>
         </div>
@@ -50,14 +51,14 @@
     <div class="row g-3 mb-4">
         <div class="col-lg-5">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key"><i class="bi bi-bar-chart-fill me-2"></i>SALES_ANALYSIS / 活動銷售分析</div>
+                <div class="tech-key"><i class="bi bi-bar-chart-fill me-2"></i>活動銷售分析</div>
                 <div style="height: 200px;"><canvas id="salesAreaChart"></canvas></div>
             </div>
         </div>
 
         <div class="col-lg-5">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key"><i class="bi bi-activity me-2"></i>24H_TREND / 銷售趨勢</div>
+                <div class="tech-key"><i class="bi bi-activity me-2"></i>24H銷售趨勢</div>
                 <div style="height: 200px;"><canvas id="salesVelocityChart"></canvas></div>
             </div>
         </div>
@@ -65,7 +66,7 @@
         <div class="col-lg-2">
             <div class="cyber-card h-100 d-flex flex-column justify-content-center align-items-center p-2 text-center">
                 <div class="spinner-grow text-success mb-2 shadow-glow" role="status"></div>
-                <div class="tech-key" style="font-size: 0.8rem !important; padding: 2px 10px;">SERVICE_STATUS</div>
+                <div class="tech-key" style="font-size: 0.8rem !important; padding: 2px 10px;">數據回收</div>
                 <div class="small text-white-50">掃描過期訂單中...</div>
             </div>
         </div>
@@ -75,8 +76,8 @@
     <div class="row g-3">
         <div class="col-lg-4">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger), transparent);">
-                    <i class="bi bi-bell-fill me-2"></i>ALERTS / 庫存預警
+                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger),transparent 140%);">
+                    <i class="bi bi-bell-fill me-2"></i>場館、票區預警
                 </div>
                 <div class="overflow-auto custom-scroll" style="max-height: 250px;" id="alertsContainer">
                     @* AJAX 載入 *@
@@ -86,94 +87,17 @@
 
         <div class="col-lg-5">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key"><i class="bi bi-pie-chart-fill me-2"></i>ORDER_DISTRIBUTION / 狀態分佈</div>
+                <div class="tech-key"><i class="bi bi-pie-chart-fill me-2"></i>訂單狀態分佈</div>
                 <div style="height: 250px;"><canvas id="orderStatusChart"></canvas></div>
             </div>
         </div>
 
         <div class="col-lg-3">
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key"><i class="bi bi-list-check me-2"></i>WAITING_LIST / 待處理</div>
+
+                <div class="tech-key"><i class="bi bi-list-check me-2"></i>待處理</div>
+
                 <div class="list-group list-group-flush mt-2">
-                    <a asp-controller="Questions" asp-action="Index" class="list-group-item bg-transparent text-white border-info border-opacity-25 d-flex justify-content-between px-0">
-                        <span>客服提問</span><span class="badge rounded-pill bg-danger">@ViewBag.PendingRefunds</span>
-                    </a>
-                    <a asp-controller="Programmes" asp-action="AdminIndex" class="list-group-item bg-transparent text-white border-info border-opacity-25 d-flex justify-content-between px-0">
-                        <span>活動審核</span><span class="badge rounded-pill bg-warning text-dark">@ViewBag.PendingProgramme</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @* --- 5. 最近交易數據 --- *@
-    <div class="cyber-card p-4 mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="tech-key" style="margin-bottom: 0;"><i class="bi bi-list-ul me-2"></i>TRANSACTION_STREAM / 最近交易數據</div>
-            <a asp-controller="Orders" asp-action="Index" class="tech-link-icon"><i class="bi bi-arrow-right-circle-fill fs-4"></i></a>
-        </div>
-
-        <div class="table-responsive">
-            <table class="cyber-table">
-                <thead>
-                    <tr>
-                        <th>時間</th>
-                        <th>帳號</th>
-                        <th>金額</th>
-                        <th>狀態</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="text-info font-monospace">@item.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm:ss")</td>
-                            <td class="fw-bold">@item.Member?.Name</td>
-                            <td class="text-white fw-bold">@item.Tickets.Sum(t => t.TicketsArea.Price).ToString("C0")</td>
-                            <td>
-                                <span class="badge @(item.OrderStatusID == "Y" ? "bg-success text-dark" : "bg-warning text-dark")">
-                                    @item.OrderStatus?.OrderStatusName
-                                </span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-    @* --- 4. 數據流與圓餅圖 --- *@
-    <div class="row g-3">
-        <div class="col-lg-4">
-            <div class="cyber-card p-3 h-100">
-                <div class="tech-label mb-3 border-bottom border-danger pb-2 text-danger">
-                    <i class="bi bi-bell-fill me-2"></i>各票區配置預警
-                </div>
-                <div class="overflow-auto" style="max-height: 250px;" id="alertsContainer">
-                    @* AJAX 載入 *@
-                </div>
-            </div>
-        </div>
-
-        @* 🚩 修改：最近交易串流改為顯示圓餅圖 *@
-        <div class="col-lg-5">
-            <div class="cyber-card p-3 h-100">
-                <div class="tech-label mb-3 border-bottom border-info pb-2">
-                    <i class="bi bi-pie-chart-fill me-2"></i>訂單狀態分佈
-                </div>
-                <div style="height: 250px; position: relative;">
-                    <canvas id="orderStatusChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3">
-            <div class="cyber-card p-3 h-100">
-                <div class="tech-label mb-3 border-bottom border-info pb-2">
-                    <i class="bi bi-list-check me-2"></i>待處理區
-                </div>
-                <div class="list-group list-group-flush small">
                     <a asp-controller="Questions" asp-action="Index" class="list-group-item bg-transparent text-white border-info border-opacity-25 d-flex justify-content-between px-0">
                         <span>客服提問</span><span class="badge rounded-pill bg-danger shadow-glow">@ViewBag.PendingRefunds</span>
                     </a>
@@ -191,38 +115,33 @@
         </div>
     </div>
 
-    @* 最近交易數據串流 (移至下方或獨立區塊) *@
-    <div class="cyber-card p-3 mt-4">
-        <div class="d-flex justify-content-between align-items-center tech-label mb-3 border-bottom border-info pb-2">
-            <div>
-                <i class="bi bi-list-ul me-2"></i>最近交易數據
-            </div>
-
-            <a asp-controller="Orders" asp-action="Index" class="tech-link-icon">
-                <i class="bi bi-arrow-right-circle-fill fs-5"></i>
-            </a>
+    @* --- 5. 最近交易數據 --- *@
+    <div class="cyber-card p-4 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="tech-key" style="margin-bottom: 0;"><i class="bi bi-list-ul me-2"></i>最近交易數據</div>
+            <a asp-controller="Orders" asp-action="Index" class="tech-link-icon"><i class="bi bi-arrow-right-circle-fill fs-4"></i></a>
         </div>
 
         <div class="table-responsive">
-            <table class="w-100 cyber-table small text-center">
+            <table class="cyber-table">
                 <thead>
                     <tr>
-                        <th>時間</th>
-                        <th>帳號</th>
-                        <th>金額</th>
-                        <th>狀態</th>
+                        <th><i class="bi bi-clock-history me-2"></i>時間</th>
+                        <th><i class="bi bi-person-badge me-2"></i>會員</th>
+                        <th><i class="bi bi-currency-dollar me-2"></i>金額</th>
+                        <th><i class="bi bi-shield-check me-2"></i>狀態</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td class="text-info">@item.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm:ss")</td>
+                            <td class="text-info font-monospace">@item.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm:ss")</td>
                             <td class="fw-bold">@item.Member?.Name</td>
-                            <td class="neon-text-sharp">@item.Tickets.Sum(t => t.TicketsArea.Price).ToString("C0")</td>
+                            <td class="text-white fw-bold">@item.Tickets.Sum(t => t.TicketsArea.Price).ToString("C0")</td>
                             <td>
-                                <span class="@(item.OrderStatusID == "Y" ? "text-success" : "text-warning")">
-                                    ● @item.OrderStatus?.OrderStatusName
+                                <span class="status-badge @(item.OrderStatusID == "Y" ? "bg-success text-dark" : "bg-warning text-dark")">
+                                    @item.OrderStatus?.OrderStatusName
                                 </span>
                             </td>
                         </tr>
@@ -233,6 +152,7 @@
     </div>
 </div>
 
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -242,8 +162,14 @@
             Chart.defaults.font.family = "'Share Tech Mono', monospace";
 
             const commonScales = {
-                x: { ticks: { color: '#00f2ff' }, grid: { color: 'rgba(0, 242, 255, 0.1)' } },
-                y: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(0, 242, 255, 0.1)' } }
+            x: {
+                ticks: { color: 'rgba(0, 242, 255, 0.7)', font: { size: 10 } },
+                grid: { color: 'rgba(0, 242, 255, 0.05)' } // 🚩 降低網格線亮度
+            },
+            y: {
+                ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 10 } },
+                grid: { color: 'rgba(0, 242, 255, 0.05)' }
+            }
             };
 
             // 1. Bar Chart
@@ -303,12 +229,15 @@
 
             // 4. Alerts
             function loadLiveAlerts() {
-                fetch('/Admin/GetLiveAlerts').then(res => res.json()).then(data => {
+                   fetch('/Admin/GetLiveAlerts').then(res => res.json()).then(data => {
                     const container = document.getElementById('alertsContainer');
                     container.innerHTML = data.map(alert => `
-                        <div class="p-2 border-start border-${alert.level} border-4 bg-white bg-opacity-10 mb-2">
-                            <div class="tech-label text-${alert.level}" style="font-size:0.7rem;">[ ALERT_${alert.level.toUpperCase()} ]</div>
-                            <div class="text-white small">${alert.message}</div>
+                        <div class="p-2 border-start border-${alert.level} border-4 mb-2"
+                             style="background: rgba(255, 255, 255, 0.03); border-color: var(--tech-${alert.level}) !important;">
+                            <div class="tech-label text-${alert.level}" style="font-size:0.7rem; color: var(--tech-${alert.level}) !important;">
+                                [ ALERT_${alert.level.toUpperCase()} ]
+                            </div>
+                            <div class="text-white small opacity-75">${alert.message}</div>
                         </div>
                     `).join('');
                 });

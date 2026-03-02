@@ -13,7 +13,7 @@
     --tech-danger: #ff3333;
     --tech-success: #00ff88;
     --base-font-size: 1.2rem;
-    --header-font-size: 3.5rem;
+    --header-font-size: 2.8rem;
     --base-font: 1.2rem;
     background-color: #000 !important;
     background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
@@ -39,15 +39,7 @@
     }
 
     /* --- [3. 標題與標籤系統] --- */
-    .order-management-scope .neon-header {
-        font-size: var(--header-font-size);
-        font-weight: 900;
-        letter-spacing: 6px;
-        color: var(--tech-cyan) !important;
-        text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
-        text-transform: uppercase;
-        margin-bottom: 0;
-    }
+    
 
     .order-management-scope .tech-sub-label {
         font-size: 0.9rem !important;
@@ -93,11 +85,21 @@
             box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
         }
 
-    /* --- [5. 訂單數據表格 (HUD 表格化)] --- */
+
+
+/* --- [5. 訂單數據表格 (HUD 表格化)] --- */
     .order-management-scope .table-container {
-        background: var(--tech-bg);
-        border: 1px solid var(--tech-border);
-        padding: 1rem;
+        background: var(--panel-bg) !important;
+        border: 1px solid var(--tech-cyan) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        backdrop-filter: blur(8px);
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+        transition: all 0.3s ease;
+        /* 穩定性設定 */
+        max-width: 100%;
+        width: 100%;
+        position: relative;
+        overflow: hidden; /* 確保內容不破壞斜切角 */
     }
 
     .order-management-scope .table {
@@ -215,39 +217,41 @@
         text-shadow: 0 0 5px var(--tech-cyan);
     }
     .order-management-scope .order-input {
-        background-color: rgba(20, 20, 20, 0.95) !important; /* 深色背景 */
-        color: var(--tech-cyan) !important; /* 青色文字 */
-        border: 1px solid var(--order-border) !important;
-        font-size: 1.2rem !important; /* 🚩 確保 1.2rem */
+        background-color: rgba(10, 10, 10, 0.95) !important;
+        color: var(--tech-cyan) !important;
+        border: 1px solid var(--tech-border) !important;
+        font-size: 1.2rem !important;
+        border-radius: 0 !important; /* 賽博風去圓角 */
         padding: 10px 15px;
-        cursor: pointer;
-        appearance: none; /* 移除瀏覽器預設箭頭，稍後自定義 */
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300f2ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 16px 12px;
+        transition: all 0.3s ease;
     }
 
-        /* 🚩 關鍵：強制修改下拉選項後的背景 (Option) */
-        .order-management-scope .order-input option {
-            background-color: #111 !important; /* 確保下拉後的底色是黑的 */
-            color: #fff !important; /* 選項文字為白色 */
-            padding: 10px;
-            font-size: 1.2rem !important;
-        }
+    /* 🚩 2. 針對「文字輸入框」的特別修正 (移除下拉箭頭) */
+    .order-management-scope input[type="text"].order-input {
+        background-image: none !important; /* 🚩 關鍵：文字框不需要下拉箭頭 */
+    }
 
-        /* 當選單被聚焦時的發光效果 */
-        .order-management-scope .order-input:focus {
-            border-color: var(--tech-cyan) !important;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
-            outline: none;
-        }
+    /* 🚩 3. 針對「下拉選單」的特別修正 (保留自定義箭頭) */
+    .order-management-scope select.order-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300f2ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 1rem center !important;
+        background-size: 16px 12px !important;
+        padding-right: 2.5rem !important;
+    }
 
-        /* 針對行動裝置或特定瀏覽器的優化 */
-        .order-management-scope .order-input:-webkit-autofill {
-            -webkit-text-fill-color: var(--tech-cyan) !important;
-            -webkit-box-shadow: 0 0 0px 1000px #111 inset !important;
-        }
+    /* 🚩 4. 共同的 Focus 效果 (發光邊框) */
+    .order-management-scope .order-input:focus {
+        border-color: var(--tech-cyan) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+        outline: none !important;
+    }
+
+    /* 🚩 5. 修正 Placeholder 顏色 (讓它看起來像暗掉的燈管) */
+    .order-management-scope .order-input::placeholder {
+        color: rgba(0, 242, 255, 0.3) !important;
+    }
 @keyframes cyber-pulse {
     0%, 100% {
         opacity: 1;

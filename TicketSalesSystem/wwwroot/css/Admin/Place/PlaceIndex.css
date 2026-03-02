@@ -1,0 +1,142 @@
+﻿.venue-img-tech {
+    width: 100px;
+    height: 70px;
+    object-fit: cover;
+    border: 1px solid var(--tech-cyan);
+    padding: 2px;
+    background: #000;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); /* 圖片也做斜切感 */
+    transition: all 0.3s;
+}
+
+    .venue-img-tech:hover {
+        box-shadow: 0 0 15px var(--tech-cyan);
+        transform: scale(1.05);
+    }
+
+/* 戰術按鈕修正 */
+.btn-cyber-primary {
+    background: rgba(0, 242, 255, 0.1);
+    border: 1px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    padding: 6px 20px;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+    .btn-cyber-primary:hover {
+        background: var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 20px var(--tech-cyan);
+    }
+
+/* 🚩 滿版表格欄位比例分配 */
+.cyber-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+    .cyber-table th:nth-child(1) {
+        width: 120px;
+    }
+    /* 平面圖 */
+    .cyber-table th:nth-child(2) {
+        width: 20%;
+    }
+    /* 名稱 */
+    .cyber-table th:nth-child(4) {
+        width: 120px;
+    }
+    /* 區域 */
+    .cyber-table th:nth-child(5) {
+        width: 120px;
+    }
+    /* 座位 */
+    .cyber-table th:nth-child(6) {
+        width: 160px;
+    }
+/* 操作 */
+
+/* 數據標籤樣式 */
+.badge-tech {
+    background: rgba(0, 242, 255, 0.1);
+    border: 1px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    padding: 4px 12px;
+    font-weight: 700;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+}
+
+.text-pixel-yellow {
+    color: #ffcc00;
+    text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+/* 🚩 1. 強化表格基礎結構 */
+.cyber-table {
+    width: 100% !important;
+    table-layout: fixed; /* 鎖定欄寬 */
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    display: table !important; /* 強制回復表格模式 */
+}
+
+    /* 🚩 2. 強制 <tr> 絕對不能換行或變成 flex */
+    .cyber-table thead tr {
+        display: table-row !important;
+    }
+
+    /* 🚩 3. 修正 <th> 寬度與行為 */
+    .cyber-table th {
+        display: table-cell !important;
+        vertical-align: middle;
+        padding: 0 20px !important; /* 減少外部間距，給內部空間 */
+    }
+
+        /* 🚩 4. 重新定義 <th> 內部的 tech-key */
+        .cyber-table th .tech-key {
+            display: flex !important; /* 改用 flex 確保文字置中 */
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%; /* 撐滿 th 寬度 */
+            margin: 0;
+            padding: 8px 15px 8px 10px; /* 🚩 調整這裡的 padding 控制標籤高度與寬度 */
+            white-space: nowrap; /* 絕對不准文字換行 */
+            font-size: 0.85rem; /* 稍微縮小字體確保能塞進去 */
+            /* 修正斜切角：標頭建議用左右對稱的梯形，視覺較穩 */
+            clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+            background: linear-gradient(180deg, var(--tech-cyan), rgba(0, 242, 255, 0.5));
+            color: #000 !important;
+            font-weight: 900;
+        }
+
+        /* 🚩 5. 精確分配欄位比例 (總和須為 100%) */
+        .cyber-table th:nth-child(1) {
+            width: 100px;
+        }
+        /* 平面圖 */
+        .cyber-table th:nth-child(2) {
+            width: 20%;
+        }
+        /* 名稱 */
+        .cyber-table th:nth-child(3) {
+            width: 30%;
+        }
+        /* 地址 (把原本的 auto 改成固定比例) */
+        .cyber-table th:nth-child(4) {
+            width: 15%;
+        }
+        /* 區域 */
+        .cyber-table th:nth-child(5) {
+            width: 15%;
+        }
+        /* 座位 */
+        .cyber-table th:nth-child(6) {
+            width: 120px;
+        }
+/* 操作 */

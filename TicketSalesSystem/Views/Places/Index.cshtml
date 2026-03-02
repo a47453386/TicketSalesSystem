@@ -3,99 +3,13 @@
 @{
     ViewData["Title"] = "場館系統總覽 / VENUE_MANAGEMENT";
 }
-
-<style>
-    /* 🚩 1. 核心規格同步 */
-    body.admin-body {
-        font-size: 1.2rem !important;
-        background-color: var(--tech-bg);
-        color: #fff;
-        font-family: 'Share Tech Mono', monospace;
-    }
-
-    /* 🚩 2. 銳利霓虹字體 (白字核心 + 藍光暈) */
-    .neon-text-sharp {
-        color: #ffffff !important;
-        text-shadow: 0 0 5px var(--tech-cyan), 0 0 10px rgba(0, 242, 255, 0.5);
-        font-weight: bold;
-    }
-
-    /* 🚩 3. 科技感連結/按鈕 */
-    .btn-cyber-primary {
-        background: transparent;
-        border: 2px solid var(--tech-cyan);
-        color: var(--tech-cyan);
-        padding: 8px 20px;
-        clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
-        font-weight: bold;
-    }
-
-        .btn-cyber-primary:hover {
-            background: var(--tech-cyan);
-            color: #000;
-            box-shadow: 0 0 20px var(--tech-cyan);
-        }
-
-    /* 🚩 4. 數位掃描圖片框 */
-    .venue-img-tech {
-        width: 80px;
-        height: 60px;
-        object-fit: cover;
-        border: 1px solid var(--tech-cyan);
-        padding: 2px;
-        background: #000;
-        position: relative;
-    }
-
-    /* 🚩 5. 科技表格規格 */
-    .cyber-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 8px;
-    }
-
-        .cyber-table thead th {
-            color: var(--tech-cyan);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid var(--tech-cyan);
-            padding: 15px;
-            font-size: 1rem;
-        }
-
-        .cyber-table tbody tr {
-            background: rgba(0, 242, 255, 0.05);
-            transition: all 0.2s;
-        }
-
-            .cyber-table tbody tr:hover {
-                background: rgba(0, 242, 255, 0.15);
-                transform: scale(1.005);
-            }
-
-        .cyber-table td {
-            padding: 15px;
-            border-top: 1px solid rgba(0, 242, 255, 0.1);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-        }
-
-    /* 狀態標籤 */
-    .badge-tech {
-        background: rgba(0, 242, 255, 0.1);
-        border: 1px solid var(--tech-cyan);
-        color: var(--tech-cyan);
-        padding: 5px 12px;
-        font-size: 0.9rem;
-    }
-</style>
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Place/PlaceIndex.css" asp-append-version="true" />
 
 <div class="admin-body p-4">
     @* --- 頂部標題與操作 --- *@
     <div class="d-flex justify-content-between align-items-center mb-5 tech-label border-bottom border-info border-opacity-25 pb-3">
-        <h1 class="neon-text-sharp m-0">
+        <h1 class="neon-header m-0">
             <i class="bi bi-building-fill me-3"></i>場館系統總覽
         </h1>
         <a asp-action="Create" class="btn-cyber-primary">
@@ -109,12 +23,12 @@
             <table class="cyber-table align-middle">
                 <thead>
                     <tr>
-                        <th class="text-center">平面圖</th>
-                        <th>場館名稱</th>
-                        <th>地址址</th>
-                        <th class="text-center">區域數量</th>
-                        <th class="text-center">總座位數</th>
-                        <th class="text-center">系統操作</th>
+                        <th class="tech-key">平面圖</th>
+                        <th class="tech-key">場館名稱</th>
+                        <th class="tech-key">地址</th>
+                        <th class="tech-key">區域數量</th>
+                        <th class="tech-key">總座位數</th>
+                        <th class="tech-key">系統操作</th>
                     </tr>
                 </thead>
                 <tbody>

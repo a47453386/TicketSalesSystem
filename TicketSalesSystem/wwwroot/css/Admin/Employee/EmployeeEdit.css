@@ -1,0 +1,51 @@
+﻿/* 🚩 專屬編輯頁樣式：圓形頭像上傳 */
+.profile-avatar-edit-wrap {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+    border: 2px solid var(--tech-cyan);
+    border-radius: 50% !important;
+    padding: 5px;
+    background: rgba(0, 242, 255, 0.05);
+    position: relative;
+}
+
+    .profile-avatar-edit-wrap img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50% !important;
+        object-fit: cover;
+    }
+
+.avatar-edit-label {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--tech-cyan);
+    color: #000;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--tech-cyan);
+    transition: 0.3s;
+}
+
+    .avatar-edit-label:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px var(--tech-cyan);
+    }
+
+/* 自定義 Radio 按鈕 */
+.custom-cyber-radio .form-check-input {
+    background-color: transparent;
+    border-color: var(--tech-cyan);
+}
+
+    .custom-cyber-radio .form-check-input:checked {
+        background-color: var(--tech-cyan);
+        box-shadow: 0 0 10px var(--tech-cyan);
+    }

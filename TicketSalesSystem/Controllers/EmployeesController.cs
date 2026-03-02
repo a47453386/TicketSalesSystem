@@ -105,33 +105,6 @@ namespace TicketSalesSystem.Controllers
             {
                 try
                 {
-                    //處理角色新增
-                    if(!string.IsNullOrEmpty(vm.NewRoleID) && !string.IsNullOrEmpty(vm.NewRoleName))
-                    {
-                        // 檢查重複 (避免編號衝突)
-                        if (await _context.Role.AnyAsync(r => r.RoleID == vm.NewRoleID))
-                        {
-                            ModelState.AddModelError("NewRoleID", "此角色編號已存在");
-                            throw new Exception("Duplicate RoleID");
-                        }
-                        _context.Role.Add(new Role { RoleID = vm.NewRoleID, RoleName = vm.NewRoleName });
-                        vm.RoleID = vm.NewRoleID; // 🚩 強制將員工關聯到新角色
-                    }
-
-                    //處理帳號狀態新增
-                    if (!string.IsNullOrEmpty(vm.NewAccountStatusID) && !string.IsNullOrEmpty(vm.NewAccountStatusName))
-                    {
-                        if (await _context.AccountStatus.AnyAsync(s => s.AccountStatusID == vm.NewAccountStatusID))
-                        {
-                            ModelState.AddModelError("NewAccountStatusID", "此狀態編號已存在");
-                            throw new Exception("Duplicate StatusID");
-                        }
-                        _context.AccountStatus.Add(new AccountStatus { AccountStatusID = vm.NewAccountStatusID, AccountStatusName = vm.NewAccountStatusName });
-                        vm.AccountStatusID = vm.NewAccountStatusID; // 🚩 強制將員工關聯到新狀態
-                    }
-                    // 先儲存主檔變動，確保外鍵關聯正確
-                    await _context.SaveChangesAsync();
-
                     //產生新的 EmployeeID
                     var emID = await _idService.GetNextEmployeeID(vm.RoleID);
 
@@ -266,27 +239,6 @@ namespace TicketSalesSystem.Controllers
 
                     if(employee == null) return NotFound();
 
-                    //新增角色
-                    if (!string.IsNullOrEmpty(vm.NewRoleID) && !string.IsNullOrEmpty(vm.NewRoleName))
-                    {
-                        if (!await _context.Role.AnyAsync(r => r.RoleID == vm.NewRoleID))
-                        {
-                            _context.Role.Add(new Role { RoleID = vm.NewRoleID, RoleName = vm.NewRoleName });
-                            vm.RoleID = vm.NewRoleID;
-                        }
-                    }
-
-                    // 新增狀態
-                    if (!string.IsNullOrEmpty(vm.NewAccountStatusID) && !string.IsNullOrEmpty(vm.NewAccountStatusName))
-                    {
-                        if (!await _context.AccountStatus.AnyAsync(s => s.AccountStatusID == vm.NewAccountStatusID))
-                        {
-                            _context.AccountStatus.Add(new AccountStatus { AccountStatusID = vm.NewAccountStatusID, AccountStatusName = vm.NewAccountStatusName });
-                            vm.AccountStatusID = vm.NewAccountStatusID;
-                        }
-                    }
-
-                    await _context.SaveChangesAsync();
 
                     //處裡照片更新
                     if (vm.PhotoFile != null && vm.PhotoFile.Length > 0)
@@ -405,6 +357,61 @@ namespace TicketSalesSystem.Controllers
             ViewData["RoleID"] = new SelectList(_context.Role, "RoleID", "FullDisplayName", selectedRole);
         }
 
+        // 🚩 處理新角色新增邏輯
+        [HttpPost]
+        public async Task<IActionResult> QuickCreateRole(string id, string name)
+        {
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name))
+                return Json(new { success = false, message = "請輸入完整的角色編號與名稱" });
+
+            if (await _context.Role.AnyAsync(r => r.RoleID == id))
+                return Json(new { success = false, message = "角色編號已存在" });
+
+            var role = new Role { RoleID = id, RoleName = name };
+            _context.Role.Add(role);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, id = id, name = name });
+        }
+
+        
+        [HttpPost]
+        public async Task<IActionResult> UpdateRole(string id, string name)
+        {
+            var role = await _context.Role.FindAsync(id);
+            if (role == null) return Json(new { success = false, message = "找不到該角色" });
+
+            role.RoleName = name;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, id = id, name = name });
+        }
+
+        // 🚩 [POST] 快速新增帳號狀態
+        [HttpPost]
+        public async Task<IActionResult> QuickCreateStatus(string id, string name)
+        {
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name))
+                return Json(new { success = false, message = "請輸入完整的狀態編號與名稱" });
+
+            if (await _context.AccountStatus.AnyAsync(s => s.AccountStatusID == id))
+                return Json(new { success = false, message = "狀態編號已存在" });
+
+            var status = new AccountStatus { AccountStatusID = id, AccountStatusName = name };
+            _context.AccountStatus.Add(status);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, id = id, name = name });
+        }
+
+        // 🚩 [POST] 快速編輯帳號狀態名稱
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(string id, string name)
+        {
+            var status = await _context.AccountStatus.FindAsync(id);
+            if (status == null) return Json(new { success = false, message = "找不到該狀態" });
+
+            status.AccountStatusName = name;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, id = id, name = name });
+        }
 
     }
 }

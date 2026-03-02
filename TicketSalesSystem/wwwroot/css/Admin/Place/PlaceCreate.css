@@ -1,206 +1,110 @@
-﻿
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
-
-:root {
-    --tech-cyan: #00f2ff;
-    --tech-blue: #004d66;
-    --tech-bg: #000b1a;
-    --tech-border: rgba(0, 242, 255, 0.3);
-    --panel-bg: rgba(0, 20, 40, 0.85);
-    --neon-glow: 0 0 10px rgba(0, 242, 255, 0.5);
+﻿/* 🚩 1. 針對表單元件的戰術優化 */
+.tech-input {
+    background: rgba(0, 242, 255, 0.03) !important;
+    border: 1px solid var(--tech-border) !important;
+    color: var(--tech-cyan) !important;
+    border-radius: 0 !important;
+    font-family: 'Share Tech Mono', monospace;
+    transition: all 0.3s ease;
 }
 
-/* --- 2. 全域背景與基礎規格 --- */
-body.admin-body {
-    background-color: var(--tech-bg) !important;
-    color: #ffffff !important;
-    font-family: 'Share Tech Mono', 'Orbitron', monospace;
-    font-size: 1.2rem !important; /* 🚩 統一 1.2rem 規格 */
-    margin: 0;
-    /* 數位網格背景 */
-    background-image: radial-gradient(circle at 50% 50%, #001a33 0%, #000b1a 100%), linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
-    background-attachment: fixed;
-}
-
-/* --- 3. 銳利霓虹字體 (解決字體太糊問題) --- */
-.neon-text-sharp {
-    color: #ffffff !important;
-    /* 🚩 縮小模糊半徑，加入 1px 硬邊緣增加清晰度 */
-    text-shadow: 0 0 4px var(--tech-cyan), 0 0 1px #ffffff;
-    font-weight: bold;
-    letter-spacing: 1px;
-}
+    .tech-input:focus {
+        background: rgba(0, 242, 255, 0.1) !important;
+        border-color: var(--tech-cyan) !important;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.3) !important;
+        outline: none;
+    }
 
 .tech-label {
-    color: var(--tech-cyan) !important;
+    color: var(--tech-cyan);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    display: block;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    font-weight: 700;
     margin-bottom: 8px;
+    display: block;
 }
 
-/* --- 4. 終極表單修正 (解決白底與字體灰問題) --- */
-/* 強制覆蓋所有輸入框，包括動態產生的 */
-.tech-input,
-.admin-body input,
-.admin-body select,
-.admin-body textarea,
-.cyber-table input,
-.cyber-table select {
-    background-color: rgba(0, 0, 0, 0.8) !important; /* 🚩 絕對黑底防止變白 */
-    border: 1px solid var(--tech-border) !important;
-    color: #ffffff !important; /* 🚩 強制純白文字 (#ffffff) */
-    font-size: 1.2rem !important;
-    border-radius: 0 !important;
-    padding: 10px 15px;
-    transition: all 0.3s ease;
-    outline: none;
-}
-
-/* 修正下拉選單 (Select) 的箭頭與選項 */
-select.tech-input, .admin-body select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300f2ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
-    background-position: right 0.75rem center;
-    background-size: 16px 12px;
-    background-repeat: no-repeat;
-    appearance: none;
-    padding-right: 2.5rem;
-}
-
-    select.tech-input option, .admin-body select option {
-        background-color: #000b1a !important;
-        color: #ffffff !important;
-    }
-
-.tech-input:focus, input:focus, select:focus {
-    border-color: var(--tech-cyan) !important;
-    box-shadow: 0 0 12px rgba(0, 242, 255, 0.5) !important;
-    background-color: rgba(0, 242, 255, 0.05) !important;
-}
-
-/* --- 5. 科技感卡片與面板 --- */
-.cyber-card {
-    background: var(--panel-bg);
-    border: 1px solid var(--tech-cyan);
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
-    /* 裝甲切角設計 */
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-    padding: 20px;
-    position: relative;
-    transition: all 0.3s;
-}
-
-    .cyber-card:hover {
-        box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);
-        background: rgba(0, 30, 60, 0.85);
-    }
-
-/* --- 6. 數據串流表格 --- */
-.cyber-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px; /* 行與行之間的間隔 */
-}
-
-    .cyber-table thead th {
-        color: var(--tech-cyan);
-        text-transform: uppercase;
-        font-weight: bold;
-        border-bottom: 2px solid var(--tech-cyan);
-        padding: 15px;
-        background: rgba(0, 242, 255, 0.05);
-    }
-
-    .cyber-table tbody tr {
-        background: rgba(0, 242, 255, 0.03);
-        transition: all 0.2s;
-    }
-
-        .cyber-table tbody tr:hover {
-            background: rgba(0, 242, 255, 0.1);
-            transform: translateX(5px);
-        }
-
-    .cyber-table td {
-        padding: 12px;
-        border-top: 1px solid rgba(0, 242, 255, 0.1);
-        border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-        color: #ffffff;
-    }
-
-/* --- 7. 戰甲式按鈕 --- */
+/* 🚩 2. 戰術按鈕 */
 .btn-cyber {
     background: transparent;
-    border: 2px solid var(--tech-cyan);
+    border: 1px solid var(--tech-cyan);
     color: var(--tech-cyan);
-    font-weight: bold;
+    padding: 8px 25px;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+    font-weight: 800;
     text-transform: uppercase;
-    padding: 10px 25px;
-    clip-path: polygon(0 0, 100% 0, 100% 75%, 90% 100%, 0 100%);
     transition: all 0.3s;
     cursor: pointer;
-    font-family: 'Orbitron', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
 }
 
     .btn-cyber:hover {
         background: var(--tech-cyan);
-        color: #000b1a;
-        box-shadow: 0 0 20px var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 15px var(--tech-cyan);
     }
 
-.tech-link-icon {
-    color: var(--tech-cyan) !important;
-    text-shadow: 0 0 8px var(--tech-cyan);
-    transition: all 0.3s;
-    text-decoration: none;
+.btn-cyber-success {
+    border-color: #00ff88;
+    color: #00ff88;
 }
 
-    .tech-link-icon:hover {
-        color: #ffffff !important;
-        text-shadow: 0 0 15px var(--tech-cyan);
-        transform: scale(1.1);
+    .btn-cyber-success:hover {
+        background: #00ff88;
+        box-shadow: 0 0 15px #00ff88;
     }
 
-/* --- 8. 彈窗與遮罩 --- */
-.modal-content {
-    background: var(--tech-bg) !important;
-    border: 2px solid var(--tech-cyan) !important;
-    color: #fff !important;
-    border-radius: 0 !important;
-    clip-path: polygon(0 0, 95% 0, 100% 5%, 100% 100%, 5% 100%, 0 95%);
-    backdrop-filter: blur(15px);
+/* 🚩 3. 圖片預覽區域 (掃描器風格) */
+.preview-scanner {
+    border: 1px solid var(--tech-border);
+    background: repeating-linear-gradient(0deg, rgba(0,242,255,0.03) 0px, rgba(0,242,255,0.03) 1px, transparent 1px, transparent 2px);
+    background-size: 100% 4px;
+    position: relative;
+    overflow: hidden;
 }
 
-.modal-backdrop.show {
-    backdrop-filter: blur(5px); /* 背景自動霧化 */
-    background-color: rgba(0, 0, 0, 0.7);
+/* 🚩 4. 表格欄位比例分配 */
+.cyber-table {
+    table-layout: fixed;
+    width: 100%;
 }
 
-/* --- 9. 特效與動畫 --- */
-.dot-blink {
-    animation: tech-pulse 2s infinite;
-}
-
-@keyframes tech-pulse {
-    0% {
-        opacity: 1;
-        transform: scale(1);
+    .cyber-table th:nth-child(1) {
+        width: 18%;
     }
 
-    50% {
-        opacity: 0.4;
-        transform: scale(1.1);
+    .cyber-table th:nth-child(2) {
+        width: 12%;
     }
 
-    100% {
-        opacity: 1;
-        transform: scale(1);
+    .cyber-table th:nth-child(3) {
+        width: 80px;
     }
-}
 
-.shadow-glow {
-    box-shadow: 0 0 10px var(--tech-cyan);
-}
+    .cyber-table th:nth-child(4) {
+        width: 25%;
+    }
+
+    .cyber-table th:nth-child(5) {
+        width: 20%;
+    }
+
+    .cyber-table th:nth-child(6) {
+        width: 60px;
+    }
+
+    .cyber-table th .tech-key {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 6px 5px;
+        font-size: 0.85rem;
+        clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+        background: linear-gradient(180deg, var(--tech-cyan), rgba(0, 242, 255, 0.5));
+        color: #000 !important;
+        font-weight: 900;
+    }

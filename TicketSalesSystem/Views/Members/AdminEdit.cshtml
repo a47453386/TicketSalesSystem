@@ -1,129 +1,134 @@
 ﻿@model TicketSalesSystem.ViewModel.Member.VMMemberAdminEdit
 
 @{
-    ViewData["Title"] = "後台會員管理 - 更新";
+    ViewData["Title"] = "會員權限核心 / IDENTITY_CONTROL";
 }
 
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-action="Index">會員列表</a></li>
-            <li class="breadcrumb-item active">管理員編輯</li>
-        </ol>
-    </nav>
+@* 🚩 載入戰術規格 CSS *@
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Member/MemberEdit.css" asp-append-version="true" />
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-dark text-white p-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-shield-lock-fill me-2"></i> 會員權限管理</h5>
-            <span class="badge bg-secondary">會員編號: @Model.MemberID</span>
+
+<div class="order-management-scope admin-body p-4">
+
+    @* --- [1. 頂部標頭：HUD 診斷風格] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <div>
+            @* <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb mb-0" style="background: transparent; padding: 0;">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info opacity-75 text-decoration-none">會員清單</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">會員資料更新</li>
+                </ol>
+            </nav> *@
+            <h1 class="neon-header m-0">
+                <i class="bi bi-shield-lock-fill me-3"></i>會員資料更新
+            </h1>
         </div>
-
-        <div class="card-body p-4">
-            <form asp-action="AdminEdit" method="post">
-                @* 🚩 必要隱藏欄位 *@
-                <input type="hidden" asp-for="MemberID" />
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <div class="row">
-                    <div class="col-md-8 border-end pe-md-4">
-                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
-                            <i class="bi bi-person-lines-fill me-1"></i> 基本聯絡資料
-                        </h6>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Account" class="form-label text-muted small">登入帳號</label>
-                                <input asp-for="Account" class="form-control-plaintext fw-bold ps-2 bg-light rounded" readonly />
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Name" class="form-label fw-bold">姓名</label>
-                                <input asp-for="Name" class="form-control" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Tel" class="form-label fw-bold text-danger">手機號碼 (唯讀)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light"><i class="bi bi-phone-mute"></i></span>
-                                    @* 🚩 設定為 readonly 並加上 bg-light 灰色外觀 *@
-                                    <input asp-for="Tel" class="form-control bg-light" readonly />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Birthday" class="form-label fw-bold">生日</label>
-                                <input asp-for="Birthday" type="date" class="form-control" />
-                                <span asp-validation-for="Birthday" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="NationalID" class="form-label fw-bold">身分證字號</label>
-                                <input asp-for="NationalID" type="text" class="form-control" />
-                                <span asp-validation-for="NationalID" class="text-danger"></span>
-                            </div>
-
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label fw-bold">電子郵件</label>
-                            <input asp-for="Email" class="form-control" readonly />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Address" class="form-label fw-bold">聯絡地址</label>
-                            <textarea asp-for="Address" class="form-control" rows="2" readonly></textarea>
-                            <span asp-validation-for="Address" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 ps-md-4">
-                        <h6 class="text-danger fw-bold mb-3 border-bottom pb-2">
-                            <i class="bi bi-gear-wide-connected me-1"></i> 帳號狀態控制
-                        </h6>
-
-                        <div class="p-3 bg-light rounded border mb-4">
-                            <div class="mb-3">
-                                <label asp-for="AccountStatusID" class="form-label fw-bold">帳號目前狀態</label>
-                                <select asp-for="AccountStatusID" class="form-select border-primary" asp-items="ViewBag.AccountStatusID"></select>
-                                <span asp-validation-for="AccountStatusID" class="text-danger"></span>
-                            </div>
-
-                            <hr />
-
-                            <div class="form-check form-switch mt-3">
-                                <input class="form-check-input" type="checkbox" asp-for="IsPhoneVerified" id="verifySwitch">
-                                <label class="form-check-label fw-bold" for="verifySwitch">
-                                    手機驗證狀態
-                                </label>
-                                <div class="form-text small">
-                                    開啟後，該會員將被視為已完成簡訊驗證。
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-info py-2 small shadow-sm">
-                            <i class="bi bi-info-circle-fill me-1"></i>
-                            若將狀態設為「停用 (D)」，該會員將無法進行登入操作。
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-5 border-top pt-4 text-center">
-                    <a asp-action="Index" class="btn btn-outline-secondary px-4 me-2">
-                        <i class="bi bi-arrow-left"></i> 放棄並返回
-                    </a>
-                    <button type="submit" class="btn btn-danger px-5 fw-bold shadow">
-                        <i class="bi bi-check-lg me-1"></i> 儲存管理員變更
-                    </button>
-                </div>
-            </form>
+        <div class="text-end">
+            <div class="tech-key mb-0" style="background: linear-gradient(90deg, var(--tech-danger), transparent 150%);">
+                ID: @Model.MemberID
+            </div>
         </div>
     </div>
+
+    @* --- [2. 主編輯區域：Cyber-Card] --- *@
+    <div class="cyber-card p-5">
+        <form asp-action="AdminEdit" method="post">
+            <input type="hidden" asp-for="MemberID" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4 font-monospace small"></div>
+
+            <div class="row g-5">
+                @* --- 左側：基本聯絡數據 --- *@
+                <div class="col-lg-8 border-end border-info border-opacity-10">
+                    <div class="tech-key mb-4">基本資料</div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Account" class="text-info small mb-2 d-block">帳號</label>
+                            @* 唯讀欄位處理：看起來像終端輸出 *@
+                            <div class="order-input opacity-50 bg-dark" style="cursor: not-allowed;">
+                                @Model.Account
+                                <input type="hidden" asp-for="Account" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="text-info small mb-2 d-block">姓名</label>
+                            <input asp-for="Name" class="form-control order-input" placeholder="輸入姓名..." />
+                            <span asp-validation-for="Name" class="text-danger small font-monospace"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="Tel" class="text-danger small mb-2 d-block">手機 (唯讀)</label>
+                            <input asp-for="Tel" class="form-control order-input opacity-100" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Birthday" class="text-info small mb-2 d-block">生日</label>
+                            <input asp-for="Birthday" type="date" class="form-control order-input" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="NationalID" class="text-info small mb-2 d-block">身分證號</label>
+                            <input asp-for="NationalID" class="form-control order-input" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Email" class="text-info small mb-2 d-block">電子郵件</label>
+                        <input asp-for="Email" class="form-control order-input opacity-100" readonly />
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Address" class="text-info small mb-2 d-block">聯絡地址</label>
+                        <textarea asp-for="Address" class="form-control order-input opacity-100" rows="2" readonly></textarea>
+                    </div>
+                </div>
+
+                @* --- 右側：系統狀態控制 --- *@
+                <div class="col-lg-4">
+                    <div class="tech-key mb-4" style="background: linear-gradient(90deg, #ffcc00, transparent 120%);">系統鎖定</div>
+
+                    <div class="p-4 mb-4" style="background: rgba(0,0,0,0.3); border: 1px solid var(--tech-border);">
+                        <div class="mb-4">
+                            <label asp-for="AccountStatusID" class="text-warning small mb-2 d-block">帳號狀態</label>
+                            <select asp-for="AccountStatusID" class="form-select order-input border-warning" asp-items="ViewBag.AccountStatusID"></select>
+                        </div>
+
+                        <hr class="border-info opacity-25" />
+
+                        <div class="form-check form-switch mt-4">
+                            <input class="form-check-input" type="checkbox" asp-for="IsPhoneVerified" id="verifySwitch" style="cursor:pointer">
+                            <label class="form-check-label text-white ms-2" for="verifySwitch">
+                                驗證通過
+                            </label>
+                        </div>
+                        <div class="small text-warning opacity-10 mt-2 font-monospace">
+                            [ WARNING: 手動強制通過簡訊驗證程序 ]
+                        </div>
+                    </div>
+
+                    <div class="alert  border border-info border-opacity-0 small text-info p-3">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        注意：若設為「停用」，該使用者將被禁止存取所有前端交易服務與票券資源。
+                    </div>
+                </div>
+            </div>
+
+            @* --- 底部按鈕區 --- *@
+            <div class="mt-5 pt-4 border-top border-info border-opacity-10 text-center">
+                <a asp-action="Index" class="btn btn-outline-info px-4 me-3" style="border-radius: 0; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);">
+                    <i class="bi bi-arrow-left"></i> 回到清單
+                </a>
+                <button type="submit" class="btn btn-danger px-5 fw-bold" style="border-radius: 0; clip-path: polygon(0 0, 90% 0, 100% 100%, 10% 100%); box-shadow: 0 0 15px rgba(255,51,51,0.4);">
+                    <i class="bi bi-shield-check me-2"></i> 更新並儲存
+            </div>
+        </form>
+    </div>
 </div>
-<div asp-validation-summary="All" class="text-danger"></div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
 }
