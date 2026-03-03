@@ -1,7 +1,7 @@
 ﻿@model TicketSalesSystem.Models.Employee
 
 @{
-    ViewData["Title"] = "員工詳細資訊 / BIO_REGISTRY";
+    ViewData["Title"] = "員工詳細資料";
 }
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Employee/EmployeeDetail.css" asp-append-version="true" />
@@ -19,7 +19,7 @@
                 </ol>
             </nav> *@
             <h1 class="neon-header m-0">
-                <i class="bi bi-person-badge me-3"></i>員工詳細資料
+                <i class="bi bi-person-badge me-3"></i> @ViewData["Title"]
         </div>
         <div class="text-end">
             <div class="tech-key mb-0">建立日期: @Model.CreatedTime.ToString("yyyy-MM-dd")</div>

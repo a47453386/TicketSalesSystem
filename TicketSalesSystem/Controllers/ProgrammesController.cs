@@ -106,12 +106,21 @@ namespace TicketSalesSystem.Controllers
                 Notice = programme.Notice,
                 RefundPolicy = programme.RefundPolicy,
                 CoverImage = programme.CoverImage,
-                SeatImage= programme.SeatImage,
+                SeatImage = programme.SeatImage,
                 OnShelfTime = programme.OnShelfTime,
                 UpdatedAt = programme.UpdatedAt ?? DateTime.Now,
                 EmployeeName = programme.Employee?.Name,
-                DescriptionImages = programme.DescriptionImage.Select(di => di.DescriptionImageName).ToList(),
             };
+
+            if (programme.DescriptionImage != null)
+            {
+                vm.DescriptionImages = programme.DescriptionImage.Select(di => new VMDescriptionImage
+                {
+                    // 🚩 這裡請對齊 VMDescriptionImage 的屬性名稱
+                    ImagePath = di.ImagePath,
+                    DescriptionImageName = di.DescriptionImageName
+                }).ToList();
+            }
 
             // 3. 核心：計算每個票區的即時銷售量 (Sold Count)
             foreach (var s in programme.Session)

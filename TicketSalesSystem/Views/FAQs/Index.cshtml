@@ -4,72 +4,106 @@
     ViewData["Title"] = "常見問題管理";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-patch-question-fill me-2 text-primary"></i>常見問題管理</h2>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i>新增問題
-    </a>
-</div>
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Index.css" asp-append-version="true" />
 
-<div class="card shadow-sm">
-    <div class="card-body p-0">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th class="ps-4">問題標題</th>
-                    <th>分類</th>
-                    <th>最後修改人員</th>
-                    <th class="text-center">發布狀態</th>
-                    <th class="text-center" style="width: 180px;">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td class="ps-4">
-                            <div class="fw-bold">@item.FAQTitle</div>
-                            <small class="text-muted text-truncate d-inline-block" style="max-width: 300px;">
-                                @item.FAQDescription
-                            </small>
-                        </td>
-                        <td>
-                            <span class="badge bg-light text-dark border">@item.FAQType?.FAQTypeName</span>
-                        </td>
-                        <td>@item.Employee?.Name</td>
-                        <td class="text-center">
-                            @if (item.FAQPublishStatusID == "Y")
-                            {
-                                <span class="badge rounded-pill bg-success">已發布</span>
-                            }
-                            else
-                            {
-                                <span class="badge rounded-pill bg-secondary">草稿</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <a asp-action="Edit" asp-route-id="@item.FAQID" class="btn btn-outline-primary">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a asp-action="Details" asp-route-id="@item.FAQID" class="btn btn-outline-info">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-danger"
-                                        data-delete-id="@item.FAQID"
-                                        onclick="globalDelete('@item.FAQID', '@Html.Raw(item.FAQTitle)', 'FAQs')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                            <form id="delete-form-@item.FAQID" asp-action="Delete" asp-route-id="@item.FAQID" method="post" style="display:none">
-                                @Html.AntiForgeryToken()
-                            </form>
-                        </td>
+
+@* 🚩 主容器：鎖定暗色網格背景 *@
+<div class="order-management-scope admin-body p-4">
+
+    @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <h1 class="neon-header m-0">
+            <i class="bi bi-patch-question-fill me-3"></i>@ViewData["Title"]
+        </h1>
+        <a asp-action="Create" class="btn-cyber px-4">
+            <i class="bi bi-plus-lg me-2"></i>新增常見問題
+        </a>
+    </div>
+
+    @* --- [2. 數據矩陣容器] --- *@
+    <div class="cyber-card">
+        <div class="table-responsive custom-scroll">
+            <table class="table table-hover align-middle mb-0 border-0">
+                <thead>
+                    <tr class="text-center">
+                        @* 百分比分配：35% | 15% | 15% | 15% | 20% *@
+                        <th class=" pt-4 ps-4" style="width: 35%;">
+                            <div class="tech-key1">問題標題</div>
+                        </th>
+                        <th class="pt-4" style="width: 15%;">
+                            <div class=" tech-key1">分類</div>
+                        </th>
+                        <th class="pt-4" style="width: 15%;">
+                            <div class="tech-key1">負責人</div>
+                        </th>
+                        <th class="text-center pt-4" style="width: 15%;">
+                            <div class="tech-key1">狀態</div>
+                        </th>
+                        <th class="text-end pe-4 pt-4 " style="width: 20%;">
+                            <div class="tech-key1">操作</div>
+                        </th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            @* 問題標題與摘要 *@
+                            <td class="ps-4">
+                                <div class="fw-bold text-info fs-6 mb-1">@item.FAQTitle</div>
+                                <div class="opacity-50 small text-truncate" style="max-width: 350px;">
+                                    @item.FAQDescription
+                                </div>
+                            </td>
+
+                            @* 分類 *@
+                            <td class="text-center">
+                                <span class="badge border border-info text-info bg-dark bg-opacity-50 font-monospace">
+                                    @item.FAQType?.FAQTypeName
+                                </span>
+                            </td>
+
+                            @* 最後修改人員 *@
+                            <td class="text-white opacity-100 font-monospace text-center">
+                                <i class="bi bi-person-badge me-2 text-info"></i>@(item.Employee?.Name ?? "SYSTEM")
+                            </td>
+
+                            @* 發布狀態：套用右圓角戰術樣式 *@
+                            <td class="text-center">
+                                @if (item.FAQPublishStatusID == "Y")
+                                {
+                                    <div class="status-badge">
+                                        <span class="status-badge-icon" style="background-color: #00ffc8;"></span> PUBLISHED
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;">
+                                        <span class="status-badge-icon" style="background-color: #ff3333;"></span> STANDBY
+                                    </div>
+                                }
+                            </td>
+
+                            @* 操作按鈕群 *@
+                            <td class="text-end pe-4">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a asp-action="Edit" asp-route-id="@item.FAQID" class="btn-cyber-icon" title="EDIT">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.FAQID" class="btn-cyber-icon" title="DETAILS">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn-cyber-icon border-danger text-danger"
+                                            onclick="globalDelete('@item.FAQID', '@Html.Raw(item.FAQTitle)', 'FAQs')">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-

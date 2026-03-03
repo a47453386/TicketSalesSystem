@@ -1,0 +1,28 @@
+﻿/* 1. 已結案 (預設狀態 - 青色) */
+.status-badge {
+    color: var(--tech-cyan) !important;
+    border: 1px solid var(--tech-cyan) !important;
+    background-color: rgba(0, 242, 255, 0.1) !important;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+/* 2. 待處理 (紅色 - 警示) */
+.status-badge-pending {
+    color: #ff3333 !important; /* Tech Danger */
+    border: 1px solid #ff3333 !important;
+    background-color: rgba(255, 51, 51, 0.15) !important;
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+}
+
+/* 3. 處理中 (黃色 - 注意) */
+.status-badge-processing {
+    color: #ffcc00 !important; /* Tech Warning */
+    border: 1px solid #ffcc00 !important;
+    background-color: rgba(255, 204, 0, 0.15) !important;
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+}
+
+/* 共用圖示修正：讓圖示背景跟隨文字顏色 */
+.status-badge i {
+    filter: drop-shadow(0 0 2px currentColor);
+}

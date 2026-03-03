@@ -90,36 +90,12 @@
     width: 100%;
 }
     /* 🚩 1. 父節點 th 的環境清理 */
-    .cyber-table th {
+    .cyber-table thead th {
         padding: 0 !important;
-        text-align: center !important;
-        vertical-align: middle;
-        border: none;
-        min-width: 120px; /* 🚩 稍微加大最小寬度，防止標籤太擠 */
+        border: none !important;
         background: transparent !important;
     }
 
-        /* 🚩 2. tech-key 標籤本體修正 */
-        .cyber-table th .tech-key1 {
-            /* 必須是 flex 或 inline-flex，字才會在裡面置中 */
-            display: flex !important;
-            justify-content: center;
-            align-items: center;
-            /* 🚩 關鍵修正：寬度設為 50% 後，必須靠 auto 邊距來置中 */
-            width: 65% !important; /* 50% 對於中文字可能太窄，建議 65%-80% */
-            margin: 5px auto !important;
-            padding: 6px 10px;
-            font-size: 0.75rem;
-            font-weight: 900;
-            color: #000 !important;
-            white-space: nowrap; /* 🚩 防止文字因為標籤太窄而換行，導致變形 */
-            /* 你的斜切規格與漸層 */
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-            background: linear-gradient(180deg, var(--tech-cyan), rgba(0, 242, 255, 0.7)) !important;
-            /* 增加一點外發光，確保在暗色背景看得到 */
-            box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
-            transition: all 0.3s ease;
-        }
     .cyber-table th:nth-child(1) {
         width: 25%;
     }

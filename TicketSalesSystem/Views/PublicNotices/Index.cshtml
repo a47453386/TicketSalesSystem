@@ -27,27 +27,27 @@
                 <thead>
                     <tr class="text-center border-bottom border-info border-opacity-25">
                         <th class="pt-4 border-0" style="width: 22%;">
-                            <div class="tech-key">標題</div>
+                            <div class="tech-key1">標題</div>
                         </th>
 
                         <th class="pt-4 border-0" style="width: 22%;">
-                            <div class="tech-key">摘要</div>
+                            <div class="tech-key1">摘要</div>
                         </th>
 
                         <th class="pt-4 border-0" style="width: 14%;"> 
-                            <div class="tech-key">排程</div>
+                            <div class="tech-key1">排程</div>
                         </th>
 
                         <th class="pt-4  border-0" style="width: 15%;">
-                            <div class="tech-key">狀態</div>
+                            <div class="tech-key1">狀態</div>
                         </th>
 
                         <th class="pt-4  border-0" >
-                            <div class="tech-key">負責人</div>
+                            <div class="tech-key1">負責人</div>
                         </th>
 
                         <th class="text-end pe-4 border-0" style="width: 10%;">
-                            <div class="tech-key">操作</div>
+                            <div class="tech-key1">操作</div>
                         </th>
                     </tr>
                 </thead>
@@ -71,7 +71,7 @@
                                     <div class="text-cyan mb-1">
                                         <i class="bi bi-arrow-up-right-circle me-1"></i>上架: @(item.PublishTime?.ToString("yyyy-MM-dd") ?? "IMMEDIATE")
                                     </div>
-                                    <div class="text-danger opacity-75">
+                                    <div class="text-danger opacity-100">
                                         <i class="bi bi-arrow-down-left-circle me-1"></i>下架: @(item.RemovalTime?.ToString("yyyy-MM-dd") ?? "PERSISTENT")
                                     </div>
                                 </div>
@@ -84,20 +84,20 @@
                                 @if (item.PublicNoticeStatus)
                                 {
                                     <div class="status-badge" style="cursor: pointer;" onclick="toggleNoticeStatus('@item.PublicNoticeID')">
-                                        <span class="status-badge-icon">✓</span> 已上架
+                                        <span class="status-badge-icon"></span> 已上架
                                     </div>
                                 }
                                 else
                                 {
                                     <div class="status-badge" style="cursor: pointer; color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;" onclick="toggleNoticeStatus('@item.PublicNoticeID')">
-                                        <span class="status-badge-icon" style="background-color: #ff3333;">✕</span> 未上架
+                                        <span class="status-badge-icon" style="background-color: #ff3333;"></span> 未上架
                                     </div>
                                 }
                             </td>
 
                             @* 負責人 *@
-                            <td class="text-center font-monospace small text-info opacity-75">
-                                @(item.Employee?.EmployeeID ?? "Name")
+                            <td class="text-center font-monospace small text-info opacity-100">
+                                @(item.Employee?.Name ?? "無")
                             </td>
 
                             @* 操作按鈕 *@

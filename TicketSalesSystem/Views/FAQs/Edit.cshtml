@@ -1,116 +1,115 @@
 ﻿@model TicketSalesSystem.Models.FAQ
 
 @{
-    ViewData["Title"] = "更新常見問題";
-    
+    ViewData["Title"] = "常見問題更新";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-plus-circle me-2"></i>@ViewData["Title"]</h2>
-        <a asp-action="Index" class="btn btn-outline-secondary">返回列表</a>
+@* 🚩 注入戰術樣式表 *@
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/FAQ/FAQCreate.css" asp-append-version="true" />
+
+<div class="order-management-scope admin-body p-4">
+
+    @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <div>
+          @*   <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb m-0 p-0 bg-transparent">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">FAQ_REGISTRY</a></li>
+                    <li class="breadcrumb-item active text-white">OVERRIDE_MODE</li>
+                </ol>
+            </nav> *@
+            <h1 class="neon-header m-0">
+                <i class="bi bi-pencil-square me-3"></i>@ViewData["Title"]
+            </h1>
+        </div>
+        <a asp-action="Index" class="btn-cyber btn-cyber-warning px-4">
+            <i class="bi bi-arrow-left me-2"></i>回清單
+        </a>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <form asp-action="Edit">
+    @* --- [2. 主編輯卡片：Cyber-Card] --- *@
+    <div class="cyber-card p-5">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger small font-monospace mb-4"></div>
+            <input asp-for="FAQID" type="hidden" />
 
-                <input asp-for="FAQID" type="hidden" />
-                <div class="row">
-                    <div class="col-md-12 mb-3">
+            <div class="row g-4">
+                @* --- A. 問題標題 --- *@
+                <div class="col-12">
+                    <div class="tech-key">Q.標題</div>
+                    <div class="mt-2">
+                        <input asp-for="FAQTitle" class="form-control order-input" placeholder="請輸入標題..." />
+                        <span asp-validation-for="FAQTitle" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-12 mb-3">
-                        <label asp-for="FAQTitle" class="form-label fw-bold">問題標題</label>
-                        <input asp-for="FAQTitle" class="form-control" placeholder="例如：如何申請退票？" />
-                        <span asp-validation-for="FAQTitle" class="text-danger"></span>
-                    </div>
+                </div>
 
-                    <div class="col-md-12 mb-3">
-                        <label asp-for="FAQDescription" class="form-label fw-bold">答案內容</label>
-                        <textarea asp-for="FAQDescription" class="form-control " rows="5" placeholder="請輸入詳細解答..."></textarea>
-                        <span asp-validation-for="FAQDescription" class="text-danger"></span>
+                @* --- B. 答案內容 --- *@
+                <div class="col-12">
+                    <div class="tech-key">A.內容</div>
+                    <div class="mt-2">
+                        <textarea asp-for="FAQDescription" class="form-control order-input custom-scroll"
+                                  rows="6" placeholder="請輸入內容..."></textarea>
+                        <span asp-validation-for="FAQDescription" class="text-danger small"></span>
                     </div>
+                </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="FAQTypeID" class="form-label fw-bold">FAQ 分類</label>
-                        <div class="input-group">
-                            <select asp-for="FAQTypeID" class="form-select" asp-items="ViewBag.FAQTypeID" id="faqTypeSelect">
-                                <option value="">-- 請選擇分類 --</option>
-                            </select>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTypeModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </button>
-                            <button type="button" class="btn btn-warning" id="editTypeBtn">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
+                @* --- C. FAQ 分類 (通用 Add/Edit 類別) --- *@
+                <div class="col-md-6">
+                    <div class="tech-key">問題種類</div>
+                    <div class="input-group mt-2">
+                        <select asp-for="FAQTypeID" class="form-select order-input" asp-items="ViewBag.FAQTypeID" id="faqTypeSelect">
+                            <option value="">-- 請選擇 --</option>
+                        </select>
+                        <button type="button" class="btn-cyber px-2 quick-add-btn" data-mode="Type">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                        <button type="button" class="btn-cyber btn-cyber-warning px-2 quick-edit-btn" data-mode="Type">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                @* --- D. 發佈狀態 (通用 Add/Edit 類別) --- *@
+                <div class="col-md-6">
+                    <div class="tech-key">發佈狀態</div>
+                    <div class="input-group mt-2">
+                        <select asp-for="FAQPublishStatusID" class="form-select order-input" asp-items="ViewBag.FAQPublishStatusID" id="faqStatusSelect">
+                        </select>
+                        <button type="button" class="btn-cyber px-2 quick-add-btn" data-mode="Status">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                        <button type="button" class="btn-cyber btn-cyber-warning px-2 quick-edit-btn" data-mode="Status">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+                </div>
+
+                @* --- E. 執行操作員 (系統自動帶入) --- *@
+                <div class="col-12">
+                    <div class="tech-key">負責人</div>
+                    <div class="mt-2 p-3 border border-info border-opacity-10 bg-dark bg-opacity-50">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-badge me-3 text-info fs-4"></i>
+                            <div>
+                                <span class="text-info opacity-50 small d-block font-monospace">負責人</span>
+                                <span class="fs-5 text-white fw-bold">@User.Identity.Name</span>
+                                <span class="ms-2 badge border border-info text-info small">由系統自行帶入</span>
+                            </div>
                         </div>
-                        <span asp-validation-for="FAQTypeID" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="FAQPublishStatusID" class="form-label fw-bold">發佈狀態</label>
-                        <select asp-for="FAQPublishStatusID" class="form-select" asp-items="ViewBag.FAQPublishStatusID"></select>
-                    </div>
-
-
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="EmployeeID" class="form-label fw-bold">建立人員</label>
-                        <select asp-for="EmployeeID" class="form-select" asp-items="ViewBag.EmployeeID"></select>
                     </div>
                 </div>
 
-                <div class="mt-4 border-top pt-3">
-                    <button type="submit" class="btn btn-success px-5">儲存修改</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="addTypeModal" tabindex="-1" aria-labelledby="addTypeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="addTypeModalLabel">新增分類項目</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="newTypeName" class="mb-2">分類名稱</label>
-                    <input type="text" id="newTypeName" class="form-control" placeholder="請輸入新分類，如：購票優惠">
-                    <small class="text-muted">新增後將直接選取該項目。</small>
+                @* --- F. 提交按鈕 --- *@
+                <div class="col-12 mt-5 pt-4 border-top border-info border-opacity-10 text-center">
+                    <button type="submit" class="btn-cyber px-5 py-2 fs-5">
+                        <i class="bi bi-save2-fill me-2"></i>更新並儲存
+                    </button>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="saveTypeBtn">確認新增</button>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
-<div class="modal fade" id="editTypeModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title">修改分類名稱</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="editTypeIdField" />
-                <div class="form-group">
-                    <label class="mb-2">新的分類名稱</label>
-                    <input type="text" id="editTypeNameField" class="form-control">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-warning" id="saveEditedTypeBtn">確認更新</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div asp-validation-summary="All" class="text-danger"></div>
-
 
 
 @section Scripts {
@@ -118,100 +117,5 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
-    <script>
-        $(document).ready(function () {
-            //新增
-            $('#saveTypeBtn').click(function () {
-                const typeName = $('#newTypeName').val();
-
-                if (!typeName || typeName.trim() === "") {
-                    alert("請輸入名稱！");
-                    return;
-                }
-
-                // 發送 AJAX 請求到後台
-                $.ajax({
-                    url: '@Url.Action("CreateTypeQuickly", "FAQs")', // 確保 Controller 方法名稱正確
-                    type: 'POST',
-                    data: { typeName: typeName },
-                    success: function (response) {
-                        console.log("伺服器回傳內容:", response);
-                       var newId = response.faqTypeId;
-                       var newName = response.faqTypeName;
-
-                        if (response.success) {
-                           //動態產生一個新的Option
-                           var newOption= new Option(newName, newId);
-
-                           //塞入下拉式選單並直接選取
-                            $('#faqTypeSelect').append(newOption).val(newId).trigger('change');
-
-                            //清除輸入框並關閉彈窗
-                            $('#newTypeName').val('');
-                            $('#addTypeModal').modal('hide');
-
-                            alert("新分類「" + newName+ "」已新增並選取！");
-
-                        } else {
-                            alert("新增失敗：" + response.message);
-                        }
-                    },
-                    error: function () {
-                        alert("連線伺服器時發生錯誤。");
-                    }
-                });
-            });
-
-
-
-
-
-            //更新
-            $('#editTypeBtn').click(function () {
-                // 1. 取得目前下拉選單選中的 ID 和 文字
-                var selectedId = $('#faqTypeSelect').val();
-                var selectedText = $('#faqTypeSelect option:selected').text();
-
-                // 2. 檢查是否有選取東西
-                if (!selectedId || selectedId === "") {
-                    alert("請先從選單中選擇一個要修改的分類！");
-                    return;
-                }
-
-                // 3. 將資料填入 Modal 的隱藏欄位與輸入框
-                $('#editTypeIdField').val(selectedId);
-                $('#editTypeNameField').val(selectedText);
-
-                // 4. 顯示 Modal
-                $('#editTypeModal').modal('show');
-             });
-
-
-            $('#saveEditedTypeBtn').click(function () {
-                var tid = $('#editTypeIdField').val();   // 拿到要改的那個 ID
-                var tname = $('#editTypeNameField').val(); // 拿到新的名字
-                $.ajax({
-                    url: '@Url.Action("EditTypeQuickly", "FAQs")', // 🚩 走「修改」路徑
-                    type: 'POST',
-                    data: { typeId: tid, typeName: tname }, // 要傳 ID 給後台才知道改哪一筆
-                    success: function (response) {
-                        if (response.success) {
-                            // 修改邏輯：不新增，只改選單裡「那個 ID」的文字
-                            $("#faqTypeSelect option[value='" + tid + "']").text(tname);
-                            $('#editTypeModal').modal('hide');
-                            alert("分類更新成功！");
-                        }
-                    }
-                });
-            });
-        });
-
-
-
-
-
-
-        
-    </script>
-
+    <partial name="_FAQModalsPartial" />
 }

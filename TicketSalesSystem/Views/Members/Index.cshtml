@@ -79,9 +79,18 @@
 
                             @* 3. 帳號狀態 *@
                             <td>
-                                <span class="status-badge @(item.AccountStatusID == "A" ? "bg-success" : "bg-danger")">
-                                    @(item.AccountStatusID == "A" ? "啟用" : "停用")
-                                </span>
+                                @if (item.AccountStatusID == "A")
+                                {
+                                    <div class="status-badge">
+                                        <span class="status-badge-icon"></span> @item.AccountStatus?.AccountStatusName
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;">
+                                        <span class="status-badge-icon" style="background-color: #ff3333;"></span> @item.AccountStatus?.AccountStatusName
+                                    </div>
+                                }
                             </td>
 
                             @* 4. 手機驗證 *@

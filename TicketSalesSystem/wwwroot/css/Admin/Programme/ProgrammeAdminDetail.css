@@ -1,267 +1,112 @@
-﻿/* ==========================================================================
-   戰術簡報系統核心 CSS - MISSION_BRIEFING_v3
-   適用於：AdminDetail 頁面
-   風格：Cyberpunk HUD / 1.2rem High-Readability
-   ========================================================================== */
-
-:root {
-    /* 核心色彩定義 */
-    --tech-cyan: #00f2ff;
-    --tech-bg: rgba(10, 10, 10, 0.9);
-    --tech-border: rgba(0, 242, 255, 0.25);
-    --tech-warning: #ffcc00;
-    --tech-danger: #ff3333;
-    --tech-success: #00ff88;
-    /* 字體大小定義 */
-    --base-font-size: 1.2rem; /* 🚩 要求的基礎字體大小 */
-    --label-font-size: 0.95rem; /* 標籤文字 */
-    --header-font-size: 4rem; /* 主標題 */
-}
-
-/* --- 基礎佈局設定 --- */
-.admin-body {
-    background-color: #000;
-    background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px; /* 背景網格增加科技感 */
-    color: #e0e0e0;
-    font-size: var(--base-font-size);
-    font-family: 'Segoe UI', 'Roboto', '微軟正黑體', sans-serif;
-    line-height: 1.6;
-    min-height: 100vh;
-}
-
-    /* 確保所有容器內容繼承 1.2rem */
-    .admin-body p,
-    .admin-body div,
-    .admin-body td,
-    .admin-body span {
-        font-size: var(--base-font-size);
-    }
-
-/* --- [標題系統] --- */
-.neon-header {
-    font-size: var(--header-font-size);
-    font-weight: 900;
-    letter-spacing: 6px;
-    color: var(--tech-cyan);
-    text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
-    margin-bottom: 0;
-    text-transform: uppercase;
-}
-
-.tech-sub-label {
-    font-size: 0.9rem;
-    color: var(--tech-cyan);
-    opacity: 0.6;
-    letter-spacing: 3px;
-    font-family: 'Consolas', monospace;
-}
-
-.tech-key {
-    font-size: 1.3rem;
-    font-weight: 700;
-    background: linear-gradient(90deg, var(--tech-cyan), transparent);
-    color: #000;
-    padding: 4px 20px;
-    clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
-    display: inline-block;
-    margin-bottom: 1.2rem;
-    text-transform: uppercase;
-}
-
-    .tech-key.small {
-        font-size: 1rem;
-        padding: 2px 15px;
-    }
-
-/* --- [卡片系統] Glassmorphism --- */
-.cyber-card {
-    background: var(--tech-bg);
-    backdrop-filter: blur(12px);
+﻿/* 針對詳情頁的局部戰術補強 */
+.media-preview, .seat-map-bg {
     border: 1px solid var(--tech-border);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-    border-radius: 4px;
-    transition: all 0.3s ease;
+    background: #000;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
 }
 
-    .cyber-card:hover {
-        border-color: rgba(0, 242, 255, 0.5);
-        box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
-    }
-
-/* --- [HUD 銷售矩陣節點] --- */
-.session-node {
-    background: rgba(255, 255, 255, 0.03) !important; /* 極低透明度，增加層次 */
-    border: 1px solid var(--tech-border) !important;
-    border-left: 5px solid var(--tech-cyan) !important; /* 左側霓虹指示條 */
-    padding: 25px;
-    margin-bottom: 2.5rem;
-    border-radius: 4px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
-}
-
-    .session-node:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: var(--tech-cyan) !important;
-        box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
-    }
-.admin-body .table {
-    background-color: transparent !important;
-    --bs-table-bg: transparent !important; /* 覆蓋 Bootstrap 5 變數 */
-    border-collapse: separate;
-    border-spacing: 0 8px; /* 讓行與行之間有微小間隙，增加 HUD 感 */
-    margin-bottom: 0;
-}
-
-    .admin-body .table thead th {
-        font-size: 0.9rem !important; /* 標頭稍微縮小，增加專業感 */
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        color: rgba(255, 255, 255) !important;
-        border-bottom: 1px solid rgba(0, 242, 255, 0.2) !important;
-        padding-bottom: 15px;
-    }
-
-    .admin-body .table tbody td {
-        font-size: var(--base-font-size) !important; /* 🚩 確保內容維持 1.2rem */
-        padding: 15px 10px;
-        background-color: transparent !important;
-        border: none;
-        color: #fff !important;
-    }
-/* --- [進度條系統] --- */
 .cyber-progress {
-    height: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    height: 8px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
 }
 
 .cyber-progress-bar {
     height: 100%;
-    transition: width 1.2s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px currentColor;
 }
 
-/* 進度條動態變色 */
+/* 進度條戰術色彩協定 */
 .prog-low {
-    background: linear-gradient(90deg, #00d2ff, #0084ff);
-    box-shadow: 0 0 10px #0084ff;
+    color: var(--tech-cyan);
+    background-color: var(--tech-cyan);
 }
 
 .prog-mid {
-    background: linear-gradient(90deg, #ffd000, #ff8c00);
-    box-shadow: 0 0 10px #ff8c00;
+    color: #ffcc00;
+    background-color: #ffcc00;
 }
 
 .prog-high {
-    background: linear-gradient(90deg, #ff4d4d, #ff0000);
-    box-shadow: 0 0 15px #ff0000;
-    animation: cyber-pulse 1.5s infinite;
+    color: var(--tech-danger);
+    background-color: var(--tech-danger);
 }
 
-@keyframes cyber-pulse {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.6;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-/* --- [文本內容區塊] --- */
 .desc-block {
-    background: rgba(255, 255, 255, 0.03);
-    border-left: 4px solid var(--tech-cyan);
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+    background: rgba(0, 242, 255, 0.02);
+    border-left: 2px solid var(--tech-border);
+    padding: 15px;
+    margin-bottom: 20px;
 }
 
     .desc-block.warning {
-        border-left-color: var(--tech-warning);
-        background: rgba(255, 204, 0, 0.03);
+        border-color: #ffcc00;
     }
 
     .desc-block.danger {
-        border-left-color: var(--tech-danger);
-        background: rgba(255, 51, 51, 0.03);
+        border-color: var(--tech-danger);
     }
 
-/* --- [媒體預覽系統] --- */
-.media-preview {
-    border: 1px solid var(--tech-border);
-    padding: 5px;
-    background: #000;
-    transition: transform 0.3s;
-}
-
-.seat-map-bg {
-    background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
-    border: 1px solid rgba(0, 242, 255, 0.3);
-}
-
 .gallery-thumb {
-    object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    opacity: 0.8;
-    transition: all 0.3s;
+    border: 1px solid var(--tech-border);
+    transition: 0.3s;
     cursor: pointer;
 }
 
     .gallery-thumb:hover {
-        opacity: 1;
         border-color: var(--tech-cyan);
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0, 242, 255, 0.3);
+        box-shadow: 0 0 15px var(--tech-cyan);
     }
-
-/* --- [狀態標籤與按鈕] --- */
-.status-badge {
-    font-size: 1rem;
-    padding: 5px 15px;
-    font-weight: bold;
-    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+    /* 🚩 徹底取消表格背景白色 */
+.table.cyber-table {
+    --bs-table-bg: transparent !important; /* 針對 Bootstrap 5 的變數覆蓋 */
+    background-color: transparent !important;
+    color: #ffffff !important;
+    border-color: rgba(0, 242, 255, 0.2) !important;
 }
 
-.status-active {
-    background: var(--tech-cyan);
-    color: #000;
-    box-shadow: 0 0 15px var(--tech-cyan);
+/* 🚩 確保所有儲存格也是透明的 */
+.cyber-table th, 
+.cyber-table td {
+    background-color: transparent !important;
+    color: inherit !important;
+    border-bottom: 1px solid rgba(0, 242, 255, 0.1) !important;
 }
 
-.btn-cyber-submit {
-    background: transparent;
+/* 🚩 移除 Bootstrap 預設的懸停灰色 */
+.table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: transparent !important;
+    background-color: rgba(0, 242, 255, 0.08) !important; /* 改用我們自訂的微光 */
+    color: #ffffff !important;
+}
+/* 🚩 文字截斷協定：限制顯示 3 行，超出顯示 ... */
+.text-truncate-cyber {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* 鎖定行數 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 4.8em; /* 保持高度一致性 (1.6 line-height * 3) */
+}
+
+/* 🚩 微型戰術按鈕 (用於卡片內) */
+.btn-cyber-mini {
+    font-size: 0.7rem !important;
+    padding: 2px 10px !important;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
+    margin-top: 10px;
     border: 1px solid var(--tech-cyan);
     color: var(--tech-cyan);
-    font-weight: bold;
-    padding: 8px 25px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    background: transparent;
     transition: all 0.3s;
+    cursor: pointer;
+    float: right; /* 靠右對齊 */
 }
 
-    .btn-cyber-submit:hover {
+    .btn-cyber-mini:hover {
         background: var(--tech-cyan);
         color: #000;
-        box-shadow: 0 0 20px var(--tech-cyan);
+        box-shadow: 0 0 10px var(--tech-cyan);
     }
-
-/* --- [表格數據優化] --- */
-.table th {
-    color: rgba(255, 255, 255, 0.5);
-    font-weight: 400;
-    text-transform: uppercase;
-    font-size: 1rem;
-    letter-spacing: 1px;
-}
-
-.font-monospace {
-    font-family: 'Consolas', 'Monaco', monospace;
-    letter-spacing: 1px;
-}

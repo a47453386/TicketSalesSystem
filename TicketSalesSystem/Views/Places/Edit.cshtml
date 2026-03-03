@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Place/PlaceEdit.css" asp-append-version="true" />
 
+
 <div class="admin-body p-4">
     <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editForm">
         @Html.AntiForgeryToken()
@@ -74,12 +75,12 @@
                 <table class="cyber-table align-middle">
                     <thead>
                         <tr>
-                            <th><div class="tech-key">區域名稱</div></th>
-                            <th><div class="tech-key">樓層</div></th>
-                            <th><div class="tech-key">顏色</div></th>
-                            <th><div class="tech-key">排數 x 座位</div></th>
-                            <th><div class="tech-key">系統狀態</div></th>
-                            <th><div class="tech-key">DEL</div></th>
+                            <th><div class="tech-key1">區域名稱</div></th>
+                            <th><div class="tech-key1">樓層</div></th>
+                            <th><div class="tech-key1">顏色</div></th>
+                            <th><div class="tech-key1">排數 x 座位</div></th>
+                            <th><div class="tech-key1">系統狀態</div></th>
+                            <th><div class="tech-key1">操作</div></th>
                         </tr>
                     </thead>
                     <tbody id="venueBody">

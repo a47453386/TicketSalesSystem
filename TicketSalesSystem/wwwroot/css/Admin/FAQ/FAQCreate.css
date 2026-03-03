@@ -1,0 +1,16 @@
+﻿/* 修正 Modal 內的背景色，防止繼承 Bootstrap 預設白色 */
+.modal-content.cyber-card {
+    background: #000b1a !important;
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+}
+
+/* 確保 Select 選項在暗色模式下可見 */
+.order-input option {
+    background-color: #000b1a;
+    color: #00f2ff;
+}
+
+textarea.order-input {
+    resize: vertical;
+    min-height: 150px;
+}

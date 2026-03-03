@@ -1,0 +1,51 @@
+﻿/* 輔助：狀態標籤的小圓點圖示 */
+.table {
+    table-layout: fixed; /* 🚩 強制百分比寬度 */
+    width: 100%;
+    --bs-table-bg: transparent !important;
+    --bs-table-color: #fff !important;
+    border-color: rgba(0, 242, 255, 0.1) !important;
+}
+
+    .table td, .table th {
+        border: none !important;
+        border-bottom: 1px solid rgba(0, 242, 255, 0.1) !important; /* 🚩 僅底線 */
+        padding: 15px 10px;
+    }
+
+.table-hover tbody tr:hover {
+    background: rgba(0, 242, 255, 0.05) !important;
+    transition: 0.3s;
+}
+
+.btn-cyber-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--tech-cyan);
+    color: var(--tech-cyan);
+    background: transparent;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+    .btn-cyber-icon:hover {
+        background: var(--tech-cyan);
+        color: #000;
+        box-shadow: 0 0 15px var(--tech-cyan);
+    }
+.status-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    color: #000;
+    border-radius: 50%;
+    margin-right: 8px;
+    font-size: 0.6rem;
+    font-weight: bold;
+}

@@ -79,11 +79,3 @@
         box-shadow: 0 0 10px var(--tech-cyan);
     }
 
-.status-badge {
-    display: inline-block;
-    padding: 6px 20px;
-    font-weight: 900;
-    clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
-    color: #000 !important;
-    font-size: 0.85rem;
-}

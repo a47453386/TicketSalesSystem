@@ -1,76 +1,138 @@
 ﻿@using TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail
 @model VMProgrammeAdminDetail
+@{
+    ViewData["Title"] = "活動詳細資料";
+}
 
+@* 🚩 注入全域戰術樣式表 *@
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Programme/ProgrammeAdminDetail.css" asp-append-version="true" />
-
 <div class="admin-body p-4">
-    <div class="d-flex justify-content-between align-items-end mb-4">
+@* --- [1. 頂部 HUD：節目狀態標頭] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
         <div>
-            <div class="tech-sub-label mb-1">節目資料</div>
-            <div class="neon-header">@Model.ProgrammeName</div>
+            @* <div class="tech-key1 mb-2" style="width: fit-content; clip-path: polygon(0 0, 90% 0, 100% 100%, 0 100%);"></div> *@
+            <h1 class="neon-header m-0">@ViewData["Title"]</h1>
         </div>
-        <div class="d-flex gap-2">
-            <a asp-action="AdminIndex" class="btn btn-outline-secondary">回活動列表</a>
-            <a asp-action="Edit" asp-route-id="@Model.ProgrammeID" class="btn btn-cyber-submit">編輯節目</a>
+        <div class="d-flex gap-3">
+            <a asp-action="AdminIndex" class="btn-cyber px-4">
+                <i class="bi bi-arrow-left me-2"></i>回清單
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.ProgrammeID" class="btn-cyber btn-cyber-warning px-4">
+                <i class="bi bi-pencil-square me-2"></i>活動更新
+            </a>
         </div>
     </div>
-    @* --- [第一列] 封面 + 基本資料 (名稱、地點、時間) + 總量統計 --- *@
+
+@* --- [2. 第一列：核心數據終端 (封面 + 資料 + 總量) --- *@
     <div class="row g-4 mb-4">
+        @* 封面預覽 *@
         <div class="col-lg-3">
             <div class="cyber-card p-2 h-100 text-center">
-                <div class="tech-key small">封面</div>
-                <img src="/Photos/CoverImage/@Model.CoverImage" class="w-100 media-preview" style="height: 250px; object-fit: cover;">
+                <div class="tech-key small">封面圖</div>
+                <img src="/Photos/CoverImage/@Model.CoverImage" class="w-100 media-preview" style="height: 280px; object-fit: cover;">
             </div>
         </div>
+
+        @* 基本參數資料 *@
         <div class="col-lg-6">
-            <div class="cyber-card p-4 h-100">
-                <div class="tech-key small mb-3">基本資料</div>
-                <div class="row g-3">
-                    <div class="col-12"><div class="text-info small">活動名稱</div><div class="h4 text-white">@Model.ProgrammeName</div></div>
-                    <div class="col-6"><div class="text-white-50 small">演出地點</div><div>@Model.PlaceName</div></div>
-                    <div class="col-6"><div class="text-white-50 small">上架時間</div><div class="font-monospace">@Model.OnShelfTime.ToString("yyyy-MM-dd HH:mm")</div></div>
+            <div class="cyber-card p-4 h-100 d-flex flex-column">
+                @* 1. 標頭與核心名稱 *@
+                <div class="tech-key mb-4">基本資料</div>
+
+                <div class="mb-4">
+                    <div class="text-info font-monospace small opacity-50" style="letter-spacing: 2px;">活動名稱</div>
+                    <div class="h3 text-white fw-bold mb-0">@Model.ProgrammeName</div>
+                </div>
+
+                @* 2. 地點與上架狀態 (雙欄顯示) *@
+                <div class="row g-4 mb-4 border-bottom border-info border-opacity-10 pb-4">
+                    <div class="col-md-6">
+                        <div class="text-white-50 small font-monospace mb-1">演出地點</div>
+                        <div class="fs-5 text-white"><i class="bi bi-geo-alt me-2 text-info"></i>@Model.PlaceName</div>
+                    </div>
+                    <div class="col-md-6 border-start border-info border-opacity-10">
+                        <div class="text-white-50 small font-monospace mb-1">上架日</div>
+                        <div class="fs-5 font-monospace text-info fw-bold">
+                            <i class="bi bi-calendar-check me-2"></i>@Model.OnShelfTime.ToString("yyyy-MM-dd HH:mm")
+                        </div>
+                    </div>
+                </div>
+
+                @* 3. 場次時程流 (Session Stream) *@
+                <div class="flex-grow-1 overflow-auto custom-scroll pe-2" style="max-height: 400px;">
+                    <div class="text-info font-monospace small mb-3" style="opacity: 0.7; letter-spacing: 1px;">
+                        場次與售票時程
+                    </div>
+
                     @foreach (var s in Model.Sessions)
                     {
-                        <div class="col-6"><div class="text-warning small">開演時間</div><div class="font-monospace">@s.StartTime.ToString("yyyy-MM-dd HH:mm")</div></div>
-                        <div class="col-6"><div class="text-danger small">停售預計</div><div class="font-monospace">@s.StartTime.AddHours(-1).ToString("yyyy-MM-dd HH:mm")</div></div>
+                        <div class="mb-3 p-3 bg-dark bg-opacity-25 border-start border-warning border-3" style="background: linear-gradient(90deg, rgba(255,193,7,0.05), transparent);">
+                            @* 場次標題 *@
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-warning fw-bold font-monospace">
+                                    <i class="bi bi-clock-history me-2"></i>場次
+                                </span>
+                                <span class="badge bg-transparent border border-warning text-warning px-2 py-1 font-monospace">
+                                    @s.StartTime.ToString("MM/dd HH:mm")
+                                </span>
+                            </div>
+
+                            <div class="row g-3">
+                                @* 演出時間 *@
+                                <div class="col-12 mb-1">
+                                    <div class="text-white-50 tiny-label font-monospace" style="font-size: 0.7rem;">演出日</div>
+                                    <div class="fs-5 font-monospace text-white">@s.StartTime.ToString("yyyy-MM-dd HH:mm")</div>
+                                </div>
+
+                                @* 開賣與停售 (平行對比) *@
+                                <div class="col-6">
+                                    <div class="text-warning small font-monospace opacity-50" style="font-size: 0.7rem;">開賣日</div>
+                                    <div class="font-monospace text-warning">@s.SaleStartTime.ToString("MM-dd HH:mm")</div>
+                                </div>
+                                <div class="col-6 border-start border-white border-opacity-10">
+                                    <div class="text-danger small font-monospace opacity-50" style="font-size: 0.7rem;">停售日</div>
+                                    <div class="font-monospace text-danger">@s.SaleEndTime.ToString("MM-dd HH:mm")</div>
+                                </div>
+                            </div>
+                        </div>
                     }
                 </div>
+
+                @* 底部系統標記 *@
+                @* <div class="mt-auto pt-3 text-end">
+                    <span class="font-monospace opacity-25 small" style="letter-spacing: 3px;">DATA_LOG_V3.1</span>
+                </div> *@
             </div>
         </div>
+
+        @* 銷售總量面板 *@
         <div class="col-lg-3">
             <div class="cyber-card p-4 h-100 border-info border-opacity-50 text-center d-flex flex-column">
-                @* --- 上半部：全域指標 (Grand Total) --- *@
-                <div class="mb-3">
-                    <div class="text-info small mb-1">總票數</div>
-                    <div class="display-5 fw-bold font-monospace text-white">@Model.Sessions.Sum(s => s.TotalCapacity)</div>
-                    <div class="mt-1 text-white-50" style="font-size: 1.1rem;">
-                        已售總量: <span class="text-info">@Model.Sessions.Sum(s => s.TotalSold)</span>
+                <div class="mb-4">
+                    <div class="text-info small mb-1 font-monospace">活動票券總數量</div>
+                    <div class="display-4 fw-bold font-monospace text-white">@Model.Sessions.Sum(s => s.TotalCapacity)</div>
+                    <div class="mt-2 text-white-50">
+                        總銷售數: <span class="text-info fw-bold">@Model.Sessions.Sum(s => s.TotalSold)</span>
                     </div>
                 </div>
 
-                @* 分隔線 *@
-                <hr class="border-info opacity-25 my-3">
+                <hr class="border-info opacity-25 my-4">
 
-                @* --- 下半部：各場次明細 (Session Breakdown) --- *@
-                <div class="flex-grow-1 overflow-auto pe-2" style="max-height: 250px;">
-                    <div class="text-info tiny-label mb-3" style="font-size: 0.8rem; letter-spacing: 2px; opacity: 0.7; text-align: left;">
-                       各場次銷售情形
-                    </div>
+                <div class="flex-grow-1 overflow-auto custom-scroll pe-2" style="max-height: 250px;">
+                    <div class="tech-key1 mb-3" style="font-size: 0.75rem;">各場次銷售</div>
 
                     @foreach (var session in Model.Sessions)
                     {
-                        @* 🚩 解決 RZ1010: 在 code block 內宣告變數不需要加 @ *@
                         var sPercent = session.TotalCapacity > 0 ? (session.TotalSold * 100) / session.TotalCapacity : 0;
                         var sColor = sPercent >= 90 ? "prog-high" : (sPercent >= 50 ? "prog-mid" : "prog-low");
 
-                        <div class="mb-3 p-2 border-start border-info border-opacity-25" style="background: rgba(255,255,255,0.02);">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="text-white-50" style="font-size: 0.95rem;">@session.StartTime.ToString("MM/dd HH:mm")</span>
-                                <span class="font-monospace text-info" style="font-size: 1rem;">@session.TotalSold / @session.TotalCapacity</span>
+                        <div class="mb-4 p-3 border-start border-info border-opacity-20 bg-dark bg-opacity-30">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-white-50 small font-monospace">@session.StartTime.ToString("MM/dd HH:mm")</span>
+                                <span class="font-monospace text-info">@session.TotalSold/@session.TotalCapacity</span>
                             </div>
-
-                            @* 迷你進度條 *@
-                            <div class="cyber-progress" style="height: 6px; background: rgba(255,255,255,0.05);">
+                            <div class="cyber-progress">
                                 <div class="cyber-progress-bar @sColor" style="width: @sPercent%"></div>
                             </div>
                         </div>
@@ -80,89 +142,244 @@
         </div>
     </div>
 
-    @* --- [第二列] 銷售矩陣 (HUD 節點) + 座位圖 --- *@
+@* --- [3. 第二列：銷售矩陣 (HUD 節點) + 座位圖 --- *@
     <div class="row g-4 mb-4">
         <div class="col-lg-8">
-            <div class="cyber-card p-4 h-100">
-                <div class="tech-key">1: 銷售數據</div>
+            <div class="cyber-card border-0 p-4  h-100">
+                <div class="tech-key mb-4">票區銷售</div>
                 @foreach (var session in Model.Sessions)
                 {
-                    <div class="session-node mb-4">
-                        <div class="d-flex justify-content-between mb-3 border-bottom border-white border-opacity-10 pb-2">
-                            <span class="text-info font-monospace">場次序號: @session.SessionID</span>
-                            <span class="text-white opacity-75">銷售情形: @session.TotalSold / @session.TotalCapacity</span>
-                        </div>
-                        <table class="table table-borderless text-white mb-0">
-                            <thead class="text-white-50 small">
-                                <tr>
-                                    <th>票區</th>
-                                    <th class="text-center">座位數 (行 x 座)</th>
-                                    <th style="width: 45%">即時進度</th>
-                                    <th class="text-end">剩餘票數</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var area in session.TicketsAreas)
-                                {
-                                    // 🚩 修正 RZ1010: 在代碼塊內直接定義變數，不需要多加 @
-                                    var percent = area.Capacity > 0 ? (area.Sold * 100) / area.Capacity : 0;
-                                    var colorClass = percent >= 90 ? "prog-high" : (percent >= 50 ? "prog-mid" : "prog-low");
+                    @* --- [場次數據節點卡片] --- *@
+                    <div class="cyber-card mb-5 p-0 overflow-hidden">
 
-                                    <tr class="align-middle">
-                                        <td class="fw-bold">@area.TicketsAreaName</td>
-                                        <td class="text-center font-monospace opacity-50">@area.RowCount x @area.SeatCount</td>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="cyber-progress flex-grow-1">
-                                                    <div class="cyber-progress-bar @colorClass" style="width: @percent%"></div>
-                                                </div>
-                                                <span class="font-monospace small" style="min-width: 40px;">@percent%</span>
-                                            </div>
-                                        </td>
-                                        <td class="text-end font-monospace text-info">@area.Remaining</td>
+                        @* 1. 節點標頭：場次與即時訊號 *@
+                        <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-info border-opacity-10 bg-dark bg-opacity-30">
+                            <div>
+                                <span class="tech-key mb-0" style="font-size: 1rem !important; padding: 4px 20px;">
+                                    <i class="bi bi-cpu me-2"></i>場次: #@session.SessionID
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-white-50 small font-monospace">銷售率:</span>
+                                <div class="status-badge" style="background: rgba(0, 242, 255, 0.1) !important;">
+                                    @session.TotalSold / @session.TotalCapacity
+                                </div>
+                            </div>
+                        </div>
+
+                        @* 2. 數據表：區域銷售矩陣 *@
+                        <div class="table-responsive p-3">
+                            <table class="table cyber-table align-middle text-center mb-0">
+                                <thead>
+                                    <tr>
+                                        @* 寬度分配：30% | 20% | 35% | 15% *@
+                                        <th style="width: 30%;">
+                                            <div class="tech-key1">票區</div>
+                                        </th>
+                                        <th style="width: 20%;">
+                                            <div class="tech-key1">配置</div>
+                                        </th>
+                                        <th style="width: 35%;">
+                                            <div class="tech-key1">即時進度</div>
+                                        </th>
+                                        <th style="width: 15%;">
+                                            <div class="tech-key1">剩餘</div>
+                                        </th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var area in session.TicketsAreas)
+                                    {
+                                        var percent = area.Capacity > 0 ? (area.Sold * 100) / area.Capacity : 0;
+                                        // 根據百分比切換戰術色彩
+                                        var colorClass = percent >= 90 ? "bg-danger" : (percent >= 50 ? "bg-warning" : "bg-info");
+
+                                        <tr>
+                                            @* 票區名稱 *@
+                                            <td class="fw-bold text-white text-start ps-4">
+                                                <i class="bi bi-caret-right-fill text-info me-2 small"></i>@area.TicketsAreaName
+                                            </td>
+
+                                            @* 座位配置 *@
+                                            <td class="font-monospace opacity-50 small">
+                                                @area.RowCount <span class="text-info">R</span> x @area.SeatCount <span class="text-info">S</span>
+                                            </td>
+
+                                            @* 進度條 *@
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3 pe-3">
+                                                    <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 0; overflow: visible;">
+                                                        <div class="progress-bar @colorClass"
+                                                             style="width: @percent%; box-shadow: 0 0 10px currentColor; transition: width 1s ease-in-out;">
+                                                        </div>
+                                                    </div>
+                                                    <span class="font-monospace text-info small" style="min-width: 45px;">@percent%</span>
+                                                </div>
+                                            </td>
+
+                                            @* 剩餘票數 *@
+                                            <td class="font-monospace fw-bold text-info pe-4">
+                                                @area.Remaining
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @* 3. 節點底部：系統註記 *@
+                        @* <div class="p-2 border-top border-info border-opacity-10 text-center">
+                            <span class="small font-monospace opacity-25" style="letter-spacing: 3px;">
+                                DATA_NODE_STABLE_STREAMING_BY_V3.1
+                            </span>
+                        </div> *@
                     </div>
                 }
             </div>
         </div>
+
         <div class="col-lg-4">
             <div class="cyber-card p-3 h-100 text-center">
                 <div class="tech-key small mb-3">座位配置圖</div>
-                <img src="/Photos/SeatImage/@Model.SeatImage" class="w-100 seat-map-bg" style="height: 450px; object-fit: contain;">
+                <img src="/Photos/SeatImage/@Model.SeatImage" class="w-100 seat-map-bg p-2" style="height: 500px; object-fit: contain;">
             </div>
         </div>
     </div>
 
-    @* --- [第三列] 文本內容 --- *@
-    <div class="cyber-card p-4 mb-4">
-        <div class="tech-key">2.: 活動詳細介紹及規範</div>
-        <div class="desc-block"><div class="text-info small mb-1">活動簡介</div><p>@Model.ProgrammeDescription</p></div>
-        <div class="row g-3">
-            <div class="col-md-6"><div class="desc-block warning"><div class="text-warning small mb-1">注意事項</div><div>@Model.Notice</div></div></div>
-            <div class="col-md-6"><div class="desc-block danger"><div class="text-danger small mb-1">退票政策</div><div>@Model.RefundPolicy</div></div></div>
-        </div>
-    </div>
+@* --- [4. 第三列：文本內容] --- *@
+    <div class="cyber-card p-5 mb-4">
+        @* --- 1. 核心標頭 --- *@
+        <div class="tech-key mb-4">活動詳細資訊</div>
 
-    @* --- [第四列] 附件藝廊 --- *@
-    <div class="cyber-card p-4 mb-4">
-        <div class="tech-key small">3: 說明圖片</div>
-        <div class="row g-3 mt-1">
-            @foreach (var imgName in Model.DescriptionImages)
-            {
-                <div class="col-md-2 col-4">
-                    @* 🚩 修正 CS1061: 直接使用 imgName (string) *@
-                    <img src="/Photos/DescriptionImage/@imgName" class="w-100 gallery-thumb" style="height: 150px;">
+        @* --- 2. 導讀區塊：活動簡介 (全寬強化) --- *@
+        <div class="desc-block mb-5" style="border-left: 3px solid var(--tech-cyan); background: linear-gradient(90deg, rgba(0,242,255,0.05), transparent);">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-info-square-fill text-info me-2"></i>
+                <div class="text-info font-monospace small" style="letter-spacing: 2px;">節目介紹</div>
+            </div>
+            <p class="text-white opacity-75 fs-6" style="white-space: pre-line; line-height: 1.8; padding-left: 25px;">
+                @Model.ProgrammeDescription
+            </p>
+        </div>
+
+        @* --- 3. 規範矩陣 (2x2 Grid) --- *@
+        <div class="cyber-card p-5 mb-4">
+            @* --- 1. 核心標頭 --- *@
+            <div class="tech-key mb-4">活動規則</div>
+
+            @* --- 2. 活動簡介 (主導讀區塊) --- *@
+            <div class="desc-block desc-block-hover mb-5 p-3" onclick="viewProtocol('活動簡介', `@Model.ProgrammeDescription`)">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-info font-monospace small">
+                        <i class="bi bi-info-circle me-2"></i>
+                    </div>
+                    <span class="btn-cyber-mini">更多</span>
                 </div>
-            }
+                <p class="text-white opacity-75 protocol-truncate mb-0" style="white-space: pre-line;">
+                    @Model.ProgrammeDescription
+                </p>
+            </div>
+
+            @* --- 3. 規範細節矩陣 --- *@
+            <div class="row g-4">
+                @* 注意事項 *@
+                <div class="col-md-6">
+                    <div class="desc-block warning desc-block-hover h-100 p-3" onclick="viewProtocol('注意事項', `@Model.Notice`)">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-warning font-monospace small">[ 01_注意事項 ]</div>
+                            <span class="btn-cyber-mini">更多</span>
+                        </div>
+                        <div class="text-white opacity-75 protocol-truncate small">@Model.Notice</div>
+                    </div>
+                </div>
+
+                @* 購票提醒 *@
+                <div class="col-md-6">
+                    <div class="desc-block danger desc-block-hover h-100 p-3" onclick="viewProtocol('購票提醒', `@Model.RefundPolicy`)">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-danger font-monospace small">[ 02_購票提醒 ]</div>
+                            <span class="btn-cyber-mini">更多</span>
+                        </div>
+                        <div class="text-white opacity-75 protocol-truncate small">@Model.RefundPolicy</div>
+                    </div>
+                </div>
+
+                @* 取票提醒 (假設欄位為取票相關) *@
+                <div class="col-md-6">
+                    <div class="desc-block danger desc-block-hover h-100 p-3" onclick="viewProtocol('取票提醒', `@Model.RefundPolicy`)">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-danger font-monospace small">[ 03_取票提醒 ]</div>
+                            <span class="btn-cyber-mini">更多</span>
+                        </div>
+                        <div class="text-white opacity-75 protocol-truncate small">@Model.RefundPolicy</div>
+                    </div>
+                </div>
+
+                @* 退票說明 *@
+                <div class="col-md-6">
+                    <div class="desc-block danger desc-block-hover h-100 p-3" onclick="viewProtocol('退票說明', `@Model.RefundPolicy`)">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-danger font-monospace small">[ 04_退票說明 ]</div>
+                            <span class="btn-cyber-mini">更多</span>
+                        </div>
+                        <div class="text-white opacity-75 protocol-truncate small">@Model.RefundPolicy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* --- [5. 第四列：附件藝廊] --- *@
+        <div class="cyber-card p-4 mb-5">
+            <div class="tech-key small mb-4">說明圖片</div>
+            <div class="row g-3">
+                @foreach (var imgName in Model.DescriptionImages)
+                {
+                    <div class="col-lg-2 col-md-3 col-6 mb-3">
+                        @* 🚩 影像容器：加入掃描器外框與懸停放大效果 *@
+                        <div class="preview-scanner gallery-item-wrapper" style="cursor: zoom-in;">
+
+                            @* 🚩 修正 1：ImagePath 的 I 與 P 要大寫 (對照 VM 定義) 
+               🚩 修正 2：確保路徑拼接正確，假設圖片存在 /Photos/DescriptionImage/ *@
+                            <img src="~/Photos/DescriptionImage/@imgName.ImagePath"
+                                 class="w-100 gallery-thumb"
+                                 alt="@imgName.DescriptionImageName"
+                                 style="height: 160px; object-fit: cover;">
+
+                            @* 🚩 修正 3：不能直接對 item 做 Split，要對 item.ImagePath 做 
+               🚩 修正 4：Split 務必使用單引號 '.' *@
+                            <div class="img-data-tag">
+                                FILE_@(imgName.ImagePath?.Split('.').FirstOrDefault())
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* --- [最後底部：系統資訊] --- *@
+        <div class="d-flex justify-content-between p-3 opacity-100 font-monospace border-top border-info border-opacity-20" style="font-size: 0.85rem; letter-spacing: 1px;">
+            <span>負責人: @Model.EmployeeName</span>
+            <span class="text-info">最後更新時間: @Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
         </div>
     </div>
 
-    @* --- [最後一列] 系統資訊 --- *@
-    <div class="d-flex justify-content-between p-2 opacity-50 font-monospace border-top border-info border-opacity-20" style="font-size: 1rem;">
-        <span>發佈人: @Model.EmployeeName</span>
-        <span class="text-info">最後更新: @Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
-    </div>
-</div>
+@section Scripts {
+
+        <script>
+            function viewProtocol(title, content) {
+                // 推薦使用 SweetAlert2 或是自定義 Modal
+                Swal.fire({
+                    title: `<span style="color: #00f2ff; font-family: 'Share Tech Mono'; font-weight: 800;">${title}</span>`,
+                    html: `<div style="text-align: left; color: #fff; opacity: 0.8; white-space: pre-line; font-size: 0.95rem; line-height: 1.8;">${content}</div>`,
+                    background: 'rgba(0, 11, 26, 0.95)',
+                    backdrop: 'rgba(0, 242, 255, 0.1)',
+                    confirmButtonText: 'ACKNOWLEDGE',
+                    confirmButtonColor: '#00f2ff',
+                    customClass: {
+                        popup: 'cyber-card' // 讓彈窗也具備賽博斜切角
+                    }
+                });
+            }
+        </script>
+
+}

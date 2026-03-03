@@ -1,151 +1,194 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.Question>
 
 @{
-    ViewData["Title"] = "諮詢管理中心";
-    Layout = "_AdminLayout";
+    ViewData["Title"] = "客服管理中心";
 }
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Index.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Question/QuestionIndex.css" asp-append-version="true" />
+<div class="admin-body p-4">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-patch-question"></i> 使用者諮詢管理</h2>
-    <div>
-        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#typeManagerModal">
-            <i class="bi bi-tags"></i> 管理分類項目
-        </button>
+    @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
+        <div>
+            <h1 class="neon-header m-0">
+                <i class="bi bi-patch-question me-3"></i>@ViewData["Title"]
+            </h1>
+        </div>
+        <div>
+            <button type="button" class="btn-cyber" data-bs-toggle="modal" data-bs-target="#typeManagerModal">
+                <i class="bi bi-tags me-2"></i>種類名稱管理
+            </button>
+        </div>
     </div>
-</div>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>提問時間</th>
-                    <th>會員</th>
-                    <th>分類</th>
-                    <th>問題標題</th>
-                    <th>附件</th>
-                    <th>狀態</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>@item.CreatedTime.ToString("yyyy/MM/dd HH:mm")</td>
-                        <td>@item.Member?.Name <br /><small class="text-muted">@item.MemberID</small></td>
-                        <td>
-                            <span class="badge bg-info text-dark">@item.QuestionType?.QuestionTypeName</span>
-                        </td>
-                        <td class="text-truncate" style="max-width: 250px;">
-                            <strong>@item.QuestionTitle</strong>
-                        </td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(item.UploadFile))
-                            {
-                                <i class="bi bi-file-earmark-pdf text-danger" title="有附件"></i>
-                            }
-                            else
-                            {
-                                <span class="text-muted">-</span>
-                            }
-                        </td>
-                        <td>
-                            @{
-                                // 1. 抓取最後一筆回覆
-                                var latestReply = item.Reply?.OrderByDescending(r => r.CreatedTime).FirstOrDefault();
+    @* --- [2. 數據網格卡片：Cyber-Card] --- *@
+    <div class="cyber-card p-4">
+        <div class="table-responsive custom-scroll">
+            <table class="table cyber-table align-middle">
+                <thead>
+                    <tr class="text-center">
+                        @* 1. 時間 (12%) *@
+                        <th style="width: 12%;" class="pt-4 ps-4">
+                            <div class="tech-key1">時間</div>
+                        </th>
+                        @* 2. 會員 (15%) *@
+                        <th style="width: 15%;" class="pt-4">
+                            <div class="tech-key1">會員</div>
+                        </th>
+                        @* 3. 分類 (10%) *@
+                        <th style="width: 10%;" class="pt-4">
+                            <div class="tech-key1">分類</div>
+                        </th>
+                        @* 4. 標題 (28%) - 這裡需要較寬空間 *@
+                        <th style="width: 25%;" class="pt-4">
+                            <div class="tech-key1">標題</div>
+                        </th>
+                        @* 5. 附件 (5%) *@
+                        <th style="width: 10%;" class="pt-4">
+                            <div class="tech-key1">附件</div>
+                        </th>
+                        @* 6. 狀態 (15%) *@
+                        <th style="width: 15%;" class="pt-4">
+                            <div class="tech-key1">狀態</div>
+                        </th>
+                        @* 7. 操作 (15%) *@
+                        <th style="width: 15%;" class="pe-4 pt-4">
+                            <div class="tech-key1">操作</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="text-center">
+                            @* 提問時間 *@
+                            <td class="font-monospace text-info">
+                                @item.CreatedTime.ToString("yyyy.MM.dd")<br />
+                                <small class="opacity-100">@item.CreatedTime.ToString("HH:mm")</small>
+                            </td>
 
-                                // 2. 設定標籤文字 (根據你的資料庫 ID，假設 "2" 是已完成)
-                                string statusText = "待處理";
-                                string badgeClass = "bg-warning text-dark";
+                            @* 會員 *@
+                            <td>
+                                <div class="fw-bold">@item.Member?.Name</div>
+                                <div class="small font-monospace text-info opacity-100">#@item.MemberID</div>
+                            </td>
 
-                                if (latestReply != null)
+                            @* 分類 *@
+                            <td>
+                                <span class="badge border border-info text-info bg-dark bg-opacity-50 px-3">
+                                    @item.QuestionType?.QuestionTypeName
+                                </span>
+                            </td>
+
+                            @* 標題 *@
+                            <td>
+                                <div class="text-truncate" style="max-width: 250px; color: #fff;">
+                                    <strong>@item.QuestionTitle</strong>
+                                </div>
+                            </td>
+
+                            @* 附件 *@
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(item.UploadFile))
                                 {
-                                    if (latestReply.ReplyStatusID == "Y")
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-5" title="FILE_DETECTED"></i>
+                                }
+                                else
+                                {
+                                    <span class="opacity-25">-</span>
+                                }
+                            </td>
+
+                            @* 狀態判定邏輯 *@
+                            <td>
+                                @{
+                                    var latestReply = item.Reply?.OrderByDescending(r => r.CreatedTime).FirstOrDefault();
+                                    if (latestReply == null)
                                     {
-                                        statusText = "已結案";
-                                        badgeClass = "bg-success";
+                                        <div class="status-badge status-badge-pending">
+                                            <i class="bi bi- exclamation-circle me-2"></i> 待處理
+                                        </div>
                                     }
-                                    else // 其他狀態如 "N" 或 "A" (處理中)
+                                    else if (latestReply.ReplyStatusID == "Y")
                                     {
-                                        statusText = latestReply.ReplyStatus?.ReplyStatusName ?? "處理中";
-                                        badgeClass = "bg-info text-dark";
+                                        <div class="status-badge">
+                                            <i class="bi bi-check-circle me-2"></i> 已結案
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="status-badge status-badge-processing">
+                                            <i class="bi bi-hourglass-split me-2"></i> 處理中
+                                        </div>
                                     }
                                 }
-                            }                                                                                                                                                                                  
-                                @* 3. 顯示標籤 *@
-                                <span class="badge @badgeClass">@statusText</span>
-                            
-                        </td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@item.QuestionID" class="btn btn-sm btn-primary">
-                                <i class="bi bi-chat-dots"></i> 回覆
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+                            </td>
 
-<div class="modal fade" id="typeManagerModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">分類管理</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="typeManagerContent">
-                載入中...
-            </div>
-
+                            @* 操作 *@
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.QuestionID" class="btn-cyber py-1">
+                                    <i class="bi bi-chat-dots-fill me-2"></i>回覆
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
+@* --- [3. 分類管理 Modal - 賽博化改造] --- *@
+<div class="modal fade" id="typeManagerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content cyber-card" style="clip-path: none; background: #000b1a !important;">
+            <div class="modal-header border-info border-opacity-25">
+                <h5 class="text-info font-monospace m-0">問題名稱管理</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="typeManagerContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status"></div>
+                    <p class="mt-3 font-monospace opacity-50">DECRYPTING_DATA...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
-        // 初始化：Modal 顯示時抓資料
-        $('#typeManagerModal').on('show.bs.modal', function () {
-            refreshTypeList();
+          $(document).ready(function () {
+            console.log("INQUIRY_TERMINAL_ONLINE");
+
+            // Modal 顯示時抓資料
+            $('#typeManagerModal').on('show.bs.modal', function () {
+                refreshTypeList();
+            });
         });
 
-        // 載入清單
         function refreshTypeList() {
-            // 讓 ASP.NET 自動產生路徑，它會自動處理 Port 號
             var targetUrl = "@Url.Action("GetPartialList", "QuestionTypes")";
-            console.log("正在嘗試連線至: " + targetUrl); // 檢查這行輸出的網址是否正確
-
             $("#typeManagerContent").load(targetUrl, function(response, status, xhr) {
                 if (status == "error") {
-                    alert("連線失敗！請確認伺服器是否正常執行。");
+                    alert("PROTOCOL_ERR: 連線失敗，請檢查伺服器狀態。");
                 }
             });
         }
 
-        // 新增分類：
-
+        // 新增分類
         function addNewType() {
-            var name = $("#newTypeName").val(); // 取得輸入框內容
-            if (!name) {
-                alert("請輸入分類名稱");
-                return;
-            }
+            var name = $("#newTypeName").val();
+            if (!name) return alert("INPUT_ERR: 請輸入分類名稱");
 
-            // 發送 POST 請求
             $.post("@Url.Action("QuickCreate", "QuestionTypes")", { name: name }, function (data) {
                 if (data.success) {
-                    // 1. 清空輸入框
                     $("#newTypeName").val("");
-                    // 2. 呼叫之前的 refreshTypeList() 重新整理 Modal 內的列表
                     refreshTypeList();
                 } else {
-                    alert("新增失敗：" + data.message);
+                    alert("ERROR: " + data.message);
                 }
-            }).fail(function() {
-                alert("系統連線錯誤，請稍後再試");
             });
         }
 

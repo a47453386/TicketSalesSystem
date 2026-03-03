@@ -16,16 +16,40 @@
 *, *::before, *::after {
     box-sizing: border-box;
 }
+/* 🚩 核心：全域透明化 */
+html, body, .admin-body {
+    background: transparent !important; /* 徹底透明 */
+    background-color: transparent !important;
+    color: #ffffff !important;
+    min-height: 100vh;
+}
 
-body.admin-body, .admin-body {
+/* 🚩 強化：讓卡片具備「毛玻璃」透明感 */
+.cyber-card {
+    background: rgba(0, 20, 40, 0.4) !important; /* 半透明深藍，讓內容清晰 */
+    backdrop-filter: blur(10px); /* 關鍵：產生毛玻璃模糊感 */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--tech-cyan) !important;
+}
+
+/* 🚩 表格背景透明化 */
+.cyber-table {
+    background-color: transparent !important;
+}
+
+    .cyber-table tbody tr {
+        background-color: rgba(255, 255, 255, 0.02) !important; /* 極微弱的透明層，增加層次 */
+    }
+    
+    /*body.admin-body, .admin-body {
     background-color: var(--tech-bg) !important;
     background-image: linear-gradient(var(--tech-border) 1px, transparent 1px), linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
     background-size: 40px 40px;
     color: #fff !important;
     font-family: 'Share Tech Mono', 'Orbitron', '微軟正黑體', monospace;
     font-size: var(--base-font) !important;
-    overflow-x: hidden; /* 防止水平跑位 */
-}
+    overflow-x: hidden;*/ /* 防止水平跑位 */
+/*}*/
 
 /* 🚩 2. 通用卡片外框 (Cyber-Card) */
 .cyber-card {
@@ -68,6 +92,22 @@ body.admin-body, .admin-body {
     margin-bottom: 1.2rem;
     text-transform: uppercase;
 }
+.tech-key1 {
+    display: flex;
+    justify-content: center; /* 符合你之前的需求，標頭靠右 */
+    align-items: center;
+    width: 100%;
+    padding: 6px 15px;
+    font-size: 0.85rem;
+    clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, var(--tech-cyan) 0%, rgba(0, 242, 255, 0.7) 100%);
+    color: #000 !important;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px; /* 增加字距營造科技感 */
+    /* 避免標頭過扁，微調高度 */
+    min-height: 32px;
+}
 
 /* 🚩 4. 戰術捲軸 (Utility Class) */
 .custom-scroll::-webkit-scrollbar {
@@ -82,6 +122,7 @@ body.admin-body, .admin-body {
     background: var(--tech-cyan);
     box-shadow: 0 0 10px var(--tech-cyan);
 }
+
 .order-input {
     background-color: rgba(10, 10, 10, 0.95) !important;
     color: var(--tech-cyan) !important;
@@ -91,9 +132,11 @@ body.admin-body, .admin-body {
     padding: 10px 15px;
     transition: all 0.3s ease;
 }
+
 .input[type="text"].order-input {
     background-image: none !important; /* 🚩 關鍵：文字框不需要下拉箭頭 */
 }
+
 elect.order-input {
     appearance: none;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300f2ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
@@ -102,11 +145,13 @@ elect.order-input {
     background-size: 16px 12px !important;
     padding-right: 2.5rem !important;
 }
+
 .order-input:focus {
     border-color: var(--tech-cyan) !important;
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
     outline: none !important;
 }
+
 .order-input::placeholder {
     color: rgba(0, 242, 255, 0.3) !important;
 }
@@ -128,7 +173,7 @@ elect.order-input {
 
     .btn-cyber:hover {
         background: var(--tech-cyan);
-        color: #000;
+        color: #ffcc00;
         box-shadow: 0 0 15px var(--tech-cyan);
     }
 
@@ -155,4 +200,30 @@ elect.order-input {
     border: 1px solid #00ffc8; /* 添加綠色邊框 */
     border-radius: 0 100px 100px 0; /* 只有右側是圓角的 */
     box-sizing: border-box; /* 確保 padding 和 border 包含在總寬度內 */
+}
+/* 🚩 強化表格行懸停效果 (光棒效果) */
+.table tbody tr {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent; /* 預留左側光條空間 */
+}
+
+    .table tbody tr:hover {
+        /* 1. 背景改為更亮的青色微光，不再是死黑 */
+        background-color: rgba(0, 242, 255, 0.12) !important;
+        /* 2. 注入核心發光：內發光讓整行看起來在發亮 */
+        box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.2);
+        /* 3. 左側光棒：產生一條亮青色的垂直指示條 */
+        border-left: 3px solid var(--tech-cyan) !important;
+        /* 4. 文字增亮：讓懸停時的文字更有數位感 */
+        color: #fff !important;
+        text-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
+        /* 5. 稍微向上浮動或維持穩定 */
+        transform: translateX(5px); /* 輕微向右滑動，產生選取感 */
+    }
+
+/* 如果你使用的是 Bootstrap 的 .table-hover，需要強制覆蓋它的預設疊加層 */
+.table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: transparent !important;
+    color: #fff !important;
+    box-shadow: none !important; /* 移除預設的陰影 */
 }

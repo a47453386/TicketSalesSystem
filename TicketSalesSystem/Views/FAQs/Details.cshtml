@@ -1,127 +1,145 @@
 ﻿@model TicketSalesSystem.Models.FAQ
 
 @{
-    ViewData["Title"] = "常見問題詳情";
+    ViewData["Title"] = "常見問題詳細資料";
 }
 
-<div class="container py-4">
-    @* 頂部導覽與操作按鈕 *@
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a asp-action="Index">常見問題管理</a></li>
-                <li class="breadcrumb-item active" aria-current="page">問題詳情</li>
-            </ol>
-        </nav>
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/FAQ/FAQDetail.css" asp-append-version="true" />
+
+<div class="admin-body p-4">
+
+    @* --- [1. 頂部導覽與戰術操作按鈕] --- *@
+    <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
         <div>
-            <a asp-action="Edit" asp-route-id="@Model.FAQID" class="btn btn-warning">
-                <i class="bi bi-pencil-square me-1"></i>編輯
+            @* <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb m-0 p-0 bg-transparent" style="font-family: 'Share Tech Mono', monospace;">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">FAQ_REGISTRY</a></li>
+                    <li class="breadcrumb-item active text-white">RECORD_#@Model.FAQID</li>
+                </ol>
+            </nav> *@
+            <h1 class="neon-header m-0"><i class="bi bi-eye-fill me-3"></i>@ViewData["Title"]</h1>
+        </div>
+        <div class="d-flex gap-3">
+            <a asp-action="Edit" asp-route-id="@Model.FAQID" class="btn-cyber btn-cyber-warning px-4">
+                <i class="bi bi-pencil-square me-2"></i>更新
             </a>
-            <a asp-action="Index" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>返回列表
+            <a asp-action="Index" class="btn-cyber px-4">
+                <i class="bi bi-arrow-left me-2"></i>回清單
             </a>
         </div>
     </div>
 
     <div class="row g-4">
-        @* 左側：核心內容 *@
+        @* --- [2. 左側：核心數據內容] --- *@
         <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 text-primary">
-                        <i class="bi bi-chat-left-text me-2"></i>問題與解答
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small">問題標題</label>
-                        <h4 class="fw-bold">@Model.FAQTitle</h4>
-                    </div>
+            <div class="cyber-card p-5 h-100">
 
-                    <hr class="my-4 opacity-25">
+                <div class="tech-key mb-2">Q.標題</div>
+                <h2 class="text-white fw-bold mb-1" style="letter-spacing: 1px;">@Model.FAQTitle</h2>
 
-                    <div>
-                        <label class="form-label fw-bold text-muted small">詳細解答</label>
-                        @* 🚩 關鍵：使用 pre-line 確保換行能正確顯示 *@
-                        <p class="fs-5 text-secondary" style="white-space: pre-line; line-height: 1.8;">
-                            @Model.FAQDescription
-                        </p>
-                    </div>
+
+                <hr class="my-3 border-info opacity-10">
+
+
+                <div class="tech-key mb-2">A.詳細解答</div>
+                <div class="custom-scroll pe-3" style="max-height: 500px; overflow-y: auto;">
+                    <p class="fs-5 text-white" style="white-space: pre-line; line-height: 2; font-family: '微軟正黑體', sans-serif;">
+                        @Model.FAQDescription
+                    </p>
                 </div>
+                
+
             </div>
         </div>
 
-        @* 右側：管理資訊 *@
+        @* --- [3. 右側：管理資訊與安全性操作] --- *@
         <div class="col-lg-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light fw-bold">
-                    <i class="bi bi-info-circle me-2"></i>管理資訊
+            @* 管理資訊卡片 *@
+            <div class="cyber-card p-4 mb-4">
+                <div class="tech-key mb-4" style="font-size: 1rem !important;">管理資訊</div>
+
+                <div class="info-row">
+                    <span class="detail-label">常見問題編號</span>
+                    <span class="font-monospace text-info">@Model.FAQID</span>
                 </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="text-muted">問題 ID</span>
-                        <span class="badge bg-light text-dark border">@Model.FAQID</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="text-muted">分類</span>
-                        <span class="badge bg-info text-dark">@Model.FAQType?.FAQTypeName</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="text-muted">發布狀態</span>
-                        @if (Model.FAQPublishStatusID == "Y")
-                        {
-                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>已發布</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary"><i class="bi bi-pencil-fill me-1"></i>草稿</span>
-                        }
-                    </li>
-                    <li class="list-group-item">
-                        <div class="text-muted small mb-1">負責員工</div>
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-person-circle fs-4 me-2 text-secondary"></i>
-                            <div>
-                                <div class="fw-bold">@Model.Employee?.Name</div>
-                                <div class="small text-muted">ID: @Model.EmployeeID</div>
-                            </div>
+
+                <div class="info-row">
+                    <span class="detail-label">常見問題種類</span>
+                    <span class="badge border border-info text-info bg-dark">@Model.FAQType?.FAQTypeName</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="detail-label">常見問題狀態</span>
+                    @if (Model.FAQPublishStatusID == "Y")
+                    {
+                        <div class="status-badge">
+                            <i class="bi bi-broadcast me-2"></i> 已發布
                         </div>
-                    </li>
-                </ul>
+                    }
+                    else
+                    {
+                        <div class="status-badge" style="color: #ffcc00; border-color: #ffcc00; background-color: rgba(40, 30, 0, 0.6) !important;">
+                            <i class="bi bi-pencil-fill me-2"></i> @Model.FAQPublishStatus.FAQPublishStatusName
+                        </div>
+                    }
+                </div>
+
+                <div class="info-row border-0">
+                    <span class="detail-label">負責人</span>
+                    <div class="d-flex align-items-center mt-2">
+                        <div class="bg-info bg-opacity-10 p-2 me-3" style="clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);">
+                            <i class="bi bi-person-bounding-box text-info fs-4"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-white">@Model.Employee?.Name</div>
+                            <div class="small font-monospace opacity-50">ID: @Model.EmployeeID</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            @* 刪除區塊 *@
-            <div class="card border-danger shadow-sm mt-4">
-                <div class="card-body">
-                    <h6 class="text-danger fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>危險區域</h6>
-                    <p class="small text-muted">刪除此問題後將無法復原，且前台將不再顯示。</p>
-                    <button type="button" class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        刪除此常見問題
-                    </button>
-                </div>
-            </div>
+            @* 危險區域 *@
+            @* <div class="cyber-card cyber-card-danger p-4">
+                <div class="tech-key mb-3" style="background: linear-gradient(90deg, var(--tech-danger), transparent 120%);">CRITICAL_SECTION</div>
+                <p class="small text-danger opacity-75 mb-4 font-monospace">
+                    WARNING: Deleting this record is irreversible. Associated frontend cache will be purged immediately.
+                </p>
+                <button type="button" class="btn-cyber w-100 justify-content-center"
+                        style="border-color: var(--tech-danger); color: var(--tech-danger);"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash3-fill me-2"></i>TERMINATE_RECORD
+                </button>
+            </div> *@
         </div>
     </div>
 </div>
 
-@* 刪除確認 Modal *@
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">確認刪除</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+@* @* @* --- [4. 刪除確認 Modal - 賽博化改造] --- *@
+@* <div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content cyber-card p-2" style="clip-path: none; border-radius: 0; background: var(--tech-bg) !important;">
+            <div class="modal-header border-bottom border-danger border-opacity-25">
+                <h5 class="modal-title text-danger fw-bold font-monospace">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>CONFIRM_TERMINATION
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                您確定要刪除「<strong>@Model.FAQTitle</strong>」嗎？
+            <div class="modal-body py-4 text-center">
+                <p class="text-white-50">您確定要永久抹除此項紀錄嗎？</p>
+                <div class="p-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 text-white font-monospace">
+                    @Model.FAQTitle
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <div class="modal-footer border-top border-danger border-opacity-25">
+                <button type="button" class="btn-cyber px-4" data-bs-dismiss="modal">ABORT</button>
                 <form asp-action="Delete" asp-route-id="@Model.FAQID" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger">確定刪除</button>
+                    <button type="submit" class="btn-cyber px-4" style="background: var(--tech-danger); color: #000; border: none;">
+                        CONFIRM_DELETE
+                    </button>
                 </form>
             </div>
         </div>
     </div>
-</div>
+</div>  *@

@@ -2,7 +2,7 @@
 @Html.AntiForgeryToken()
 
 @{
-    ViewData["Title"] = "公告詳細資訊 / NOTICE_DIAGNOSTICS";
+    ViewData["Title"] = "公告詳細資訊";
 }
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/PublicNotice/PublicEdit.css" asp-append-version="true" />
@@ -13,22 +13,21 @@
     @* --- [1. 頂部標頭：HUD 儀表板風格] --- *@
     <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
         <div>
-            <nav aria-label="breadcrumb" class="mb-2">
+            @* <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb m-0 p-0 bg-transparent">
                     <li class="breadcrumb-item"><a asp-action="Index" class="text-info text-decoration-none opacity-50">NOTICE_LIST</a></li>
                     <li class="breadcrumb-item active text-white">FILE_DIAGNOSTICS</li>
                 </ol>
-            </nav>
+            </nav> *@
             <h1 class="neon-header m-0">
-                <i class="bi bi-info-circle me-3"></i>NOTICE_DETAILS
-            </h1>
+                <i class="bi bi-info-circle me-3"></i>@ViewData["Title"]
         </div>
         <div class="d-flex gap-3">
             <a asp-action="Edit" asp-route-id="@Model?.PublicNoticeID" class="btn-cyber">
-                <i class="bi bi-pencil-square me-2"></i>AUTHORIZE_EDIT
+                <i class="bi bi-pencil-square me-2"></i>公告更新
             </a>
             <a asp-action="Index" class="btn-cyber btn-cyber-warning">
-                <i class="bi bi-arrow-left me-2"></i>ESC_BACK
+                <i class="bi bi-arrow-left me-2"></i>回公告清單
             </a>
         </div>
     </div>
@@ -37,7 +36,7 @@
         @* --- [2. 左側：公告主體內容 (Core Data Stream)] --- *@
         <div class="col-lg-8">
             <div class="cyber-card p-4 h-100">
-                <div class="tech-key mb-4">CORE_CONTENT / 公告主體</div>
+                <div class="tech-key mb-4">公告資料</div>
 
                 <h2 class="text-info fw-bold mb-4 font-monospace" style="letter-spacing: 2px;">
                     @Model.PublicNoticeTitle
@@ -53,12 +52,12 @@
         <div class="col-lg-4">
             @* 發佈管理卡片 *@
             <div class="cyber-card p-4 mb-4">
-                <div class="tech-key mb-4">MANAGEMENT_INFO / 發佈資訊</div>
+                <div class="tech-key mb-4">發佈資訊</div>
 
                 <div class="d-flex flex-column gap-4">
                     @* 狀態切換區 *@
                     <div class="info-block">
-                        <small class="text-info opacity-50 d-block font-monospace mb-2">CURRENT_SIGNAL</small>
+                        <small class="text-info opacity-100 d-block font-monospace mb-2">公告狀態</small>
                         <div class="d-flex align-items-center justify-content-between bg-dark bg-opacity-50 p-3 border border-info border-opacity-10">
                             <div class="form-check form-switch m-0">
                                 <input class="form-check-input status-toggle" type="checkbox"
@@ -69,12 +68,12 @@
                             <div id="statusIndicator">
                                 @if (Model.PublicNoticeStatus)
                                 {
-                                    <div class="status-badge"><span class="status-badge-icon">✓</span> PUBLISHED</div>
+                                    <div class="status-badge"><span class="status-badge-icon">✓</span> 已上架</div>
                                 }
                                 else
                                 {
                                     <div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;">
-                                        <span class="status-badge-icon" style="background-color: #ff3333;">✕</span> STANDBY
+                                        <span class="status-badge-icon" style="background-color: #ff3333;">✕</span> 未上架
                                     </div>
                                 }
                             </div>
@@ -83,19 +82,19 @@
 
                     @* 負責人與時間 *@
                     <div class="info-block">
-                        <small class="text-info opacity-50 d-block font-monospace mb-1">OPERATOR_ID</small>
+                        <small class="text-info opacity-100 d-block font-monospace mb-1">負責人</small>
                         <div class="fs-5 text-white fw-bold"># @(Model.Employee?.EmployeeID ?? "SYSTEM_AUTO")</div>
                     </div>
 
                     <div class="info-block">
-                        <small class="text-info opacity-50 d-block font-monospace mb-1">UP_LINK_SCHEDULE</small>
+                        <small class="text-info opacity-100 d-block font-monospace mb-1">上架時間</small>
                         <div class="text-cyan font-monospace">
                             <i class="bi bi-calendar-event me-2"></i>@(Model.PublishTime?.ToString("yyyy-MM-dd HH:mm") ?? "IMMEDIATE")
                         </div>
                     </div>
 
                     <div class="info-block">
-                        <small class="text-info opacity-50 d-block font-monospace mb-1">DOWN_LINK_EXPIRY</small>
+                        <small class="text-info opacity-100 d-block font-monospace mb-1">下架時間</small>
                         <div class="font-monospace @(Model.RemovalTime < DateTime.Now ? "text-danger" : "text-white")">
                             <i class="bi bi-calendar-x me-2"></i>@(Model.RemovalTime?.ToString("yyyy-MM-dd HH:mm") ?? "MANUAL_ONLY")
                         </div>
@@ -105,15 +104,15 @@
 
             @* 系統日誌卡片 *@
             <div class="cyber-card p-4">
-                <div class="tech-key mb-4" style="background: linear-gradient(90deg, #ff3333, transparent 120%); color: #fff;">SECURITY_LOGS / 系統日誌</div>
+                <div class="tech-key mb-4" style="background: linear-gradient(90deg, #ffcc00, transparent 120%); color: #fff;">系統日誌</div>
                 <div class="font-monospace" style="font-size: 0.8rem;">
                     <div class="mb-3 p-2 border-start border-info">
-                        <div class="opacity-50">ENTRY_CREATED:</div>
+                        <div class="opacity-100">建立日期:</div>
                         <div class="text-info">@Model.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
                     </div>
                     <div class="p-2 border-start border-warning">
-                        <div class="opacity-50">LAST_OVERRIDE:</div>
-                        <div class="text-warning">@(Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "NO_MODIFICATION_DETECTED")</div>
+                        <div class="opacity-100">最後更新日期:</div>
+                        <div class="text-warning">@(Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "無")</div>
                     </div>
                 </div>
             </div>
@@ -142,9 +141,9 @@
                     if (res.success) {
                         // 🚩 動態更新為符合 CSS 規範的 Badge
                         if (res.newStatus) {
-                            indicator.html('<div class="status-badge"><span class="status-badge-icon">✓</span> PUBLISHED</div>');
+                            indicator.html('<div class="status-badge"><span class="status-badge-icon">✓</span> 已上架</div>');
                         } else {
-                            indicator.html('<div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;"><span class="status-badge-icon" style="background-color: #ff3333;">✕</span> STANDBY</div>');
+                            indicator.html('<div class="status-badge" style="color: #ff3333; border-color: #ff3333; background-color: rgba(26, 0, 0, 0.6) !important;"><span class="status-badge-icon" style="background-color: #ff3333;">✕</span> 未上架</div>');
                         }
                     } else {
                         alert(res.message);

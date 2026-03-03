@@ -24,7 +24,7 @@
 
     .btn-cyber-icon:hover {
         background: var(--tech-cyan);
-        color: #000;
+        color: #fff;
         box-shadow: 0 0 15px var(--tech-cyan);
     }
 
@@ -34,8 +34,8 @@
 
 /* 摘要文字截斷優化 */
 .synopsis-text {
-    opacity: 0.6;
-    font-size: 0.85rem;
+    opacity: 1;
+    font-size: 0.95rem;
     max-width: 250px;
     white-space: nowrap;
     overflow: hidden;
@@ -44,3 +44,4 @@
 .cyber-card th .status-badge {
     font-size: 0.75rem !important;
 }
+

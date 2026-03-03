@@ -1,4 +1,17 @@
-﻿/* 🚩 1. 編輯頁面專屬戰術元件 */
+﻿/* ==========================================================================
+   UniversalCyber.css - 核心戰術規格 (v3.2 修正版)
+   ========================================================================== */
+
+:root {
+    --tech-cyan: #00f2ff;
+    --tech-bg: #000b1a;
+    --panel-bg: rgba(0, 20, 40, 0.6);
+    --tech-border: rgba(0, 242, 255, 0.3);
+    --tech-danger: #ff3333;
+    --base-font: 1rem;
+}
+
+/* 🚩 1. 編輯頁面專屬戰術元件 */
 .tech-input {
     background: rgba(0, 242, 255, 0.03) !important;
     border: 1px solid var(--tech-border) !important;
@@ -25,7 +38,7 @@
     display: block;
 }
 
-/* 戰術按鈕 */
+/* 🚩 2. 戰術按鈕 */
 .btn-cyber {
     background: transparent;
     border: 1px solid var(--tech-cyan);
@@ -47,17 +60,7 @@
         box-shadow: 0 0 15px var(--tech-cyan);
     }
 
-.btn-cyber-success {
-    border-color: #00ff88;
-    color: #00ff88;
-}
-
-    .btn-cyber-success:hover {
-        background: #00ff88;
-        box-shadow: 0 0 15px #00ff88;
-    }
-
-/* 🚩 2. 影像掃描器樣式 */
+/* 🚩 3. 影像掃描器樣式 */
 .preview-scanner {
     border: 1px solid var(--tech-border);
     background: #000;
@@ -67,22 +70,10 @@
     display: inline-block;
 }
 
-    .preview-scanner::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--tech-cyan);
-        box-shadow: 0 0 15px var(--tech-cyan);
-        animation: scan 3s linear infinite;
-        opacity: 0.5;
-    }
-
-@@keyframes scan {
+/* 修正：如果是 CSS 檔用 @keyframes，cshtml 內才用 @@keyframes */
+@keyframes scan {
     0% {
-        top: 0;
+        top: 0%;
     }
 
     100% {
@@ -90,12 +81,28 @@
     }
 }
 
-/* 🚩 3. 表格欄位比例分配 */
+.preview-scanner::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--tech-cyan);
+    box-shadow: 0 0 15px var(--tech-cyan);
+    animation: scan 3s linear infinite;
+    opacity: 0.5;
+}
+
+/* 🚩 4. 表格欄位與梯形標頭精準控制 */
 .cyber-table {
     table-layout: fixed;
     width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
+    /* 這裡是你原本定義的寬度比例 */
     .cyber-table th:nth-child(1) {
         width: 18%;
     }
@@ -120,21 +127,30 @@
         width: 60px;
     }
 
-    .cyber-table th .tech-key {
+    .cyber-table thead th {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        vertical-align: bottom;
+    }
+
+    .cyber-table .tech-key1 {
         display: flex;
-        justify-content:center; /* 符合你之前的需求，標頭靠右 */
+        justify-content: center;
         align-items: center;
         width: 100%;
-        padding: 6px 15px;
-        font-size: 0.85rem;
-        clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
-        background: linear-gradient(180deg, var(--tech-cyan), rgba(0, 242, 255, 0.5));
+        height: 40px;
+        margin: 0;
+        /* 梯形坐標：頂部收縮 20% */
+        clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+        background: linear-gradient(180deg, var(--tech-cyan) 0%, rgba(0, 242, 255, 0.5) 100%);
         color: #000 !important;
         font-weight: 900;
+        font-size: 0.9rem;
     }
+
+/* 🚩 5. 修正原本錯誤的區塊 */
 .cyber-card .tech-key {
-    /* 必須加上 !important 才能蓋過全域設定 */
     font-size: 1.2rem !important;
-    /* 如果你覺得標籤高度太擠，可以順便微調 padding */
     padding: 5px 25px !important;
 }

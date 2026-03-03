@@ -1,0 +1,26 @@
+﻿.chat-container {
+    background: rgba(0, 11, 26, 0.8) !important;
+    border: 1px inset var(--tech-border);
+    padding: 20px;
+}
+
+.reply-bubble {
+    background: rgba(0, 242, 255, 0.03);
+    border-left: 3px solid var(--tech-cyan);
+    margin-bottom: 20px;
+    padding: 15px;
+    transition: all 0.3s;
+}
+
+    .reply-bubble:hover {
+        background: rgba(0, 242, 255, 0.08);
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+    }
+
+.meta-label {
+    font-size: 0.75rem;
+    color: var(--tech-cyan);
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

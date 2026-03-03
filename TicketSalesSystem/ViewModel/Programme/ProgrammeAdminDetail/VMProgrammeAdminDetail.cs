@@ -1,4 +1,5 @@
 ﻿using TicketSalesSystem.Models;
+using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
 
 namespace TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail
 {
@@ -10,6 +11,9 @@ namespace TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail
         public string? PlaceName { get; set; }
         public string? ProgrammeDescription { get; set; }
         public string? Notice { get; set; }
+        public string? PurchaseReminder { get; set; }
+        public string? CollectionReminder { get; set; }
+
         public string? RefundPolicy { get; set; }
         public string? CoverImage { get; set; }
         public string? SeatImage { get; set; }
@@ -20,7 +24,7 @@ namespace TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail
 
        
         public List<VMSessionDetail> Sessions { get; set; } = new();
-        public List<string> DescriptionImages { get; set; } = new();
+        public List<VMDescriptionImage> DescriptionImages { get; set; } = new();
     }
 
     

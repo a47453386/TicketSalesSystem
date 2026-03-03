@@ -18,5 +18,9 @@ namespace TicketSalesSystem.Models
 
         //關聯
         public virtual List<FAQ>? FAQ { get; set; }
+
+        //顯示用
+        [NotMapped]
+        public string FullDisplayName => $"{FAQPublishStatusID} - {FAQPublishStatusName}";
     }
 }

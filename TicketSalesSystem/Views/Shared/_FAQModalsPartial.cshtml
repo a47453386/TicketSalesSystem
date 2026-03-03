@@ -1,0 +1,132 @@
+﻿<div class="modal fade" id="universalAddModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content cyber-card" style="clip-path: none; background: #000b1a !important;">
+            <div class="modal-header border-info border-opacity-25">
+                <h5 class="text-info font-monospace m-0" id="addModalTitle">新增</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="addModalMode" />
+
+                <div id="idInputGroup" style="display:none;">
+                    <div class="tech-key mb-3">編號</div>
+                    <input type="text" id="newIdInput" class="form-control order-input mb-4" placeholder="例如：P">
+                </div>
+
+                <div class="tech-key mb-3">種類名稱</div>
+                <input type="text" id="newNameInput" class="form-control order-input" placeholder="請輸入名稱...">
+            </div>
+            <div class="modal-footer border-info border-opacity-25">
+                <button type="button" class="btn-cyber btn-cyber-warning py-1" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn-cyber py-1" id="universalSaveBtn">送出</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="universalEditModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content cyber-card" style="clip-path: none; background: #000b1a !important;">
+            <div class="modal-header border-warning border-opacity-25">
+                <h5 class="text-warning font-monospace m-0" id="editModalTitle">更新</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="editModalMode" />
+
+                <div class="tech-key mb-3" style="background: linear-gradient(90deg, #ffcc00, transparent 120%);">編號</div>
+                <input type="text" id="editIdField" class="form-control order-input mb-4" readonly style="background: rgba(255,255,255,0.05) !important;">
+
+                <div class="tech-key mb-3" style="background: linear-gradient(90deg, #ffcc00, transparent 120%);">新名稱</div>
+                <input type="text" id="editNameField" class="form-control order-input">
+            </div>
+            <div class="modal-footer border-warning border-opacity-25">
+                <button type="button" class="btn-cyber py-1" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn-cyber btn-cyber-warning py-1" id="universalUpdateBtn">送出</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* --- [3. 通用 AJAX 邏輯] --- *@
+<script>
+          $(document).ready(function () {
+
+        // --- [新增按鈕觸發] ---
+        // 假設你的按鈕是 <button class="quick-add-btn" data-mode="Type">
+        $('.quick-add-btn').click(function () {
+            const mode = $(this).data('mode'); // Type 或 Status
+            $('#addModalMode').val(mode);
+            $('#addModalTitle').text(mode === 'Type' ? '新增種類' : '新增狀態');
+
+            // 如果是 Status 模式，顯示 ID 輸入框；如果是 Type 則隱藏（自動編號）
+            $('#idInputGroup').toggle(mode === 'Status');
+
+            $('#universalAddModal').modal('show');
+        });
+
+        // --- [編輯按鈕觸發] ---
+        $('.quick-edit-btn').click(function () {
+            const mode = $(this).data('mode');
+            const selectId = (mode === 'Type') ? '#faqTypeSelect' : '#faqStatusSelect';
+
+            const id = $(selectId).val();
+            let text = $(selectId + " option:selected").text();
+
+            if (!id) return alert("請先選取項目！");
+
+            // 如果是顯示 "ID - Name" 格式，我們只取後面的名稱
+            if (text.includes('-')) text = text.split('-').pop().trim();
+
+            $('#editModalMode').val(mode);
+            $('#editIdField').val(id);
+            $('#editNameField').val(text);
+            $('#editModalTitle').text(mode === 'Type' ? '編輯種類' : '編輯狀態');
+
+            $('#universalEditModal').modal('show');
+        });
+
+        // --- [通用執行新增 AJAX] ---
+        $('#universalSaveBtn').click(function () {
+            const mode = $('#addModalMode').val();
+            const url = (mode === 'Type') ? '@Url.Action("CreateTypeQuickly", "FAQs")' : '@Url.Action("QuickCreateStatus", "FAQs")';
+            const data = (mode === 'Type')
+                ? { typeName: $('#newNameInput').val() }
+                : { id: $('#newIdInput').val(), name: $('#newNameInput').val() };
+
+            $.post(url, data, function (res) {
+                if (res.success) {
+                    // 回傳格式處理：Type 用 res.faqTypeName, Status 用 res.name (ID-Name)
+                    const displayId = (mode === 'Type') ? res.faqTypeId : res.id;
+                    const displayText = (mode === 'Type') ? res.faqTypeName : res.name;
+                    const selectTarget = (mode === 'Type') ? '#faqTypeSelect' : '#faqStatusSelect';
+
+                    $(selectTarget).append(new Option(displayText, displayId)).val(displayId).trigger('change');
+                    $('#universalAddModal').modal('hide');
+                    $('.order-input').val(''); // 清空
+                } else { alert(res.message); }
+            });
+        });
+
+        // --- [通用執行更新 AJAX] ---
+        $('#universalUpdateBtn').click(function () {
+            const mode = $('#editModalMode').val();
+            const url = (mode === 'Type') ? '@Url.Action("EditTypeQuickly", "FAQs")' : '@Url.Action("EditStatusQuickly", "FAQs")';
+            const id = $('#editIdField').val();
+            const name = $('#editNameField').val();
+
+            // 參數名要跟 Controller 對上：Type 用 typeId/typeName, Status 用 id/name
+            const data = (mode === 'Type') ? { typeId: id, typeName: name } : { id: id, name: name };
+
+            $.post(url, data, function (res) {
+                if (res.success) {
+                    const selectTarget = (mode === 'Type') ? '#faqTypeSelect' : '#faqStatusSelect';
+                    const displayText = (mode === 'Type') ? res.faqTypeName : res.name;
+
+                    $(selectTarget + " option[value='" + id + "']").text(displayText);
+                    $('#universalEditModal').modal('hide');
+                }
+            });
+        });
+    });
+</script>

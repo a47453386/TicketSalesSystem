@@ -97,11 +97,57 @@ namespace TicketSalesSystem.Controllers
 
             return Json(new{success = true, faqTypeId = faqType.FAQTypeID,faqTypeName = faqType.FAQTypeName});
         }
+        // 🚩 [POST] 快速新增 FAQ 狀態 (ID 自行輸入)
+        [HttpPost]
+        public async Task<IActionResult> QuickCreateStatus(string id, string name)
+        {
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name))
+                return Json(new { success = false, message = "代碼與名稱均不能為空" });
 
+            // 檢查 ID 是否重複，因為是手動輸入
+            if (await _context.FAQPublishStatus.AnyAsync(s => s.FAQPublishStatusID == id))
+                return Json(new { success = false, message = "此狀態代碼已存在" });
+
+            try
+            {
+                var newStatus = new FAQPublishStatus
+                {
+                    FAQPublishStatusID = id,
+                    FAQPublishStatusName = name
+                };
+                _context.FAQPublishStatus.Add(newStatus);
+                await _context.SaveChangesAsync();
+
+                // 💡 這裡回傳的 name 格式為 "ID - Name"，讓前端下拉選單同步
+                return Json(new { success = true, id = id, name = $"{id} - {name}" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "系統錯誤：" + ex.Message });
+            }
+        }
+
+        // 🚩 [POST] 快速編輯 FAQ 狀態 (ID 唯讀)
+        [HttpPost]
+        public async Task<IActionResult> EditStatusQuickly(string id, string name)
+        {
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name))
+                return Json(new { success = false, message = "找不到識別 ID 或名稱為空" });
+
+            var status = await _context.FAQPublishStatus.FindAsync(id);
+            if (status == null) return Json(new { success = false, message = "找不到該狀態" });
+
+            status.FAQPublishStatusName = name;
+            await _context.SaveChangesAsync();
+
+            // 回傳更新後的 FullDisplayName 格式
+            return Json(new { success = true, id = id, name = $"{id} - {name}" });
+        }
 
         // GET: FAQs/Create
         public IActionResult Create()
         {
+            
             PopulateDropdownLists();
             return View();
         }
@@ -111,10 +157,14 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(FAQ fAQ)
         {
+            ModelState.Remove("EmployeeID");
             try
             {
                 if (ModelState.IsValid)
                 {
+                    fAQ.EmployeeID = User.Identity.Name;
+
+
                     _context.Add(fAQ);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -237,7 +287,7 @@ namespace TicketSalesSystem.Controllers
         private void PopulateDropdownLists(FAQ f = null)
         {
             ViewData["EmployeeID"] = new SelectList(_context.Employee.ToList(), "EmployeeID", "Name", f?.EmployeeID);
-            ViewData["FAQPublishStatusID"] = new SelectList(_context.FAQPublishStatus.ToList(), "FAQPublishStatusID","FAQPublishStatusName",  f?.FAQPublishStatusID);
+            ViewData["FAQPublishStatusID"] = new SelectList(_context.FAQPublishStatus.ToList(),"FAQPublishStatusID", "FullDisplayName",f?.FAQPublishStatusID);
             ViewData["FAQTypeID"] = new SelectList(_context.FAQType.ToList(), "FAQTypeID", "FAQTypeName", f?.FAQTypeID);
         }
     }
