@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item;
+using TicketSalesSystem.ViewModel.Programme.Index;
 
 namespace TicketSalesSystem.ViewModel.Programme
 {
@@ -54,7 +55,7 @@ namespace TicketSalesSystem.ViewModel.Programme
             _ => "primary"      // 預設 - 藍色
         };
 
-        public List<VMSessionItem> Session { get; set; } = new List<VMSessionItem>();
+        public List<ProgrammeIndexSession> Session { get; set; } = new List<ProgrammeIndexSession>();
 
 
     }

@@ -11,6 +11,7 @@ using TicketSalesSystem.Service.Orders;
 using TicketSalesSystem.Service.Queue;
 using TicketSalesSystem.Service.Seats;
 using TicketSalesSystem.Service.Sms;
+using TicketSalesSystem.Service.SystemMonitor;
 using TicketSalesSystem.Service.Validation.IBookingValidation;
 using TicketSalesSystem.Service.Validation.IProgrammeValidationService;
 using TicketSalesSystem.Service.Validation.NewFolder;
@@ -68,6 +69,9 @@ builder.Services.AddScoped<IUserAccessorService, UserAccessorService>();
 
 //註冊密碼複雜度服務
 builder.Services.AddScoped<PasswordHasher<MemberLogin>>();
+
+// 註冊為 Singleton，全站共用同一個記憶體空間
+builder.Services.AddSingleton<SystemMonitorService>();
 
 //註冊資料保護服務，並指定金鑰存放在專案資料夾下的一個特定目錄
 builder.Services.AddDataProtection()

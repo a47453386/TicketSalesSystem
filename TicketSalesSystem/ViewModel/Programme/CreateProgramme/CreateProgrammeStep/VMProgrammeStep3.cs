@@ -8,7 +8,7 @@ namespace TicketSalesSystem.ViewModel.Programme.CreateProgramme.CreateProgrammeS
         [Key]
         public List<VMTicketsAreaItem> TicketsArea { get; set; } = new List<VMTicketsAreaItem>();
 
-        public List<VMSessionItem> Session { get; set; } = new List<VMSessionItem>();
+        public List<VMSessionItemForGrammeIndex> Session { get; set; } = new List<VMSessionItemForGrammeIndex>();
         public string? VenueID { get; set; }
         public string TicketsAreaStatusID { get; set; } = "A";
     }

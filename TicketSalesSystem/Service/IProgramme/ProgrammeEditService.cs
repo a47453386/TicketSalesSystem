@@ -56,7 +56,7 @@ namespace TicketSalesSystem.Service.IProgramme
                 TempUrl = null
             }).ToList();
 
-            vm.Session=db.Session.Select(s=>new VMSessionItem
+            vm.Session=db.Session.Select(s=>new VMSessionItemForGrammeIndex
             {
                 SessionID=s.SessionID,
                 StartTime=s.StartTime,

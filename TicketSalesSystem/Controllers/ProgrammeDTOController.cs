@@ -139,13 +139,13 @@ namespace TicketSalesSystem.Controllers
         private void MapStep2ToVM(ProgrammeDTO dto, VMProgrammeStep2 vm)
         {
             vm.Session = dto.Session?
-                .Select(s => new VMSessionItem
+                .Select(s => new VMSessionItemForGrammeIndex
                 {
                     SaleStartTime = s.SaleStartTime,
                     SaleEndTime = s.SaleEndTime,
                     StartTime = s.StartTime
                 })
-                .ToList() ?? new List<VMSessionItem>();
+                .ToList() ?? new List<VMSessionItemForGrammeIndex>();
         }
 
 
@@ -168,7 +168,7 @@ namespace TicketSalesSystem.Controllers
             else
             {
                 // 如果是第一次進來，預設給一筆空白場次，方便前端產生第一個輸入框
-                var vmF = new VMSessionItem
+                var vmF = new VMSessionItemForGrammeIndex
                 {
                     StartTime = DateTime.Now,
                     SaleStartTime = DateTime.Now,
@@ -269,7 +269,7 @@ namespace TicketSalesSystem.Controllers
             if (dto.Session != null && dto.Session.Any())
             {
                 // 2. 映射場次列表
-                vm.Session = dto.Session.Select(s => new VMSessionItem
+                vm.Session = dto.Session.Select(s => new VMSessionItemForGrammeIndex
                 {
                     SessionID = s.SessionID,
                     StartTime = s.StartTime,

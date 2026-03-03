@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.ViewModel.Programme;
+using TicketSalesSystem.ViewModel.Programme.Index;
 using TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail;
 
 namespace TicketSalesSystem.Controllers
@@ -160,25 +161,56 @@ namespace TicketSalesSystem.Controllers
         [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
         public async Task<IActionResult> AdminIndex()
         {
-            // 後台通常不進行狀態過濾 (Where)，以便管理所有活動
+            // 1. 抓取活動主檔 (包含導覽屬性以獲取地點與狀態)
             var programmes = await _context.Programme
-                .OrderByDescending(p => p.CreatedTime) // 照建立時間排序，新的在上面
-                .Select(p => new VMProgramme
+                .AsNoTracking()
+                .Include(p => p.Place)
+                .Include(p => p.ProgrammeStatus)
+                .Where(p => p.ProgrammeStatusID == "O") // 僅顯示售票中，若要顯示全部可移除此行
+                .OrderByDescending(p => p.ProgrammeID)
+                .ToListAsync();
+
+            // 2. 抓取所有場次與票區資料到記憶體，解決 8碼對10碼的匹配問題
+            var allSessions = await _context.Session.AsNoTracking().ToListAsync();
+            var allTickets = await _context.TicketsArea.AsNoTracking().ToListAsync();
+
+            // 3. 投影組裝至 VMprogrammeIndex
+            var vmList = programmes.Select(p => {
+
+                // 🚩 核心：用 StartsWith 找出該活動的所有場次 (例如 20260303 開頭的 2026030301)
+                var matchedSessions = allSessions
+                    .Where(s => s.SessionID.Trim().StartsWith(p.ProgrammeID.Trim()))
+                    .OrderBy(s => s.StartTime)
+                    .ToList();
+
+                // 🚩 根據場次 ID 找出所有的票區並計算總量
+                var matchedSessionIDs = matchedSessions.Select(s => s.SessionID).ToList();
+                var myTickets = allTickets.Where(t => matchedSessionIDs.Contains(t.SessionID)).ToList();
+
+                return new VMprogrammeIndex
                 {
                     ProgrammeID = p.ProgrammeID,
                     ProgrammeName = p.ProgrammeName,
                     CoverImage = p.CoverImage,
-                    PlaceName = p.Place != null ? p.Place.PlaceName : "未設定",
+                    PlaceName = p.Place?.PlaceName ?? "尚未公佈地點",
                     ProgrammeStatusID = p.ProgrammeStatusID,
-                    ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "未知",
-                    // 抓最早場次時間
-                    StartTime = p.Session.OrderBy(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
-                    Capacity = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Capacity),
-                    Remaining = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Remaining)
-                    
-                }).ToListAsync();
+                    ProgrammeStatusName = p.ProgrammeStatus?.ProgrammeStatusName ?? "售票中",
 
-            return View(programmes);
+                    // 填充場次清單
+                    Session = matchedSessions.Select(s => new ProgrammeIndexSession
+                    {
+                        SessionID = s.SessionID,
+                        StartTime = s.StartTime,
+                        SaleStartTime = s.SaleStartTime,
+                        SaleEndTime = s.SaleEndTime
+                    }).ToList(),
+
+                    Capacity = myTickets.Sum(t => (int?)t.Capacity) ?? 0,
+                    Remaining = myTickets.Sum(t => (int?)t.Remaining) ?? 0
+                };
+            }).ToList();
+
+            return View(vmList);
         }
 
 

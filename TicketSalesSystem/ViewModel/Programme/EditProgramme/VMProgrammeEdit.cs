@@ -31,7 +31,7 @@ namespace TicketSalesSystem.ViewModel.Programme.EditProgramme
 
         // --- 關聯資料 (一次全部載入) ---
         public List<DescriptionImageDTO> DescriptionImage { get; set; } = new List<DescriptionImageDTO>();
-        public List<VMSessionItem>? Session { get; set; } = new List<VMSessionItem>();
+        public List<VMSessionItemForGrammeIndex>? Session { get; set; } = new List<VMSessionItemForGrammeIndex>();
         public List<TicketsAreaDTO> TicketsArea { get; set; } = new List<TicketsAreaDTO>();
 
         // --- 新增這兩個屬性，前端 <input type="file"> 才能對應到 ---

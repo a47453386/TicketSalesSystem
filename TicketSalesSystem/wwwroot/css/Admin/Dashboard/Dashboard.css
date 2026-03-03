@@ -67,3 +67,28 @@
     overflow-x: hidden !important; /* 滿版時隱藏水平捲軸 */
     padding: 0 !important;
 }
+#log-container {
+    scrollbar-width: thin;
+    scrollbar-color: #0f0 #000;
+    /* 掃描線特效 (選配) */
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+}
+
+    /* 捲軸美化 */
+    #log-container::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    #log-container::-webkit-scrollbar-track {
+        background: #000;
+    }
+
+    #log-container::-webkit-scrollbar-thumb {
+        background: #0f0;
+        box-shadow: 0 0 5px #0f0;
+    }
+.shadow-glow {
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.8);
+    transition: all 0.5s ease; /* 讓顏色切換時有漸變感 */
+}

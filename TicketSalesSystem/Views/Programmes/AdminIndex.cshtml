@@ -1,22 +1,20 @@
-﻿@model IEnumerable<TicketSalesSystem.ViewModel.Programme.VMProgramme>
+﻿@model IEnumerable<TicketSalesSystem.ViewModel.Programme.Index.VMprogrammeIndex>
 
 @{
     ViewData["Title"] = "活動管理";
 }
 
-@* 引入核心戰術規格 *@
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Index.css" asp-append-version="true" />
+
 <div class="admin-body p-4 custom-scroll">
 
-    @* --- 1. 頂部標頭系統 (Neon & Tech-Key) --- *@
+    @* --- 1. 頂部標頭系統 --- *@
     <div class="d-flex justify-content-between align-items-end mb-4 pb-3 border-bottom border-info border-opacity-25">
         <div>
-           
             <h2 class="neon-header m-0">@ViewData["Title"]</h2>
         </div>
 
-        @* 戰術按鈕 *@
         <a asp-controller="ProgrammeDTO" asp-action="CreateStep1" class="btn-cyber">
             <i class="bi bi-plus-lg me-2"></i>[ 新增活動 ]
         </a>
@@ -25,35 +23,17 @@
     @* --- 2. 數據封鎖區塊 (Cyber-Card) --- *@
     <div class="cyber-card p-3">
         <div class="table-responsive">
-            @* 引入 .table 類別以觸發 CSS 中的懸停光棒效果 *@
             <table class="table cyber-table align-middle border-0">
                 <thead>
-                    @* 移除 tr 上的背景，讓內層 tech-key1 獨立顯色 *@
                     <tr class="border-0">
-                        <th style="width: 110px;" class="ps-4 border-0">
-                            <div class="tech-key1" >活動編號</div>
-                        </th>
-                        <th style="width: 90px;" class="border-0">
-                            <div class="tech-key1">封面圖</div>
-                        </th>
-                        <th style="width: 25%;" class="border-0">
-                            <div class="tech-key1" >活動名稱</div>
-                        </th>
-                        <th style="width: 15%;" class="border-0">
-                            <div class="tech-key1 ">演出地點</div>
-                        </th>
-                        <th style="width: 140px;" class="border-0">
-                            <div class="tech-key1">演出時間</div>
-                        </th>
-                        <th style="width: 130px;" class="border-0">
-                            <div class="tech-key1">銷售概況</div>
-                        </th>
-                        <th style="width: 140px;" class="border-0">
-                            <div class="tech-key1">狀態</div>
-                        </th>
-                        <th style="width: 130px;" class="border-0 pe-4">
-                            <div class="tech-key1">操作</div>
-                        </th>
+                        <th style="width: 110px;" class="ps-4 border-0"><div class="tech-key1">活動編號</div></th>
+                        <th style="width: 90px;" class="border-0"><div class="tech-key1">封面圖</div></th>
+                        <th style="width: 25%;" class="border-0"><div class="tech-key1">活動名稱</div></th>
+                        <th style="width: 15%;" class="border-0"><div class="tech-key1">演出地點</div></th>
+                        <th style="width: 140px;" class="border-0"><div class="tech-key1">演出時間</div></th>
+                        <th style="width: 130px;" class="border-0"><div class="tech-key1">銷售概況</div></th>
+                        <th style="width: 140px;" class="border-0"><div class="tech-key1">狀態</div></th>
+                        <th style="width: 130px;" class="border-0 pe-4"><div class="tech-key1">操作</div></th>
                     </tr>
                 </thead>
                 <tbody class="custom-scroll">
@@ -62,12 +42,12 @@
                         @foreach (var item in Model)
                         {
                             <tr>
-                                @* 1. UID 區塊：# 號與數字分色，增加識別度 *@
+                                @* 1. UID *@
                                 <td class="ps-4 font-monospace">
                                     <span style="color: var(--tech-border);">#</span><span style="color: var(--tech-cyan); font-weight: bold;">@item.ProgrammeID</span>
                                 </td>
 
-                                @* 2. 縮圖：增加微弱掃描線濾鏡感 *@
+                                @* 2. 縮圖 *@
                                 <td class="text-center">
                                     <div class="img-frame">
                                         <img src="@Url.Content("~/Photos/CoverImage/" + item.CoverImage)"
@@ -76,7 +56,7 @@
                                     </div>
                                 </td>
 
-                                @* 3. 名稱：主標題加粗，副標題弱化 *@
+                                @* 3. 名稱 *@
                                 <td class="text-start">
                                     <div class="fw-bold text-white mb-0" style="font-size: 1rem; letter-spacing: 0.5px;">@item.ProgrammeName</div>
                                     <div class="font-monospace opacity-50" style="font-size: 0.65rem; color: var(--tech-cyan);">ACCESS_LEVEL: ADMIN_ONLY</div>
@@ -89,49 +69,62 @@
                                     </div>
                                 </td>
 
-                                @* 5. 時間：使用點隔開日期，增加科技美感 *@
+                                @* 5. 時間 (取第一場) *@
                                 <td class="font-monospace text-center">
-                                    <div class="text-white" style="font-size: 0.85rem;">@(item.StartTime?.ToString("yyyy.MM.dd") ?? "0000.00.00")</div>
-                                    <div class="text-info opacity-50" style="font-size: 0.75rem;">@(item.StartTime?.ToString("HH:mm:ss") ?? "00:00:00")</div>
+                                    @if (item.Session != null && item.Session.Any())
+                                    {
+                                        <div class="d-flex flex-column gap-2">
+                                            @foreach (var sess in item.Session.OrderBy(s => s.StartTime))
+                                            {
+                                                <div class="session-item pb-1 border-bottom border-info border-opacity-10 last-child-border-0">
+                                                    <div class="text-white" style="font-size: 0.85rem;">
+                                                        @sess.StartTime?.ToString("yyyy.MM.dd")
+                                                    </div>
+                                                    <div class="text-info opacity-75" style="font-size: 0.75rem;">
+                                                        <i class="bi bi-clock-history me-1"></i>@sess.StartTime?.ToString("HH:mm")
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-white opacity-25 small">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>無場次資料
+                                        </div>
+                                    }
                                 </td>
 
-                                @* 6. 票數監控：使用 D3 格式化 (008) 保持長度一致，對齊更美觀 *@
+                                @* 6. 票數監控 *@
                                 <td class="text-center font-monospace">
                                     <div style="font-size: 0.9rem;">
-                                        <span class="opacity-100">總票數:</span><span class="text-white">@item.Capacity.ToString("D3")</span>
+                                        <span class="opacity-50">總:</span><span class="text-white">@item.Capacity.ToString("D3")</span>
                                     </div>
                                     <div style="font-size: 0.85rem;">
-                                        <span class="opacity-100">剩餘票數:</span>
-                                        <span class="@(item.Remaining < 10 && item.Remaining > 0 ? "fw-bold" : "")"
-                                              style="color: @(item.Remaining < 10 && item.Remaining > 0 ? "var(--tech-danger)" : "var(--tech-cyan)");
-                                             text-shadow: @(item.Remaining < 10 && item.Remaining > 0 ? "0 0 10px var(--tech-danger)" : "none");">
+                                        <span class="opacity-50">剩:</span>
+                                        <span style="color: @(item.Remaining < 10 && item.Remaining > 0 ? "var(--tech-danger)" : "var(--tech-cyan)");">
                                             @item.Remaining.ToString("D3")
                                         </span>
                                     </div>
                                 </td>
 
-                                @* 7. 狀態：套用 CSS 規範的 status-badge *@
+                                @* 7. 狀態 *@
                                 <td class="text-center">
-                                    @* 直接對接：status-@item.StatusColor 就會產出 status-success, status-danger 等 *@
                                     <div class="status-badge status-@item.StatusColor">
-                                        <span class="me-2 pulse-dot"></span>
-                                        @item.ProgrammeStatusName
+                                        <span class="me-2 pulse-dot"></span>@item.ProgrammeStatusName
                                     </div>
                                 </td>
 
-                                @* 8. 操作按鈕：間距拉大，避免誤觸 *@
+                                @* 8. 操作 *@
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-3">
-                                        <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID"
-                                           class="btn-action-icon text-info" title="編輯">
+                                        <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@item.ProgrammeID" class="btn-action-icon text-info" title="編輯">
                                             <i class="bi bi-cpu-fill"></i>
                                         </a>
-                                        <a asp-action="AdminDetail" asp-route-id="@item.ProgrammeID"
-                                           class="btn-action-icon text-white" title="詳細資訊">
+                                        <a asp-action="AdminDetail" asp-route-id="@item.ProgrammeID" class="btn-action-icon text-white" title="詳細資訊">
                                             <i class="bi bi-eye-fill"></i>
                                         </a>
-                                        <button type="button"
-                                                class="btn-action-icon text-danger bg-transparent border-0 p-0"
+                                        <button type="button" class="btn-action-icon text-danger bg-transparent border-0 p-0"
                                                 onclick="globalDelete('@item.ProgrammeID', '@item.ProgrammeName', 'Programmes')">
                                             <i class="bi bi-trash3-fill"></i>
                                         </button>
@@ -139,16 +132,6 @@
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="8" class="text-center py-5 border-0">
-                                <div class="font-monospace opacity-25" style="letter-spacing: 5px;">
-                                    [ ! ] CRITICAL_EMPTY_SECTOR_NO_DATA
-                                </div>
-                            </td>
-                        </tr>
                     }
                 </tbody>
             </table>

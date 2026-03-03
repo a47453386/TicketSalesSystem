@@ -5,6 +5,7 @@ using System.Security.Claims;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
+using TicketSalesSystem.Service.SystemMonitor;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -12,11 +13,12 @@ namespace TicketSalesSystem.Controllers
     public class AdminController : Controller
     {
         private readonly TicketsContext _context;
+        private readonly SystemMonitorService _monitor;
 
-        public AdminController(TicketsContext context)
+        public AdminController(TicketsContext context, SystemMonitorService monitor)
         {
             _context = context;
-            
+            _monitor = monitor;
         }
         
         public async Task<IActionResult> Dashboard()
@@ -178,6 +180,24 @@ namespace TicketSalesSystem.Controllers
             // 合併所有警示
             var allAlerts = soldOutWarnings.Concat(physicalLimitWarnings).ToList();
             return Json(allAlerts);
+        }
+
+        // 🚩 新增：取得背景日誌的頁面
+        public IActionResult BackgroundLogs()
+        {
+            // 直接從 Singleton 服務拿取最新的記憶體日誌
+            var logs = _monitor.GetLogs();
+            return View(logs);
+        }
+
+        // 🚩 新增：如果你想讓頁面可以「局部刷新」或用 AJAX 抓日誌
+        [HttpGet]
+        public IActionResult GetLiveBackgroundLogs()
+        {
+            var logs = _monitor.GetLogs();
+            var status = _monitor.CurrentStatus;
+
+            return Json(new { logs, status });
         }
     }
 

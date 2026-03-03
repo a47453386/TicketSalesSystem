@@ -74,3 +74,13 @@
         transform: scale(1);
     }
 }
+/* 移除最後一個場次的分隔線 */
+.last-child-border-0:last-child {
+    border-bottom: none !important;
+}
+
+/* 如果場次太多，限制高度並允許滾動 (選配) */
+.session-container {
+    max-height: 120px;
+    overflow-y: auto;
+}

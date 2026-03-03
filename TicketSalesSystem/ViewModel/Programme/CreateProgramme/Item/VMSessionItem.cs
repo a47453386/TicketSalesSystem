@@ -2,7 +2,7 @@
 
 namespace TicketSalesSystem.ViewModel.Programme.CreateProgramme.Item
 {
-    public class VMSessionItem
+    public class VMSessionItemForGrammeIndex
     {
         public string? SessionID { get; set; }
         public DateTime StartTime { get; set; }

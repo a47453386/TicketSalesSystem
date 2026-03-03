@@ -5,245 +5,251 @@
 }
 
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/Admin/Dashboard.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Dashboard/Dashboard.css" asp-append-version="true" />
 <div class="admin-body p-3">
-    @* --- 1. 頂部標題 (套用 Neon-Header 與 Cyber-Card 組合) --- *@
-    <div class="text-center mb-5">
+
+    @* --- 1. 頂部標題 --- *@
+
+    <div class="text-center mb-4">
+
         <div class="d-inline-block p-3 cyber-card px-5">
+
             <h1 class="neon-header mb-0">
-                <i class="bi bi-shield-shaded me-3"></i>售票後台管理系統即時監測
+
+                <i class="bi bi-shield-shaded me-3"></i>售票後台即時監控中心
+
             </h1>
+
         </div>
+
     </div>
 
-    @* --- 2. KPI 數據面板 --- *@
-    <div class="row text-center g-3 mb-4">
+
+
+    @* --- 第一列：核心 KPI 數據 (不變) --- *@
+
+    <div class="row text-center g-3 mb-3">
+
         <div class="col-md-3">
+
             <div class="cyber-card p-3 h-100">
+
                 <div class="tech-key">總累計營收</div>
+
                 <h3 class="fw-bold mb-0 text-white">NT$ @ViewBag.TotalSales.ToString("N0")</h3>
+
             </div>
+
         </div>
+
         <div class="col-md-3">
+
             <div class="cyber-card p-3 h-100">
+
                 <div class="tech-key">銷售率</div>
+
                 <h3 class="fw-bold mb-0">@ViewBag.SalesRate% <span class="small opacity-50">(@ViewBag.TotalTicketsSold 張)</span></h3>
+
                 <div class="progress mt-2" style="height: 6px;">
+
                     <div class="progress-bar bg-info shadow-glow" style="width: @ViewBag.SalesRate%"></div>
+
                 </div>
+
             </div>
+
         </div>
+
         <div class="col-md-3">
+
             <div class="cyber-card p-3 h-100">
+
                 <div class="tech-key">累計會員數</div>
+
                 <h3 class="fw-bold mb-0">@ViewBag.MemberCount <span class="small opacity-50">位</span></h3>
+
             </div>
+
         </div>
+
         <div class="col-md-3">
+
             <div class="cyber-card p-3 h-100">
+
                 <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger), transparent 140%);">客訴數量</div>
+
                 <h3 class="fw-bold text-danger mb-0">@ViewBag.PendingRefunds <span class="small opacity-50 text-white">Pending</span></h3>
+
             </div>
+
         </div>
+
     </div>
 
-    @* --- 3. 圖表監測區 --- *@
-    <div class="row g-3 mb-4">
-        <div class="col-lg-5">
+
+
+    @* --- 第二列：時間監控 (24H趨勢 + 背景日誌 + 狀態) --- *@
+
+    <div class="row g-3 mb-3">
+
+        @* 24H 銷售趨勢 (寬度佔 6) *@
+
+        <div class="col-lg-6">
+
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key"><i class="bi bi-bar-chart-fill me-2"></i>活動銷售分析</div>
-                <div style="height: 200px;"><canvas id="salesAreaChart"></canvas></div>
+
+                <div class="tech-key"><i class="bi bi-activity me-2"></i>24H 銷售趨勢</div>
+
+                <div style="height: 200px;"><canvas id="salesVelocityChart"></canvas></div>
+
             </div>
+
         </div>
 
-        <div class="col-lg-5">
+
+
+        @* 清理日誌 / 背景任務回報 (寬度佔 4) *@
+
+        <div class="col-lg-4">
+
             <div class="cyber-card p-3 h-100">
-                <div class="tech-key"><i class="bi bi-activity me-2"></i>24H銷售趨勢</div>
-                <div style="height: 200px;"><canvas id="salesVelocityChart"></canvas></div>
+
+                <div class="tech-key mb-2">背景任務日誌 (Live)</div>
+
+                <div id="log-container" class="font-monospace p-2 custom-scroll" style="height: 180px; overflow-y: auto; background: #000; color: #0f0; font-size: 0.75rem; border: 1px solid var(--tech-cyan);">
+
+                    >> 初始化監控系統...   
+
+                </div>
+
             </div>
+
         </div>
+
+
+
+        @* 數據回收狀態 (寬度佔 2) *@
 
         <div class="col-lg-2">
             <div class="cyber-card h-100 d-flex flex-column justify-content-center align-items-center p-2 text-center">
-                <div class="spinner-grow text-success mb-2 shadow-glow" role="status"></div>
-                <div class="tech-key" style="font-size: 0.8rem !important; padding: 2px 10px;">數據回收</div>
-                <div class="small text-white-50">掃描過期訂單中...</div>
+                @* 這裡的 Spinner 可以根據狀態變色 *@
+                <div id="status-spinner" class="spinner-grow text-success mb-2 shadow-glow" role="status"></div>
+                <div class="tech-key" style="font-size: 0.75rem !important; padding: 2px 8px;">系統監測</div>
+                @* 🚩 加上 id="current-status-text" *@
+                <div id="current-status-text" class="small text-white-50" style="font-size: 0.7rem;">初始化中...</div>
             </div>
         </div>
+
     </div>
 
-    @* --- 4. 數據流與圓餅圖 --- *@
-    <div class="row g-3">
-        <div class="col-lg-4">
-            <div class="cyber-card p-3 h-100">
-                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger),transparent 140%);">
-                    <i class="bi bi-bell-fill me-2"></i>場館、票區預警
-                </div>
-                <div class="overflow-auto custom-scroll" style="max-height: 250px;" id="alertsContainer">
-                    @* AJAX 載入 *@
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-5">
-            <div class="cyber-card p-3 h-100">
-                <div class="tech-key"><i class="bi bi-pie-chart-fill me-2"></i>訂單狀態分佈</div>
-                <div style="height: 250px;"><canvas id="orderStatusChart"></canvas></div>
-            </div>
-        </div>
+
+    @* --- 第三列：深度分析與警告 (活動、狀態、預警、待處理) --- *@
+
+    <div class="row g-3">
+
+        @* 活動銷售分析 *@
 
         <div class="col-lg-3">
+
             <div class="cyber-card p-3 h-100">
 
-                <div class="tech-key"><i class="bi bi-list-check me-2"></i>待處理</div>
+                <div class="tech-key"><i class="bi bi-bar-chart-fill me-2"></i>活動銷售分析</div>
+
+                <div style="height: 200px;"><canvas id="salesAreaChart"></canvas></div>
+
+            </div>
+
+        </div>
+
+
+
+        @* 訂單狀態分佈 *@
+
+        <div class="col-lg-3">
+
+            <div class="cyber-card p-3 h-100">
+
+                <div class="tech-key"><i class="bi bi-pie-chart-fill me-2"></i>訂單狀態分佈</div>
+
+                <div style="height: 200px;"><canvas id="orderStatusChart"></canvas></div>
+
+            </div>
+
+        </div>
+
+
+
+        @* 場館、票區預警 *@
+
+        <div class="col-lg-3">
+
+            <div class="cyber-card p-3 h-100">
+
+                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger),transparent 140%);">
+
+                    <i class="bi bi-bell-fill me-2"></i>場館預警
+
+                </div>
+
+                <div class="overflow-auto custom-scroll mt-2" style="max-height: 180px;" id="alertsContainer">
+
+                    @* AJAX 載入預警內容 *@
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        @* 待處理區域 *@
+
+        <div class="col-lg-3">
+
+            <div class="cyber-card p-3 h-100">
+
+                <div class="tech-key"><i class="bi bi-list-check me-2"></i>系統待處理</div>
 
                 <div class="list-group list-group-flush mt-2">
-                    <a asp-controller="Questions" asp-action="Index" class="list-group-item bg-transparent text-white border-info border-opacity-25 d-flex justify-content-between px-0">
-                        <span>客服提問</span><span class="badge rounded-pill bg-danger shadow-glow">@ViewBag.PendingRefunds</span>
+
+                    <a asp-controller="Questions" asp-action="Index" class="list-group-item bg-transparent text-white border-info border-opacity-10 d-flex justify-content-between px-0 py-1 small">
+
+                        <span>客服提問</span><span class="badge rounded-pill bg-danger">@ViewBag.PendingRefunds</span>
+
                     </a>
-                    <a asp-controller="Programmes" asp-action="AdminIndex" class="list-group-item bg-transparent text-white border-info border-opacity-25 d-flex justify-content-between px-0">
-                        <span>活動審核</span><span class="badge rounded-pill bg-warning text-dark shadow-glow">@ViewBag.PendingProgramme</span>
+
+                    <a asp-controller="Programmes" asp-action="AdminIndex" class="list-group-item bg-transparent text-white border-info border-opacity-10 d-flex justify-content-between px-0 py-1 small">
+
+                        <span>活動審核</span><span class="badge rounded-pill bg-warning text-dark">@ViewBag.PendingProgramme</span>
+
                     </a>
-                    <a asp-controller="PublicNotices" asp-action="Index" class="list-group-item bg-transparent text-white border-0 d-flex justify-content-between px-0">
-                        <span>未發公告</span><span class="badge rounded-pill bg-info shadow-glow">@ViewBag.PendingPublicNotice</span>
+
+                    <a asp-controller="PublicNotices" asp-action="Index" class="list-group-item bg-transparent text-white border-info border-opacity-10 d-flex justify-content-between px-0 py-1 small">
+
+                        <span>未發公告</span><span class="badge rounded-pill bg-info">@ViewBag.PendingPublicNotice</span>
+
                     </a>
-                    <a asp-controller="FAQs" asp-action="Index" class="list-group-item bg-transparent text-white border-0 d-flex justify-content-between px-0">
-                        <span>未發常見問題</span><span class="badge rounded-pill bg-success shadow-glow">@ViewBag.PendingFAQ</span>
+
+                    <a asp-controller="FAQs" asp-action="Index" class="list-group-item bg-transparent text-white border-0 d-flex justify-content-between px-0 py-1 small">
+
+                        <span>未發 FAQ</span><span class="badge rounded-pill bg-success">@ViewBag.PendingFAQ</span>
+
                     </a>
+
                 </div>
+
             </div>
-        </div>
-    </div>
 
-    @* --- 5. 最近交易數據 --- *@
-    <div class="cyber-card p-4 mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="tech-key" style="margin-bottom: 0;"><i class="bi bi-list-ul me-2"></i>最近交易數據</div>
-            <a asp-controller="Orders" asp-action="Index" class="tech-link-icon"><i class="bi bi-arrow-right-circle-fill fs-4"></i></a>
         </div>
 
-        <div class="table-responsive">
-            <table class="cyber-table">
-                <thead>
-                    <tr>
-                        <th><i class="bi bi-clock-history me-2"></i>時間</th>
-                        <th><i class="bi bi-person-badge me-2"></i>會員</th>
-                        <th><i class="bi bi-currency-dollar me-2"></i>金額</th>
-                        <th><i class="bi bi-shield-check me-2"></i>狀態</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="text-info font-monospace">@item.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm:ss")</td>
-                            <td class="fw-bold">@item.Member?.Name</td>
-                            <td class="text-white fw-bold">@item.Tickets.Sum(t => t.TicketsArea.Price).ToString("C0")</td>
-                            <td>
-                                <span class="status-badge @(item.OrderStatusID == "Y" ? "bg-success text-dark" : "bg-warning text-dark")">
-                                    @item.OrderStatus?.OrderStatusName
-                                </span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
     </div>
+
 </div>
 
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // --- 🚩 Chart 全域科技風配置 ---
-            Chart.defaults.color = '#fff';
-            Chart.defaults.font.family = "'Share Tech Mono', monospace";
-
-            const commonScales = {
-            x: {
-                ticks: { color: 'rgba(0, 242, 255, 0.7)', font: { size: 10 } },
-                grid: { color: 'rgba(0, 242, 255, 0.05)' } // 🚩 降低網格線亮度
-            },
-            y: {
-                ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 10 } },
-                grid: { color: 'rgba(0, 242, 255, 0.05)' }
-            }
-            };
-
-            // 1. Bar Chart
-            fetch('/Admin/GetAreaSalesData').then(res => res.json()).then(data => {
-                new Chart(document.getElementById('salesAreaChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(d => d.label),
-                        datasets: [
-                            { label: '已售', data: data.map(d => d.sold), backgroundColor: '#00f2ff' },
-                            { label: '剩餘', data: data.map(d => d.remaining), backgroundColor: 'rgba(255,255,255,0.1)' }
-                        ]
-                    },
-                    options: { maintainAspectRatio: false, indexAxis: 'y', scales: commonScales }
-                });
-            });
-
-            // 2. Line Chart
-            fetch('/Admin/GetSalesVelocity').then(res => res.json()).then(data => {
-                new Chart(document.getElementById('salesVelocityChart'), {
-                    type: 'line',
-                    data: {
-                        labels: data.map(d => d.hour),
-                        datasets: [{
-                            label: '單量',
-                            data: data.map(d => d.count),
-                            borderColor: '#00f2ff',
-                            backgroundColor: 'rgba(0, 242, 255, 0.2)',
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: { maintainAspectRatio: false, scales: commonScales }
-                });
-            });
-
-            // 3. Doughnut Chart (圓餅圖)
-            fetch('/Admin/GetOrderStatusDistribution').then(res => res.json()).then(data => {
-                new Chart(document.getElementById('orderStatusChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.map(d => d.status),
-                        datasets: [{
-                            data: data.map(d => d.count),
-                            backgroundColor: ['#00f2ff', '#7000ff', '#ff0055', '#39ff14'],
-                            borderColor: '#000b1a',
-                            borderWidth: 3
-                        }]
-                    },
-                    options: {
-                        maintainAspectRatio: false,
-                        cutout: '75%',
-                        plugins: { legend: { position: 'right', labels: { color: '#00f2ff' } } }
-                    }
-                });
-            });
-
-            // 4. Alerts
-            function loadLiveAlerts() {
-                   fetch('/Admin/GetLiveAlerts').then(res => res.json()).then(data => {
-                    const container = document.getElementById('alertsContainer');
-                    container.innerHTML = data.map(alert => `
-                        <div class="p-2 border-start border-${alert.level} border-4 mb-2"
-                             style="background: rgba(255, 255, 255, 0.03); border-color: var(--tech-${alert.level}) !important;">
-                            <div class="tech-label text-${alert.level}" style="font-size:0.7rem; color: var(--tech-${alert.level}) !important;">
-                                [ ALERT_${alert.level.toUpperCase()} ]
-                            </div>
-                            <div class="text-white small opacity-75">${alert.message}</div>
-                        </div>
-                    `).join('');
-                });
-            }
-            loadLiveAlerts();
-            setInterval(loadLiveAlerts, 60000);
-        });
-    </script>
+    <script src="~/js/Admin/Dashboard/Dashboard.js" asp-append-version="true"></script>
 }
