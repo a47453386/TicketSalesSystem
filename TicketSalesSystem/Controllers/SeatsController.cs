@@ -41,6 +41,7 @@ namespace TicketSalesSystem.Controllers
             _memoryCache = memoryCache;
             _queueService = queueService;
             _bookingService = bookingService;
+            _userAccessorService = userAccessorService;
         }
 
         // 【入口門衛】--當使用者點擊「立即購票」時，這是他們看到的第一站。
@@ -196,11 +197,7 @@ namespace TicketSalesSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmBooking([FromBody] VMBookingRequest request)
         {
-            //先檢查目前是否已有交易，沒有才開啟
-            var transaction = _context.Database.CurrentTransaction == null
-                              ? await _context.Database.BeginTransactionAsync()
-                              : null;
-
+            
             var memberID = _userAccessorService.GetMemberId();
 
             if (memberID == null)

@@ -14,8 +14,7 @@ namespace TicketSalesSystem.Service.Seats
 {
     public class BookingService
     {
-        private readonly ISeatService _seatService;
-        
+        private readonly ISeatService _seatService;        
         private readonly TicketsContext _context;
         private readonly IQueueService _queueService;
 
@@ -23,8 +22,7 @@ namespace TicketSalesSystem.Service.Seats
             TicketsContext context, IOrderService orderService, IMemoryCache memoryCache,
             IQueueService queueService, IUserAccessorService userAccessorService)
         {
-            _seatService = seatService;
-            
+            _seatService = seatService;            
             _context = context;
             _queueService = queueService;
         }
