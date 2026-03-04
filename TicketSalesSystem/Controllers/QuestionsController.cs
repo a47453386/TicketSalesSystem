@@ -8,6 +8,7 @@ using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class QuestionsController : Controller
     {
         private readonly TicketsContext _context;

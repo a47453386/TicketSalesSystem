@@ -13,6 +13,7 @@ using TicketSalesSystem.ViewModel.Place;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
     public class PlacesController : Controller
     {

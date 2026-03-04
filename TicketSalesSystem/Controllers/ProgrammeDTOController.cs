@@ -19,6 +19,7 @@ using TicketSalesSystem.ViewModel.Programme.EditProgramme;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
     [Route("ProgrammeDTO/[action]")]
     public class ProgrammeDTOController : Controller

@@ -9,6 +9,7 @@ using TicketSalesSystem.Service.SystemMonitor;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(AuthenticationSchemes = "EmployeeScheme")]
     public class AdminController : Controller
     {

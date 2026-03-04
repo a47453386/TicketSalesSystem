@@ -11,6 +11,7 @@ using TicketSalesSystem.Service.IUserAccessor;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A")]
     public class PublicNoticesController : Controller
     {

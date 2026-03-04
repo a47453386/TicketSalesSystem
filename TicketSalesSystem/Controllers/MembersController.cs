@@ -12,6 +12,7 @@ using TicketSalesSystem.ViewModel.Member;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class MembersController : Controller
     {
         private readonly TicketsContext _context;

@@ -111,7 +111,7 @@
                             <div class="pixel-status-tag">熱賣中..</div>
                             @if (!string.IsNullOrEmpty(item.CoverImage))
                             {
-                                <img src="@Url.Content("~/Photos/CoverImage/" + item.CoverImage)" alt="@item.ProgrammeName">
+                                <img src="@item.CoverImage" alt="@item.ProgrammeName">
                             }
                             else
                             {

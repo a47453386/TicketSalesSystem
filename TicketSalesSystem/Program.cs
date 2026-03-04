@@ -12,6 +12,7 @@ using TicketSalesSystem.Service.Queue;
 using TicketSalesSystem.Service.Seats;
 using TicketSalesSystem.Service.Sms;
 using TicketSalesSystem.Service.SystemMonitor;
+using TicketSalesSystem.Service.User;
 using TicketSalesSystem.Service.Validation.IBookingValidation;
 using TicketSalesSystem.Service.Validation.IProgrammeValidationService;
 using TicketSalesSystem.Service.Validation.NewFolder;
@@ -20,8 +21,15 @@ using TicketSalesSystem.Service.Validation.NewFolder;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://*:5098");
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
 
 //註冊GuestBookContext類別
 builder.Services.AddDbContext<TicketsContext>(options =>
@@ -77,6 +85,9 @@ builder.Services.AddSingleton<SystemMonitorService>();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(@"./MyKeys/")) // 存放金鑰的資料夾
     .SetApplicationName("TicketSalesSystem");               // 設定應用程式辨識名稱
+
+//註冊使用者服務
+builder.Services.AddScoped<IUser,UserService>();
 
 
 //註冊 Session 服務 加入 Session 服務
@@ -137,7 +148,12 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
+// 2. 啟用介面 (在 app.Run() 之前)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(); // 預設路徑通常是 /swagger/index.html
+}
 
 // ... 其他中間件 (如 StaticFiles, Routing)
 app.UseStaticFiles();

@@ -11,6 +11,7 @@ using TicketSalesSystem.Service.ID;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,C")]
     public class QuestionTypesController : Controller
     {

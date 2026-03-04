@@ -16,6 +16,7 @@ using TicketSalesSystem.ViewModel.Order;
 
 namespace TicketSalesSystem.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,D")]
     public class OrdersController : Controller
     {
