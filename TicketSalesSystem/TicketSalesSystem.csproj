@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\API\" />
     <Folder Include="SeedPhotos\CoverImage\" />
     <Folder Include="SeedPhotos\DescriptionImage\" />
     <Folder Include="SeedPhotos\SeatImage\" />

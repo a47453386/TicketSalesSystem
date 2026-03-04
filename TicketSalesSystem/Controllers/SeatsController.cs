@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
+using TicketSalesSystem.DTOs;
 using TicketSalesSystem.Helpers;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
@@ -27,10 +28,11 @@ namespace TicketSalesSystem.Controllers
         private readonly IMemoryCache _memoryCache;
         private readonly IQueueService _queueService;
         private readonly IUserAccessorService _userAccessorService;
+        private readonly BookingService _bookingService;
 
         public SeatsController(ISeatService seatService, IBookingValidationService bookingValidation, 
             TicketsContext context, IOrderService orderService, IMemoryCache memoryCache,
-            IQueueService queueService,IUserAccessorService userAccessorService)
+            IQueueService queueService,IUserAccessorService userAccessorService, BookingService bookingService)
         {
             _seatService = seatService;
             _bookingValidation = bookingValidation;
@@ -38,7 +40,7 @@ namespace TicketSalesSystem.Controllers
             _orderService = orderService;
             _memoryCache = memoryCache;
             _queueService = queueService;
-            _userAccessorService = userAccessorService;
+            _bookingService = bookingService;
         }
 
         // 【入口門衛】--當使用者點擊「立即購票」時，這是他們看到的第一站。
@@ -206,65 +208,18 @@ namespace TicketSalesSystem.Controllers
                 return RedirectToAction("MemberLogin", "Login");
             }
 
-            var member = await _context.Member.AnyAsync(m => m.MemberID == memberID);
-            if (!member)
+            var memberExists = await _context.Member.AnyAsync(m => m.MemberID == memberID);
+            if (!memberExists)
             {
-                return Json(new VMBookingResponse { Success = false, Message = "會員不存在" });
+                return Json(new { success = false, message = "會員不存在" });
             }
 
+            var result = await _bookingService.ConfirmBookingAsync(request, memberID);
 
-            var (isValid, message) = await _bookingValidation.ValidateAllAsync(request, memberID);
-            if (!isValid)
-            {
-                return Json(new VMBookingResponse { Success = false, Message = message });
-            }
+            if (result.ShouldRedirectToLogin) return RedirectToAction("MemberLogin", "Login");
 
-
-
-            try
-            {
-                //原子扣減
-                var rowAffected = await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE TicketsArea SET Remaining = Remaining - {0} " +
-                    "WHERE TicketsAreaID = {1} AND Remaining >= {2}",
-                    request.Count, request.TicketsAreaID, request.Count
-                    );
-
-                if (rowAffected == 0)
-                {
-                    if (transaction != null) await transaction.RollbackAsync();
-                    _queueService.ReleaseQueueSlot();
-                    return Json(new { success = false, message = "抱歉，票券已售完！" });
-                }
-
-
-                //建立訂單與寫入
-                var response = await _seatService.CreateOrderAndTicketsAsync(request, memberID);
-
-
-                if (response.Success)
-                {
-                    if (transaction != null) await transaction.CommitAsync();
-                    return Json(response);
-                }
-                else
-                {
-                    if (transaction != null) await transaction.RollbackAsync();
-                    _queueService.ReleaseQueueSlot();
-                    return Json(response);
-                }
-
-               
-
-            }
-            catch (Exception ex)
-            {
-                if (transaction != null) await transaction.RollbackAsync();
-                _queueService.ReleaseQueueSlot();
-                var detail = ex.InnerException?.Message ?? ex.Message;
-                return Json(new VMBookingResponse { Success = false, Message = "系統異常：" + detail });
-
-            }
+            // 網頁端通常回傳 JSON 給前台的 AJAX
+            return Json(result.Success ? result.Data : new { success = false, message = result.Message });
 
 
         }
@@ -280,32 +235,16 @@ namespace TicketSalesSystem.Controllers
         {
             if (id == null) return NotFound();
 
-            var VMOrder = await _context.Order
-                .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(p => p.Place)
-                .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
-                .FirstOrDefaultAsync(o => o.OrderID == id);
+            var vm = await _orderService.GetPaymentDetailsAsync(id);
 
-            if (VMOrder == null) return NotFound();
+            if (vm == null) return NotFound();
+
             ViewData["PaymentMethods"] = await _context.PaymentMethod.ToListAsync();
-            var expireTime = VMOrder.OrderCreatedTime.AddMinutes(10);
-            var remainingSeconds = (int)(expireTime - DateTime.Now).TotalSeconds;
-
-            var vm = new VMBookingResponse
-            {
-                ProgrammeName = VMOrder.Session.Programme.ProgrammeName,
-                StartTime = VMOrder.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
-                PlaceName = VMOrder.Session.Programme.Place.PlaceName,
-                Success = true,
-                OrderID = VMOrder.OrderID,
-                FinalAmount = VMOrder.Tickets.Sum(t => t.TicketsArea.Price),
-                Seats = VMOrder.Tickets.Select(t => $"{t.TicketsArea.TicketsAreaName} 區 {t.RowIndex} 排{t.SeatIndex} 號").ToList(),
-                RemainingSeconds = remainingSeconds > 0 ? remainingSeconds : 0,
-                ExpireTimeText = expireTime.ToString("yyyy-MM-ddTHH:mm:ss")
-            };
 
             return View(vm);
-
         }
+
+
         //是讓你「正式結帳」**並領取票券憑證
         [HttpPost]
         public async Task<IActionResult> Payment([FromBody] VMPaymentRequest request)
@@ -317,31 +256,21 @@ namespace TicketSalesSystem.Controllers
             }
             try
             {
-                // 1. 先確認目前訂單的真實狀態（不追蹤，避免干擾）
-                var currentStatus = await _context.Order
-                    .AsNoTracking()
-                    .Where(o => o.OrderID == request.OrderID)
-                    .Select(o => o.OrderStatusID)
-                    .FirstOrDefaultAsync();
-
-
-
-                if (currentStatus == null)
-                    return Json(new { success = false, message = "訂單不存在，可能已被系統徹底移除。" });
-
-                if (currentStatus == "N")
-                    return Json(new { success = false, message = "訂單已因超時失效，座位已釋出，請重新購票。" });
-
+                // 2. 直接交給專業的來（呼叫 Service）
+                // 內部會自動處理：是否存在、是否超時(N)、是否已付款(Y)、原子更新、產票
                 var result = await _orderService.ProcessPaymentAsync(request);
 
                 if (result.Success)
                 {
+                    // 3. 執行網頁版特有的收尾動作
                     _queueService.ReleaseQueueSlot();
                     HttpContext.Session.Remove("BookingToken");
-                    return Json(new { success = true, message = "付款成功！" });
+
+                    return Json(new { success = true, message = result.Message });
                 }
 
-                return Json(new { success = false, result.Message });
+                // 4. 如果失敗，直接回傳 Service 給的錯誤訊息（例如：已逾時）
+                return Json(new { success = false, message = result.Message });
             }
             catch (Exception ex)
             {

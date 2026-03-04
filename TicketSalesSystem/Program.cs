@@ -106,6 +106,16 @@ builder.Services.AddSession(options =>
 
 
 
+
+
+//µù¥UBookingService
+builder.Services.AddScoped<BookingService>();
+
+
+
+
+
+
 var app = builder.Build();
 
 //using (var scope = app.Services.CreateScope())
