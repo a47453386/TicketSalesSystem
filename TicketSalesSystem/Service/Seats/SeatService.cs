@@ -224,7 +224,7 @@ namespace TicketSalesSystem.Service.Seats
                         });
                     }
 
-                    _context.Order.Add(order);
+                    //_context.Order.Add(order);
 
                     await _context.SaveChangesAsync();
 

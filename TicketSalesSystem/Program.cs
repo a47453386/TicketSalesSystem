@@ -156,11 +156,17 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 2. 啟用介面 (在 app.Run() 之前)
+// 2. 啟用 Swagger (解決 Failed to fetch 的關鍵)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); // 預設路徑通常是 /swagger/index.html
+    app.UseSwaggerUI(c =>
+    {
+        // 🚩 這裡改用相對路徑，這樣不管是 localhost 還是 192.168.0.107 都能抓到
+        c.SwaggerEndpoint("./v1/swagger.json", "Ticket API V1");
+        // 如果想直接輸入 IP 就看到 Swagger，可以加上這行：
+        // c.RoutePrefix = "swagger"; 
+    });
 }
 
 // ... 其他中間件 (如 StaticFiles, Routing)
@@ -185,19 +191,19 @@ app.Run();
 
 
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-}
-app.UseStaticFiles();
+//// Configure the HTTP request pipeline.
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Home/Error");
+//}
+//app.UseStaticFiles();
 
-app.UseRouting();
+//app.UseRouting();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+//app.Run();

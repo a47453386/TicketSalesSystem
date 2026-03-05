@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.Queue;
+using TicketSalesSystem.Service.User;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Booking;
 using TicketSalesSystem.ViewModel.Order;
@@ -16,11 +17,14 @@ namespace TicketSalesSystem.Controllers
         private readonly TicketsContext _context;
         private readonly IQueueService _queueService;
         private readonly IUserAccessorService _userAccessorService;
-        public UserOrdersController(TicketsContext context, IQueueService queueService, IUserAccessorService userAccessorService)
+        private readonly IUser _user;
+        public UserOrdersController(TicketsContext context, IQueueService queueService
+            , IUserAccessorService userAccessorService, IUser user)
         {
             _context = context;
             _queueService = queueService;
             _userAccessorService = userAccessorService;
+            _user = user;
         }
 
         // 前台會員專區的訂單列表
@@ -33,37 +37,7 @@ namespace TicketSalesSystem.Controllers
                 return RedirectToAction("MemberLogin", "Login");
             }
 
-            var time = (int)Math.Max(0, (DateTime.Now.AddMinutes(10) - DateTime.Now).TotalSeconds);
-
-            var odrders = await _context.Order
-                .AsNoTracking()
-                .Include(o => o.OrderStatus)
-                .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(s => s.Place)
-                .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
-                .Where(o => o.MemberID == memberID)
-                .OrderByDescending(o => o.OrderCreatedTime)
-                .Select(o => new VMBookingDetailsResponse
-                {
-                    OrderID = o.OrderID,
-                    ProgrammeName = o.Session.Programme.ProgrammeName,
-                    StartTime = o.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
-                    PlaceName = o.Session.Programme.Place.PlaceName,
-                    FinalAmount = o.Tickets.Sum(t => t.TicketsArea.Price),
-                    OrderStatusID = o.OrderStatusID,
-                    OrderStatusName = o.OrderStatus.OrderStatusName,
-                    Seats = o.Tickets.Select(t => $"{t.RowIndex}排{t.SeatIndex}號").ToList(),
-                    //只有在狀態是待付款 (P) 時才需要計算，已完成 (Y) 的話就給 0
-                    RemainingSeconds = o.OrderStatusID == "P" ? time : 0,
-                    Success = o.OrderStatusID == "Y",
-                    Message = o.OrderStatusID == "Y" ? "付款完成" : o.OrderStatusID == "N" ? "訂單失效" : "待付款",
-                    TicketDetails = o.Tickets.Select(t => new VMTicketDetail
-                    {
-                        SeatInfo = $"{t.TicketsArea.TicketsAreaName} {t.RowIndex}排 {t.SeatIndex}號",
-                        StatusName = t.TicketsStatus.TicketsStatusName ?? "未知",
-                        Price = t.TicketsArea.Price
-                    }).ToList()
-                })
-                .ToArrayAsync();
+            var odrders = await _user.GetUserOrdersAsync(memberID);
 
 
             if (odrders == null)
