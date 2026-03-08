@@ -1,8 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Booking;
+using TicketSalesSystem.ViewModel.Member;
+using TicketSalesSystem.ViewModel.Order;
 using TicketSalesSystem.ViewModel.Programme;
 using TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail;
 
@@ -12,13 +16,15 @@ namespace TicketSalesSystem.Service.User
     {
         private readonly TicketsContext _context;
         private readonly IUserAccessorService _userAccessorService;
-        public UserService(TicketsContext context, IUserAccessorService userAccessorService)
+        private readonly IFileService _fileService;
+        public UserService(TicketsContext context, IUserAccessorService userAccessorService, IFileService fileService)
         {
             _context = context;
             _userAccessorService = userAccessorService;
+            _fileService = fileService;
         }
 
-        private readonly string _baseUrl = "http://10.10.51.9:5098/Photos/CoverImage/";
+        private readonly string _baseUrl = "http://192.168.0.107:5098/Photos/CoverImage/";
 
         public string GetImageFullUrl(string fileName)
         {
@@ -27,13 +33,14 @@ namespace TicketSalesSystem.Service.User
             // 🚩 如果資料庫已經存了完整路徑，就不要再拼 _baseUrl
             if (fileName.StartsWith("http") || fileName.StartsWith("/Photos"))
             {
-                return fileName.StartsWith("/") ? $"http://10.10.51.9:5098{fileName}" : fileName;
+                return fileName.StartsWith("/") ? $"http://192.168.0.107:5098{fileName}" : fileName;
             }
 
             // 🚩 否則才進行拼接，並確保斜線只有一個
             return _baseUrl.TrimEnd('/') + "/" + fileName.TrimStart('/');
             
         }
+
 
         //所有活動清單
         public async Task<List<VMProgramme>> GetProgrammesALL()
@@ -63,6 +70,88 @@ namespace TicketSalesSystem.Service.User
                 }).ToListAsync();
         }
 
+        //最新5筆公告
+        public async Task<List<PublicNotice>> GetLatestFiveNoticesAsync()
+        {
+            var latestNews = await _context.PublicNotice
+                .Where(p => p.PublicNoticeStatus == true)
+                .OrderByDescending(n => n.CreatedTime)
+                .Take(5)
+                .ToListAsync();
+            return latestNews;
+        }
+
+        //常見問題清單
+        public async Task<List<FAQ>> GetFAQsAsync ()
+        {
+            var faqs = await _context.FAQ
+               .Include(f => f.FAQPublishStatus)
+               .Include(f => f.FAQType)
+               .Where(f => f.FAQPublishStatusID == "Y") // 只顯示已發布的 FAQ                
+               .ToListAsync();
+            return faqs;
+        }
+
+        //我要發問
+        public async Task<bool> CreateQuestionAsync(Question question, IFormFile? upload, string memberId)
+        {
+            // 1. 補足後端資訊
+            question.QuestionID = Guid.NewGuid().ToString();
+            question.CreatedTime = DateTime.Now;
+            question.MemberID = memberId;
+
+            // 2. 處理檔案上傳
+            if (upload != null && upload.Length != 0)
+            {
+                string dbPath = await _fileService.SaveFileAsync(upload, "Questions");
+                question.UploadFile = dbPath;
+            }
+
+            // 3. 寫入資料庫
+            _context.Add(question);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        //問題清單
+        public async Task<List<Question>> GetMemberQuestionsAsync(string memberID)
+        {
+            return await _context.Question
+                .Include(q => q.QuestionType)
+                .Include(q => q.Reply)
+                .Where(q => q.MemberID == memberID)
+                .OrderByDescending(q => q.CreatedTime)
+                .ToListAsync();
+        }
+
+        //會員基本資料更新
+        public async Task<(bool success, string message)> UpdateMemberProfileAsync(VMMemberUserEdit vm)
+        {
+            var member = await _context.Member.FindAsync(vm.MemberID);
+
+            // 🚩 邏輯抽離：手機重複檢查
+            bool isTelExist = await _context.Member.AnyAsync(m => m.Tel == vm.Tel && m.MemberID != vm.MemberID);
+            if (isTelExist) return (false, "此手機號碼已被使用");
+
+            try
+            {
+                // 🚩 邏輯抽離：手機變更重設驗證狀態
+                if (member.Tel != vm.Tel)
+                {
+                    member.IsPhoneVerified = false;
+                }
+
+                member.Address = vm.Address;
+                member.Tel = vm.Tel;
+                member.Email = vm.Email;
+
+                await _context.SaveChangesAsync();
+                return (true, "個人資料已更新");
+            }
+            catch (Exception ex)
+            {
+                return (false, "更新失敗：" + ex.Message);
+            }
+        }
 
         // 活動詳細資訊
         public async Task<VMProgrammeAdminDetail> GetProgrammesDetail(string id)
@@ -151,5 +240,51 @@ namespace TicketSalesSystem.Service.User
 
             return orders;
         }
+
+        // 使用者訂單詳細資訊
+        public async Task<VMUserOrderDetail> GetUserOrderDetailAsync(string orderId)
+        {
+            var order = await _context.Order
+                .AsNoTracking()
+                .Include(o => o.OrderStatus)
+                .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(s => s.Place)
+                .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
+                .Include(o => o.Tickets).ThenInclude(t => t.Session)
+                .Include(o => o.Tickets).ThenInclude(t => t.TicketsStatus)
+                .Where(o => o.OrderID == orderId)
+                .FirstOrDefaultAsync();
+
+            var isPrintable = true;
+            //取票天數
+            //var isPrintable = DateTime.Now >= order.Session.StartTime.AddDays(-15);
+
+            var vm = new VMUserOrderDetail
+            {
+                OrderID = order.OrderID,
+                ProgrammeName = order.Session.Programme.ProgrammeName,
+                StartTime = order.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                PlaceName = order.Session.Programme.Place.PlaceName,
+                FinalAmount = order.Tickets.Sum(t => t.TicketsArea.Price),
+                OrderStatusName = order.OrderStatus.OrderStatusName,
+                Seats = order.Tickets.Select(t => $"{t.RowIndex}排{t.SeatIndex}號").ToList(),
+                IsPrintable = isPrintable,
+                Tickets = order.Tickets.Select(t => new VMUserTicketItem
+                {
+                    OrderID = order.OrderID,
+                    ProgrammeName = order.Session.Programme.ProgrammeName,
+                    StartTime = order.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                    PlaceName = order.Session.Programme.Place.PlaceName,
+                    FinalAmount = t.TicketsArea.Price,
+                    TicketsID = t.TicketsID,
+                    TicketsAreaName = t.TicketsArea.TicketsAreaName,
+                    Seat = $"{t.RowIndex}排{t.SeatIndex}號",
+                    CheckInCode = t.CheckInCode /*isPrintable? t.CheckInCode: null*/
+                }).ToList()
+            };
+            return vm;
+        }
+
+
+
     }
 }

@@ -227,3 +227,19 @@ elect.order-input {
     color: #fff !important;
     box-shadow: none !important; /* 移除預設的陰影 */
 }
+/* 加入到你的 CSS 檔案 */
+#scanFeedContainer div {
+    animation: scanPulse 0.5s ease-out;
+}
+
+@keyframes scanPulse {
+    0% {
+        background: rgba(57, 255, 20, 0.2);
+        transform: translateX(-5px);
+    }
+
+    100% {
+        background: transparent;
+        transform: translateX(0);
+    }
+}

@@ -86,6 +86,57 @@
     }
     loadLiveAlerts();
     setInterval(loadLiveAlerts, 60000);
+
+    // 5. 活動進場率統計 (Bar Chart)
+    fetch('/Admin/GetAttendanceData').then(res => res.json()).then(data => {
+        new Chart(document.getElementById('attendanceChart'), {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.programmeName),
+                datasets: [
+                    {
+                        label: '已進場',
+                        data: data.map(d => d.actualEntry),
+                        backgroundColor: '#39ff14' // 螢光綠代表進場
+                    },
+                    {
+                        label: '未到場',
+                        data: data.map(d => d.notShow),
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, ticks: { color: '#39ff14' } }, // 堆疊顯示
+                    y: { stacked: true, ticks: { color: '#fff' } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#39ff14' } }
+                }
+            }
+        });
+    });
+
+
+    // 6. 即時核銷紀錄流水 (Live Scan Feed)
+    function loadLiveScanLogs() {
+        fetch('/Admin/GetLiveScanLogs').then(res => res.json()).then(data => {
+            const container = document.getElementById('scanFeedContainer');
+            if (container) {
+                container.innerHTML = data.map(log => `
+                <div class="d-flex justify-content-between border-bottom border-secondary py-1 mb-1" style="font-size: 0.8rem;">
+                    <span style="color: #39ff14;">[OK]</span>
+                    <span class="text-white-50">${log.time}</span>
+                    <span style="color: #00f2ff;">${log.code}</span>
+                    <span class="text-info">${log.programme}</span>
+                </div>
+            `).join('');
+            }
+        });
+    }
+    setInterval(loadLiveScanLogs, 10000); // 每 10 秒刷新一次進場流水
 });
 function refreshBackgroundLogs() {
     fetch('/Admin/GetLiveBackgroundLogs')

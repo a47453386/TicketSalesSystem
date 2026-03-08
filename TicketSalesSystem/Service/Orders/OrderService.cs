@@ -67,7 +67,7 @@ namespace TicketSalesSystem.Service.Orders
 
                 foreach (var t in tickets)
                 {
-                    t.TicketsStatusID = "S"; // 售出
+                    t.TicketsStatusID = "A"; // 未使用
                     t.CheckInCode = StringHelper.GenerateCheckInCode(12);
                 }
 

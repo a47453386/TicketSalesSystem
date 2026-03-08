@@ -106,11 +106,11 @@ namespace TicketSalesSystem.Controllers
         {
             // 統計各個狀態的訂單張數
             var data = await _context.Order
+                .Where(o => o.OrderStatusID == "Y" || o.OrderStatusID == "P" || o.OrderStatusID == "N")
                 .GroupBy(o => o.OrderStatusID)
                 .Select(g => new {
                     status = g.Key == "Y" ? "已付款" :
-                             g.Key == "P" ? "待付款" :
-                             g.Key == "N" ? "逾期付款" : "已失效",
+                             g.Key == "P" ? "待付款" :"逾期付款",                             
                     count = g.Count()
                 })
                 .ToListAsync();
@@ -199,6 +199,47 @@ namespace TicketSalesSystem.Controllers
             var status = _monitor.CurrentStatus;
 
             return Json(new { logs, status });
+        }
+        public async Task<IActionResult> GetAttendanceData()
+        {
+            var data = await _context.Programme // 假設你的 Model 是 Programme
+        .Select(p => new {
+            // 🚩 這裡的屬性名稱會自動轉為 camelCase (例如 programmeName)
+            programmeName = p.ProgrammeName,
+
+            // 已進場人數 (狀態 Y)
+            actualEntry = p.Session.SelectMany(s => s.Tickets)
+                            .Count(t => t.TicketsStatusID == "Y"),
+
+            // 未到場人數 (已售出狀態 A，但不包含已核銷 Y)
+            notShow = p.Session.SelectMany(s => s.Tickets)
+                        .Count(t => t.TicketsStatusID == "A")
+        })
+        .ToListAsync();
+
+            return Json(data); 
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetLiveScanLogs()
+        {
+            // 🚩 從 Tickets 資料表撈取最近 10 筆已核銷的紀錄
+            var logs = await _context.Tickets
+                .Include(t => t.Session)
+                .ThenInclude(s => s.Programme) // 關聯活動名稱
+                .Where(t => t.TicketsStatusID == "Y" && t.ScannedTime != null)
+                .OrderByDescending(t => t.ScannedTime) // 依時間降冪，最新的在上面
+                .Take(10) // 每次取最新的 10 筆
+                .Select(t => new {
+                    // 🚩 格式化輸出給前端 JS 讀取
+                    time = t.ScannedTime.Value.ToString("HH:mm:ss"),
+                    code = t.CheckInCode,
+                    programme = t.Session.Programme.ProgrammeName
+                })
+                .ToListAsync();
+
+            return Json(logs);
         }
     }
 

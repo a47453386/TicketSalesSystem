@@ -1,4 +1,8 @@
-﻿using TicketSalesSystem.ViewModel.Booking;
+﻿using Microsoft.EntityFrameworkCore;
+using TicketSalesSystem.Models;
+using TicketSalesSystem.ViewModel.Booking;
+using TicketSalesSystem.ViewModel.Member;
+using TicketSalesSystem.ViewModel.Order;
 using TicketSalesSystem.ViewModel.Programme;
 using TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail;
 
@@ -13,12 +17,30 @@ namespace TicketSalesSystem.Service.User
         //所有已開賣的活動
         Task<List<VMProgramme>> GetProgrammesALL();
 
+        //最新五則公告
+        Task<List<PublicNotice>> GetLatestFiveNoticesAsync();
+
+        //常見問題
+        Task<List<FAQ>> GetFAQsAsync();
+
         //活動詳細資料
         Task<VMProgrammeAdminDetail> GetProgrammesDetail(string id);
 
-        //會員所有訂單
+        //我要發問
+        Task<bool> CreateQuestionAsync(Question question, IFormFile? upload, string memberId);
 
+        //會員所有提問
+        Task<List<Question>> GetMemberQuestionsAsync(string memberID);
+        
+        //會員基本資料更新
+        Task<(bool success, string message)> UpdateMemberProfileAsync(VMMemberUserEdit vm);
+
+
+        //會員所有訂單
         Task<IEnumerable<VMBookingDetailsResponse>> GetUserOrdersAsync(string memberID);
+
+        //會員訂單詳細資料
+        Task<VMUserOrderDetail> GetUserOrderDetailAsync(string orderId);
 
 
     }

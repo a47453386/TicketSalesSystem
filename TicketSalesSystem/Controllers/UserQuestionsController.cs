@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IUserAccessor;
+using TicketSalesSystem.Service.User;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -14,12 +15,16 @@ namespace TicketSalesSystem.Controllers
         private readonly TicketsContext _context;
         private readonly IFileService _fileService;
         private readonly IUserAccessorService _userAccessorService;
+        private readonly IUser _userService;    
 
-        public UserQuestionsController(TicketsContext context, IFileService fileService, IUserAccessorService userAccessor)
+        public UserQuestionsController(TicketsContext context,
+            IFileService fileService, IUserAccessorService userAccessor, 
+            IUser userService)
         {
             _context = context;
             _fileService = fileService;
             _userAccessorService = userAccessor;
+            _userService = userService;
         }
 
         // A. 我的提問紀錄 (消費者只能看自己的)
@@ -34,12 +39,7 @@ namespace TicketSalesSystem.Controllers
                 return RedirectToAction("MemberLogin", "Login");
             }
 
-            var myQuestions = await _context.Question
-                .Include(q => q.QuestionType)
-                .Include(q => q.Reply) // 載入回覆紀錄
-                .Where(q => q.MemberID == memberID)
-                .OrderByDescending(q => q.CreatedTime)
-                .ToListAsync();
+            var myQuestions = await _userService.GetMemberQuestionsAsync(memberID);
 
             return View(myQuestions);
         }
@@ -54,46 +54,31 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Question question, IFormFile? upload)
         {
+            // 1. 取得會員 ID (這是 Web 層的權限檢查)
             var memberID = _userAccessorService.GetMemberId();
-
             if (memberID == null)
             {
                 return RedirectToAction("MemberLogin", "Login");
             }
 
-            // 🚩 後端補足必要資訊
-            question.QuestionID = Guid.NewGuid().ToString();
-            question.CreatedTime = DateTime.Now;
-            question.MemberID = memberID; // 應抓取登入者
-
-
-            // 如果沒有上傳檔案，確保 UploadFile 欄位為 null
-            if (upload != null && upload.Length != 0)
-            {
-                string dbPath = await _fileService.SaveFileAsync(upload, "Questions");
-                question.UploadFile = dbPath;
-            }
-
-
-
-            // 移除不需要前端輸入的驗證
+            // 2. 移除不需要前端驗證的欄位 (這些由 Service 補齊)
             ModelState.Remove("QuestionID");
             ModelState.Remove("MemberID");
             ModelState.Remove("CreatedTime");
 
-
+            // 3. 呼叫抽離出來的 Service
             if (ModelState.IsValid)
             {
-                _context.Add(question);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(MyList));
+                bool isSuccess = await _userService.CreateQuestionAsync(question, upload, memberID);
+                if (isSuccess)
+                {
+                    return RedirectToAction(nameof(MyList));
+                }
             }
 
-
+            // 失敗則重新填充下拉選單並回傳 View
             PopulateDropdownLists(question);
-
             return View(question);
-
         }
 
         // GET: Questions/Details/5

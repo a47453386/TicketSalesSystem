@@ -48,49 +48,17 @@ namespace TicketSalesSystem.Controllers
             return View(odrders);
         }
 
-        // 前台會員專區的訂單詳細資料
+        // 訂單詳細資料
         public async Task<IActionResult> UserDetail(string id)
         {
             if (id == null) return BadRequest();
-            var order = await _context.Order
-                .AsNoTracking()
-                .Include(o => o.OrderStatus)
-                .Include(o => o.Session).ThenInclude(s => s.Programme).ThenInclude(s => s.Place)
-                .Include(o => o.Tickets).ThenInclude(t => t.TicketsArea)
-                .Include(o => o.Tickets).ThenInclude(t => t.Session)
-                .Include(o => o.Tickets).ThenInclude(t => t.TicketsStatus)
-                .Where(o => o.OrderID == id)
-                .FirstOrDefaultAsync();
-            if (order == null) return NotFound();
 
-            var isPrintable = true;
+            
+            var vm= await _user.GetUserOrderDetailAsync(id);
 
-            //判斷天數
-            //DateTime.Now >= order.Session.StartTime.AddDays(-15);
 
-            var vm = new VMUserOrderDetail
-            {
-                OrderID = order.OrderID,
-                ProgrammeName = order.Session.Programme.ProgrammeName,
-                StartTime = order.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
-                PlaceName = order.Session.Programme.Place.PlaceName,
-                FinalAmount = order.Tickets.Sum(t => t.TicketsArea.Price),
-                OrderStatusName = order.OrderStatus.OrderStatusName,
-                Seats = order.Tickets.Select(t => $"{t.RowIndex}排{t.SeatIndex}號").ToList(),
-                IsPrintable = isPrintable,
-                Tickets = order.Tickets.Select(t => new VMUserTicketItem
-                {
-                    OrderID = order.OrderID,
-                    ProgrammeName = order.Session.Programme.ProgrammeName,
-                    StartTime = order.Session.StartTime.ToString("yyyy-MM-dd HH:mm"),
-                    PlaceName = order.Session.Programme.Place.PlaceName,
-                    FinalAmount = t.TicketsArea.Price,
-                    TicketsID = t.TicketsID,
-                    TicketsAreaName = t.TicketsArea.TicketsAreaName,
-                    Seat = $"{t.RowIndex}排{t.SeatIndex}號",
-                    CheckInCode = t.CheckInCode /*isPrintable? t.CheckInCode: null*/
-                }).ToList()
-            };
+            if(vm == null) return NotFound();
+
 
             return View(vm);
         }

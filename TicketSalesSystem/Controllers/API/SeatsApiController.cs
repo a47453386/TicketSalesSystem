@@ -34,14 +34,7 @@ namespace TicketSalesSystem.Controllers.API
             _orderService = orderService;
         }
 
-        //活動清單
-        [HttpGet("apihome")]
-        public async Task<IActionResult> GetHomeData()
-        {
-            // 直接叫 Service 做事，Controller 只負責回傳 Ok
-            var data = await _user.GetProgrammesALL();
-            return Ok(data);
-        }
+        
 
 
         //活動詳細資料

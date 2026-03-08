@@ -33,6 +33,7 @@ namespace TicketSalesSystem.Controllers.API
             _orderService = orderService;
         }
 
+        //訂單清單
         [HttpGet("api/OrdersIndex")]
         public async Task<IActionResult> GetOrdersIndex()
         {
@@ -50,5 +51,26 @@ namespace TicketSalesSystem.Controllers.API
             return Ok(orders); // 回傳 JSON 給 Android
         }
 
+
+
+        //訂單詳情
+        [HttpGet("OrdersDetail/{id}")]
+        public async Task<IActionResult> GetOrderDetail(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("訂單編號不可為空");
+            }
+
+            // 2. 直接調用你剛抽離好的 Service
+            var orders = await _user.GetUserOrderDetailAsync(id);
+
+            if (orders == null)
+            {
+                return NotFound(new { message = "找不到該筆訂單" });
+            }
+
+            return Ok(orders); // 回傳 JSON 給 Android
+        }
     }
 }

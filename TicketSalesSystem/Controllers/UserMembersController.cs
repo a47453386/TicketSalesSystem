@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.Sms;
+using TicketSalesSystem.Service.User;
 using TicketSalesSystem.ViewModel.Member;
 
 namespace TicketSalesSystem.Controllers
@@ -15,12 +16,14 @@ namespace TicketSalesSystem.Controllers
         private readonly TicketsContext _context;
         private readonly ISmsService _smsService;
         private readonly IUserAccessorService _userAccessorService;
+        private readonly IUser _userService;
 
-        public UserMembersController(TicketsContext context, ISmsService smsService, IUserAccessorService userAccessor)
+        public UserMembersController(TicketsContext context, ISmsService smsService, IUserAccessorService userAccessor, IUser userService)
         {
             _context = context;
             _smsService = smsService;
             _userAccessorService = userAccessor;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
@@ -287,48 +290,26 @@ namespace TicketSalesSystem.Controllers
         {
             if (id != vm.MemberID) return NotFound();
 
-            //檢查手機號碼是否已存在
-            bool isTelExist = await _context.Member.AnyAsync(m => m.Tel == vm.Tel);
-
-            if (isTelExist)
-            {
-                // 針對 Tel 欄位加入錯誤訊息
-                ModelState.AddModelError("Tel", "此手機號碼已被使用，請更換號碼或嘗試找回帳號。");
-            }
-
+            // 移除不需驗證的欄位
             ModelState.Remove("NationalID");
             ModelState.Remove("Account");
             ModelState.Remove("Password");
 
             if (!ModelState.IsValid) return View(vm);
 
+            // 🚩 呼叫 Service 執行核心邏輯
+            var result = await _userService.UpdateMemberProfileAsync(vm);
 
-            var member = await _context.Member.FindAsync(vm.MemberID);
-            if (member == null) return NotFound();
-
-
-            try
+            if (result.success)
             {
-                //處理手機號碼變更邏輯 (如果手機換了，建議重設驗證狀態)
-                if (member.Tel != vm.Tel)
-                {
-                    member.IsPhoneVerified = false;
-                }
-
-                member.Address = vm.Address;
-                member.Tel = vm.Tel;
-                member.Email = vm.Email;
-
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "個人資料已更新";
+                TempData["Success"] = result.message; //
                 return RedirectToAction("UserEdit", new { id = vm.MemberID });
             }
-            catch (Exception ex)
+            else
             {
-                ModelState.AddModelError("", "會員資料更新失敗，錯誤原因：" + ex.Message);
+                ModelState.AddModelError("Tel", result.message); // 將錯誤綁回畫面
+                return View(vm);
             }
-
-            return View(vm);
         }
 
         private void PopulateDropdownLists(string? selectedStatus = null)

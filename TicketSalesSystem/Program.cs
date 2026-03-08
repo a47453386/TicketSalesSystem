@@ -104,16 +104,47 @@ builder.Services.AddScoped<IUser,UserService>();
 builder.Services.AddDistributedMemoryCache();
 
 // 設定 Cookie 認證
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication(options =>
+{
+    // 🚩 建議設定一個預設的認證方案，避免 [Authorize] 找不到對象
+    options.DefaultScheme = "MemberScheme";
+})
     .AddCookie("MemberScheme", options =>
     {
-        options.LoginPath = "/Login/MemberLogin"; // 會員登入路徑
-        options.Cookie.Name = "TicketSystem.Member.Cookie"; // 這是會員的口袋
+        options.LoginPath = "/Login/MemberLogin";
+        options.Cookie.Name = "TicketSystem.Member.Cookie";
+
+        // 🚩 1. 設定登入過期時間 (例如 30 分鐘)
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+
+        // 🚩 2. 滑動過期：如果使用者在 30 分鐘內有操作，時間會自動重新計算 30 分鐘
+        options.SlidingExpiration = true;
+
+        // 🚩 3. 增加安全性：防止跨站腳本攻擊 (XSS)
+        options.Cookie.HttpOnly = true;
+        //APP
+        options.Events.OnRedirectToLogin = context =>
+        {
+            // 如果請求路徑是以 /api 開頭，就回傳 401，不要跳轉頁面
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            }
+            else
+            {
+                context.Response.Redirect(context.RedirectUri);
+            }
+            return Task.CompletedTask;
+        };
     })
     .AddCookie("EmployeeScheme", options =>
     {
-        options.LoginPath = "/Login/EmployeeLogin"; // 員工登入路徑
-        options.Cookie.Name = "TicketSystem.Employee.Cookie"; // 這是員工的口袋
+        options.LoginPath = "/Login/EmployeeLogin";
+        options.Cookie.Name = "TicketSystem.Employee.Cookie";
+
+        // 員工端通常可以設定久一點，或比照辦理
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(480);
+        options.SlidingExpiration = true;
     });
 
 builder.Services.AddSession(options =>

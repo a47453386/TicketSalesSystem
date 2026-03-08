@@ -29,61 +29,40 @@
     @* --- 第一列：核心 KPI 數據 (不變) --- *@
 
     <div class="row text-center g-3 mb-3">
-
         <div class="col-md-3">
-
             <div class="cyber-card p-3 h-100">
-
                 <div class="tech-key">總累計營收</div>
-
                 <h3 class="fw-bold mb-0 text-white">NT$ @ViewBag.TotalSales.ToString("N0")</h3>
-
             </div>
-
         </div>
-
-        <div class="col-md-3">
-
+        <div class="col-md-2">
             <div class="cyber-card p-3 h-100">
-
                 <div class="tech-key">銷售率</div>
-
-                <h3 class="fw-bold mb-0">@ViewBag.SalesRate% <span class="small opacity-50">(@ViewBag.TotalTicketsSold 張)</span></h3>
-
+                <h3 class="fw-bold mb-0">@ViewBag.SalesRate%</h3>
                 <div class="progress mt-2" style="height: 6px;">
-
                     <div class="progress-bar bg-info shadow-glow" style="width: @ViewBag.SalesRate%"></div>
-
                 </div>
-
             </div>
-
         </div>
-
-        <div class="col-md-3">
-
+        <div class="col-md-2">
+            <div class="cyber-card p-3 h-100 border-start border-success border-4">
+                <div class="tech-key" style="background: linear-gradient(90deg, #39ff14, transparent 140%); color: #000;">當前進場數</div>
+                <h3 class="fw-bold mb-0 text-white">@ViewBag.TotalAttendance <span class="small opacity-50">/ @ViewBag.TotalTicketsSold</span></h3>
+                <div class="small text-success">進場率: @ViewBag.AttendanceRate%</div>
+            </div>
+        </div>
+        <div class="col-md-2">
             <div class="cyber-card p-3 h-100">
-
                 <div class="tech-key">累計會員數</div>
-
                 <h3 class="fw-bold mb-0">@ViewBag.MemberCount <span class="small opacity-50">位</span></h3>
-
             </div>
-
         </div>
-
         <div class="col-md-3">
-
             <div class="cyber-card p-3 h-100">
-
-                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger), transparent 140%);">客訴數量</div>
-
+                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger), transparent 140%);">待處理客服</div>
                 <h3 class="fw-bold text-danger mb-0">@ViewBag.PendingRefunds <span class="small opacity-50 text-white">Pending</span></h3>
-
             </div>
-
         </div>
-
     </div>
 
 
@@ -244,6 +223,33 @@
 
         </div>
 
+    </div>
+    @* --- 5. 第四列：進場實況監控中心 (New) --- *@
+    <div class="row g-3">
+        @* 各場次進場率堆疊圖 *@
+        <div class="col-lg-8">
+            <div class="cyber-card p-3 h-100">
+                <div class="tech-key" style="background: linear-gradient(90deg, #39ff14, transparent 140%); color: #000;">
+                    <i class="bi bi-ticket-detailed-fill me-2"></i>活動現場進場率 (已核銷 vs 未核銷)
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        @* 掃描槍流水日誌 *@
+        <div class="col-lg-4">
+            <div class="cyber-card p-3 h-100" style="border-color: #39ff14 !important;">
+                <div class="tech-key mb-2" style="background: #39ff14; color: #000;">
+                    <i class="bi bi-qr-code-scan me-2"></i>入口核銷流水 (Live Feed)
+                </div>
+                <div id="scanFeedContainer" class="font-monospace p-2 custom-scroll"
+                     style="height: 210px; overflow-y: auto; background: rgba(0,0,0,0.9); border: 1px solid #39ff14;">
+                    <div class="text-white-50 small">>> 等待入口掃描器訊號...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

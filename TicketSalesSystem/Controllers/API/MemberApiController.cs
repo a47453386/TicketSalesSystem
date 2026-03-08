@@ -1,0 +1,57 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.User;
+using TicketSalesSystem.ViewModel.Member;
+
+namespace TicketSalesSystem.Controllers.API
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [AllowAnonymous]
+    public class MemberApiController : ControllerBase
+    {
+        private readonly IUser _userService;
+        private readonly TicketsContext _context;
+        public MemberApiController(IUser userService, TicketsContext context)
+        {
+            _userService = userService;
+            _context = context;
+        }
+
+        [HttpGet("GetProfile/{id}")]
+        public async Task<IActionResult> GetProfile(string id)
+        {
+            var member = await _context.Member.FindAsync(id);
+            if (member == null) return NotFound();
+
+            // 🚩 投影成 Android 需要的格式
+            var result = new
+            {
+                member.MemberID,
+                member.Name,
+                member.Birthday,
+                member.Tel,
+                member.Email,
+                member.Address,
+                Account = (await _context.MemberLogin.FindAsync(id))?.Account
+            };
+            return Ok(result);
+        }        
+
+        [HttpPost("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] VMMemberUserEdit vm)
+        {
+            // API 不使用 ModelState 驗證，直接執行 Service
+            var result = await _userService.UpdateMemberProfileAsync(vm);
+
+            if (result.success)
+            {
+                return Ok(new { message = result.message });
+            }
+            return BadRequest(new { message = result.message });
+        }
+    }
+}
