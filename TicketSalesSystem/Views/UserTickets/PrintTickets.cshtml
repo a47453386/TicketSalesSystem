@@ -1,0 +1,57 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Tickets>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>像素風格 | 實體票券列印</title>
+   
+
+    <link rel="stylesheet" href="~/css/User/Ticket/PrintTicket.css" asp-append-version="true" />
+</head>
+<body>
+
+    <div class="no-print" style="text-align:center; padding-bottom: 40px;">
+        <div style="color: var(--pixel-yellow); margin-bottom: 10px; font-weight: bold; font-size: 20px;">
+            >>> 輸出實體票券 <<<
+        </div>
+        @* 修正後的像素按鈕 *@
+        <button class="btn-pixel-print" onclick="window.print()">
+            列印
+        </button>
+        <p style="font-size: 12px; color: var(--pixel-text-muted); margin-top: 10px;">系統提示：列印時將自動優化為省墨模式</p>
+    </div>
+
+    <div class="ticket-page">
+        @foreach (var item in Model)
+        {
+            <div class="ticket-item">
+                <div class="info-section">
+                    <small style="color: var(--pixel-pink); font-weight: bold; text-transform: uppercase;">[ 節目資訊 ]</small>
+                    <h2>@item.TicketsArea.Session.Programme.ProgrammeName</h2>
+                    <p><strong>演出時間:</strong> @item.TicketsArea.Session.StartTime.ToString("yyyy/MM/dd HH:mm")</p>
+                    <p><strong>區域:</strong> @item.TicketsArea.TicketsAreaName 區</p>
+                    <p><strong>座位:</strong> @item.RowIndex 排 @item.SeatIndex 號</p>
+                    <div class="check-in-box">
+                        <strong>查核碼:</strong> @item.CheckInCode
+                    </div>
+                </div>
+
+                <div class="qr-section">
+                    <div class="pixel-qrcode-frame">
+                        <div class="qrcode-container" data-code="@item.CheckInCode"></div>
+                    </div>
+                    <div style="font-weight: bold; font-size: 12px; letter-spacing: 2px;">請掃我</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <script src="~/js/User/Ticket/ticket-qr-init.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
+</html>

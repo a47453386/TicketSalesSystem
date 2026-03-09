@@ -1,83 +1,288 @@
 ﻿@model IEnumerable<TicketSalesSystem.Models.Tickets>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "票券管理";
 }
 
-<h1>Index</h1>
+@* 確保引入核心樣式與圖標 *@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Index.css" asp-append-version="true" />
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.RowIndex)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SeatIndex)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RefundTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ScannedTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TicketsStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Order)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Session)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TicketsArea)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.RowIndex)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SeatIndex)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RefundTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ScannedTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TicketsStatus.TicketsStatusID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Order.OrderID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Session.SessionID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TicketsArea.TicketsAreaID)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.TicketsID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.TicketsID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.TicketsID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="container-fluid py-4 admin-body custom-scroll">
+    <div class="mb-5">
+        <h1 class="neon-header">
+            <i class="bi bi-ticket-perforated-fill me-3"></i>票券管理
+        </h1>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="cyber-card p-3">
+                <div class="tech-key1 mb-2"><i class="bi bi-database-fill me-1"></i>總票券數</div>
+                <div class="d-flex justify-content-between align-items-end">
+                    <h2 class="mb-0 text-white fw-bold">@ViewBag.TotalCount</h2>
+                    <span class="text-pixel-muted small">系統總量</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-card p-3" style="border-color: var(--tech-cyan) !important;">
+                <div class="tech-key1 mb-2" style="background: var(--tech-cyan); color: #000;"><i class="bi bi-shield-lock-fill me-1"></i>已使用票券</div>
+                <div class="d-flex justify-content-between align-items-end">
+                    <h2 class="mb-0 fw-bold" style="color: var(--tech-cyan);">@ViewBag.UsedCount</h2>
+                    <span class="text-pixel-muted small">已核銷</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-card p-3" style="border-color: #28a745 !important;">
+                <div class="tech-key1 mb-2" style="background: #28a745; color: #000;"><i class="bi bi-person-check-fill me-1"></i>預計入場</div>
+                <div class="d-flex justify-content-between align-items-end">
+                    <h2 class="mb-0 fw-bold" style="color: #28a745;">@ViewBag.TodayExpect</h2>
+                    <span class="text-pixel-muted small">今日數據</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-card p-3" style="border-color: var(--tech-danger) !important;">
+                <div class="tech-key1 mb-2" style="background: var(--tech-danger); color: #000;"><i class="bi bi-exclamation-triangle-fill me-1"></i>退票異常</div>
+                <div class="d-flex justify-content-between align-items-end">
+                    <h2 class="mb-0 fw-bold" style="color: var(--tech-danger);">@ViewBag.RefundCount</h2>
+                    <span class="text-pixel-muted small">異常總數</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cyber-card p-4 mb-5">
+        <div class="tech-key mb-4"><i class="bi bi-filter-square me-2"></i>篩選模組</div>
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="small text-info mb-1 font-monospace">[ 活動項目 ]</label>
+                <select name="programmeId" class="form-select order-input" onchange="this.form.submit()">
+                    <option value="">-- 所有活動 --</option>
+                    @foreach (var p in (dynamic)ViewBag.Programmes)
+                    {
+                        <option value="@p.ProgrammeID" selected="@(p.ProgrammeID == ViewBag.CurrentProgramme)">@p.ProgrammeName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="small text-info mb-1 font-monospace">[ 選擇場次 ]</label>
+                <select name="sessionId" class="form-select order-input" onchange="this.form.submit()">
+                    <option value="">-- 所有場次 --</option>
+                    @if (ViewBag.Sessions != null)
+                    {
+                        @foreach (var s in (dynamic)ViewBag.Sessions)
+                        {
+                            <option value="@s.SessionID" selected="@(s.SessionID == ViewBag.CurrentSession)">
+                                @s.StartTime.ToString("yyyy/MM/dd HH:mm")
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="small text-info mb-1 font-monospace">[ 關鍵字搜尋 ]</label>
+                <input type="text" name="search" class="form-control order-input"
+                       placeholder="[ 查核碼 / 訂單 / ID ]" value="@ViewBag.CurrentSearch">
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <div class="flex-grow-1">
+                    <label class="small text-info mb-1 font-monospace">[ 狀態 ]</label>
+                    <select name="status" class="form-select order-input">
+                        <option value="">-- 所有狀態 --</option>
+                        <option value="A" selected="@(ViewBag.CurrentStatus == "A")">未使用</option>
+                        <option value="Y" selected="@(ViewBag.CurrentStatus == "Y")">已核銷</option>
+                        <option value="C" selected="@(ViewBag.CurrentStatus == "C")">已退票</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-cyber" style="height: 48px; width: 60px;">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="cyber-card overflow-hidden">
+        <div class="table-responsive custom-scroll">
+            <table class="table cyber-table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;"><div class="tech-key1"><i class="bi bi-fingerprint"></i>票券編號</div></th>
+                        <th><div class="tech-key1"><i class="bi bi-broadcast-pin"></i>活動資訊</div></th>
+                        <th><div class="tech-key1"><i class="bi bi-grid-3x3-gap"></i>座位資訊</div></th>
+                        <th><div class="tech-key1"><i class="bi bi-qr-code"></i>查核碼</div></th>
+                        <th><div class="tech-key1"><i class="bi bi-activity"></i>狀態</div></th>
+                        <th><div class="tech-key1"><i class="bi bi-stopwatch"></i>時間戳記</div></th>
+                        <th class="text-center"><div class="tech-key1">操作</div></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td class="text-info font-monospace small">
+                                #@t.TicketsID.Substring(t.TicketsID.Length - 8).ToUpper()
+                            </td>
+                            <td>
+                                <div class="fw-bold text-white">@t.TicketsArea?.Session?.Programme?.ProgrammeName</div>
+                                <div class="small text-pixel-muted">@t.TicketsArea?.Session?.StartTime.ToString("yyyy-MM-dd HH:mm")</div>
+                            </td>
+                            <td>
+                                <span style="color: var(--tech-cyan);">@t.TicketsArea?.TicketsAreaName 區</span>
+                                <div class="small">@t.RowIndex 排 @t.SeatIndex 號</div>
+                            </td>
+                            <td>
+                                <code style="color: var(--pixel-yellow); background: rgba(0,0,0,0.3); padding: 4px 8px; border: 1px solid rgba(255,240,0,0.2);">
+                                    @(t.CheckInCode ?? "無代碼")
+                                </code>
+                            </td>
+                            <td>
+                                @if (t.TicketsStatusID == "Y")
+                                {
+                                    <div class="status-badge" style="color: var(--tech-cyan); border-color: var(--tech-cyan);">
+                                        <i class="bi bi-check2-circle me-2 text-info"></i>已進場
+                                    </div>
+                                }
+                                else if (t.TicketsStatusID == "A")
+                                {
+                                    <div class="status-badge" style="color: #28a745; border-color: #28a745;">
+                                        <i class="bi bi-broadcast me-2 text-success"></i>可核銷
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="status-badge" style="color: var(--tech-danger); border-color: var(--tech-danger);">
+                                        <i class="bi bi-slash-circle me-2 text-danger"></i>已失效
+                                    </div>
+                                }
+                            </td>
+                            <td class="small">
+                                @if (t.ScannedTime.HasValue)
+                                {
+                                    <div class="text-info font-monospace">核銷: @t.ScannedTime.Value.ToString("HH:mm:ss")</div>
+                                }
+                                else
+                                {
+                                    <div class="text-pixel-muted font-monospace">同步: @t.CreatedTime.ToString("MM-dd HH:mm")</div>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Details" asp-route-id="@t.TicketsID" class="btn-cyber-icon" title="檢視詳情">
+                                        <i class="bi bi-cpu"></i>
+                                    </a>
+                                    @if (t.TicketsStatusID == "A")
+                                    {
+                                        <button onclick="manualCheckIn('@t.TicketsID')" class="btn-cyber-icon text-success" style="border-color: #28a745;" title="手動核銷">
+                                            <i class="bi bi-qr-code-scan"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="checkInModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="cyber-card modal-content" style="border: 1px solid var(--tech-cyan) !important;">
+            <div class="tech-key1">
+                <i class="bi bi-shield-lock-fill me-2"></i>核銷授權協定
+            </div>
+            <div class="modal-body p-4 text-center" id="checkInModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+        /**
+     * 執行人工核銷程序 - 戰術彈窗版 (Tactical UI Update)
+     */
+    function manualCheckIn(id) {
+        const shortId = id.substring(id.length - 8).toUpperCase();
+        const modalEl = document.getElementById('checkInModal');
+        const myModal = new bootstrap.Modal(modalEl);
+
+        // 1. 初始化彈窗內容：顯示確認資訊
+        const confirmHtml = `
+            <div class="py-4">
+                <h4 class="text-white mb-4">是否授權強制核銷？</h4>
+                <div class="mb-4">
+                    <code class="text-pixel-yellow p-2" style="background:rgba(0,0,0,0.5)">票券號碼ID: #${shortId}</code>
+                </div>
+                <p class="text-pixel-muted small mb-4">⚠ 警告：此操作將跳過加密驗證並強制變更資產狀態。</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">[ 取消 ]</button>
+                    <button type="button" class="btn btn-cyber" onclick="executeManualCheckIn('${id}')">
+                        <i class="bi bi-cpu"></i> [ 執行核銷 ]
+                    </button>
+                </div>
+            </div>
+        `;
+
+        $('#checkInModalBody').html(confirmHtml);
+        myModal.show();
+    }
+
+    /**
+     * 實際執行 AJAX 提交
+     */
+    function executeManualCheckIn(id) {
+        const $body = $('#checkInModalBody');
+        const submitBtn = $body.find('.btn-cyber');
+
+        // 1. 防止重複點擊，進入處理狀態
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> 處理中...');
+
+        // 2. 發送 AJAX 請求
+        $.ajax({
+            url: '/Tickets/ManualCheckIn',
+            type: 'POST',
+            data: { id: id },
+            success: function (response) {
+                // 判斷 Success 或 success (相容性處理)
+                const isSuccess = response.success || response.Success;
+                const message = response.message || response.Message;
+
+                if (isSuccess) {
+                    // 成功：顯示成功畫面
+                    const successHtml = `
+                        <div class="py-5 text-center">
+                            <i class="bi bi-check-circle text-info display-1 mb-3"></i>
+                            <h4 class="text-info fw-bold">核銷成功</h4>
+                            <p class="text-white">${message}</p>
+                            <div class="mt-4">
+                                <button class="btn btn-cyber" onclick="location.reload()">[ 同步數據 ]</button>
+                            </div>
+                        </div>
+                    `;
+                    $body.hide().html(successHtml).fadeIn(300);
+                } else {
+                    // 失敗：顯示錯誤原因
+                    const errorHtml = `
+                        <div class="py-5 text-center">
+                            <i class="bi bi-exclamation-triangle text-danger display-1 mb-3"></i>
+                            <h4 class="text-danger fw-bold">存取遭拒</h4>
+                            <p class="text-white">${message}</p>
+                            <div class="mt-4">
+                                <button class="btn btn-outline-info" data-bs-dismiss="modal">[ 重新檢查 ]</button>
+                            </div>
+                        </div>
+                    `;
+                    $body.hide().html(errorHtml).fadeIn(300);
+                }
+            },
+            error: function () {
+                $body.html('<div class="text-danger py-5">通訊鏈路中斷，請檢查網路連線。</div>');
+            }
+        });
+    }
+</script>

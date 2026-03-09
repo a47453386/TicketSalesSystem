@@ -14,10 +14,10 @@
         <h1 class="neon-header m-0">
             <i class="bi bi-shield-lock-fill me-3"></i>ORDER: @Model.OrderID
         </h1>
-            <a asp-action="Index" class="btn-order-action btn-info-static px-4 py-2">
-                <i class="bi bi-arrow-left me-2"></i>[ 回到清單 ]
-            </a>
-        
+        <a asp-action="Index" class="btn-order-action btn-info-static px-4 py-2">
+            <i class="bi bi-arrow-left me-2"></i>[ 回到清單 ]
+        </a>
+
     </div>
 
     <form asp-action="Edit">
@@ -108,9 +108,35 @@
                                                 <td class="font-monospace text-warning">@ticket.RowIndex <span class="small">R</span> @ticket.SeatIndex <span class="small">S</span></td>
                                                 <td class="text-center">
                                                     @{
-                                                        var bClass = ticket.TicketsStatusID switch { "Y" => "bg-success", "C" => "bg-danger", "N" => "bg-warning", _ => "bg-secondary" };
+                                                        // 1. 取得 ID (轉大寫)
+                                                        string sId = ticket.TicketsStatusID?.Trim().ToUpper() ?? "";
+
+                                                        // 2. 定義對應的【顏色】、【圖示】與【中文顯示文字】
+                                                        var (bColor, bIcon, bLabel) = sId switch
+                                                        {
+                                                            "Y" => ("var(--tech-cyan)", "bi-check2-circle", "已進場"),
+                                                            "A" => ("#28a745", "bi-broadcast", "待核銷"),
+                                                            "C" => ("var(--tech-danger)", "bi-x-octagon", "已退票"),
+                                                            "N" => ("#ffc107", "bi-clock-history", "逾時付款"),
+                                                            _ => ("#888", "bi-slash-circle", ticket.TicketsStatus?.TicketsStatusName ?? "未知狀態")
+                                                        };
                                                     }
-                                                    <span class="status-badge @bClass">@ticket.TicketsStatus?.TicketsStatusName</span>
+
+                                                    @* 🚩 渲染戰術標籤 *@
+                                                    <div class="status-badge"
+                                                         style="color: @bColor; border-color: @bColor; font-size: 0.75rem; padding: 2px 10px; display: inline-flex; align-items: center;">
+                                                        <i class="bi @bIcon me-1"></i>
+                                                        @* 💡 重點：這裡改用我們定義好的 bLabel，不再直接輸出 ID *@
+                                                        <span class="text-white">@bLabel</span>
+                                                    </div>
+
+                                                    @* 🚩 下方的 LOG 時間 (保持原樣) *@
+                                                    @if (sId == "C" && ticket.RefundTime.HasValue)
+                                                    {
+                                                        <div class="small text-danger opacity-50 font-monospace mt-1" style="font-size: 0.65rem;">
+                                                            LOG: @ticket.RefundTime.Value.ToString("HH:mm")
+                                                        </div>
+                                                    }
                                                 </td>
                                             </tr>
                                         }

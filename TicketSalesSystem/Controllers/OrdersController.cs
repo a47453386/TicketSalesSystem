@@ -75,6 +75,7 @@ namespace TicketSalesSystem.Controllers
                     .ThenInclude(t => t.Session)
                         .ThenInclude(s => s.Programme)
                 .Include(o => o.Question) // 包含客服提問紀錄
+                .ThenInclude(r=>r.Reply)
                 .FirstOrDefaultAsync(m => m.OrderID == id);
 
             if (order == null) return NotFound();
@@ -143,17 +144,21 @@ namespace TicketSalesSystem.Controllers
                     if (originalOrder == null) return NotFound();
 
                     // 偵測狀態是否變更為 'C' (取消/退票)
-                    var cancelStatuses = new[] { "C", "N" };
-                    if (!cancelStatuses.Contains(originalOrder.OrderStatusID) && cancelStatuses.Contains(order.OrderStatusID))
-                    {
-                        // 抓出該訂單的所有票券，全部設為 'C'
+                        var cancelStatuses = new[] { "C", "N" ,"B"};
+                        if (!cancelStatuses.Contains(originalOrder.OrderStatusID) && cancelStatuses.Contains(order.OrderStatusID))
+                        {
+                        // 如果訂單是 N，票券就轉為 N；如果訂單是 C 或 B，票券就轉為 C
+                        string targetTicketStatus = (order.OrderStatusID == "N") ? "N" : "C";
                         await _context.Tickets
-                             .Where(t => t.OrderID == id)
-                             .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, order.OrderStatusID));
-                    }
+                                 .Where(t => t.OrderID == id)
+                                 .ExecuteUpdateAsync(s => s
+                                 .SetProperty(t => t.TicketsStatusID, targetTicketStatus)// 更新狀態
+                                 .SetProperty(t => t.RefundTime, DateTime.Now)// 紀錄退款時間
+                                 .SetProperty(t => t.CheckInCode, (string)null));
+                        }
                     // 更新訂單主體
                     _context.Update(order);
-
+                        
                     //處理相關的 Question
                     var relatedQuestions = await _context.Question
                         .Include(q => q.Reply) // 務必包含 Reply 列表

@@ -94,9 +94,10 @@
                 <li class="breadcrumb-item active text-white" aria-current="page">票券詳情</li>
             </ol>
         </nav>
-        <button class="btn-pixel-text" onclick="window.print()">
-            <i class="bi bi-printer me-2"></i>[ 列印憑證 ]
-        </button>
+        <a href="@Url.Action("PrintTickets", "Tickets", new { orderId = Model.OrderID })"
+           target="_blank" class="btn btn-primary">
+            [列印實體票券]
+        </a>
     </div>
 
     @* 🚩 活動主資訊：終端機封包格式 *@
@@ -170,23 +171,5 @@
 
 
 @section Scripts {
-    @* 請確保頁面有引用 qrcode.js *@
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const qrContainers = document.querySelectorAll('.qrcode-container');
-            qrContainers.forEach(container => {
-                const code = container.getAttribute('data-code');
-                if (code) {
-                    new QRCode(container, {
-                        text: code,
-                        width: 160,
-                        height: 160,
-                        colorDark: "#000000",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                }
-            });
-        });
-    </script>
+    <script src="~/js/User/Ticket/ticket-qr-init.js"></script>
 }

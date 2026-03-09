@@ -136,7 +136,7 @@
     }
 
     /* --- [5. 狀態標籤與脈衝動畫] --- */
-    .order-management-scope .status-badge {
+/*    .order-management-scope .status-badge {
         display: inline-block;
         padding: 6px 20px;
         font-weight: 900;
@@ -144,7 +144,7 @@
         text-align: center;
         min-width: 120px;
         clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
-    }
+    }*/
 
     .order-management-scope .bg-success {
         background: var(--tech-success) !important;
