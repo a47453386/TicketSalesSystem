@@ -1,0 +1,12 @@
+﻿/* 讓票券 ID 在滑鼠移過時有發光感 */
+.cyber-link {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
+}
+
+    .cyber-link:hover {
+        color: var(--tech-cyan) !important;
+        text-shadow: 0 0 8px var(--tech-cyan);
+        border-bottom: 1px solid var(--tech-cyan);
+        letter-spacing: 0.5px;
+    }

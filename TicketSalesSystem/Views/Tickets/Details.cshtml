@@ -1,72 +1,138 @@
 ﻿@model TicketSalesSystem.Models.Tickets
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "票券詳細資料";
 }
 
-<h1>Details</h1>
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 
-<div>
-    <h4>Tickets</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RowIndex)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RowIndex)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SeatIndex)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SeatIndex)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RefundTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RefundTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ScannedTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ScannedTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TicketsStatus)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TicketsStatus.TicketsStatusID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Order)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Order.OrderID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Session)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Session.SessionID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TicketsArea)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TicketsArea.TicketsAreaID)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.TicketsID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-info font-monospace mb-0">
+                <i class="bi bi-cpu-fill me-2"></i>@ViewData["Title"]
+            </h2>
+            @* <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a asp-controller="Orders" asp-action="Index" class="text-secondary">訂單管理</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Orders" asp-action="Edit" asp-route-id="@Model.OrderID" class="text-secondary">訂單 @Model.OrderID</a></li>
+                    <li class="breadcrumb-item active text-info">票券詳情</li>
+                </ol>
+            </nav> *@
+        </div>
+        <a asp-controller="Orders" asp-action="Edit" asp-route-id="@Model.OrderID" class="btn btn-outline-info">
+            <i class="bi bi-arrow-left"></i> 回到訂單
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="cyber-card p-4 text-center">
+                @{
+                    // 1. 取得 ID 並處理空值與大小寫
+                    string sId = Model.TicketsStatusID?.Trim().ToUpper() ?? "";
+
+                    // 2. 定義對應的【顏色】、【圖示】與【中文顯示文字】
+                    // 這裡我們同步定義 bColor (顏色), bIcon (圖示), bLabel (文字)
+                    var (bColor, bIcon, bLabel) = sId switch
+                    {
+                        "Y" => ("var(--tech-cyan)", "bi-check2-circle", "已進場"),
+                        "A" => ("#28a745", "bi-broadcast", "待核銷"),
+                        "C" => ("var(--tech-danger)", "bi-x-octagon", "已退票"),
+                        "N" => ("#ffc107", "bi-clock-history", "逾時付款"),
+                        _ => ("#888", "bi-slash-circle", "未知狀態")
+                    };
+                }
+
+                <div class="tech-key mb-3">當前狀態 STATUS_DIAGNOSIS</div>
+
+                @* 🚩 1. 巨型動態圖示區 *@
+                <div class="display-1 my-4" style="color: @bColor; filter: drop-shadow(0 0 15px @bColor);">
+                    <i class="bi @bIcon"></i>
+                </div>
+
+                @* 🚩 2. 狀態標題 *@
+                <h2 class="fw-bold mb-3" style="color: @bColor">@bLabel</h2>
+
+                @* 🚩 3. 戰術標籤 (細節顯示) *@
+                <div class="status-badge mb-3"
+                     style="color: @bColor; border-color: @bColor; font-size: 0.75rem; padding: 4px 15px; display: inline-flex; align-items: center; border: 1px solid; border-radius: 4px; background: rgba(0,0,0,0.2);">
+                    <i class="bi @bIcon me-2"></i>
+                    <span class="font-monospace">SYS_STATUS: @bLabel</span>
+                </div>
+
+                <hr class="border-secondary opacity-25 my-4" />
+
+                @* 🚩 4. 底部 UUID 資訊 *@
+                <div class="text-start">
+                    <div class="small text-pixel-muted font-monospace mb-1">TICKET_UUID:</div>
+                    <div class="text-white font-monospace small">@Model.TicketsID</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="cyber-card p-0">
+                <div class="tech-key px-4 py-2">詳細資料</div>
+                <div class="p-4">
+                    <div class="row g-4">
+                        <div class="col-6">
+                            <label class="text-info small font-monospace">活動名稱</label>
+                            <div class="fs-5 text-white">@Model.Session?.Programme?.ProgrammeName</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-info small font-monospace">場次時間</label>
+                            <div class="fs-5 text-white font-monospace">@Model.Session?.StartTime.ToString("yyyy-MM-dd HH:mm")</div>
+                        </div>
+                        <div class="col-4">
+                            <label class="text-info small font-monospace">票區</label>
+                            <div class="text-white">@Model.TicketsArea?.TicketsAreaName</div>
+                        </div>
+                        <div class="col-4">
+                            <label class="text-info small font-monospace">座次</label>
+                            <div class="text-white font-monospace">Row @Model.RowIndex / Seat @Model.SeatIndex</div>
+                        </div>
+                        <div class="col-4">
+                            <label class="text-info small font-monospace">票價</label>
+                            <div class="text-pixel-yellow fw-bold">$@Model.TicketsArea?.Price.ToString("N0")</div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary opacity-25 my-4" />
+
+                    <div class="row g-4">
+                        <div class="col-6">
+                            <label class="text-info small font-monospace">購買人</label>
+                            <div class="text-white">@Model.Order?.Member?.Name</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-info small font-monospace">訂單編號</label>
+                            <div class="text-white font-monospace">#@Model.OrderID</div>
+                        </div>
+                        @if (Model.RefundTime.HasValue)
+                        {   
+                            <div class="col-12">
+                                <div class="p-3 bg-danger bg-opacity-10 border border-danger text-danger">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    退款時間紀錄：@Model.RefundTime.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button class="btn btn btn-cyber py-2 px-4" onclick="window.print()">
+                    <i class="bi bi-printer"></i> 列印診斷報告
+                </button>
+                @if (Model.TicketsStatusID == "A")
+                {
+                    <button class="btn btn-cyber py-2 px-4">
+                        <i class="bi bi-check-lg"></i> 手動核銷此票
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
 </div>

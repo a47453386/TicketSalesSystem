@@ -163,25 +163,22 @@ namespace TicketSalesSystem.Controllers
         // GET: Tickets/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var tickets = await _context.Tickets
-                .Include(t => t.Order)
-                .Include(t => t.Session)
-                .Include(t => t.TicketsArea)
+            var ticket = await _context.Tickets
                 .Include(t => t.TicketsStatus)
+                .Include(t => t.TicketsArea)
+                .Include(t => t.Session)
+                    .ThenInclude(s => s.Programme)
+                .Include(t => t.Order)
+                    .ThenInclude(o => o.Member)
                 .FirstOrDefaultAsync(m => m.TicketsID == id);
-            if (tickets == null)
-            {
-                return NotFound();
-            }
 
-            return View(tickets);
+            if (ticket == null) return NotFound();
+
+            return View(ticket);
         }
 
-        
+
     }
 }
