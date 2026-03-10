@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TicketSalesSystem.DTOs.Question;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IUserAccessor;
@@ -24,7 +25,7 @@ namespace TicketSalesSystem.Service.User
             _fileService = fileService;
         }
 
-        private readonly string _baseUrl = "http://192.168.0.107:5098/Photos/CoverImage/";
+        private readonly string _baseUrl = "http://10.10.51.9:5098/Photos/CoverImage/";
 
         public string GetImageFullUrl(string fileName)
         {
@@ -33,7 +34,7 @@ namespace TicketSalesSystem.Service.User
             // 🚩 如果資料庫已經存了完整路徑，就不要再拼 _baseUrl
             if (fileName.StartsWith("http") || fileName.StartsWith("/Photos"))
             {
-                return fileName.StartsWith("/") ? $"http://192.168.0.107:5098{fileName}" : fileName;
+                return fileName.StartsWith("/") ? $"http://10.10.51.9:5098{fileName}" : fileName;
             }
 
             // 🚩 否則才進行拼接，並確保斜線只有一個
@@ -122,6 +123,40 @@ namespace TicketSalesSystem.Service.User
                 .OrderByDescending(q => q.CreatedTime)
                 .ToListAsync();
         }
+
+        //問題詳細資料(含回覆)
+        public async Task<QuestionDetailDTO> GetQuestionDetailForUserAsync(string questionId, string memberId)
+        {
+            var question =await _context.Question
+             .Where(q => q.QuestionID == questionId && q.MemberID == memberId)
+             .Select(q => new QuestionDetailDTO
+             {
+                 OrderID= q.OrderID,
+                 QuestionID = q.QuestionID,
+                 QuestionTitle = q.QuestionTitle, // 假設你的實體欄位叫這個
+                 QuestionDescription = q.QuestionDescription,
+                 CreatedTime = q.CreatedTime,
+                 UploadFile = q.UploadFile,
+                 QuestionTypeName = q.QuestionType.QuestionTypeName,
+
+                 // 映射回覆清單
+                 Reply = q.Reply
+                     .Where(r => r.EmployeeID != null)
+                     .OrderBy(r => r.CreatedTime)
+                     .Select(r => new ReplyDTO
+                     {
+                         ReplyStatusID = r.ReplyStatusID,                         
+                         ReplyDescription = r.ReplyDescription,
+                         ReplyStatusName = r.ReplyStatus.ReplyStatusName,
+                         EmployeeName = r.Employee.Name,
+                         CreatedTime = r.CreatedTime
+                     }).ToList()
+             })
+             .FirstOrDefaultAsync();
+
+            return question;
+        }
+
 
         //會員基本資料更新
         public async Task<(bool success, string message)> UpdateMemberProfileAsync(VMMemberUserEdit vm)

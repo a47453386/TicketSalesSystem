@@ -36,6 +36,8 @@ namespace TicketSalesSystem.Controllers.API
                 member.Tel,
                 member.Email,
                 member.Address,
+                member.NationalID,
+                member.Gender,
                 Account = (await _context.MemberLogin.FindAsync(id))?.Account
             };
             return Ok(result);

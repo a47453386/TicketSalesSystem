@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
+using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.User;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -15,10 +17,13 @@ namespace TicketSalesSystem.Controllers.API
     {
         private readonly IUser _user;
         private readonly TicketsContext _context;
-        public HomeApiController(IUser user, TicketsContext context)
+        private readonly IUserAccessorService _userAccessorService;
+
+        public HomeApiController(IUser user, TicketsContext context, IUserAccessorService userAccessor)
         {
             _user = user;
             _context = context;
+            _userAccessorService = userAccessor;
         }
 
         //活動清單
@@ -123,6 +128,29 @@ namespace TicketSalesSystem.Controllers.API
             return Ok(result);
         }
 
+        //問題詳細資料
+        [HttpGet("GetQuestionsDetail/{id}")]
+        public async Task<IActionResult> GetQuestionDetail(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return BadRequest();
 
+            var memberID = _userAccessorService.GetMemberId();
+            if (memberID == null) return Unauthorized();
+
+            // 直接獲取 DTO
+            var questionDto = await _user.GetQuestionDetailForUserAsync(id, memberID);
+
+            if (questionDto == null) return NotFound();
+
+            // 🚩 API 不再需要 SelectList，讓前端根據 QuestionTypeName 或邏輯自行判斷即可
+            return Ok(questionDto);
+
+        }
+
+
+
+
+            
+        
     }
 }

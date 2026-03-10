@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TicketSalesSystem.DTOs.Question;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.ViewModel.Booking;
 using TicketSalesSystem.ViewModel.Member;
@@ -28,6 +29,9 @@ namespace TicketSalesSystem.Service.User
 
         //我要發問
         Task<bool> CreateQuestionAsync(Question question, IFormFile? upload, string memberId);
+
+        //問題詳細資料(含回覆)
+        Task<QuestionDetailDTO> GetQuestionDetailForUserAsync(string questionId, string memberId);
 
         //會員所有提問
         Task<List<Question>> GetMemberQuestionsAsync(string memberID);

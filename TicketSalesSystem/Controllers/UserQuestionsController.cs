@@ -6,6 +6,7 @@ using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.User;
+using TicketSalesSystem.ViewModel.Question;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -84,36 +85,34 @@ namespace TicketSalesSystem.Controllers
         // GET: Questions/Details/5
         public async Task<IActionResult> UserDetails(string id)
         {
-            if (id == null) return NotFound();
-
             var memberID = _userAccessorService.GetMemberId();
+            if (memberID == null) return RedirectToAction("MemberLogin", "Login");
 
-            if (memberID == null)
+            // 1. 從 Service 拿到 DTO (資料本體)
+            var dto = await _userService.GetQuestionDetailForUserAsync(id, memberID);
+            if (dto == null) return NotFound();
+
+            // 2. 🚩 在這裡將 DTO 轉為 View 想要的 VMQuestionDetail
+            var viewModel = new VMQuestionDetail
             {
-                return RedirectToAction("MemberLogin", "Login");
-            }
+                OrderID = dto.OrderID,
+                QuestionID = dto.QuestionID,
+                QuestionTitle = dto.QuestionTitle,
+                QuestionDescription = dto.QuestionDescription,
+                CreatedTime = dto.CreatedTime ?? DateTime.Now,
+                UploadFile = dto.UploadFile,
+                QuestionTypeName = dto.QuestionTypeName,
+                Reply = dto.Reply.Select(r => new VMReply
+                {
+                    ReplyStatusID = r.ReplyStatusID,
+                    ReplyDescription = r.ReplyDescription,
+                    ReplyStatusName = r.ReplyStatusName,
+                    EmployeeName = r.EmployeeName,
+                    CreatedTime = r.CreatedTime
+                }).ToList()
+            };
 
-            var question = await _context.Question
-                .Include(q => q.QuestionType)
-                .Include(q => q.Member)
-                .Include(q => q.Reply
-                    .Where(r => r.EmployeeID != null)
-                    .OrderBy(r => r.CreatedTime)) // 按時間順序排列回覆
-                        .ThenInclude(r => r.Employee) // 載入是哪位員工回覆的
-                .Include(q => q.Reply)
-                    .ThenInclude(r => r.ReplyStatus) // 載入回覆狀態名稱
-                .FirstOrDefaultAsync(m => m.QuestionID == id);
-
-            if (question == null) return NotFound();
-
-            // 🚩 核心安全檢查：防止玩家透過修改 URL 偷看別人的問題
-            if (question.MemberID != memberID)
-            {
-                return Forbid(); // 傳送失敗：權限不足
-            }
-
-            ViewData["ReplyStatusID"] = new SelectList(_context.ReplyStatus.ToList(), "ReplyStatusID", "ReplyStatusName");
-            return View(question);
+            return View(viewModel);
         }
 
         private void PopulateDropdownLists(Question q = null)

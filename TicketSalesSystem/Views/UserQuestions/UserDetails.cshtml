@@ -1,4 +1,4 @@
-﻿@model TicketSalesSystem.Models.Question
+﻿@model TicketSalesSystem.ViewModel.Question.VMQuestionDetail
 
 @{
     ViewData["Title"] = "我的問題";
@@ -98,7 +98,7 @@
             <h2 class="text-pixel-yellow fw-bold mb-1">[ 我的問題 ]</h2>
             <div class="text-pixel-muted fs-pixel-base">
                 訂單編號: <span class="text-white">@(string.IsNullOrEmpty(Model.OrderID) ? "" : Model.OrderID)</span>|
-                問題種類: <span class="text-white">@Model.QuestionType.QuestionTypeName</span>
+                問題種類: <span class="text-white">@Model.QuestionTypeName</span>
             </div>
         </div>
         <a asp-action="MyList" class="btn-pixel-text">[ 問題清單 ]</a>
