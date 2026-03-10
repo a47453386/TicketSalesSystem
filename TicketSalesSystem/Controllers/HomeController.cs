@@ -17,6 +17,11 @@ namespace TicketSalesSystem.Controllers
             _logger = logger;
             _context = context;
         }
+        [AllowAnonymous] // 確保即使快過期了也能訪問
+        public IActionResult Ping()
+        {
+            return Ok(); // 回傳 200 即可
+        }
         [AllowAnonymous]
         public IActionResult Index()
         {

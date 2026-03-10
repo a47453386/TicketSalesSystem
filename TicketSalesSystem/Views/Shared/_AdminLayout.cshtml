@@ -197,6 +197,11 @@
     <script src="~/js/admin-common.js" asp-append-version="true"></script>
     <script src="~/js/server-monitor.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script src="~/js/Login/Logout.js" asp-append-version="true"></script>
+    }
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

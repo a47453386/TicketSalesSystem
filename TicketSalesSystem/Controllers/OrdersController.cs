@@ -113,7 +113,10 @@ namespace TicketSalesSystem.Controllers
             {
                 return NotFound();
             }
-           
+
+            bool isLocked = order.Tickets.Any(t => t.TicketsStatusID == "Y");
+            ViewBag.IsLocked = isLocked;
+
             ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusName", order.OrderStatusID);
             ViewData["PaymentMethodID"] = new SelectList(_context.PaymentMethod, "PaymentMethodID", "PaymentMethodName", order.PaymentMethodID);
            
@@ -125,6 +128,15 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id,Order order)
         {
+            // 🚩 安全攔截：再次檢查資料庫狀態
+            var hasCheckedInTickets = await _context.Tickets.AnyAsync(t => t.OrderID == id && t.TicketsStatusID == "Y");
+
+            if (hasCheckedInTickets)
+            {
+                // 戰術警報：禁止非法修改已核銷資產
+                return Forbid("此訂單已有票券核銷進場，禁止修改資料。");
+            }
+
             if (id != order.OrderID) return NotFound();
             
 

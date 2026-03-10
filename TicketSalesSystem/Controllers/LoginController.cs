@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pag
 using System.Security.Claims;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
+using TicketSalesSystem.Service.User;
 using TicketSalesSystem.ViewModel;
 using TicketSalesSystem.ViewModel.Login;
 
@@ -62,13 +63,13 @@ namespace TicketSalesSystem.Controllers
                 return isAjax ? PartialView("_LoginPartial", vm) : View(vm);
             }
 
-            // 🚩 修改 1：只用「帳號」去找人。
+            //用「帳號」去找人。
             // 因為資料庫裡的密碼是加密的，直接比對 vm.Password 會找不到。
             var user = await _context.MemberLogin
                 .Include(m => m.Member)
                 .FirstOrDefaultAsync(m => m.Account == vm.Account);
 
-            // 🚩 修改 2：找到人後，才開始比對密碼
+            // 找到人後，才開始比對密碼
             if (user != null)
             {
                 var hasher = new PasswordHasher<string>();
@@ -76,10 +77,22 @@ namespace TicketSalesSystem.Controllers
                 // 驗證輸入的密碼 (vm.Password) 與資料庫存的加密密碼 (user.Password)
                 var result = hasher.VerifyHashedPassword(vm.Account, user.Password, vm.Password);
 
-                // 🚩 修改 3：只有驗證成功 (Success) 才執行登入邏輯
+                // 驗證成功 (Success) 才執行登入邏輯
                 if (result == PasswordVerificationResult.Success)
                 {
-                    // 3. 準備身分證 (Claims)
+                    // 檢查帳號狀態 (停權、異常等)
+                    if (user.Member.AccountStatusID != "A")
+                    {
+                        ModelState.AddModelError(string.Empty, "您的帳號目前處於停權或異常狀態，請聯繫客服人員。");
+                        return isAjax ? PartialView("_LoginPartial", vm) : View(vm);
+                    }
+                    //更新最後登入時間
+                    user.Member.LastLoginTime = DateTime.Now;
+
+                    //存回資料庫 (非同步)
+                    await _context.SaveChangesAsync();
+
+                    //準備身分證 (Claims)
                     var claims = new List<Claim>
                      {
                          new Claim(ClaimTypes.Name, user.Member.Name?? user.Account),// 這裡放姓名
@@ -89,14 +102,15 @@ namespace TicketSalesSystem.Controllers
 
                     var claimsIdentity = new ClaimsIdentity(claims, "MemberScheme");
 
-                    // 4. 執行登入 (核發 Cookie)
+                    //執行登入 (核發 Cookie)
                     await HttpContext.SignInAsync("MemberScheme", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                     {
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(5),
+                        AllowRefresh = true
                     });
 
-                    // 5. 處理回傳結果
+                    //處理回傳結果
                     if (isAjax)
                     {
                         return Json(new { success = true, redirectUrl = returnUrl ?? Url.Action("Index", "Home") });
@@ -110,7 +124,7 @@ namespace TicketSalesSystem.Controllers
                 }
             }
 
-            // 🚩 修改 4：不管是「找不到人」還是「密碼錯」，統一口徑 (安全性考量)
+            // 不管是「找不到人」還是「密碼錯」，統一口徑 (安全性考量)
             ModelState.AddModelError(string.Empty, "帳號或密碼錯誤，請重新輸入。");
             return isAjax ? PartialView("_LoginPartial", vm) : View(vm);
         }
@@ -152,6 +166,19 @@ namespace TicketSalesSystem.Controllers
 
                 if (result == PasswordVerificationResult.Success)
                 {
+                    // 檢查帳號狀態 (停權、異常等)
+                    if (emp.Employee.AccountStatusID != "A")
+                    {
+                        ModelState.AddModelError(string.Empty, "此員工帳號已被停用，請洽詢系統管理員。");
+                        return RedirectToAction("EmployeeLogin", "Login");
+                    }
+
+                    // 🚩 1. 更新最後登入時間
+                    emp.Employee.LastLoginTime = DateTime.Now;
+
+                    // 🚩 2. 存回資料庫 (非同步)
+                    await _context.SaveChangesAsync();
+
                     // 🚩 修改 2：準備「員工身分證」
                     // 注意：這裡使用 emp.Employee.Name，這樣導覽列才會顯示「陳信宏」而不是「admin001」
                     var claims = new List<Claim>
@@ -167,7 +194,8 @@ namespace TicketSalesSystem.Controllers
                     await HttpContext.SignInAsync("EmployeeScheme", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                     {
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(5),
+                        AllowRefresh = true
                     });
 
                     // 🚩 修改 4：跳轉邏輯
@@ -301,7 +329,7 @@ namespace TicketSalesSystem.Controllers
             }
             catch
             {
-                // 加密格式不對或被竄改會進這裡
+                // 加密格式不對或被 竄改會進這裡
                 ModelState.AddModelError("", "無效的修復協定。");
                 return View(vm);
             }
