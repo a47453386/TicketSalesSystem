@@ -26,7 +26,14 @@ builder.WebHost.UseUrls("http://*:5098");
 // 設定 CORS
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowApp", policy =>
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+        policy.WithOrigins(
+                "http://10.0.2.2:5098",    // 🚩 讓 Android 模擬器通行
+                "http://localhost:5098",   // 🚩 讓本機網頁通行
+                "http://192.168.x.x:5098"  // 🚩 如果有用實機測試，請加上電腦的區域網路 IP
+              )
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());        // 🚩 核心：允許傳遞 Cookie 通行證
 });
 
 
@@ -208,9 +215,10 @@ app.UseRouting();
 // 啟用 Session (必須放在 UseRouting 之後，UseAuthorization 之前)
 app.UseSession();
 
-// 🚩 2. 使用 CORS (必須放在 UseRouting 之後，UseAuthorization 之前)
+// 2. 使用 CORS (必須放在 UseRouting 之後，UseAuthorization 之前)
 app.UseCors("AllowApp");
 
+// 3. 認證與授權
 app.UseAuthentication();// 認證：你是誰？
 app.UseAuthorization();// 授權：你能做什麼？
 

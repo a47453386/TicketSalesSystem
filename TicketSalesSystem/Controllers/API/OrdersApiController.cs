@@ -13,7 +13,7 @@ namespace TicketSalesSystem.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "MemberScheme")]
     public class OrdersApiController : ControllerBase
     {
         private readonly TicketsContext _context;
@@ -38,12 +38,10 @@ namespace TicketSalesSystem.Controllers.API
         public async Task<IActionResult> GetOrdersIndex()
         {
 
-            //// 1. 取得登入者 ID
-            //var memberID = _userAccessorService.GetMemberId();
-            //if (memberID == null) return Unauthorized(new { success = false, message = "請先登入" });
+            // 1. 取得登入者 ID
+            var memberID = _userAccessorService.GetMemberId();
+            if (memberID == null) return Unauthorized(new { success = false, message = "請先登入" });
 
-
-            var memberID = "a8e36451-c3fb-44ba-a05e-602ca0760166";
 
             // 2. 直接調用你剛抽離好的 Service
             var orders = await _user.GetUserOrdersAsync(memberID);

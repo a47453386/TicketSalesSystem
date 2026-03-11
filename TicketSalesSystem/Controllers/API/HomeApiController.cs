@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using TicketSalesSystem.DTOs.Login;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.User;
@@ -30,7 +34,7 @@ namespace TicketSalesSystem.Controllers.API
         [HttpGet("Home")]
         public async Task<IActionResult> GetHomeData()
         {
-            
+
             var data = await _user.GetProgrammesALL();
             return Ok(data);
         }
@@ -52,105 +56,113 @@ namespace TicketSalesSystem.Controllers.API
 
             // 2. 🚩 在這裡進行投影，只選取 Android 需要的欄位
             // 這會切斷循環引用，因為我們沒有選取 FAQPublishStatus 物件本身
-            var result = faqs.Select(f => new {
+            var result = faqs.Select(f => new
+            {
                 faqTitle = f.FAQTitle,
                 faqDescription = f.FAQDescription,
                 faqTypeName = f.FAQType?.FAQTypeName
             }).ToList();
             return Ok(result);
         }
-        //會員資料
-        [HttpGet("MembersDetails/{id}")]
-        public async Task<IActionResult> GetMemberDetails(string id)
-        {
-
-            var member = await _context.Member
-             .Include(m => m.AccountStatus)
-             .FirstOrDefaultAsync(m => m.MemberID == id);
-
-            if (member == null) return NotFound();
-
-            var memberLogin = await _context.MemberLogin.FindAsync(id);
-
-            var data = new
-            {
-                MemberID = "a8e36451-c3fb-44ba-a05e-602ca0760166",
-                Name = member.Name,
-                Address = member.Address,
-                Birthday = member.Birthday.ToString("yyyy-MM-dd"), // 格式化日期
-                Tel = member.Tel,
-                Gender = member.Gender,
-                NationalID = member.NationalID,
-                Email = member.Email,
-                IsPhoneVerified = member.IsPhoneVerified,
-                StatusName = member.AccountStatus?.AccountStatusName ?? "正常"
-            };
-            return Ok(data);
-        }
 
 
-        
+
+
 
         //我要發問
         [HttpPost("QuestionsCreate")]
         public async Task<IActionResult> QuestionsCreate([FromForm] Question question, IFormFile? upload)
         {
-            var memberId = "a8e36451-c3fb-44ba-a05e-602ca0760166";
+            var memberID = _userAccessorService.GetMemberId();
+            if (memberID == null) return Unauthorized();
 
-            var result = await _user.CreateQuestionAsync(question, upload, memberId);
+            var result = await _user.CreateQuestionAsync(question, upload, memberID);
 
             return result ? Ok() : BadRequest();
         }
 
-        //問題清單
-        [HttpGet("GetMyQuestions")]
-        public async Task<IActionResult> GetMyQuestions()
+
+
+
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
         {
-            //var memberID = _userAccessorService.GetMemberId();
-            //if (memberID == null) return Unauthorized();
+            // 1. 基本防呆
+            if (request == null || string.IsNullOrEmpty(request.Account))
+            {
+                return Ok(new LoginResponseDTO { Success = false, Message = "請輸入帳號與密碼" });
+            }
 
-            var memberID = "a8e36451-c3fb-44ba-a05e-602ca0760166";
+            // 2. 尋找登入資訊
+            var loginInfo = await _context.MemberLogin
+                .Include(m => m.Member)
+                .FirstOrDefaultAsync(m => m.Account == request.Account);
 
-            var questions = await _user.GetMemberQuestionsAsync(memberID);
+            // 3. 檢查帳號是否存在
+            if (loginInfo == null)
+            {
+                return Ok(new LoginResponseDTO { Success = false, Message = "帳號或密碼錯誤" });
+            }
 
-            // 🚩 投影成 Android 端能解析的 JSON 格式
-            var result = questions.Select(q => new {
-                QuestionID = q.QuestionID,
-                QuestionTitle = q.QuestionTitle,
-                QuestionDescription = q.QuestionDescription,
-                CreatedTime = q.CreatedTime.ToString("yyyy-MM-dd HH:mm"),
-                QuestionTypeName = q.QuestionType?.QuestionTypeName, // 補上種類名稱
-                                                                     // 抓取最後一筆回覆的狀態，若無則預設為 "P" (處理中)
-                ReplyStatusID = q.Reply?.OrderByDescending(r => r.CreatedTime).FirstOrDefault()?.ReplyStatusID ?? "P",
-                HasUpload = !string.IsNullOrEmpty(q.UploadFile) // 標記是否有附件
-            });
+            // 4. 驗證密碼
+            var hasher = new PasswordHasher<string>();
+            var verifyResult = hasher.VerifyHashedPassword(loginInfo.Account, loginInfo.Password, request.Password);
 
-            return Ok(result);
+            if (verifyResult != PasswordVerificationResult.Success)
+            {
+                return Ok(new LoginResponseDTO { Success = false, Message = "帳號或密碼錯誤" });
+            }
+
+            // 5. 檢查帳號狀態 (A 為正常)
+            if (loginInfo.Member.AccountStatusID != "A")
+            {
+                return Ok(new LoginResponseDTO { Success = false, Message = "帳號異常或停權，請聯繫客服。" });
+            }
+
+            try
+            {
+                // 🚩 6. 重要：核發身分證 (Cookie)
+                // 這步沒做，App 就算記住 ID，呼叫其他 API 也會被擋掉
+                var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, loginInfo.Member.Name ?? loginInfo.Account),
+                        new Claim(ClaimTypes.NameIdentifier, loginInfo.MemberID), // 存入 ID
+                        new Claim(ClaimTypes.Role, "Member")
+                    };
+
+                var claimsIdentity = new ClaimsIdentity(claims, "MemberScheme");
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30) // App 建議給長一點的時間
+                };
+
+                // 執行登入
+                await HttpContext.SignInAsync("MemberScheme", new ClaimsPrincipal(claimsIdentity), authProperties);
+
+                // 7. 更新最後登入時間
+                loginInfo.Member.LastLoginTime = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                // 8. 回傳結果 (包含 ID 讓 App 儲存)
+                return Ok(new LoginResponseDTO
+                {
+                    Success = true,
+                    Message = "登入成功",
+                    MemberID = loginInfo.MemberID,
+                    Name = loginInfo.Member.Name
+                });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new LoginResponseDTO { Success = false, Message = "伺服器內部錯誤" });
+            }
         }
 
-        //問題詳細資料
-        [HttpGet("GetQuestionsDetail/{id}")]
-        public async Task<IActionResult> GetQuestionDetail(string id)
-        {
-            if (string.IsNullOrEmpty(id)) return BadRequest();
-
-            var memberID = _userAccessorService.GetMemberId();
-            if (memberID == null) return Unauthorized();
-
-            // 直接獲取 DTO
-            var questionDto = await _user.GetQuestionDetailForUserAsync(id, memberID);
-
-            if (questionDto == null) return NotFound();
-
-            // 🚩 API 不再需要 SelectList，讓前端根據 QuestionTypeName 或邏輯自行判斷即可
-            return Ok(questionDto);
-
-        }
 
 
 
 
-            
-        
     }
 }

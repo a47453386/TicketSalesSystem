@@ -94,8 +94,7 @@
                 <li class="breadcrumb-item active text-white" aria-current="page">票券詳情</li>
             </ol>
         </nav>
-        <a href="@Url.Action("PrintTickets", "Tickets", new { orderId = Model.OrderID })"
-           target="_blank" class="btn btn-primary">
+        <a asp-controller="UserTickets"  asp-action="PrintTickets" asp-route-orderId="@Model.OrderID" target="_blank"   class="btn btn-primary">
             [列印實體票券]
         </a>
     </div>

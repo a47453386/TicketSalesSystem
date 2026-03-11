@@ -10,7 +10,7 @@ namespace TicketSalesSystem.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "MemberScheme")]
     public class MemberApiController : ControllerBase
     {
         private readonly IUser _userService;
@@ -21,6 +21,36 @@ namespace TicketSalesSystem.Controllers.API
             _context = context;
         }
 
+        //會員資料
+        [HttpGet("MembersDetails/{id}")]
+        public async Task<IActionResult> GetMemberDetails(string id)
+        {
+
+            var member = await _context.Member
+             .Include(m => m.AccountStatus)
+             .FirstOrDefaultAsync(m => m.MemberID == id);
+
+            if (member == null) return NotFound();
+
+            var memberLogin = await _context.MemberLogin.FindAsync(id);
+
+            var data = new
+            {
+                MemberID = id,
+                Name = member.Name,
+                Address = member.Address,
+                Birthday = member.Birthday.ToString("yyyy-MM-dd"), // 格式化日期
+                Tel = member.Tel,
+                Gender = member.Gender,
+                NationalID = member.NationalID,
+                Email = member.Email,
+                IsPhoneVerified = member.IsPhoneVerified,
+                StatusName = member.AccountStatus?.AccountStatusName ?? "正常"
+            };
+            return Ok(data);
+        }
+
+        //會員資料編輯
         [HttpGet("GetProfile/{id}")]
         public async Task<IActionResult> GetProfile(string id)
         {

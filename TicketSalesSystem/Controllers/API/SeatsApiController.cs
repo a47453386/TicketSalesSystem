@@ -14,7 +14,7 @@ namespace TicketSalesSystem.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "MemberScheme")]
     public class SeatsApiController : ControllerBase
     {
         private readonly TicketsContext _context; 
@@ -54,8 +54,7 @@ namespace TicketSalesSystem.Controllers.API
         [HttpPost("confirm")]
         public async Task<IActionResult> APIConfirm([FromBody] VMBookingRequest request)
         {
-            //var memberID = _userAccessorService.GetMemberId();
-            var memberID = "a8e36451-c3fb-44ba-a05e-602ca0760166";
+            var memberID = _userAccessorService.GetMemberId();
 
             if (string.IsNullOrEmpty(memberID))
                 return Unauthorized(new { message = "請先登入" });

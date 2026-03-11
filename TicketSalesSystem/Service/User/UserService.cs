@@ -25,7 +25,7 @@ namespace TicketSalesSystem.Service.User
             _fileService = fileService;
         }
 
-        private readonly string _baseUrl = "http://10.10.51.9:5098/Photos/CoverImage/";
+        private readonly string _baseUrl = "http://192.168.0.107:5098/Photos/CoverImage/";
 
         public string GetImageFullUrl(string fileName)
         {
@@ -34,7 +34,7 @@ namespace TicketSalesSystem.Service.User
             // 🚩 如果資料庫已經存了完整路徑，就不要再拼 _baseUrl
             if (fileName.StartsWith("http") || fileName.StartsWith("/Photos"))
             {
-                return fileName.StartsWith("/") ? $"http://10.10.51.9:5098{fileName}" : fileName;
+                return fileName.StartsWith("/") ? $"http://192.168.0.107:5098{fileName}" : fileName;
             }
 
             // 🚩 否則才進行拼接，並確保斜線只有一個
