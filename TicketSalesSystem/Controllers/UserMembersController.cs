@@ -134,76 +134,32 @@ namespace TicketSalesSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(VMMemberCreate vm)
         {
-            //檢查手機號碼是否已存在
-            bool isTelExist = await _context.Member.AnyAsync(m => m.Tel == vm.Tel);
-
-            if (isTelExist)
-            {
-                // 針對 Tel 欄位加入錯誤訊息
-                ModelState.AddModelError("Tel", "此手機號碼已被使用，請更換號碼或嘗試找回帳號。");
-            }
-
+            // 1. 檢查基本驗證（如 [Required], [StringLength] 等標籤）
             if (!ModelState.IsValid)
             {
                 PopulateDropdownLists(vm.AccountStatusID);
                 return View(vm);
             }
 
-            using (var transaction = await _context.Database.BeginTransactionAsync())
+            // 🚩 2. 呼叫 Service：將所有業務邏輯（含手機重複檢查、資料庫交易）封裝在內
+            var result = await _userService.CreateMemberAsync(vm);
+
+            if (result.Success)
             {
-                try
-                {
-                    string newMemberID = Guid.NewGuid().ToString();
-
-                    var member = new Member
-                    {
-                        MemberID = newMemberID,
-                        Name = vm.Name,
-                        Address = vm.Address,
-                        Birthday = vm.Birthday,
-                        Tel = vm.Tel,
-                        Gender = vm.Gender,
-                        NationalID = vm.NationalID,
-                        Email = vm.Email,
-                        CreatedDate = DateTime.Now,
-                        LastLoginTime = null,
-                        IsPhoneVerified = false, 
-                        AccountStatusID = "A"
-                    };
-                    _context.Member.Add(member);
-
-                    var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<string>();
-                    var memberLogin = new MemberLogin
-                    {
-                        MemberID = newMemberID,
-                        Account = vm.Account,
-                        Password = hasher.HashPassword(vm.Account, vm.Password)
-                    };
-
-                    _context.MemberLogin.Add(memberLogin);
-
-
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
-                    return RedirectToAction(nameof(Index));
-
-
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    ModelState.AddModelError("", "新增會員失敗，錯誤原因：" + ex.Message);
-                }
-
-
+                // 🚩 成功：跳轉到列表頁或登入頁，這能防止使用者按 F5 導致重複註冊
+                TempData["SuccessMessage"] = "會員註冊成功！";
+                return RedirectToAction(nameof(Index));
             }
+
+            // 🚩 失敗：將 Service 回傳的錯誤訊息加入 ModelState
+            // 如果是手機重複，Service 會回傳特定的 Message
+            ModelState.AddModelError(result.ErrorField ?? string.Empty, result.Message);
 
             PopulateDropdownLists(vm.AccountStatusID);
             return View(vm);
-
         }
 
+        
         //新增：發送 SMS 驗證碼
         [HttpPost]
         public async Task<IActionResult> SendSmsCode(string id)

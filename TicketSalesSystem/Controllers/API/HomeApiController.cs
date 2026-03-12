@@ -10,6 +10,7 @@ using TicketSalesSystem.DTOs.Login;
 using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.IUserAccessor;
 using TicketSalesSystem.Service.User;
+using TicketSalesSystem.ViewModel.Member;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TicketSalesSystem.Controllers.API
@@ -81,7 +82,7 @@ namespace TicketSalesSystem.Controllers.API
             return result ? Ok() : BadRequest();
         }
 
-
+        //問題清單
 
 
 
@@ -161,6 +162,46 @@ namespace TicketSalesSystem.Controllers.API
         }
 
 
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] VMMemberCreate vm)
+        {
+            // 🚩 1. 如果你希望手動處理驗證，請確保這段邏輯能執行
+            if (!ModelState.IsValid)
+            {
+                // 抓出所有錯誤，並組成一個清楚的字串
+                var errorMessages = ModelState.Where(ms => ms.Value.Errors.Count > 0)
+                    .Select(ms => new {
+                        Field = ms.Key, // 哪一個欄位出錯
+                        Errors = string.Join(", ", ms.Value.Errors.Select(e => e.ErrorMessage)) // 錯誤原因
+                    }).ToList();
+
+                // 打印到偵錯視窗 (Visual Studio 輸出視窗看得到)
+                foreach (var err in errorMessages)
+                {
+                    System.Diagnostics.Debug.WriteLine($"欄位驗證失敗: {err.Field} -> {err.Errors}");
+                }
+
+                return Ok(new
+                {
+                    Success = false,
+                    // 回傳第一個最主要的錯誤訊息給 App
+                    Message = errorMessages.FirstOrDefault()?.Errors ?? "輸入資料格式有誤",
+                    ErrorField = errorMessages.FirstOrDefault()?.Field ?? "General",
+                    Details = errorMessages // 包含所有錯誤細節，方便除錯
+                });
+            }
+
+            // 🚩 2. 呼叫 Service
+            var result = await _user.CreateMemberAsync(vm);
+
+            return Ok(new
+            {
+                Success = result.Success,
+                Message = result.Message,
+                ErrorField = result.ErrorField,
+                MemberID = result.MemberID
+            });
+        }
 
 
 

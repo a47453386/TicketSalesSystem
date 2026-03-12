@@ -319,7 +319,69 @@ namespace TicketSalesSystem.Service.User
             return vm;
         }
 
+        //會員註冊
+        public async Task<(bool Success, string Message, string? ErrorField, string? MemberID)> CreateMemberAsync(VMMemberCreate vm)
+        {
+            // 1. 檢查手機號碼是否已存在
+            bool isTelExist = await _context.Member.AnyAsync(m => m.Tel == vm.Tel);
+            if (isTelExist)
+            {
+                return (false, "此手機號碼已被使用", "Tel", null);
+            }
 
+            // 🚩 2. 額外檢查：檢查帳號是否已存在 (建議加上)
+            bool isAccountExist = await _context.MemberLogin.AnyAsync(ml => ml.Account == vm.Account);
+            if (isAccountExist)
+            {
+                return (false, "此登入帳號已被佔用", "Account", null);
+            }
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    string newMemberID = Guid.NewGuid().ToString();
+
+                    // 建立 Member 資料
+                    var member = new Member
+                    {
+                        MemberID = newMemberID,
+                        Name = vm.Name,
+                        Address = vm.Address,
+                        Birthday = vm.Birthday,
+                        Tel = vm.Tel,
+                        Gender = vm.Gender,
+                        NationalID = vm.NationalID,
+                        Email = vm.Email,
+                        CreatedDate = DateTime.Now,
+                        IsPhoneVerified = false,
+                        AccountStatusID = "A"
+                    };
+                    _context.Member.Add(member);
+
+                    // 建立登入帳密與加密
+                    var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<string>();
+                    var memberLogin = new MemberLogin
+                    {
+                        MemberID = newMemberID,
+                        Account = vm.Account,
+                        Password = hasher.HashPassword(vm.Account, vm.Password)
+                    };
+                    _context.MemberLogin.Add(memberLogin);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    // 成功回傳
+                    return (true, "註冊成功", null, newMemberID);
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return (false, "系統錯誤：" + ex.Message, null, null);
+                }
+            }
+        }
 
     }
 }

@@ -46,6 +46,7 @@ namespace TicketSalesSystem.Service.User
         //會員訂單詳細資料
         Task<VMUserOrderDetail> GetUserOrderDetailAsync(string orderId);
 
-
+        //會員註冊
+        Task<(bool Success, string Message, string? ErrorField, string? MemberID)> CreateMemberAsync(VMMemberCreate vm);
     }
 }
