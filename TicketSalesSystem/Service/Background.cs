@@ -25,50 +25,55 @@ namespace TicketSalesSystem.Service
             _logger.LogInformation("正在更新活動狀態，以及檢查過期佔用票券");
             _monitor.AddLog("🚀 系統核心已啟動...");
 
-            //定期執行與循環
             while (!stoppingToken.IsCancellationRequested)
             {
-                _monitor.AddLog("🔍啟動定時巡檢...", "掃描中...");
-                await Task.Delay(2000);
+                _monitor.AddLog("🔍 啟動定時巡檢...", "掃描中...");
+
                 try
                 {
+                    // --- 🚩 每日維護任務：每天只跑一次 ---
                     if (DateTime.Now.Date > _lastCleanupDate.Date)
                     {
-                        _monitor.AddLog("🧹 偵測到跨日，執行舊日誌清理...", "清理日誌");
-                        await CleanupOldLogsAsync();
-                        _lastCleanupDate = DateTime.Now;
+                        _monitor.AddLog("🧹 偵測到跨日，執行日誌清理與【庫存全量重整】...", "每日維護");
+
+                        await CleanupOldLogsAsync(); // 清理日誌
+
+                        using (var scope = _serviceProvider.CreateScope())
+                        {
+                            var context = scope.ServiceProvider.GetRequiredService<TicketsContext>();
+                            // 🚩 每天凌晨執行一次全量重整，確保 Remaining 100% 正確
+                            await context.Database.ExecuteSqlRawAsync("EXEC [dbo].[USP_RebuildInventory]");
+                        }
+
+                        _lastCleanupDate = DateTime.Now.Date;
                         await Task.Delay(1000);
                     }
 
-                    using (var scope = _serviceProvider.CreateScope())//不能直接在背景服務裡注入 DbContext，必須手動建立一個 scope 來取得資料庫連線，確保每次檢查完都會正確關閉連線
+                    // --- 🚩 每分鐘任務：處理即時邏輯 ---
+                    using (var scope = _serviceProvider.CreateScope())
                     {
-                        //從 DI 容器拿服務，拿不到就直接丟例外
                         var context = scope.ServiceProvider.GetRequiredService<TicketsContext>();
 
                         _monitor.AddLog("🔍 正在檢查全域票券與活動狀態...", "掃描中");
-                        await Task.Delay(2000);// 模擬作業時間 (測試用，正式上線可移除)
 
-                        //先處理過期票券並歸還庫存
+                        // 1. 處理過期票券 (改狀態為 N，這會自動觸發 SQL Trigger 回補庫存)
                         await CleanupExpiredTicketsAsync(context);
-                        //更新活動售票狀態
-                        await UpdateProgrammeStatusAsync(context);
 
+                        // 2. 更新活動售票狀態 (R -> O -> E)
+                        await UpdateProgrammeStatusAsync(context);
 
                         _monitor.AddLog("✅ 巡檢週期完成，未發現異常。", "待機中");
                     }
-                   
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "執行背景任務時發生錯誤。");
                     _monitor.AddLog($"❌ 異常發生: {ex.Message}", "連線異常");
                 }
-               
-                // 每分鐘跑一次
+
+                // 每分鐘巡檢一次
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
-            _logger.LogInformation("Ticket Cleanup Service is stopping.");
-            _monitor.AddLog("🛑 系統核心已關閉", "已停止");
         }
 
         //日誌清理

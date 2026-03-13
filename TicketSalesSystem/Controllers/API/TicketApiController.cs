@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
@@ -8,6 +9,8 @@ namespace TicketSalesSystem.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "MemberScheme")]
     public class TicketApiController : ControllerBase
     {
         private readonly TicketsContext _context;

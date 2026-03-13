@@ -30,6 +30,11 @@ namespace TicketSalesSystem.Controllers.API
             if (memberID == null) return Unauthorized();
 
             var questions = await _user.GetMemberQuestionsAsync(memberID);
+            if (questions == null || !questions.Any())
+            {
+                // 這裡回傳 404，Android 就會立刻跳到黃色文字畫面
+                return NotFound(new { message = "目前尚未諮詢" });
+            }
 
             // 🚩 投影成 Android 端能解析的 JSON 格式
             var result = questions.Select(q => new {

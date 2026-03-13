@@ -101,22 +101,29 @@ namespace TicketSalesSystem.Controllers
             try
             {
                 // 3. 執行取消動作
-                order.OrderStatusID = "C"; // 改為取消狀態
+                order.OrderStatusID = "C"; // 變更訂單狀態
 
-                // 4. 連動更新票券狀態為 'C' (這會觸發你的 SQL Trigger 自動回補庫存)
-                await _context.Tickets
-                     .Where(t => t.OrderID == id)
-                     .ExecuteUpdateAsync(s => s.SetProperty(t => t.TicketsStatusID, "C"));
+                // 4. 直接利用 Include 進來的 Tickets 集合進行修改
+                // 這樣 EF 的 Change Tracker 會記錄所有變更，並在最後一次提交
+                foreach (var ticket in order.Tickets)
+                {
+                    ticket.TicketsStatusID = "C";
+                }
 
+                // 5. 🚩 這裡會一次發送所有的 UPDATE (包含 Order 和所有 Tickets)
+                // 這也會正確觸發 SQL Trigger 來回補庫存
                 await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
+
                 _queueService.ReleaseQueueSlot();
                 TempData["Success"] = "訂單已成功取消，名額已釋出。";
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                TempData["Error"] = "取消失敗，請稍後再試。";
+                // 🚩 建議：你可以用 Debug 模式看這裡的 ex.Message 是不是 SQL Trigger 報錯？
+                TempData["Error"] = "取消失敗：" + ex.Message;
             }
 
             return RedirectToAction("UserIndex"); // 返回會員的訂單列表

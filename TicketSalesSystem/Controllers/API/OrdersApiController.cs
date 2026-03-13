@@ -34,7 +34,7 @@ namespace TicketSalesSystem.Controllers.API
         }
 
         //訂單清單
-        [HttpGet("api/OrdersIndex")]
+        [HttpGet("OrdersIndex")]
         public async Task<IActionResult> GetOrdersIndex()
         {
 
@@ -45,6 +45,11 @@ namespace TicketSalesSystem.Controllers.API
 
             // 2. 直接調用你剛抽離好的 Service
             var orders = await _user.GetUserOrdersAsync(memberID);
+            if (orders == null || !orders.Any())
+            {
+                return NotFound(new { message = "目前沒有訂單" });
+            }
+
 
             return Ok(orders); // 回傳 JSON 給 Android
         }

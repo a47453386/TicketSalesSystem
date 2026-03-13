@@ -29,44 +29,38 @@ namespace TicketSalesSystem.Service.Seats
 
         public async Task<BookingResultDTO> ConfirmBookingAsync(VMBookingRequest request, string memberID)
         {
-
-            // 3. 開始交易與原子扣減
-            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var rowAffected = await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE TicketsArea SET Remaining = Remaining - {0} " +
-                    "WHERE TicketsAreaID = {1} AND Remaining >= {2}",
-                    request.Count, request.TicketsAreaID, request.Count
-                );
+                // 1. 僅做初步庫存檢查 (不扣除，只看夠不夠)
+                var area = await _context.TicketsArea.AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.TicketsAreaID == request.TicketsAreaID);
 
-                if (rowAffected == 0)
+                if (area == null || area.Remaining < request.Count)
                 {
-                    await transaction.RollbackAsync();
                     _queueService.ReleaseQueueSlot();
                     return new BookingResultDTO { Success = false, Message = "抱歉，票券已售完！" };
                 }
 
-                // 4. 建立訂單 (呼叫你原本的 SeatService)
+                // 2. 🚩 呼叫 SeatService 執行核心交易
+                // 交易與防超賣邏輯都鎖在 CreateOrderAndTicketsAsync 內部
                 var response = await _seatService.CreateOrderAndTicketsAsync(request, memberID);
 
-                if (response.Success)
+                if (!response.Success)
                 {
-                    await transaction.CommitAsync();
-                    return new BookingResultDTO { Success = true, Data = response };
-                }
-                else
-                {
-                    await transaction.RollbackAsync();
                     _queueService.ReleaseQueueSlot();
-                    return new BookingResultDTO { Success = false, Message = response.Message };
                 }
+
+                return new BookingResultDTO
+                {
+                    Success = response.Success,
+                    Data = response,
+                    Message = response.Message
+                };
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 _queueService.ReleaseQueueSlot();
-                return new BookingResultDTO { Success = false, Message = "系統異常：" + (ex.InnerException?.Message ?? ex.Message) };
+                return new BookingResultDTO { Success = false, Message = "系統異常：" + ex.Message };
             }
         }
     }

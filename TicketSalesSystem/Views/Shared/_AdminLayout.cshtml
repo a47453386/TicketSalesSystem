@@ -29,7 +29,7 @@
                 <li class="nav-item nav-item-tech">
                     <a asp-controller="Admin" asp-action="Dashboard"
                        class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
-                        <i class="bi bi-terminal-fill me-2"></i> 控制面板
+                        <i class="bi bi-terminal-fill me-2"></i> 即時監控
                     </a>
                 </li>
 
@@ -99,7 +99,7 @@
                 @* 10.票券管理 *@
                 <li class="nav-item nav-item-tech">
                     <a asp-controller="Tickets" asp-action="Index"
-                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Questions" ? "active" : "")">
+                       class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tickets" ? "active" : "")">
                         <i class="bi bi-headset-vr me-2"></i> 票券管理
                     </a>
                 </li>
