@@ -92,3 +92,41 @@
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.8);
     transition: all 0.5s ease; /* 讓顏色切換時有漸變感 */
 }
+
+/* 霓虹按鈕樣式 - 增加科技感 */
+.btn-cyber-action {
+    display: block;
+    border: 1px solid #00f3ff;
+    color: #00f3ff;
+    text-decoration: none;
+    background: rgba(0, 243, 255, 0.05);
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+    transition: all 0.3s;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+    .btn-cyber-action:hover {
+        background: #00f3ff;
+        color: #000;
+        box-shadow: 0 0 15px #00f3ff;
+    }
+
+/* 綠點閃爍動畫 */
+.pulse-dot {
+    animation: pulse-green 2s infinite;
+}
+
+@@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0px rgba(40, 167, 69, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0px rgba(40, 167, 69, 0);
+    }
+}

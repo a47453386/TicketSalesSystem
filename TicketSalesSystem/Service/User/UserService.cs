@@ -62,7 +62,9 @@ namespace TicketSalesSystem.Service.User
                     ProgrammeStatusID = p.ProgrammeStatusID ?? "O",
                     ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "售票中",
 
-                    Capacity = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Capacity),
+                    Capacity = p.Session.SelectMany(s => s.TicketsArea).Any()
+                               ? p.Session.SelectMany(s => s.TicketsArea).Sum(a => (int?)a.Capacity) ?? 0
+                               : 0,
                     Remaining = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Remaining),
 
                     StartTime = p.Session.OrderByDescending(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
@@ -289,9 +291,9 @@ namespace TicketSalesSystem.Service.User
                 .Where(o => o.OrderID == orderId)
                 .FirstOrDefaultAsync();
 
-            var isPrintable = true;
+            //var isPrintable = true;
             //取票天數
-            //var isPrintable = DateTime.Now >= order.Session.StartTime.AddDays(-15);
+            var isPrintable = DateTime.Now >= order.Session.StartTime.AddDays(-15);
 
             var vm = new VMUserOrderDetail
             {
@@ -313,7 +315,8 @@ namespace TicketSalesSystem.Service.User
                     TicketsID = t.TicketsID,
                     TicketsAreaName = t.TicketsArea.TicketsAreaName,
                     Seat = $"{t.RowIndex}排{t.SeatIndex}號",
-                    CheckInCode = t.CheckInCode /*isPrintable? t.CheckInCode: null*/
+                    CheckInCode = t.CheckInCode, /*isPrintable? t.CheckInCode: null*/
+                    TicketsStatusID = t.TicketsStatusID
                 }).ToList()
             };
             return vm;

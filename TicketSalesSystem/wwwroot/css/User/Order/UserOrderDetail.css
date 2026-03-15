@@ -1,0 +1,171 @@
+﻿body, .main-content, #wrapper {
+    background-color: #0b0118 !important; /* 你的深紫色底色 */
+}
+/* 1. 殺掉所有可能在頂部的白色背景容器 */
+.pixel-container-box,
+.container,
+.container-fluid,
+main {
+    background-color: transparent !important;
+}
+
+/* 2. 針對你原本寫在 Layout 裡的那個複雜陰影與背景進行「特製覆蓋」 */
+div.pixel-container-box {
+    background-color: rgba(0, 0, 0, 0) !important; /* 強制透明 */
+    background: none !important; /* 移除所有背景圖層 */
+    box-shadow: none !important; /* 移除那個多層次的像素邊框陰影 */
+}
+
+/* 3. 如果你只想留著「活動主資訊」那個框，但想殺掉「導覽列」那個框 */
+/* 請在 HTML 裡給導覽列那個 div 加一個 id="top-nav-box" */
+#top-nav-box {
+    background: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+
+/* 🚩 像素票券專屬樣式 */
+.pixel-ticket {
+    background-color: var(--pixel-bg-light);
+    border: 4px solid #000;
+    box-shadow: 4px 4px 0px var(--pixel-blue);
+    position: relative;
+    transition: transform 0.1s;
+}
+
+    .pixel-ticket:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px var(--pixel-pink);
+    }
+
+.bg-pixel-blue {
+    background-color: var(--pixel-blue) !important;
+}
+
+/* 票券鋸齒邊緣感 (模擬打孔) */
+.ticket-pixel-body {
+    position: relative;
+    border-top: 4px dashed #331144;
+    border-bottom: 4px dashed #331144;
+}
+
+/* 🚩 QR Code 霓虹框 */
+.pixel-qrcode-frame {
+    width: 180px;
+    height: 180px;
+    padding: 10px;
+    background: #fff; /* QR Code 必須在白底上 */
+    border: 4px solid var(--pixel-blue);
+    box-shadow: 0 0 10px var(--pixel-blue);
+}
+
+.border-pixel-dashed {
+    border-top: 2px dashed var(--pixel-blue);
+}
+
+.locked-pixel-box {
+    background-color: rgba(0,0,0,0.5);
+    border: 2px solid #331144;
+}
+
+.ticket-pixel-footer {
+    background-color: #000;
+    color: var(--pixel-text-muted);
+}
+
+.border-start-pixel {
+    border-left: 4px solid var(--pixel-pink);
+    padding-left: 20px;
+}
+
+.fs-pixel-small {
+    font-size: 1.2rem !important;
+}
+
+/* 列印優化：隱藏背景與不必要的像素框 */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+
+    .btn-pixel-text, .pixel-navbar, .pixel-footer {
+        display: none;
+    }
+
+    .pixel-ticket {
+        border: 2px solid black;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+}
+/* 🚩 基礎像素按鈕樣式 */
+.pixel-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-family: 'Press Start 2P', '微軟正黑體', cursive; /* 建議載入像素字體 */
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    border: 4px solid #000;
+    position: relative;
+    user-select: none;
+    transition: all 0.1s;
+}
+
+/* 🚩 可列印狀態 (藍色) */
+.btn-print {
+    background-color: var(--pixel-blue);
+    color: #000;
+    box-shadow: 4px 4px 0px #005a63; /* 深色厚度 */
+}
+
+    .btn-print:hover {
+        background-color: #00f2ff;
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px #005a63;
+    }
+
+    .btn-print:active {
+        transform: translate(2px, 2px);
+        box-shadow: 0px 0px 0px #005a63;
+    }
+
+
+/* 🚩 鎖定狀態 (灰色) */
+.btn-locked {
+    /* 強制透明背景，並帶一點點深色濾鏡感 */
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    /* 邊框顏色要稍微亮一點，不然在黑底背景會消失 */
+    border: 4px solid rgba(255, 255, 255, 0.2) !important;
+    /* 文字顏色改為灰色 */
+    color: #888 !important;
+    /* 移除強烈的投影，讓它看起來像「消隱」在背景中 */
+    box-shadow: none !important;
+    /* 保持禁止符號 */
+    cursor: not-allowed;
+    /* 讓整個按鈕半透明 */
+    opacity: 0.6;
+    /* 移除 hover 效果，防止滑鼠移上去又變色 */
+    pointer-events: none;
+}
+
+    /* 針對按鈕內的圖示也進行減色 */
+    .btn-locked i {
+        color: #666 !important;
+    }
+
+/* 調整麵包屑文字樣式 */
+.btn-pixel-text {
+    color: var(--pixel-pink);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+}
+
+    .btn-pixel-text:hover {
+        color: var(--pixel-yellow);
+        border-bottom: 2px solid var(--pixel-yellow);
+    }
+

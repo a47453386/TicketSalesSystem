@@ -3,14 +3,18 @@
 <table class="table table-hover">
     <thead>
         <tr>
-            <th>分類名稱</th>
-            <th style="width: 80px">操作</th>
+            <th style ="width: 20px">種類編號</th>
+            <th style="width: 60px">種類名稱</th>
+            <th style="width: 20px">操作</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
+                <td>
+                    <span id="name-@item.QuestionTypeID">@item.QuestionTypeID</span>
+                </td>
                 <td>
                     <span id="name-@item.QuestionTypeID">@item.QuestionTypeName</span>
                 </td>

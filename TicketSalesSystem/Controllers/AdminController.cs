@@ -6,6 +6,7 @@ using TicketSalesSystem.Models;
 using TicketSalesSystem.Service.ID;
 using TicketSalesSystem.Service.Images;
 using TicketSalesSystem.Service.SystemMonitor;
+using TicketSalesSystem.Service.User;
 
 namespace TicketSalesSystem.Controllers
 {
@@ -15,11 +16,13 @@ namespace TicketSalesSystem.Controllers
     {
         private readonly TicketsContext _context;
         private readonly SystemMonitorService _monitor;
+        private readonly IUser _user;
 
-        public AdminController(TicketsContext context, SystemMonitorService monitor)
+        public AdminController(TicketsContext context, SystemMonitorService monitor,IUser user)
         {
             _context = context;
             _monitor = monitor;
+            _user = user;
         }
         
         public async Task<IActionResult> Dashboard()
@@ -183,7 +186,7 @@ namespace TicketSalesSystem.Controllers
             return Json(allAlerts);
         }
 
-        // 🚩 新增：取得背景日誌的頁面
+        //取得背景日誌的頁面
         public IActionResult BackgroundLogs()
         {
             // 直接從 Singleton 服務拿取最新的記憶體日誌
@@ -191,7 +194,7 @@ namespace TicketSalesSystem.Controllers
             return View(logs);
         }
 
-        // 🚩 新增：如果你想讓頁面可以「局部刷新」或用 AJAX 抓日誌
+        //如果你想讓頁面可以「局部刷新」或用 AJAX 抓日誌
         [HttpGet]
         public IActionResult GetLiveBackgroundLogs()
         {
@@ -200,6 +203,7 @@ namespace TicketSalesSystem.Controllers
 
             return Json(new { logs, status });
         }
+
         public async Task<IActionResult> GetAttendanceData()
         {
             var data = await _context.Programme // 假設你的 Model 是 Programme
@@ -240,6 +244,54 @@ namespace TicketSalesSystem.Controllers
                 .ToListAsync();
 
             return Json(logs);
+        }
+
+
+        //票區位子監控
+        public async Task<IActionResult> AreaMonitor(string programmeId)
+        {
+            if (string.IsNullOrEmpty(programmeId)) return RedirectToAction("ActiveMonitorList");
+
+            // 1. 先抓出該活動的所有場次 (Session)
+            var sessions = await _context.Session
+                .Where(s => s.ProgrammeID == programmeId)
+                .OrderBy(s => s.StartTime)
+                .ToListAsync();
+            var sessionIds = sessions.Select(s => s.SessionID).ToList();
+
+            // 2. 🚩 修正：透過場次 ID 去找出「有哪些票區」
+            // 這裡假設 Tickets 表連結了 Session 與 TicketsArea
+            var areaDefinitions = await _context.TicketsArea
+            .Where(a => sessionIds.Contains(a.SessionID))
+            .OrderBy(a => a.TicketsAreaID)
+            .ToListAsync();
+
+            ViewBag.Sessions = sessions;
+            ViewBag.Areas = areaDefinitions; // 這裡現在保證有 4 個區（只要資料庫有定義）
+            ViewBag.ProgrammeName = _context.Programme.FirstOrDefault(p => p.ProgrammeID == programmeId)?.ProgrammeName;
+
+            // 3. 抓取所有已售/變動的票券紀錄 (填色用資料)
+            var allTickets = await _context.Tickets
+                .Where(t => sessionIds.Contains(t.SessionID))
+                .AsNoTracking()
+                .ToListAsync();
+
+            return View(allTickets);
+        }
+
+        //票區位子監控
+        public async Task<IActionResult> ActiveMonitorList()
+        {
+            try
+            {
+                var activeProgrammes = await _user.GetProgrammesALL();
+                return View(activeProgrammes);
+            }
+            catch (Exception ex)
+            {
+                // 🚩 這裡會捕捉到真正的錯誤訊息
+                return Content($"崩潰原因: {ex.Message} \n 堆疊追蹤: {ex.StackTrace}");
+            }
         }
     }
 

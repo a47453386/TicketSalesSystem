@@ -44,50 +44,57 @@ namespace TicketSalesSystem.Service.Orders
         // 處理支付完成後的邏輯(正式結帳與電子票券核發)
         public async Task<(bool Success, string Message)> ProcessPaymentAsync(VMPaymentRequest request)
         {
-            // 🚩 1. 使用 Transaction 確保原子性
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // 2. 更新訂單狀態 (改用傳統 EF 寫法，確保追蹤一致)
+                // 🚩 修正：必須預載入 Tickets 與 Session，否則 foreach 裡的 t.Session 會是 null
                 var order = await _context.Order
+                    .Include(o => o.Tickets)
+                        .ThenInclude(t => t.Session)
                     .FirstOrDefaultAsync(o => o.OrderID == request.OrderID && o.OrderStatusID != "N");
 
-                if (order == null) return (false, "訂單狀態不符合付款條件或已逾時。");
+                if (order == null) return (false, "訂單不存在或已過期。");
 
-                order.OrderStatusID = "Y";
+                // 1. 更新訂單狀態
+                order.OrderStatusID = "Y"; // 已完款
                 order.PaymentStatus = true;
                 order.PaymentMethodID = request.PaymentMethodID;
                 order.PaidTime = DateTime.Now;
 
-                // 🚩 3. 立即處理票券
-                var tickets = await _context.Tickets
-                    .Where(t => t.OrderID == request.OrderID)
-                    .ToListAsync();
-
-                foreach (var t in tickets)
+                // 2. 處理票券狀態
+                foreach (var t in order.Tickets)
                 {
-                    t.TicketsStatusID = "A"; // 未使用
-                    t.CheckInCode = StringHelper.GenerateCheckInCode(12);
+                    // 🚩 現在 t.Session 有資料了，可以正確判斷日期
+                    if (t.Session != null && DateTime.Now >= t.Session.StartTime.AddDays(-15))
+                    {
+                        t.TicketsStatusID = "A"; // 未使用 (待領票/待進場)
+                                                 // 產生 12 位核銷碼
+                        t.CheckInCode = StringHelper.GenerateCheckInCode(12);
+                    }
+                    else
+                    {
+                        t.TicketsStatusID = "S"; // 已售出 (鎖定中)
+                    }
+
+                    
                 }
 
-                // 🚩 4. 一次性儲存所有變更 (包含 Order 跟 Tickets)
                 await _context.SaveChangesAsync();
-
-                // 🚩 5. 提交交易
                 await transaction.CommitAsync();
 
-                return (true, "付款處理成功，票券已核發。");
+                return (true, "付款處理成功。");
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(); // 失敗就全部重來
-                return (false, "系統錯誤：" + ex.Message);
+                await transaction.RollbackAsync();
+                return (false, "處理失敗：" + ex.Message);
             }
         }
-
-
-
-
     }
+
+
+
+
 }
+

@@ -60,7 +60,15 @@ namespace TicketSalesSystem.Controllers
             return View(programme);
         }
 
+
+
+
+
+
+
+
         [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
+
         // GET: Programmes/Details/5
         public async Task<IActionResult> AdminDetail(string id)
         {
@@ -112,6 +120,8 @@ namespace TicketSalesSystem.Controllers
                 {
                     SessionID = s.SessionID,
                     StartTime = s.StartTime,
+                    SaleStartTime = s.SaleStartTime,
+                    SaleEndTime = s.SaleEndTime,
                     TicketsAreas = new List<VMAreaDetail>()
                 };
 
@@ -148,7 +158,6 @@ namespace TicketSalesSystem.Controllers
                 .AsNoTracking()
                 .Include(p => p.Place)
                 .Include(p => p.ProgrammeStatus)
-                .Where(p => p.ProgrammeStatusID == "O") // 僅顯示售票中，若要顯示全部可移除此行
                 .OrderByDescending(p => p.ProgrammeID)
                 .ToListAsync();
 

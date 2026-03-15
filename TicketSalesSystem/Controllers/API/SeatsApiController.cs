@@ -37,18 +37,7 @@ namespace TicketSalesSystem.Controllers.API
         
 
 
-        //活動詳細資料
-        [HttpGet("detail/{id}")]
-        public async Task<IActionResult> GetDetail(string id)
-        {
-            if (string.IsNullOrEmpty(id)) return BadRequest(new { success = false, message = "未提供活動編號" });
-          
-            var data = await _user.GetProgrammesDetail(id);
-
-            if (data== null) return NotFound(new { success = false, message = "找不到該節目" });
-            
-            return Ok(data);
-        }
+        
 
         // 確認訂單
         [HttpPost("confirm")]

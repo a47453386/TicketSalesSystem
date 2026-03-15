@@ -1,0 +1,42 @@
+﻿/* 🚩 額外補充符合規格的局部樣式 */
+
+/* 賽博進度條外框 */
+.cyber-progress-wrapper {
+    height: 6px;
+    background: rgba(0, 242, 255, 0.1);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 賽博進度條內部（發光效果） */
+.cyber-progress-inner {
+    height: 100%;
+    background: var(--tech-cyan);
+    box-shadow: 0 0 10px var(--tech-cyan);
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 脈衝點動畫 (Demo 用) */
+.pulse-dot {
+    animation: cyber-pulse 2s infinite;
+    border: 1px solid #ff3333;
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+}
+
+@@keyframes cyber-pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

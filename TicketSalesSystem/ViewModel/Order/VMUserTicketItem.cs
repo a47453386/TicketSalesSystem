@@ -12,5 +12,7 @@
         public string TicketsAreaName { get; set; }
         public string Seat { get; set; }
         public string? CheckInCode { get; set; } // 沒到期前會是 null
+
+        public string? TicketsStatusID { get; set; }
     }
 }

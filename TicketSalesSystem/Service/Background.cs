@@ -34,15 +34,24 @@ namespace TicketSalesSystem.Service
                     // --- 🚩 每日維護任務：每天只跑一次 ---
                     if (DateTime.Now.Date > _lastCleanupDate.Date)
                     {
-                        _monitor.AddLog("🧹 偵測到跨日，執行日誌清理與【庫存全量重整】...", "每日維護");
+                        _monitor.AddLog("🧹 偵測到跨日，執行日誌清理、解鎖票券與【庫存全量重整】...", "每日維護");
 
-                        await CleanupOldLogsAsync(); // 清理日誌
+                        await CleanupOldLogsAsync();
 
                         using (var scope = _serviceProvider.CreateScope())
                         {
                             var context = scope.ServiceProvider.GetRequiredService<TicketsContext>();
-                            // 🚩 每天凌晨執行一次全量重整，確保 Remaining 100% 正確
+
+                            // 1. 🚩 執行你的 SQL 預存程序 (解鎖 15 天內的票)
+                            _monitor.AddLog("🔓 正在執行 15 天內票券解鎖程序...");
+                            await context.Database.ExecuteSqlRawAsync("EXEC [dbo].[sp_UnlockTicketsBySchedule]");
+
+                            // 2. 執行原有的庫存重整
+                            _monitor.AddLog("📊 正在重新計算全量庫存...");
                             await context.Database.ExecuteSqlRawAsync("EXEC [dbo].[USP_RebuildInventory]");
+
+                            // 3. 日誌清理
+                            await CleanupOldLogsAsync();
                         }
 
                         _lastCleanupDate = DateTime.Now.Date;
@@ -192,10 +201,12 @@ namespace TicketSalesSystem.Service
             _logger.LogInformation("正在同步活動售票狀態...");
             var now = DateTime.Now;
 
-            // 抓出 R (設定完成) 和 O (開賣中) 的活動進行判斷
             var activeProgrammes = await context.Programme
                 .Include(p => p.Session)
-                .Where(p => p.ProgrammeStatusID == "R" || p.ProgrammeStatusID == "O")
+                    .ThenInclude(s => s.TicketsArea) // 優化：預先抓取區域庫存資料
+                .Where(p => p.ProgrammeStatusID == "R" ||
+                            p.ProgrammeStatusID == "O" ||
+                            p.ProgrammeStatusID == "S")
                 .ToListAsync();
 
             bool hasChanged = false;
@@ -205,31 +216,34 @@ namespace TicketSalesSystem.Service
                 string oldStatus = p.ProgrammeStatusID;
                 string newStatus = oldStatus;
 
-                // 檢查是否所有場次售票都已結束 -> 轉為 E (Ended)
+                // 1. 檢查是否結束
                 if (p.Session.Any() && p.Session.All(s => s.SaleEndTime <= now))
                 {
                     newStatus = "E";
                 }
-                // 檢查是否已達開賣時間 -> R 轉 O (On Sale)
-                else if (oldStatus == "R" && p.Session.Any(s => s.SaleStartTime <= now && s.SaleEndTime > now))
+                // 2. 檢查是否開賣
+                if (oldStatus == "R" && p.Session.Any(s => s.SaleStartTime <= now && s.SaleEndTime > now))
                 {
                     newStatus = "O";
                 }
 
-                // 🚩 修正：必須賦值給實體，SaveChangesAsync 才會生效
+                // 3. 處理 O 或 S 的庫存連動切換
+                if (newStatus != "E" && (newStatus == "O" || newStatus == "S"))
+                {
+                    var totalRemaining = p.Session.Sum(s => s.TicketsArea.Sum(a => a.Remaining));
+                    newStatus = (totalRemaining <= 0) ? "S" : "O";
+                }
+
                 if (newStatus != oldStatus)
                 {
                     p.ProgrammeStatusID = newStatus;
                     hasChanged = true;
-                    _logger.LogInformation($"[活動狀態切換] {p.ProgrammeName}: {oldStatus} -> {newStatus}");
+                    _logger.LogInformation($"[狀態同步] {p.ProgrammeName}: {oldStatus} -> {newStatus}");
+                    _monitor.AddLog($"活動 [{p.ProgrammeName}] {oldStatus} > {newStatus}", "自動切換");
                 }
             }
 
-            if (hasChanged)
-            {
-                await context.SaveChangesAsync();
-                _logger.LogInformation("[系統通知] 活動狀態已批次更新。");
-            }
+            if (hasChanged) await context.SaveChangesAsync();
         }
     }
 }

@@ -49,3 +49,118 @@
     font-size: 0.6rem;
     font-weight: bold;
 }
+/* --- 基礎標籤樣式 --- */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid transparent;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: status-pulse 2s infinite;
+}
+
+/* --- 對接 C# 的 StatusColor 屬性值 --- */
+
+/* success (O: 售票中) - 賽博青 */
+.status-success {
+    color: #00f2ff;
+    border-color: rgba(0, 242, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+}
+
+    .status-success .pulse-dot {
+        background-color: #00f2ff;
+        box-shadow: 0 0 8px #00f2ff;
+    }
+
+/* warning (D: 草稿) - 霓虹黃 */
+.status-warning {
+    color: #ffe600;
+    border-color: rgba(255, 230, 0, 0.5);
+}
+
+    .status-warning .pulse-dot {
+        background-color: #ffe600;
+        animation: none;
+    }
+
+/* info (R: 設定完成) - 亮藍/紫 */
+.status-info {
+    color: #007bff;
+    border-color: rgba(0, 123, 255, 0.5);
+}
+
+    .status-info .pulse-dot {
+        background-color: #007bff;
+    }
+
+/* danger (C: 已取消) - 霓虹紅 */
+.status-danger {
+    color: #ff0055;
+    border-color: rgba(255, 0, 85, 0.5);
+}
+
+    .status-danger .pulse-dot {
+        background-color: #ff0055;
+    }
+
+/* dark (S: 已售完) - 橘紅或深灰 */
+.status-dark {
+    color: #ff4d00;
+    border-color: rgba(255, 77, 0, 0.5);
+}
+
+    .status-dark .pulse-dot {
+        background-color: #ff4d00;
+        animation-duration: 0.5s;
+    }
+/* 閃爍加快提醒完售 */
+
+/* secondary (E: 已結束) - 鋼鐵灰 */
+.status-secondary {
+    color: #888;
+    border-color: #444;
+    opacity: 0.6;
+}
+
+    .status-secondary .pulse-dot {
+        background-color: #666;
+        animation: none;
+    }
+
+/* light (H: 已下架) - 淺灰藍 */
+.status-light {
+    color: #e0e0e0;
+    border-color: #666;
+    border-style: dashed;
+}
+
+    .status-light .pulse-dot {
+        background-color: #ccc;
+    }
+
+@keyframes status-pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(1.15);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

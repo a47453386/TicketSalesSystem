@@ -48,6 +48,19 @@ namespace TicketSalesSystem.Controllers.API
 
         }
 
+        //活動詳細資料
+        [HttpGet("detail/{id}")]
+        public async Task<IActionResult> GetDetail(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return BadRequest(new { success = false, message = "未提供活動編號" });
+
+            var data = await _user.GetProgrammesDetail(id);
+
+            if (data == null) return NotFound(new { success = false, message = "找不到該節目" });
+
+            return Ok(data);
+        }
+
         //常見問題
         [HttpGet("FAQs")]
         public async Task<IActionResult> GetFAQs()
@@ -67,22 +80,6 @@ namespace TicketSalesSystem.Controllers.API
         }
 
 
-
-
-
-        //我要發問
-        [HttpPost("QuestionsCreate")]
-        public async Task<IActionResult> QuestionsCreate([FromForm] Question question, IFormFile? upload)
-        {
-            var memberID = _userAccessorService.GetMemberId();
-            if (memberID == null) return Unauthorized();
-
-            var result = await _user.CreateQuestionAsync(question, upload, memberID);
-
-            return result ? Ok() : BadRequest();
-        }
-
-        //問題清單
 
 
 

@@ -18,7 +18,7 @@
             <a asp-action="AdminIndex" class="btn-cyber px-4">
                 <i class="bi bi-arrow-left me-2"></i>回清單
             </a>
-            <a asp-action="Edit" asp-route-id="@Model.ProgrammeID" class="btn-cyber btn-cyber-warning px-4">
+            <a  asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@Model.ProgrammeID" class="btn-cyber btn-cyber-warning px-4">
                 <i class="bi bi-pencil-square me-2"></i>活動更新
             </a>
         </div>

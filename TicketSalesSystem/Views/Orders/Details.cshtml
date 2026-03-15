@@ -1,43 +1,47 @@
 ﻿@model TicketSalesSystem.Models.Order
 
 @{
-    ViewData["Title"] = "訂單詳情 - " + Model.OrderID;
+    ViewData["Title"] = "訂單詳情 [DECODING] - " + Model.OrderID;
 }
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Order/OrderDetail.css" asp-append-version="true" />
 
-
 <div class="admin-body p-4">
 
-    @* --- [1. 頁面標頭：診斷報告風格] --- *@
+    @* --- [1. 頁面標頭] --- *@
     <div class="d-flex justify-content-between align-items-end mb-5 border-bottom border-info border-opacity-25 pb-3">
         <div>
             <h1 class="neon-header m-0">
-                <i class="bi bi-file-earmark-text me-3"></i>訂單詳情：@Model.OrderID
+                <i class="bi bi-file-earmark-text me-3"></i>ORDER_INFO: @Model.OrderID
             </h1>
         </div>
         <div class="d-flex gap-2">
             <a asp-action="Edit" asp-route-id="@Model.OrderID" class="btn-cyber btn-cyber-warning">
-                <i class="bi bi-shield-check me-2"></i>[ 訂單編輯]
+                <i class="bi bi-shield-check me-2"></i>[ 訂單審核 ]
             </a>
             <a asp-action="Index" class="btn-cyber">
-                <i class="bi bi-arrow-left-circle me-2"></i>[ 回到清單 ]
+                <i class="bi bi-arrow-left-circle me-2"></i>[ 回到矩陣 ]
             </a>
         </div>
     </div>
 
     <div class="row g-4">
-        @* --- [2. 左側：基本資訊與客戶數據] --- *@
+        @* --- [2. 左側：基本資訊] --- *@
         <div class="col-lg-4">
             <div class="cyber-card p-4 mb-4">
-                <div class="tech-key mb-4">訂單概覽</div>
-                
+                <div class="tech-key mb-4">核心數據</div>
+
                 <div class="tech-data-row">
                     <div class="data-label">訂單狀態:</div>
                     <div class="data-value">
                         @{
-                            var badgeClass = Model.OrderStatusID == "Y" ? "bg-success" : 
-                                            (Model.OrderStatusID == "N" ? "bg-warning" : "bg-danger");
+                            var badgeClass = Model.OrderStatusID switch
+                            {
+                                "Y" => "bg-success",
+                                "N" => "bg-warning text-dark",
+                                "C" => "bg-danger",
+                                _ => "bg-secondary"
+                            };
                         }
                         <span class="status-badge-tech @badgeClass">@Model.OrderStatus?.OrderStatusName</span>
                     </div>
@@ -45,53 +49,46 @@
 
                 <div class="tech-data-row">
                     <div class="data-label">建立時間:</div>
-                    <div class="data-value font-monospace">@Model.OrderCreatedTime.ToString("yyyy/MM/dd HH:mm:ss")</div>
+                    <div class="data-value font-monospace text-white">@Model.OrderCreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
                 </div>
-
-                @if (Model.OrderStatusID == "C" || Model.OrderStatusID == "N")
-                {
-                    var refundDate = Model.Tickets.FirstOrDefault(t => t.RefundTime.HasValue)?.RefundTime;
-                    <div class="tech-data-row" style="border-left: 3px solid var(--tech-danger); padding-left: 10px;">
-                        <div class="data-label text-danger">退款時間:</div>
-                        <div class="data-value font-monospace text-danger">
-                            @(refundDate.HasValue? refundDate.Value.ToString("yyyy/MM/dd HH:mm:ss") : "系統處理中...")
-                        </div>
-                    </div>
-                }
 
                 <div class="tech-data-row">
                     <div class="data-label">付款方式:</div>
-                    <div class="data-value">@(Model.PaymentMethod?.PaymentMethodName ?? "UNSPECIFIED")</div>
+                    <div class="data-value text-info">@(Model.PaymentMethod?.PaymentMethodName ?? "N/A")</div>
                 </div>
 
-                <div class="tech-data-row border-0">
-                    <div class="data-label">訂單總金額:</div>
+                <div class="tech-data-row border-0 mt-3">
+                    <div class="data-label">結算金額:</div>
                     <div class="data-value fs-4 fw-bold text-pixel-yellow">
-                        TWD $@Model.Tickets.Sum(t => t.TicketsArea.Price).ToString("N0")
+                        $@Model.Tickets.Sum(t => t.TicketsArea?.Price ?? 0).ToString("N0")
                     </div>
                 </div>
             </div>
 
             <div class="cyber-card p-4">
-                <div class="tech-key mb-4">會員</div>
+                <div class="tech-key mb-4">持有者資訊</div>
                 <div class="tech-data-row">
-                    <div class="data-label">ID:</div>
+                    <div class="data-label">會員編號:</div>
                     <div class="data-value font-monospace text-info">#@Model.MemberID</div>
                 </div>
                 <div class="tech-data-row">
-                    <div class="data-label">Identity:</div>
-                    <div class="data-value fw-bold">@Model.Member?.Name</div>
+                    <div class="data-label">姓名:</div>
+                    <div class="data-value fw-bold text-white">@Model.Member?.Name</div>
+                </div>
+                <div class="tech-data-row border-0">
+                    <div class="data-label">電子郵件:</div>
+                    <div class="data-value small opacity-75">@Model.Member.MemberLogin?.Account</div>
                 </div>
             </div>
         </div>
 
-        @* --- [3. 右側：票券明細與紀錄] --- *@
+        @* --- [3. 右側：票券明細] --- *@
         <div class="col-lg-8">
             <div class="cyber-card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="tech-key mb-0">票券明細</div>
-                    <span class="badge bg-info bg-opacity-10 text-info border border-info px-3">
-                        票券數: @Model.Tickets.Count 張
+                    <div class="tech-key mb-0">TICKET_MANIFEST</div>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info px-3 font-monospace">
+                        COUNT: @Model.Tickets.Count
                     </span>
                 </div>
 
@@ -99,139 +96,88 @@
                     <table class="cyber-table align-middle">
                         <thead>
                             <tr>
-                                <th style="width: 35%"><div class="tech-key">活動名稱 </div></th>
-                                <th style="width: 15%"><div class="tech-key text-center">票區 </div></th>
-                                <th style="width: 15%"><div class="tech-key text-center">座次 </div></th>
-                                <th style="width: 15%"><div class="tech-key text-end">單價 </div></th>
-                                <th style="width: 20%"><div class="tech-key text-center">狀態</div></th>
+                                <th style="width: 40%"><div class="tech-key">活動與場次</div></th>
+                                <th style="width: 15%"><div class="tech-key text-center">座位</div></th>
+                                <th style="width: 15%"><div class="tech-key text-end">單價</div></th>
+                                <th style="width: 30%"><div class="tech-key text-center">票券狀態</div></th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var ticket in Model.Tickets)
                             {
                                 <tr>
-                                    @* 1. 活動與場次資訊 *@
                                     <td>
                                         <div class="fw-bold text-white">@ticket.Session?.Programme?.ProgrammeName</div>
                                         <div class="small font-monospace text-info opacity-75">
-                                            <i class="bi bi-clock me-1"></i>@ticket.Session?.StartTime.ToString("yyyy/MM/dd HH:mm")
+                                            <i class="bi bi-calendar3 me-1"></i>@ticket.Session?.StartTime.ToString("yyyy/MM/dd HH:mm")
                                         </div>
                                     </td>
-
-                                    @* 2. 票區 *@
-                                    <td class="text-center">
-                                        <span class="text-white">@ticket.TicketsArea?.TicketsAreaName</span>
-                                    </td>
-
-                                    @* 3. 座次 *@
                                     <td class="text-center font-monospace">
-                                        <span class="text-info">@ticket.RowIndex</span><span class="opacity-50 mx-1">R</span>
-                                        <span class="text-info">@ticket.SeatIndex</span><span class="opacity-50 mx-1">S</span>
+                                        <span class="text-info">@ticket.RowIndex</span><span class="opacity-50 small">排</span>
+                                        <span class="text-info">@ticket.SeatIndex</span><span class="opacity-50 small">號</span>
                                     </td>
-
-                                    @* 4. 單價 *@
                                     <td class="text-end fw-bold text-pixel-yellow">
                                         $@ticket.TicketsArea?.Price.ToString("N0")
                                     </td>
-
-                                    @* 5. 票券狀態 (修正原本標籤錯誤問題) *@
                                     <td class="text-center">
                                         @{
-                                            string statusText = "其他";
-                                            string statusColor = "#888";
-                                            string statusIcon = "bi-slash-circle";
-                                            bool showRefundTime = false;
-
-                                            switch (ticket.TicketsStatusID)
+                                            // 根據你的資料表定義進行邏輯對接
+                                            var (color, icon, text, subText) = ticket.TicketsStatusID switch
                                             {
-                                                case "Y":
-                                                    statusText = "已進場";
-                                                    statusColor = "var(--tech-cyan)";
-                                                    statusIcon = "bi-check2-circle";
-                                                    break;
-                                                case "A":
-                                                    statusText = "待核銷";
-                                                    statusColor = "#28a745";
-                                                    statusIcon = "bi-broadcast";
-                                                    break;
-                                                case "C":
-                                                    statusText = "已退票";
-                                                    statusColor = "var(--tech-danger)";
-                                                    statusIcon = "bi-x-octagon";
-                                                    showRefundTime = true;
-                                                    break;
-                                                case "N":
-                                                    statusText = "逾時付款";
-                                                    statusColor = "#ffc107";
-                                                    statusIcon = "bi-clock-history";
-                                                    break;
-                                            }
+                                                "S" => ("#ffc107", "bi-lock-fill", "已售出", "15天前開放領票"),
+                                                "A" => ("#00f2ff", "bi-qr-code-scan", "待核銷", "QR Code 已發放"),
+                                                "Y" => ("#28a745", "bi-check-circle-fill", "已使用", "核銷完成"),
+                                                "C" => ("#ff0055", "bi-x-octagon-fill", "已退票", ticket.RefundTime?.ToString("MM/dd HH:mm") ?? ""),
+                                                _ => ("#888888", "bi-question-circle", "未知", "")
+                                            };
                                         }
 
-                                        <div class="status-badge" style="color: @statusColor; border-color: @statusColor; font-size: 0.75rem; padding: 2px 10px; display: inline-flex; align-items: center;">
-                                            <i class="bi @statusIcon me-1"></i> @statusText
-                                        </div>
-
-                                        @if (showRefundTime && ticket.RefundTime.HasValue)
-                                        {
-                                            <div class="small text-danger opacity-50 font-monospace mt-1" style="font-size: 0.65rem;">
-                                                退款時間: @ticket.RefundTime.Value.ToString("HH:mm")
+                                        <div class="d-flex flex-column align-items-center">
+                                            <div class="status-badge" style="color: @color; border-color: @color; font-size: 0.8rem; padding: 2px 12px;">
+                                                <i class="bi @icon me-1"></i> @text
                                             </div>
-                                        }
+                                            @if (!string.IsNullOrEmpty(subText))
+                                            {
+                                                <span class="opacity-50" style="font-size: 0.65rem; margin-top: 4px;">@subText</span>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
                         </tbody>
-                        <tfoot>
-                            <tr style="background: rgba(0, 242, 255, 0.05); border-top: 2px solid var(--tech-cyan);">
-                                <td colspan="3" class="text-end py-3 text-info font-monospace">總計金額 TOTAL_AMOUNT:</td>
-                                <td class="text-end py-3 px-3">
-                                    <div class="fs-4 fw-bold text-pixel-yellow">
-                                        $@Model.Tickets.Sum(t => t.TicketsArea.Price).ToString("N0")
-                                    </div>
-                                </td>
-                                <td></td> @* 補足 Status 欄位的空白 *@
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
 
-
+            @* --- 客訴通訊區塊 --- *@
             @if (Model.Question != null && Model.Question.Any())
             {
-                <div class="cyber-card p-4 mt-4" style="border-color: var(--tech-danger) !important;">
+                <div class="cyber-card p-4 mt-4 border-danger border-opacity-50">
                     <div class="tech-key mb-4" style="background: linear-gradient(90deg, var(--tech-danger), transparent) !important;">
-                        <i class="bi bi-broadcast me-2"></i> 通訊紀錄
+                        <i class="bi bi-chat-dots-fill me-2"></i> 管理員通訊紀錄
                     </div>
 
                     @foreach (var q in Model.Question.OrderByDescending(x => x.CreatedTime))
                     {
-                        <div class="mb-4">
-                            @* --- [提問區塊] --- *@
-                            <div class="border-start border-danger border-2 ps-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <div class="small text-danger opacity-75 font-monospace">
-                                        提問時間: @q.CreatedTime.ToString("yyyy.MM.dd HH:mm")
-                                    </div>
-
-                                    @* 🚩 你要的導向式回覆按鈕 *@
-                                    <a asp-controller="Questions" asp-action="Details" asp-route-id="@q.QuestionID" class="btn-cyber py-1 px-3" style="font-size: 0.75rem;">
-                                        <i class="bi bi-reply-fill me-1"></i>[ 回覆  ]
-                                    </a>
+                        <div class="mb-4 bg-dark bg-opacity-25 p-3 rounded border-start border-danger border-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="small text-danger opacity-75 font-monospace">
+                                    REQ_TIME: @q.CreatedTime.ToString("yyyy.MM.dd HH:mm")
                                 </div>
-                                <div class="text-white">@q.QuestionDescription</div>
+                                <a asp-controller="Questions" asp-action="Details" asp-route-id="@q.QuestionID" class="btn-cyber py-0 px-2" style="font-size: 0.7rem;">
+                                    [ 前往處理 ]
+                                </a>
                             </div>
+                            <div class="text-white mb-3">@q.QuestionDescription</div>
 
-                            @* --- [讀取已有的回覆紀錄] --- *@
                             @if (q.Reply != null && q.Reply.Any())
                             {
-                                <div class="ms-4 mt-2">
+                                <div class="ms-3 border-start border-info border-opacity-50 ps-3">
                                     @foreach (var r in q.Reply.OrderBy(x => x.CreatedTime))
                                     {
-                                        <div class="border-start border-info border-2 ps-3 mt-2 py-1" style="background: rgba(0, 242, 255, 0.03);">
-                                            <div class="small text-info opacity-50 font-monospace" style="font-size: 0.65rem;">
-                                                回覆時間: @r.CreatedTime.ToString("HH:mm")
+                                        <div class="mb-2">
+                                            <div class="small text-info opacity-50 font-monospace" style="font-size: 0.6rem;">
+                                                RESP_TIME: @r.CreatedTime.ToString("HH:mm")
                                             </div>
                                             <div class="text-pixel-muted small">@r.ReplyDescription</div>
                                         </div>
@@ -239,11 +185,6 @@
                                 </div>
                             }
                         </div>
-
-                        @if (Model.Question.Last() != q)
-                        {
-                            <hr class="border-secondary opacity-25" />
-                        }
                     }
                 </div>
             }

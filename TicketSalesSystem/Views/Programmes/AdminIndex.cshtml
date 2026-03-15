@@ -110,8 +110,10 @@
 
                                 @* 7. 狀態 *@
                                 <td class="text-center">
+                                    @* 注意：這裡使用的是 status-@item.StatusColor *@
                                     <div class="status-badge status-@item.StatusColor">
-                                        <span class="me-2 pulse-dot"></span>@item.ProgrammeStatusName
+                                        <span class="pulse-dot"></span>
+                                        @item.ProgrammeStatusName
                                     </div>
                                 </td>
 

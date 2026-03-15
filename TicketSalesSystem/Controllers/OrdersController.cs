@@ -33,6 +33,7 @@ namespace TicketSalesSystem.Controllers
             // 🚩 1. 基礎查詢，包含必要關聯
             var orders = _context.Order
                 .Include(o => o.Member)
+                .Include(o => o.Tickets)
                 .Include(o => o.OrderStatus)
                 .Include(o => o.Question) // 為了判斷是否有退票申請
                 .AsQueryable();

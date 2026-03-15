@@ -1,0 +1,57 @@
+﻿@model IEnumerable<TicketSalesSystem.ViewModel.Programme.VMProgramme>
+<link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Dashboard/ActiveMonitorList.css" asp-append-version="true" />
+<div class="row g-4">
+    @foreach (var p in Model)
+    {
+        // 🚩 計算銷售數據
+        var soldCount = p.Capacity - p.Remaining;
+        var progress = p.Capacity > 0 ? (soldCount * 100 / p.Capacity) : 0;
+        // 根據銷售率決定發光顏色 (選配)
+        var glowColor = progress > 80 ? "#ff3333" : "#00f2ff";
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="cyber-card p-4 h-100 d-flex flex-column">
+
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="tech-key1" style="width: auto; padding: 5px 20px;">
+                        @p.ProgrammeStatusName
+                    </div>
+                    @if (progress > 90)
+                    {
+                        <span class="badge rounded-pill bg-danger pulse-dot" style="font-size: 0.7rem;">即將完售</span>
+                    }
+                </div>
+
+                <h4 class="text-white mb-2" style="letter-spacing: 2px; text-shadow: 0 0 10px var(--tech-cyan);">
+                    @p.ProgrammeName
+                </h4>
+
+                <div class="mb-4">
+                    <small class="cyber-detail d-block mb-1">
+                        <i class="bi bi-geo-alt-fill me-1" style="color: var(--tech-cyan);"></i> @p.PlaceName
+                    </small>
+                    <small class="cyber-detail d-block">
+                        <i class="bi bi-clock-history me-1" style="color: var(--tech-cyan);"></i> @p.StartTime?.ToString("yyyy/MM/dd HH:mm")
+                    </small>
+                </div>
+
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.75rem; color: var(--tech-cyan);">
+                        <span>戰術載入進度: @soldCount / @p.Capacity</span>
+                        <span>@progress%</span>
+                    </div>
+                    <div class="cyber-progress-wrapper mb-4">
+                        <div class="cyber-progress-inner" style="width: @progress%;"></div>
+                    </div>
+
+                    <a asp-action="AreaMonitor"
+                       asp-route-programmeId="@p.ProgrammeID"
+                       class="btn-cyber w-100 justify-content-center">
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> 啟動即時票區監控
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

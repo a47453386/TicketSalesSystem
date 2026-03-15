@@ -1,0 +1,174 @@
+﻿@model IEnumerable<TicketSalesSystem.Models.Tickets>
+
+@{
+    Layout = "_AdminLayout";
+    var sessions = ViewBag.Sessions as List<TicketSalesSystem.Models.Session>;
+    var areaDefs = ViewBag.Areas as List<TicketSalesSystem.Models.TicketsArea>;
+
+}
+
+<div class="monitor-god-mode p-4">
+    <div class="tech-key mb-2"><i class="bi bi-geo-alt-fill me-2"></i> STADIUM REAL-TIME MONITOR</div>
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="neon-header mb-0">@ViewBag.ProgrammeName</h1>
+
+        @* 🚩 修正重點：圖例完全對應下方的方塊樣式 *@
+        <div class="cyber-card p-2 px-4 shadow-sm" style="background: rgba(0, 20, 40, 0.8) !important; border: 1px solid #333;">
+            <div class="d-flex gap-4 align-items-center">
+                @* 這裡的 class 直接套用下方座位的 class，保證外觀 100% 一致 *@
+                <div class="legend-item"><div class="admin-seat status-N"></div> <span class="small text-white">可銷售 (N)</span></div>
+                <div class="legend-item"><div class="admin-seat status-P"></div> <span class="small text-white">鎖定中 (P)</span></div>
+                <div class="legend-item"><div class="admin-seat status-S"></div> <span class="small text-white">已售出 (S)</span></div>
+                <div class="legend-item"><div class="admin-seat status-A"></div> <span class="small text-white">待進場 (A)</span></div>
+                <div class="legend-item"><div class="admin-seat status-Y"></div> <span class="small text-white">已進場 (Y)</span></div>
+                <div class="legend-item"><div class="admin-seat status-C"></div> <span class="small text-white">取消 (C)</span></div>
+            </div>
+        </div>
+    </div>
+
+    @* --- 第一層：場次 (Session) --- *@
+    @foreach (var s in sessions)
+    {
+        <div class="session-container mb-5 p-4" style="border: 1px solid #00f2ff; border-radius: 12px; background: rgba(0, 8, 15, 0.7);">
+            <div class="session-header mb-4">
+                <h2 class="text-white border-bottom border-info pb-3">
+                    <i class="bi bi-calendar3 me-2 text-cyan"></i>
+                    場次：@s.StartTime.ToString("yyyy-MM-dd HH:mm")
+                </h2>
+            </div>
+
+            <div class="d-flex flex-wrap gap-4 justify-content-start">
+                @{
+                    var areasForThisSession = areaDefs.Where(a => a.SessionID == s.SessionID).ToList();
+                }
+
+                @foreach (var a in areasForThisSession)
+                {
+                    <div class="area-map-card p-3">
+                        <div class="text-cyan text-center small fw-bold mb-3 border-bottom border-secondary pb-2">
+                            【 @a.TicketsAreaName 】
+                        </div>
+
+                        <div class="stadium-grid">
+                            @for (int r = 1; r <= a.RowCount; r++)
+                            {
+                                <div class="seat-row d-flex align-items-center mb-1">
+                                    <div class="row-label">@r</div>
+                                    <div class="d-flex">
+                                        @for (int n = 1; n <= a.SeatCount; n++)
+                                        {
+                                            // 🚩 就是這裡！在產生方塊前先抓出這份資料
+                                            var ticket = Model
+                                            .Where(t =>
+                                            t.SessionID == s.SessionID &&
+                                            t.TicketsAreaID == a.TicketsAreaID &&
+                                            t.RowIndex == r &&
+                                            t.SeatIndex == n)
+                                            .OrderByDescending(t => t.TicketsID) // 抓最新的一筆，解決 Y/C 衝突
+                                            .FirstOrDefault();
+
+                                            var status = ticket?.TicketsStatusID?.Trim() ?? "N";
+
+                                            <div class="admin-seat status-@status"
+                                                 title="@a.TicketsAreaName | 排:@r 號:@n | 狀態:@status"
+                                                 data-bs-toggle="tooltip">
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    /* 基礎座位方塊樣式 */
+    .admin-seat {
+        width: 14px;
+        height: 14px;
+        margin: 1px;
+        border-radius: 2px;
+        background-color: #111;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: transform 0.1s;
+    }
+
+        .admin-seat:hover {
+            transform: scale(3);
+            z-index: 100;
+            box-shadow: 0 0 10px #fff;
+        }
+
+    /* 🚩 狀態配色與特效 */
+
+    /* N - 可售：亮綠色 */
+    .status-N {
+        background-color: #00ff41 !important;
+        box-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
+    }
+
+    /* A - 未使用/待進場：亮青色 (如 image_22b6d8 所示) */
+    .status-A {
+        background-color: #00f2ff !important;
+        box-shadow: 0 0 5px rgba(0, 242, 255, 0.4);
+    }
+
+    /* S - 已售出：紅色 */
+    .status-S {
+        background-color: #ff3131 !important;
+        box-shadow: 0 0 5px rgba(255, 49, 49, 0.4);
+    }
+
+    /* P - 暫鎖中：黃色 + 閃爍 */
+    .status-P {
+        background-color: #ffde59 !important;
+        animation: blink 1s infinite;
+    }
+
+    /* 🚩 Y - 已進場：對應 image_07ce8d 的虛線方塊 */
+    .status-Y {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px dashed rgba(255, 255, 255, 0.5) !important;
+        box-shadow: none !important;
+    }
+
+    /* C - 取消：深灰色 */
+    .status-C {
+        background-color: #333 !important;
+        opacity: 0.5;
+    }
+
+    .area-map-card {
+        background: rgba(0,0,0,0.5);
+        border: 1px solid #333;
+        min-width: 250px;
+        border-radius: 6px;
+    }
+
+    .row-label {
+        width: 20px;
+        font-size: 0.6rem;
+        color: #00f2ff;
+        opacity: 0.4;
+        text-align: right;
+        margin-right: 5px;
+    }
+
+    @@keyframes blink {
+        50% {
+            opacity: 0.2;
+        }
+    }
+</style>
