@@ -20,6 +20,8 @@
     <Folder Include="SeedPhotos\CoverImage\" />
     <Folder Include="SeedPhotos\DescriptionImage\" />
     <Folder Include="SeedPhotos\SeatImage\" />
+    <Folder Include="wwwroot\css\User\Seats\" />
+    <Folder Include="wwwroot\js\User\Seats\" />
     <Folder Include="wwwroot\Photos\DescriptionImage\" />
     <Folder Include="wwwroot\Photos\employeePhotos\" />
     <Folder Include="wwwroot\Photos\Home\" />

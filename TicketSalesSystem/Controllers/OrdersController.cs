@@ -42,7 +42,8 @@ namespace TicketSalesSystem.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 orders = orders.Where(s => s.OrderID.Contains(searchString)
-                                        || s.Member.MemberID.Contains(searchString));
+                                        || s.Member.MemberID.Contains(searchString)
+                                        || s.Member.Name.Contains(searchString));
             }
 
             // 🚩 3. 狀態篩選
@@ -68,6 +69,7 @@ namespace TicketSalesSystem.Controllers
 
             var order = await _context.Order
                 .Include(o => o.Member)
+                .ThenInclude(m => m.MemberLogin)
                 .Include(o => o.OrderStatus)
                 .Include(o => o.PaymentMethod)
                 .Include(o => o.Tickets)
@@ -96,19 +98,22 @@ namespace TicketSalesSystem.Controllers
             }
 
             var order = await _context.Order
-             .Include(o => o.Member)
-                .ThenInclude(t => t.MemberLogin)
-             .Include(o => o.PaymentMethod) // 為了顯示付款方式名稱
-             .Include(o => o.OrderStatus)
-             .Include(o => o.Question)
-             .Include(o => o.Tickets)
-                 .ThenInclude(t => t.Session)
-                     .ThenInclude(s => s.Programme) // 為了抓活動名稱
-             .Include(o => o.Tickets)
-                 .ThenInclude(t => t.TicketsArea) // 為了抓票區
-             .Include(o => o.Tickets)
-                 .ThenInclude(t => t.TicketsStatus) // 為了抓狀態名稱
-             .FirstOrDefaultAsync(m => m.OrderID == id);
+                 .Include(o => o.Member)
+                     .ThenInclude(t => t.MemberLogin)
+                 .Include(o => o.PaymentMethod)
+                 .Include(o => o.OrderStatus)
+                 // 🚩 修正重點：包含問題 (Question) 及其對應的回覆 (Reply)
+                 .Include(o => o.Question)
+                     .ThenInclude(q => q.Reply)
+                     .ThenInclude(e=>e.Employee)
+                 .Include(o => o.Tickets)
+                     .ThenInclude(t => t.Session)
+                         .ThenInclude(s => s.Programme)
+                 .Include(o => o.Tickets)
+                     .ThenInclude(t => t.TicketsArea)
+                 .Include(o => o.Tickets)
+                     .ThenInclude(t => t.TicketsStatus)
+                 .FirstOrDefaultAsync(m => m.OrderID == id);
 
             if (order == null)
             {

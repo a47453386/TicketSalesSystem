@@ -14,6 +14,8 @@ namespace TicketSalesSystem.ViewModel.Programme.ProgrammeAdminDetail
         public string? PurchaseReminder { get; set; }
         public string? CollectionReminder { get; set; }
 
+        public int? LimitPerOrder { get; set; }
+
         public string? RefundPolicy { get; set; }
         public string? CoverImage { get; set; }
         public string? SeatImage { get; set; }

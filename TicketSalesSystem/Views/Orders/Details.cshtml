@@ -1,7 +1,7 @@
 ﻿@model TicketSalesSystem.Models.Order
 
 @{
-    ViewData["Title"] = "訂單詳情 [DECODING] - " + Model.OrderID;
+    ViewData["Title"] = "訂單詳情" + Model.OrderID;
 }
 <link rel="stylesheet" href="~/css/Admin/AdminCommon.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Admin/Order/OrderDetail.css" asp-append-version="true" />
@@ -29,7 +29,7 @@
         @* --- [2. 左側：基本資訊] --- *@
         <div class="col-lg-4">
             <div class="cyber-card p-4 mb-4">
-                <div class="tech-key mb-4">核心數據</div>
+                <div class="tech-key mb-4">訂單資料</div>
 
                 <div class="tech-data-row">
                     <div class="data-label">訂單狀態:</div>
@@ -66,7 +66,7 @@
             </div>
 
             <div class="cyber-card p-4">
-                <div class="tech-key mb-4">持有者資訊</div>
+                <div class="tech-key mb-4">會員資訊</div>
                 <div class="tech-data-row">
                     <div class="data-label">會員編號:</div>
                     <div class="data-value font-monospace text-info">#@Model.MemberID</div>
@@ -76,8 +76,12 @@
                     <div class="data-value fw-bold text-white">@Model.Member?.Name</div>
                 </div>
                 <div class="tech-data-row border-0">
-                    <div class="data-label">電子郵件:</div>
-                    <div class="data-value small opacity-75">@Model.Member.MemberLogin?.Account</div>
+                    <div class="data-label">會員帳號:</div>
+                    <div class="data-value small opacity-100">@Model.Member.MemberLogin?.Account</div>
+                </div>
+                <div class="tech-data-row border-0">
+                    <div class="data-label">會員信箱:</div>
+                    <div class="data-value small opacity-100">@Model.Member.Email</div>
                 </div>
             </div>
         </div>
@@ -86,7 +90,7 @@
         <div class="col-lg-8">
             <div class="cyber-card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="tech-key mb-0">TICKET_MANIFEST</div>
+                    <div class="tech-key mb-0">票券資料</div>
                     <span class="badge bg-info bg-opacity-10 text-info border border-info px-3 font-monospace">
                         COUNT: @Model.Tickets.Count
                     </span>
@@ -187,6 +191,7 @@
                         </div>
                     }
                 </div>
+                
             }
         </div>
     </div>

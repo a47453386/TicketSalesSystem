@@ -111,11 +111,21 @@
 
         <div class="col-lg-2">
             <div class="cyber-card h-100 d-flex flex-column justify-content-center align-items-center p-2 text-center">
-                @* 這裡的 Spinner 可以根據狀態變色 *@
-                <div id="status-spinner" class="spinner-grow text-success mb-2 shadow-glow" role="status"></div>
-                <div class="tech-key" style="font-size: 0.75rem !important; padding: 2px 8px;">系統監測</div>
-                @* 🚩 加上 id="current-status-text" *@
-                <div id="current-status-text" class="small text-white-50" style="font-size: 0.7rem;">初始化中...</div>
+                @* Spinner 顏色由 JS 動態控制，初始不設顏色類別 *@
+                <div id="status-spinner" class="spinner-grow mb-2 shadow-glow"
+                     style="width: 3rem; height: 3rem; transition: all 0.5s ease;" role="status">
+                </div>
+
+                @* 標籤改為中文 *@
+                <div class="tech-key mb-1" style="font-size: 2rem !important; padding: 2px 8px; letter-spacing: 1px;">
+                    系統監測
+                </div>
+
+                @* 初始狀態文字改為中文 *@
+                <div id="current-status-text" class="small text-white-50"
+                     style="font-size: 1.2rem; transition: color 0.5s ease;">
+                    系統待機中
+                </div>
             </div>
         </div>
 

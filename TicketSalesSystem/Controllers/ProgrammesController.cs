@@ -101,6 +101,7 @@ namespace TicketSalesSystem.Controllers
                 OnShelfTime = programme.OnShelfTime,
                 UpdatedAt = programme.UpdatedAt ?? DateTime.Now,
                 EmployeeName = programme.Employee?.Name,
+                LimitPerOrder = programme.LimitPerOrder,
             };
 
             if (programme.DescriptionImage != null)

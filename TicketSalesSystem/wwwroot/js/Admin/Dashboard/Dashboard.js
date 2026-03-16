@@ -139,40 +139,47 @@
     setInterval(loadLiveScanLogs, 10000); // 每 10 秒刷新一次進場流水
 });
 function refreshBackgroundLogs() {
+    const statusText = document.getElementById('current-status-text');
+    const statusSpinner = document.getElementById('status-spinner');
+    const logContainer = document.getElementById('log-container');
+
+    // 🚩 記錄更新前的日誌內容（用來比對有沒有新東西）
+    const oldLogContent = logContainer ? logContainer.innerHTML : "";
+
     fetch('/Admin/GetLiveBackgroundLogs')
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            // 1. 更新日誌內容 (對應小寫 logs)
-            const logContainer = document.getElementById('log-container');
+            // 1. 更新日誌內容
             if (logContainer && data.logs) {
-                logContainer.innerHTML = data.logs.map(log =>
-                    `<div class="mb-1"><span style="color: #0f0; opacity: 0.6;">[LOG]</span> ${log}</div>`
+                const newLogHTML = data.logs.map(log =>
+                    `<div class="mb-1"><span style="color: #0f0; opacity: 0.6;">[日誌]</span> ${log}</div>`
                 ).join('');
-            }
 
-            // 2. 更新狀態文字與 Spinner (對應小寫 status)
-            const statusText = document.getElementById('current-status-text');
-            const statusSpinner = document.getElementById('status-spinner');
+                logContainer.innerHTML = newLogHTML;
+                logContainer.scrollTop = logContainer.scrollHeight;
 
-            if (statusText) statusText.innerText = data.status;
+                // 🚩 判斷：內容有沒有變動
+                const hasNewActivity = newLogHTML !== oldLogContent;
 
-            if (statusSpinner) {
-                // 使用邏輯更清晰的切換方式
-                if (data.status === "待機中") {
-                    statusSpinner.className = "spinner-grow text-secondary mb-2";
-                } else {
-                    statusSpinner.className = "spinner-grow text-success mb-2 shadow-glow";
+                if (statusSpinner && statusText) {
+                    // 只要日誌有更新，或者後端回傳的不是「待機中」
+                    if (hasNewActivity || (data.status && !data.status.includes("待機"))) {
+                        // --- 🟢 活躍狀態 ---
+                        statusSpinner.className = "spinner-grow text-success mb-2 shadow-glow";
+                        statusText.innerText = "系統更新中"; // 改為中文
+                        statusText.className = "small text-success fw-bold";
+                    } else {
+                        // --- ⚪ 待機狀態 ---
+                        statusSpinner.className = "spinner-grow text-secondary mb-2";
+                        statusText.innerText = data.status || "系統待機中"; // 顯示「待機中」
+                        statusText.className = "small text-white-50";
+                    }
                 }
             }
         })
         .catch(err => {
-            // 🚩 當連線失敗時（例如伺服器重啟中），給管理員一個提示
-            const statusText = document.getElementById('current-status-text');
-            if (statusText) statusText.innerHTML = '<span class="text-danger">連線中斷...</span>';
-            console.warn("監控服務暫時無法連線:", err);
+            if (statusText) statusText.innerHTML = '<span class="text-danger">連線中斷</span>';
+            if (statusSpinner) statusSpinner.className = "spinner-grow text-danger mb-2";
         });
 }
 

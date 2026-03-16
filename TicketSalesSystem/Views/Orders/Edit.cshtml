@@ -53,7 +53,7 @@
                 <div class="col-lg-7">
                     <div class="cyber-card h-100 p-4">
                         <div class="audit-card-header mb-4">
-                            <i class="bi bi-cpu me-2"></i> 基本資料 DATA_CORE
+                            <i class="bi bi-cpu me-2 ms-5"></i> 基本資料
                         </div>
 
                         <div class="row g-4">
@@ -101,7 +101,7 @@
                             else
                             {
                                 <button type="submit" class="btn btn-order-action btn-audit-static w-100 py-3 fw-bold">
-                                    <i class="bi bi-shield-check me-2"></i> 儲存並執行變更 EXECUTE_UPDATE
+                                    <i class="bi bi-shield-check me-2"></i> 儲存並執行變更
                                 </button>
                             }
                         </div>
@@ -111,7 +111,7 @@
                     <div class="audit-card p-4 mt-4">
                         <div class="cyber-card h-100 p-4">
                             <div class="audit-card-header mb-4">
-                                <i class="bi bi-ticket-perforated me-2"></i> 票券明細 ASSETS
+                                <i class="bi bi-ticket-perforated me-2 ms-5"></i> 票券明細
                             </div>
                             <div class="table-responsive custom-scroll">
                                 <table class="table table-dark table-borderless align-middle mb-0">
@@ -159,12 +159,57 @@
 
                 @* --- [右側：通訊與訊號日誌] --- *@
                 <div class="col-lg-5">
-                    <div class="cyber-card h-100 p-4" style="border-color: rgba(255, 204, 0, 0.3) !important;">
-                        <div class="audit-card-header text-warning" style="background: linear-gradient(90deg, var(--tech-warning), transparent) !important;">
-                            <i class="bi bi-broadcast me-2"></i> 客訴處理 COMMS_LOG
+                    <div class="cyber-card h-100 p-0 overflow-hidden" style="border-color: rgba(255, 204, 0, 0.3) !important;">
+                        @* 1. 標頭：維持黃色警告風格 *@
+                        <div class="audit-card-header text-dark fw-bold p-2 px-3" style="background: linear-gradient(90deg, #ffcc00, #aa8800) !important;">
+                            <i class="bi bi-broadcast me-2 ms-5"></i> 客訴處理 
                         </div>
-                        <div class="custom-scroll pe-2" style="max-height: 850px; overflow-y: auto;">
-                            @* (客訴列表邏輯保持不變...) *@
+
+                        <div class="p-3">
+                            <div class="custom-scroll pe-2" style="max-height: 850px; overflow-y: auto;">
+                                @if (Model.Question != null && Model.Question.Any())
+                                {
+                                    @foreach (var q in Model.Question.OrderByDescending(x => x.CreatedTime))
+                                    {
+                                        @* --- 客訴主體區塊 --- *@
+                                        <div class="mb-4 p-3 border-start border-warning border-3" style="background: rgba(255, 204, 0, 0.05);">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <span class="text-warning small font-monospace" style="font-size: 0.7rem;">
+                                                    提問日期: @q.CreatedTime.ToString("yyyy.MM.dd HH:mm")
+                                                </span>
+                                                <a asp-controller="Questions" asp-action="Details" asp-route-id="@q.QuestionID" class="btn-cyber py-0 px-2" style="font-size: 0.95rem; color: #ffcc00; border: 1px solid #ffcc00; text-decoration: none;">
+                                                    [ 前往處理 ]
+                                                </a>
+                                            </div>
+
+                                            <div class="text-white mb-3" style="font-size: 0.9rem;">@q.QuestionDescription</div>
+
+                                            @* --- 管理員回覆區塊 (你剛才寫的部分) --- *@
+                                            @if (q.Reply != null && q.Reply.Any())
+                                            {
+                                                <div class="ms-3 border-start border-info border-opacity-50 ps-3 mt-2" style="background: rgba(0, 255, 255, 0.02);">
+                                                    @foreach (var r in q.Reply.OrderBy(x => x.CreatedTime))
+                                                    {
+                                                        <div class="mb-3">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <span class="badge bg-info text-dark me-2" style="font-size: 0.5rem; padding: 2px 4px;">回覆</span>
+                                                                <div class="small text-info opacity-50 font-monospace" style="font-size: 0.6rem;">
+                                                                    回覆日期: @r.CreatedTime.ToString("HH:mm") 負責人:@r.Employee?.Name
+                                                                </div>
+                                                            </div>
+                                                            <div class="text-info opacity-75 small" style="line-height: 1.4;">@r.ReplyDescription</div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center py-5 opacity-25 font-monospace">目前此訂單無客訴</div>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>

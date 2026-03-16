@@ -18,7 +18,7 @@
             <a asp-action="AdminIndex" class="btn-cyber px-4">
                 <i class="bi bi-arrow-left me-2"></i>回清單
             </a>
-            <a  asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@Model.ProgrammeID" class="btn-cyber btn-cyber-warning px-4">
+            <a asp-controller="ProgrammeDTO" asp-action="Edit" asp-route-id="@Model.ProgrammeID" class="btn-cyber btn-cyber-warning px-4">
                 <i class="bi bi-pencil-square me-2"></i>活動更新
             </a>
         </div>
@@ -28,9 +28,40 @@
     <div class="row g-4 mb-4">
         @* 封面預覽 *@
         <div class="col-lg-3">
-            <div class="cyber-card p-2 h-100 text-center">
-                <div class="tech-key small">封面圖</div>
-                <img src="/Photos/CoverImage/@Model.CoverImage" class="w-100 media-preview" style="height: 280px; object-fit: cover;">
+            @* 1. 封面圖 (移除 h-100，改用 mb-4 騰出空間) *@
+            <div class="cyber-card p-2 text-center mb-4">
+                <div class="tech-key1 small">封面圖</div>
+                <img src="/Photos/CoverImage/@Model.CoverImage"
+                     class="w-100 media-preview"
+                     style="height: 280px; object-fit: cover; border: 1px solid var(--pixel-blue-opacity);">
+            </div>
+
+            @* 2. 資訊列表 (移除 row g-3 的負面 margin 影響，改用直觀的 div 堆疊) *@
+            <div class="cyber-card p-2 text-start mb-4">
+
+                <div class="pixel-info-list border-bottom border-info border-opacity-10 pb-2">
+                    <div class="tech-key1 mb-3 small">基本訊息</div>
+                    <div class="mb-4">
+                        <div class="text-white small font-monospace mb-1">演出地點 / LOCATION</div>
+                        <div class="fs-6 text-white">
+                            <i class="bi bi-geo-alt me-2 text-info"></i>@Model.PlaceName
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="text-white small font-monospace mb-1">上架日 / RELEASE_DATE</div>
+                        <div class="fs-6 font-monospace text-info fw-bold">
+                            <i class="bi bi-calendar-event me-2"></i>@Model.OnShelfTime.ToString("yyyy-MM-dd HH:mm")
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-white small font-monospace mb-1">限購數量 / LIMIT</div>
+                        <div class="fs-6 font-monospace text-info fw-bold">
+                            <i class="bi bi-ticket-perforated me-2"></i>限購 @Model.LimitPerOrder 張
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -38,26 +69,14 @@
         <div class="col-lg-6">
             <div class="cyber-card p-4 h-100 d-flex flex-column">
                 @* 1. 標頭與核心名稱 *@
-                <div class="tech-key mb-4">基本資料</div>
+                <div class="tech-key1 mb-4">活動名稱/場次</div>
 
                 <div class="mb-4">
                     <div class="text-info font-monospace small opacity-50" style="letter-spacing: 2px;">活動名稱</div>
                     <div class="h3 text-white fw-bold mb-0">@Model.ProgrammeName</div>
                 </div>
 
-                @* 2. 地點與上架狀態 (雙欄顯示) *@
-                <div class="row g-4 mb-4 border-bottom border-info border-opacity-10 pb-4">
-                    <div class="col-md-6">
-                        <div class="text-white-50 small font-monospace mb-1">演出地點</div>
-                        <div class="fs-5 text-white"><i class="bi bi-geo-alt me-2 text-info"></i>@Model.PlaceName</div>
-                    </div>
-                    <div class="col-md-6 border-start border-info border-opacity-10">
-                        <div class="text-white-50 small font-monospace mb-1">上架日</div>
-                        <div class="fs-5 font-monospace text-info fw-bold">
-                            <i class="bi bi-calendar-check me-2"></i>@Model.OnShelfTime.ToString("yyyy-MM-dd HH:mm")
-                        </div>
-                    </div>
-                </div>
+
 
                 @* 3. 場次時程流 (Session Stream) *@
                 <div class="flex-grow-1 overflow-auto custom-scroll pe-2" style="max-height: 400px;">

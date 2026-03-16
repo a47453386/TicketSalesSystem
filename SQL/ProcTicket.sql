@@ -3,8 +3,6 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- 🚩 修正：將 A.Total 改為 (A.RowCount * A.SeatCount)
-    -- 🚩 修正：加入 CASE WHEN 防止計算結果變成負數，避免觸發 547 錯誤
     UPDATE A
     SET A.Remaining = CASE 
         WHEN ((A.[RowCount] * A.SeatCount) - ISNULL(T.SoldCount, 0)) < 0 THEN 0 

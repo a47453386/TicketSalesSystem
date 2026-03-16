@@ -15,7 +15,6 @@
     --base-font-size: 1.2rem;
     --header-font-size: 2.8rem;
     --base-font: 1.2rem;
-    background-color: #000 !important;
     background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
     color: #e0e0e0 !important;

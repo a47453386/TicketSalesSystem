@@ -1,0 +1,4 @@
+USE¡@TicketSales ;
+GO
+ALTER AUTHORIZATION ON DATABASE::TicketSales TO [sa];
+GO

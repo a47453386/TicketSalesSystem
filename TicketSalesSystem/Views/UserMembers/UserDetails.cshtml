@@ -37,7 +37,40 @@
         padding: 15px;
         margin-top: 10px;
     }
+   
+    /* 自定義科技按鈕 */
+    .btn-cyber-tech {
+        background: rgba(0, 242, 255, 0.1);
+        color: #00f2ff;
+        border: 1px solid #00f2ff;
+        border-radius: 2px;
+        font-family: 'Share Tech Mono', monospace;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
 
+        /* 移除 hover 的顏色跳變，改為維持原樣 */
+        .btn-cyber-tech:hover,
+        .btn-cyber-tech:active,
+        .btn-cyber-tech:focus {
+            background: rgba(0, 242, 255, 0.15) !important;
+            color: #00f2ff !important;
+            border-color: #00f2ff !important;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5) !important;
+            outline: none;
+        }
+
+        /* 禁用狀態（發送中） */
+        .btn-cyber-tech:disabled {
+            border-color: #555;
+            color: #555;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: none;
+        }
 </style>
 
 <div class="container mt-4 mb-5 font-pixel">
@@ -65,7 +98,7 @@
                     {
                         <div class="input-group">
                             <input type="text" value="@Model.Tel" class="form-control pixel-input bg-dark text-white" readonly />
-                            <button type="button" class="btn btn-pixel-primary btn-sm" id="btnSendSMS">發送驗證碼</button>
+                            <button type="button" class="btn btn-cyber-tech btn-sm" id="btnSendSMS">發送驗證碼</button>
                         </div>
 
                         @* 驗證輸入框 *@

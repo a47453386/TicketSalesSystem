@@ -6,6 +6,8 @@
     var areaDefs = ViewBag.Areas as List<TicketSalesSystem.Models.TicketsArea>;
 
 }
+<link rel="stylesheet" href="~/css/Admin/Dashboard/ActiveMonitor.css" asp-append-version="true" />
+
 
 <div class="monitor-god-mode p-4">
     <div class="tech-key mb-2"><i class="bi bi-geo-alt-fill me-2"></i> STADIUM REAL-TIME MONITOR</div>
@@ -86,89 +88,3 @@
     }
 </div>
 
-<style>
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-    }
-
-    /* 基礎座位方塊樣式 */
-    .admin-seat {
-        width: 14px;
-        height: 14px;
-        margin: 1px;
-        border-radius: 2px;
-        background-color: #111;
-        border: 1px solid rgba(255,255,255,0.1);
-        transition: transform 0.1s;
-    }
-
-        .admin-seat:hover {
-            transform: scale(3);
-            z-index: 100;
-            box-shadow: 0 0 10px #fff;
-        }
-
-    /* 🚩 狀態配色與特效 */
-
-    /* N - 可售：亮綠色 */
-    .status-N {
-        background-color: #00ff41 !important;
-        box-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
-    }
-
-    /* A - 未使用/待進場：亮青色 (如 image_22b6d8 所示) */
-    .status-A {
-        background-color: #00f2ff !important;
-        box-shadow: 0 0 5px rgba(0, 242, 255, 0.4);
-    }
-
-    /* S - 已售出：紅色 */
-    .status-S {
-        background-color: #ff3131 !important;
-        box-shadow: 0 0 5px rgba(255, 49, 49, 0.4);
-    }
-
-    /* P - 暫鎖中：黃色 + 閃爍 */
-    .status-P {
-        background-color: #ffde59 !important;
-        animation: blink 1s infinite;
-    }
-
-    /* 🚩 Y - 已進場：對應 image_07ce8d 的虛線方塊 */
-    .status-Y {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border: 1px dashed rgba(255, 255, 255, 0.5) !important;
-        box-shadow: none !important;
-    }
-
-    /* C - 取消：深灰色 */
-    .status-C {
-        background-color: #333 !important;
-        opacity: 0.5;
-    }
-
-    .area-map-card {
-        background: rgba(0,0,0,0.5);
-        border: 1px solid #333;
-        min-width: 250px;
-        border-radius: 6px;
-    }
-
-    .row-label {
-        width: 20px;
-        font-size: 0.6rem;
-        color: #00f2ff;
-        opacity: 0.4;
-        text-align: right;
-        margin-right: 5px;
-    }
-
-    @@keyframes blink {
-        50% {
-            opacity: 0.2;
-        }
-    }
-</style>

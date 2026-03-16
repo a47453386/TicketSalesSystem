@@ -75,7 +75,7 @@ namespace TicketSalesSystem.Service.Seats
         }
 
         // 5. 建立訂單與票券 (核心購票方法)
-        public async Task<VMBookingResponse> CreateOrderAndTicketsAsync(VMBookingRequest request, string memberID)
+        public async Task<VMBookingResponse> CreateOrderAndTicketsAsync(VMBookingRequest request, string memberID)  
         {
             if (_context.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
             {
@@ -90,6 +90,7 @@ namespace TicketSalesSystem.Service.Seats
             try
             {
                 var area = await _context.TicketsArea.FindAsync(request.TicketsAreaID);
+                    
                 if (area == null || (area.TicketsAreaStatusID != "A" && area.TicketsAreaStatusID != "I"))
                 {
                     return new VMBookingResponse
@@ -139,7 +140,7 @@ namespace TicketSalesSystem.Service.Seats
                     });
                 }
 
-                // 🚩 唯一存檔點 (觸發 Trigger & Index)
+                // 唯一存檔點 (觸發 Trigger & Index)
                 await _context.SaveChangesAsync();
 
                 if (transaction != null) await transaction.CommitAsync();

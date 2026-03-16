@@ -106,8 +106,8 @@
 @* --- 🚩 伺服器緩衝區 (Waiting Room) --- *@
 <div id="waitingRoom">
     <div class="spinner-border text-pixel-blue" style="width: 5rem; height: 5rem; border-width: 0.5rem;"></div>
-    <h3 class="text-pixel-yellow mt-5 fw-bold dot-blink">伺服器更新中...</h3>
-    <p class="text-pixel-muted fs-pixel-small">正在連接加密節點，請勿切斷連線</p>
+    <h3 class="text-pixel-yellow mt-5 fw-bold dot-blink">尋票中...</h3>
+    <p class="text-pixel-muted fs-pixel-small">請勿重新整理(F5)...</p>
 </div>
 
 @* --- 🚩 頂部活動標頭 --- *@
@@ -121,7 +121,7 @@
         </div>
         <div class="col-md-4 text-md-end">
             <div id="stepBadge" class="pixel-badge-status @(isPassed ? "text-pixel-blue" : "text-pixel-pink")">
-                [ @(isPassed ? "STEP_02: SELECT_ZONE" : "STEP_01: SECURITY_OVERRIDE") ]
+                [ @(isPassed ? "第二步: 請選票區" : "第一步: 驗證碼") ]
             </div>
         </div>
     </div>
@@ -176,7 +176,7 @@
                 {
                     bool isSoldOut = area.Remaining <= 0;
                     <div class="pixel-area-card @(isSoldOut ? "sold-out" : "")"
-                         onclick="@(isSoldOut ? "" : $"selectArea('{area.TicketsAreaID}', '{area.TicketsAreaName}', {area.Price}, '{area.VenueID}')")">
+                         onclick="@(isSoldOut ? "" : $"selectArea('{area.TicketsAreaID}', '{area.TicketsAreaName}', {area.Price}, '{area.VenueID}', {area.Remaining})")">
                         <div class="p-3 d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="text-white fw-bold">@area.TicketsAreaName</div>
@@ -205,24 +205,18 @@
                         <i class="bi bi-check-circle-fill"></i> <span class="text-white" id="selectedInfo"></span>
                     </div>
                     <div class="p-3">
-                        <label class="text-pixel-blue fs-pixel-small mb-2 d-block">數量</label>
+                        <label class="text-pixel-blue fs-pixel-small mb-2 d-block">數量 (您的剩餘額度: <span id="userQuota">@ViewBag.RemainingQuota</span> 張)</label>
                         <div class="input-group">
-                            @if (ViewBag.RemainingQuota > 0)
-                            {
-                                <select id="ticketCount" class="form-select pixel-input">
-                                    @for (int i = 1; i <= (int)ViewBag.RemainingQuota; i++)
-                                    {
-                                        <option value="@i">@i 張</option>
-                                    }
-                                </select>
-                                <button class="btn-pixel ms-2 px-4" onclick="confirmBooking()">
-                                    確認訂購
-                                </button>
-                            }
-                            else
-                            {
-                                <div class="text-pixel-pink fs-pixel-small">[ 警告：已達帳號購買上限 ]</div>
-                            }
+                            @* 🚩 改為由 JavaScript 動態生成的 select *@
+                            <select id="ticketCount" class="form-select pixel-input">
+                            </select>
+                            <button id="confirmBtn" class="btn-pixel ms-2 px-4" onclick="confirmBooking()">
+                                確認訂購
+                            </button>
+                        </div>
+                        @* 預留一個區塊顯示錯誤訊息 *@
+                        <div id="quotaError" class="text-pixel-pink fs-pixel-small mt-2" style="display:none;">
+                            [ 警告：已達帳號購買上限 ]
                         </div>
                     </div>
                 </div>
@@ -321,11 +315,48 @@
             document.getElementById('stepBadge').className = "badge bg-primary px-3 py-2";
         }
 
-        function selectArea(id, name, price, venueId) {
-            currentArea = id; currentVenue = venueId; currentPrice = price;
-            document.querySelectorAll('.area-card').forEach(c => c.classList.remove('active'));
+               function selectArea(id, name, price, venueId, areaRemaining) { // 🚩 增加傳入票區剩餘數
+            currentArea = id;
+            currentVenue = venueId;
+            currentPrice = price;
+
+            // 1. 處理樣式切換
+            document.querySelectorAll('.pixel-area-card').forEach(c => c.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            document.getElementById('selectedInfo').innerHTML = `<i class="bi bi-check-circle-fill"></i> ${name} - $${price.toLocaleString()}`;
+
+            // 2. 更新選取資訊
+            document.getElementById('selectedInfo').innerHTML = `${name} - $${price.toLocaleString()}`;
+
+            // 3. 🚩 重點：動態更新下拉選單數量
+            const userMax = parseInt("@ViewBag.RemainingQuota"); // 帳號還能買幾張
+            const areaMax = areaRemaining; // 該票區還剩幾張
+            const finalMax = Math.min(userMax, areaMax, 4); // 取三者最小值 (假設單次最高4張)
+
+            const countSelect = document.getElementById('ticketCount');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const quotaError = document.getElementById('quotaError');
+
+            countSelect.innerHTML = ""; // 清空舊選項
+
+            if (userMax <= 0) {
+                // 帳號額度已滿
+                countSelect.style.display = "none";
+                confirmBtn.style.display = "none";
+                quotaError.style.display = "block";
+            } else {
+                // 產生正確數量的選項
+                countSelect.style.display = "block";
+                confirmBtn.style.display = "block";
+                quotaError.style.display = "none";
+
+                for (let i = 1; i <= finalMax; i++) {
+                    let opt = document.createElement('option');
+                    opt.value = i;
+                    opt.innerHTML = i + " 張";
+                    countSelect.appendChild(opt);
+                }
+            }
+
             $("#bookingSection").fadeIn();
         }
 
