@@ -1,4 +1,8 @@
-﻿body, .main-content, #wrapper {
+﻿
+
+
+
+body, .main-content, #wrapper {
     background-color: #0b0118 !important; /* 你的深紫色底色 */
 }
 /* 1. 殺掉所有可能在頂部的白色背景容器 */
@@ -40,9 +44,12 @@ div.pixel-container-box {
         box-shadow: 6px 6px 0px var(--pixel-pink);
     }
 
-.bg-pixel-blue {
-    background-color: var(--pixel-blue) !important;
-}
+   
+
+
+    .bg-pixel-blue {
+        background-color: var(--pixel-blue) !important;
+    }
 
 /* 票券鋸齒邊緣感 (模擬打孔) */
 .ticket-pixel-body {
@@ -168,4 +175,41 @@ div.pixel-container-box {
         color: var(--pixel-yellow);
         border-bottom: 2px solid var(--pixel-yellow);
     }
+/* 🚩 強制覆蓋：讓所有小字變大並清晰可見 */
+.pixel-ticket .fs-pixel-small {
+    font-size: 1.4rem !important; /* 再次加大 */
+    color: #fff !important; /* 預設改為白色，確保看得見 */
+    display: block !important;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 0px #000; /* 加上黑邊，增加像素感 */
+}
 
+/* 🚩 修正頂部票區：背景亮藍、文字全黑 */
+.ticket-pixel-header {
+    background-color: #00f2ff !important; /* 亮藍色 */
+    color: #000000 !important; /* 黑色文字 */
+    padding: 10px 0 !important;
+    font-size: 1.3rem !important;
+}
+
+/* 🚩 修正「座位」標籤：改用黃色對比 */
+.text-pixel-muted.fs-pixel-small {
+    color: #ffff00 !important; /* 亮黃色 */
+}
+
+/* 🚩 修正「開放時間」文字 */
+.locked-pixel-box small.fs-pixel-small {
+    color: #00f2ff !important; /* 亮藍色 */
+    font-size: 1.1rem !important;
+}
+
+/* 🚩 修正底部 ID 區塊 */
+.ticket-pixel-footer {
+    background-color: #000 !important;
+    border-top: 2px dashed #00f2ff;
+}
+
+    .ticket-pixel-footer .fs-pixel-small {
+        font-size: 1rem !important;
+        color: #888 !important;
+    }
