@@ -49,39 +49,68 @@
     });
 
     // 3. Doughnut Chart (圓餅圖)
-    fetch('/Admin/GetOrderStatusDistribution').then(res => res.json()).then(data => {
-        new Chart(document.getElementById('orderStatusChart'), {
-            type: 'doughnut',
-            data: {
-                labels: data.map(d => d.status),
-                datasets: [{
-                    data: data.map(d => d.count),
-                    backgroundColor: ['#00f2ff', '#7000ff', '#ff0055', '#39ff14'],
-                    borderColor: '#000b1a',
-                    borderWidth: 3
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                cutout: '75%',
-                plugins: { legend: { position: 'right', labels: { color: '#00f2ff' } } }
-            }
+    fetch('/Admin/GetOrderStatusDistribution')
+        .then(res => res.json())
+        .then(data => {
+            const statusColors = {
+                '已付款': '#00f2ff', 
+                '待付款': '#7000ff', 
+                '逾期付款': '#ff0055' 
+            };
+
+            new Chart(document.getElementById('orderStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.status),
+                    datasets: [{
+                        data: data.map(d => d.count),
+                        backgroundColor: data.map(d => statusColors[d.status] || '#444'),
+                        borderColor: '#000b1a',
+                        borderWidth: 3,
+                        hoverOffset: 15 
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#00f2ff',
+                                font: { size: 14, family: '微軟正黑體' },
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
         });
-    });
 
     // 4. Alerts
     function loadLiveAlerts() {
         fetch('/Admin/GetLiveAlerts').then(res => res.json()).then(data => {
             const container = document.getElementById('alertsContainer');
+            if (!container) return;
+
+            if (data.length === 0) {
+                // 🚩 保持科技感：所有票區供應正常
+                container.innerHTML = `
+            <div class="p-2 opacity-50 small">
+                <i class="bi bi-check2-circle me-1 text-success"></i>所有票區供應正常
+            </div>`;
+                return;
+            }
+
             container.innerHTML = data.map(alert => `
-                        <div class="p-2 border-start border-${alert.level} border-4 mb-2"
-                             style="background: rgba(255, 255, 255, 0.03); border-color: var(--tech-${alert.level}) !important;">
-                            <div class="tech-label text-${alert.level}" style="font-size:0.7rem; color: var(--tech-${alert.level}) !important;">
-                                [ ALERT_${alert.level.toUpperCase()} ]
-                            </div>
-                            <div class="text-white small opacity-75">${alert.message}</div>
-                        </div>
-                    `).join('');
+            <div class="p-2 border-start border-${alert.level} border-4 mb-2"
+                 style="background: rgba(255, 255, 255, 0.03); border-color: var(--tech-${alert.level}) !important;">
+                <div class="tech-label text-${alert.level}" style="font-size:0.7rem; color: var(--tech-${alert.level}) !important;">
+                   [ ${alert.type === 'SoldOut' ? '已完售' : '即將完售'} ]
+                </div>
+                <div class="text-white small opacity-75">${alert.message}</div>
+            </div>
+        `).join('');
         });
     }
     loadLiveAlerts();

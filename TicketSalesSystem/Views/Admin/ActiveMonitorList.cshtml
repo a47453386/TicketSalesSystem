@@ -17,10 +17,15 @@
                     <div class="tech-key1" style="width: auto; padding: 5px 20px;">
                         @p.ProgrammeStatusName
                     </div>
-                    @if (progress > 90)
+                    @if (progress == 100)
                     {
-                        <span class="badge rounded-pill bg-danger pulse-dot" style="font-size: 0.7rem;">即將完售</span>
+                        <span class="badge rounded-pill text-bg-warning pulse-dot" style="font-size: 0.7rem;">已完售</span>
                     }
+                    else if (progress > 75)
+                    {
+                        <span class="badge rounded-pill bg-danger  pulse-dot" style="font-size: 0.7rem;">即將完售</span>
+                    }
+
                 </div>
 
                 <h4 class="text-white mb-2" style="letter-spacing: 2px; text-shadow: 0 0 10px var(--tech-cyan);">

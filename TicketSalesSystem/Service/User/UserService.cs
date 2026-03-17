@@ -48,7 +48,7 @@ namespace TicketSalesSystem.Service.User
         public async Task<List<VMProgramme>> GetProgrammesALL()
         {
             return await _context.Programme
-                .Where(p => p.ProgrammeStatusID == "O")
+                .Where(p => p.ProgrammeStatusID == "O" || p.ProgrammeStatusID == "S")
                 .OrderByDescending(p => p.ProgrammeID)
                 .Select(p => new VMProgramme
                 {

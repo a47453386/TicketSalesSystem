@@ -135,7 +135,7 @@
 
     @* --- 第三列：深度分析與警告 (活動、狀態、預警、待處理) --- *@
 
-    <div class="row g-3">
+    <div class="row g-3 mb-4">
 
         @* 活動銷售分析 *@
 
@@ -183,23 +183,14 @@
         @* 場館、票區預警 *@
 
         <div class="col-lg-3">
-
             <div class="cyber-card p-3 h-100">
-
-                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger),transparent 140%);">
-
-                    <i class="bi bi-bell-fill me-2"></i>場館預警
-
+                <div class="tech-key" style="background: linear-gradient(90deg, var(--tech-danger), transparent 140%);">
+                    <i class="bi bi-ticket-perforated-fill me-2"></i>票區預警
                 </div>
-
                 <div class="overflow-auto custom-scroll mt-2" style="max-height: 180px;" id="alertsContainer">
-
                     @* AJAX 載入預警內容 *@
-
                 </div>
-
             </div>
-
         </div>
 
 

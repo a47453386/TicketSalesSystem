@@ -150,7 +150,7 @@ builder.Services.AddAuthentication(options =>
         options.Cookie.Name = "TicketSystem.Employee.Cookie";
 
         // 員工端通常可以設定久一點，或比照辦理
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(480);
+        options.ExpireTimeSpan = TimeSpan.FromDays(1);
         options.SlidingExpiration = true;
     });
 

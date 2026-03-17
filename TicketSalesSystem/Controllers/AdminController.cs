@@ -152,38 +152,33 @@ namespace TicketSalesSystem.Controllers
         }
 
         //即時警示與通知
+        // 即時銷售警示：僅監控庫存狀態
         [HttpGet]
         public async Task<IActionResult> GetLiveAlerts()
         {
-            // 1. 完售預警：剩餘數量 < 5% 且 尚未完全售罄 (Remaining > 0)
-            var soldOutWarnings = await _context.TicketsArea
+            // 抓取所有剩餘量 <= 5% 的票區 (包含 0)
+            var alerts = await _context.TicketsArea
                 .Include(a => a.Session).ThenInclude(s => s.Programme)
-                .Where(a => a.Capacity > 0 && (double)a.Remaining / a.Capacity <= 0.05 && a.Remaining > 0)
+                .Where(a => a.Capacity > 0 && (double)a.Remaining / a.Capacity <= 0.25)
                 .Select(a => new {
-                    Type = "SoldOut",
-                    Title = "完售預警",
-                    Message = $"{a.Session.Programme.ProgrammeName} - {a.TicketsAreaName} 剩餘不到 5%",
-                    Level = "danger"
+                    a.TicketsAreaName,
+                    ProgrammeName = a.Session.Programme.ProgrammeName,
+                    a.Remaining,
+                    a.Capacity
                 })
                 .ToListAsync();
 
-            // 2. 物理上限警告：目前設定的 Capacity >= 該場館區域物理上限的 95%
-            // 物理上限 = Venue.RowCount * Venue.SeatCount
-            var physicalLimitWarnings = await _context.TicketsArea
-                .Include(a => a.Venue)
-                .Include(a => a.Session).ThenInclude(s => s.Programme)
-                .Where(a => a.Venue != null && a.Capacity >= (a.Venue.RowCount * a.Venue.SeatCount) * 0.95)
-                .Select(a => new {
-                    Type = "PhysicalLimit",
-                    Title = "物理上限警告",
-                    Message = $"{a.TicketsAreaName} 設定張數 ({a.Capacity}) 已逼近場館物理上限 ({a.Venue.RowCount * a.Venue.SeatCount})",
-                    Level = "warning"
-                })
-                .ToListAsync();
+            // 在記憶體中進行狀態分類，決定顯示內容
+            var result = alerts.Select(a => new {
+                Type = a.Remaining == 0 ? "SoldOut" : "Warning",
+                Title = a.Remaining == 0 ? "已完售" : "完售預警",
+                Message = a.Remaining == 0
+                          ? $"{a.ProgrammeName} - {a.TicketsAreaName} 已全數售罄"
+                          : $"{a.ProgrammeName} - {a.TicketsAreaName} 剩餘不到 5% (僅剩 {a.Remaining} 張)",
+                Level = a.Remaining == 0 ? "secondary" : "danger" 
+            }).ToList();
 
-            // 合併所有警示
-            var allAlerts = soldOutWarnings.Concat(physicalLimitWarnings).ToList();
-            return Json(allAlerts);
+            return Json(result);
         }
 
         //取得背景日誌的頁面
