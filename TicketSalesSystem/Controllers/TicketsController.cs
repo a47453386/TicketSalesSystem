@@ -22,6 +22,9 @@ namespace TicketSalesSystem.Controllers
             _context = context;
         }
 
+        
+
+
         // GET: Tickets
         public async Task<IActionResult> Index(string search, string status, string programmeId, string sessionId, int page = 1)
         {

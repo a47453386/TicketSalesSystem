@@ -122,7 +122,7 @@ builder.Services.AddAuthentication(options =>
         options.Cookie.Name = "TicketSystem.Member.Cookie";
 
         // 🚩 1. 設定登入過期時間 (例如 30 分鐘)
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+        options.ExpireTimeSpan = TimeSpan.FromDays(1);
 
         // 🚩 2. 滑動過期：如果使用者在 30 分鐘內有操作，時間會自動重新計算 30 分鐘
         options.SlidingExpiration = true;

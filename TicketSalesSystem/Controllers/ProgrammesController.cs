@@ -30,10 +30,14 @@ namespace TicketSalesSystem.Controllers
 
         
         // GET: Programmes
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? keyword)
         {
-            // 🚩 加入 OrderBy 確保每次讀取的順序一致，才不會覺得圖片跳來跳去
-            var programme = await _user.GetProgrammesALL();
+            
+            var programme = await _user.GetProgrammesALL(keyword);
+
+            ViewData["CurrentKeyword"] = keyword;
+
+            var sortedProgrammes = programme.OrderByDescending(p => p.StartTime);
 
             return View(programme);
         }

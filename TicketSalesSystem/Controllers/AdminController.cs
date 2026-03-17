@@ -275,11 +275,11 @@ namespace TicketSalesSystem.Controllers
         }
 
         //票區位子監控
-        public async Task<IActionResult> ActiveMonitorList()
+        public async Task<IActionResult> ActiveMonitorList(string? keyword)
         {
             try
             {
-                var activeProgrammes = await _user.GetProgrammesALL();
+                var activeProgrammes = await _user.GetProgrammesALL(keyword);
                 return View(activeProgrammes);
             }
             catch (Exception ex)

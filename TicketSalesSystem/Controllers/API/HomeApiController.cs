@@ -33,10 +33,10 @@ namespace TicketSalesSystem.Controllers.API
 
         //活動清單
         [HttpGet("Home")]
-        public async Task<IActionResult> GetHomeData()
+        public async Task<IActionResult> GetHomeData(string? keyword)
         {
 
-            var data = await _user.GetProgrammesALL();
+            var data = await _user.GetProgrammesALL(keyword);
             return Ok(data);
         }
         //最新公告5筆

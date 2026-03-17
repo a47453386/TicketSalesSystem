@@ -1,0 +1,68 @@
+﻿/* 🚩 賽博像素卡片核心樣式 */
+.pixel-ticket-card {
+    background-color: var(--pixel-bg-light) !important;
+    border: 2px solid var(--pixel-blue) !important;
+    border-radius: 0 !important;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+    .pixel-ticket-card:hover {
+        transform: translate(-4px, -4px);
+        box-shadow: 8px 8px 0px var(--pixel-pink) !important;
+        border-color: var(--pixel-pink) !important;
+    }
+
+/* 圖片掃描線特效 */
+.pixel-img-container {
+    height: 200px;
+    position: relative;
+    border-bottom: 2px solid var(--pixel-blue);
+    overflow: hidden;
+}
+
+    .pixel-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: saturate(1.2) contrast(1.1); /* 增加色彩鮮艷度 */
+    }
+
+/* 圖片上的狀態標籤 */
+.pixel-status-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--pixel-pink);
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    z-index: 5;
+}
+
+.pixel-card-body {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.fs-pixel-small {
+    font-size: 1.2rem !important;
+}
+
+/* 霓虹文字效果 */
+.glow-text-blue {
+    color: var(--pixel-blue);
+    text-shadow: 0 0 5px var(--pixel-blue);
+}
+
+/* 文字截斷 */
+.pixel-line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.5rem;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}

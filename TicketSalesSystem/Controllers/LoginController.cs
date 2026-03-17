@@ -106,7 +106,7 @@ namespace TicketSalesSystem.Controllers
                     await HttpContext.SignInAsync("MemberScheme", new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                     {
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(5),
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
                         AllowRefresh = true
                     });
 

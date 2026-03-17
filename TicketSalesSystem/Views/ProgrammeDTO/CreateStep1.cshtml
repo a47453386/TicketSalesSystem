@@ -2,11 +2,18 @@
 @model VMProgrammeStep1
 
 @{
-    ViewData["Title"] = "建立活動：基本配置";
+    ViewData["Title"] = "建立活動";
 }
 <link rel="stylesheet" href="~/css/Admin/Programme/Create/step1.css" asp-append-version="true" />
 
+
 <div class="admin-body p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-5 tech-label border-bottom border-info border-opacity-25 pb-3">
+        <h1 class="neon-header m-0">
+            <i class="bi bi-plus-square-dotted me-2"></i></i>@ViewData["Title"]
+        </h1>
+    </div>
     @* 步驟指示器 (建議 VCSteps 也套用藍色系樣式) *@
     <div class="mb-5">
         @await Component.InvokeAsync("VCSteps", new { currentStep = 1 })

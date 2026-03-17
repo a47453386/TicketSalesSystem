@@ -35,13 +35,72 @@
                         <li class="nav-item"><a asp-controller="Programmes" asp-action="Index" class="nav-link pixel-nav-link">節目資訊</a></li>
                         <li class="nav-item"><a asp-controller="UserPublicNotices" asp-action="UserIndex" class="nav-link pixel-nav-link">最新消息</a></li>
                         <li class="nav-item"><a asp-controller="UserFAQs" asp-action="UserIndex" class="nav-link pixel-nav-link">常見問題</a></li>
-                        <li class="nav-item"><a asp-controller="UserOrders" asp-action="UserIndex" class="nav-link pixel-nav-link">訂單查詢</a></li>
+                        @* <li class="nav-item"><a asp-controller="UserOrders" asp-action="UserIndex" class="nav-link pixel-nav-link">訂單查詢</a></li> *@
                         <li class="nav-item"><a asp-controller="UserMembers" asp-action="Index" class="nav-link pixel-nav-link">會員中心</a></li>
                         <li class="nav-item"><a asp-controller="UserQuestions" asp-action="Create" class="nav-link pixel-nav-link">我要發問</a></li>
                     </ul>
 
                     @* --- 右側功能區 (根據身份切換) --- *@
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center">                       
+
+                        @* --- 第二部分：一般會員區塊 (MemberScheme) --- *@
+                        <ul class="navbar-nav align-items-center">
+
+                            @* 🚩 新增：像 image_4a8f25.png 的搜尋框 *@
+                            <li class="nav-item me-3">
+                                <form asp-controller="Programmes" asp-action="Index" method="get" class="position-relative">
+                                    <div class="pixel-search-container">
+                                        <input type="text" name="keyword" class="pixel-search-input" placeholder="搜尋節目">
+                                        <button type="submit" class="pixel-search-btn">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </li>
+
+                            @* 🚀 導覽列身分判斷區塊 *@
+                            @if (UserAccessor.IsMember())
+                            {
+                                @* --- 會員已登入：顯示會員下拉選單 --- *@
+                                <li class="nav-item dropdown ms-2">
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="memberDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <div class="user-avatar-sm me-2">
+                                            <i class="bi bi-person-circle"></i>
+                                        </div>
+                                        @* 🚩 關鍵修正：調用 GetOnlyMemberName() 確保不抓到員工名 *@
+                                        <span class="text-tech-cyan">@UserAccessor.GetOnlyMemberName()</span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg" aria-labelledby="memberDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="UserMembers" asp-action="Index">
+                                                <i class="bi bi-person-badge me-2 text-info"></i>會員中心
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="UserIndex" asp-action="UserOrders">
+                                                <i class="bi bi-clock-history me-2 text-info"></i>訂單紀錄
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider border-secondary"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-controller="Login" asp-action="MemberLogout">
+                                                <i class="bi bi-box-arrow-right me-2"></i>登出系統
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                @* --- 會員未登入：顯示登入按鈕 --- *@
+                                <li class="nav-item">
+                                    <a class="btn btn-pixel" href="javascript:void(0);" onclick="openLoginModal()">
+                                        <i class="bi bi-person-fill me-2"></i>會員登入
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+
                         @* --- 第一部分：員工/管理員區塊 (EmployeeScheme) --- *@
                         <ul class="navbar-nav">
                             <li class="nav-item">
@@ -62,34 +121,6 @@
                                     </a>
                                 }
                             </li>
-                        </ul>
-
-                        @* --- 第二部分：一般會員區塊 (MemberScheme) --- *@
-                        <ul class="navbar-nav">
-                            @if (UserAccessor.IsMember())
-                            {
-                                @* 情況 B-2：會員已登入 - 顯示藍色玩家選單 *@
-                                <li class="nav-item dropdown ms-3">
-                                    <a class="nav-link dropdown-toggle pixel-nav-link" href="#" id="memberDropdown" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-person-circle"></i> @UserAccessor.GetUserName()
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-none pixel-dropdown-menu mt-2">
-                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="UserOrders" asp-action="UserIndex">我的訂單</a></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item" asp-controller="UserMembers" asp-action="Index">個人中心</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item pixel-dropdown-item text-danger" asp-controller="Login" asp-action="MemberLogout">登出</a></li>
-                                    </ul>
-                                </li>
-                            }
-                            else
-                            {
-                                @* 情況 A-2：會員未登入 - 顯示顯眼的登入按鈕 *@
-                                <li class="nav-item ms-lg-3">
-                                    <a class="btn btn-pixel" href="javascript:void(0);" onclick="openLoginModal()">
-                                        <i class="bi bi-person-fill me-2"></i>會員登入
-                                    </a>
-                                </li>
-                            }
                         </ul>
                     </div>
                 </div>

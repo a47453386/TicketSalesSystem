@@ -252,4 +252,76 @@ a {
     color: #ffcc00;
 }
 
-</style >
+/* 搜尋框容器 */
+.pixel-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* 搜尋輸入框本體 - 模擬 image_4a8f25.png */
+.pixel-search-input {
+    background: rgba(255, 255, 255, 0.05); /* 半透明背景 */
+    border: 1px solid rgba(0, 242, 255, 0.5); /* 科技青邊框 */
+    color: white;
+    padding: 6px 40px 6px 15px; /* 右邊留空間給 Icon */
+    border-radius: 4px; /* 稍微帶點圓角或維持直角 */
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    width: 200px; /* 初始寬度 */
+}
+
+    /* 聚焦時的發光效果 */
+    .pixel-search-input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #00f2ff;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        width: 250px; /* 聚焦時變長，更有互動感 */
+    }
+
+/* 搜尋按鈕（Icon 部分） */
+.pixel-search-btn {
+    position: absolute;
+    right: 5px;
+    background: transparent;
+    border: none;
+    color: rgba(0, 242, 255, 0.8);
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+    .pixel-search-btn:hover {
+        color: #ffffff;
+        text-shadow: 0 0 5px #00f2ff;
+    }
+
+/* 預留佔位符顏色 */
+.pixel-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+/* 下拉選單賽博化 */
+.dropdown-menu-dark {
+    background: rgba(10, 10, 15, 0.95); /* 深色半透明 */
+    border: 1px solid var(--tech-cyan); /* 科技藍邊框 */
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px); /* 磨砂玻璃效果 */
+}
+
+.dropdown-item {
+    transition: all 0.3s ease;
+    padding: 10px 20px;
+}
+
+    .dropdown-item:hover {
+        background: rgba(0, 255, 255, 0.1);
+        color: var(--tech-cyan) !important;
+        padding-left: 25px; /* 稍微向右滑動的動效 */
+    }
+
+.user-avatar-sm {
+    font-size: 1.5rem;
+    color: var(--tech-cyan);
+    filter: drop-shadow(0 0 5px var(--tech-cyan));
+}

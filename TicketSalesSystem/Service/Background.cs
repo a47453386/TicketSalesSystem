@@ -44,7 +44,18 @@ namespace TicketSalesSystem.Service
 
                             // 1. 🚩 執行你的 SQL 預存程序 (解鎖 15 天內的票)
                             _monitor.AddLog("🔓 正在執行 15 天內票券解鎖程序...");
-                            await context.Database.ExecuteSqlRawAsync("EXEC [dbo].[sp_UnlockTicketsBySchedule]");
+                            var result = await context.Database.SqlQueryRaw<int>("EXEC [dbo].[sp_UnlockTicketsBySchedule]").ToListAsync();
+
+                            int updatedCount = result.FirstOrDefault();
+
+                            if (updatedCount > 0)
+                            {
+                                _monitor.AddLog($"🔓 票券解鎖完成，本次共啟用 {updatedCount} 張票券。", "每日維護");
+                            }
+                            else
+                            {
+                                _monitor.AddLog("🔓 執行票券解鎖，今日無須啟用的票券。", "每日維護");
+                            }
 
                             // 2. 執行原有的庫存重整
                             _monitor.AddLog("📊 正在重新計算全量庫存...");
@@ -204,9 +215,10 @@ namespace TicketSalesSystem.Service
             var activeProgrammes = await context.Programme
                 .Include(p => p.Session)
                     .ThenInclude(s => s.TicketsArea) // 優化：預先抓取區域庫存資料
-                .Where(p => p.ProgrammeStatusID == "R" ||
-                            p.ProgrammeStatusID == "O" ||
-                            p.ProgrammeStatusID == "S")
+                .Where(p => p.ProgrammeStatusID == "R" || // 設定完成
+                    p.ProgrammeStatusID == "H" || // 已上架
+                    p.ProgrammeStatusID == "O" || // 開賣中
+                    p.ProgrammeStatusID == "S")   // 已完售
                 .ToListAsync();
 
             bool hasChanged = false;
@@ -221,10 +233,20 @@ namespace TicketSalesSystem.Service
                 {
                     newStatus = "E";
                 }
+
+                //2.檢查是否開賣
+                if (oldStatus == "R" && p.OnShelfTime<=now)
+                {
+                    newStatus = "H";
+                    _logger.LogInformation($"[自動上架] {p.ProgrammeName} 已達上架時間，狀態切換為 H");
+                }
+
                 // 2. 檢查是否開賣
-                if (oldStatus == "R" && p.Session.Any(s => s.SaleStartTime <= now && s.SaleEndTime > now))
+                if ((newStatus == "H" || oldStatus == "H") &&
+                p.Session.Any(s => s.SaleStartTime <= now && s.SaleEndTime > now))
                 {
                     newStatus = "O";
+                    _logger.LogInformation($"[自動開賣] {p.ProgrammeName} 已達售票時間，狀態切換為 O");
                 }
 
                 // 3. 處理 O 或 S 的庫存連動切換

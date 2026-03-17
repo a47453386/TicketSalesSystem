@@ -45,27 +45,40 @@ namespace TicketSalesSystem.Service.User
 
 
         //所有活動清單
-        public async Task<List<VMProgramme>> GetProgrammesALL()
+        public async Task<List<VMProgramme>> GetProgrammesALL(string? keyword)
         {
-            return await _context.Programme
-                .Where(p => p.ProgrammeStatusID == "O" || p.ProgrammeStatusID == "S")
+            // 1. 先建立基礎查詢（包含關聯）
+            var query = _context.Programme
+                 .Include(p => p.Place)
+                 .Include(p => p.ProgrammeStatus)
+                 .AsQueryable();
+
+            // 2. 套用狀態過濾 (只顯示 O 開賣中 或 S 已完售)
+            query = query.Where(p => p.ProgrammeStatusID == "O" || p.ProgrammeStatusID == "S" || p.ProgrammeStatusID == "H");
+
+            // 3. 🚩 如果有輸入關鍵字，就接在 query 後面繼續過濾
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(p => p.ProgrammeName.Contains(keyword) ||
+                                         p.Place.PlaceName.Contains(keyword));
+            }
+
+            // 4. 🚩 使用 query (而不是 _context.Programme) 來進行最後的投影轉換
+            return await query
                 .OrderByDescending(p => p.ProgrammeID)
                 .Select(p => new VMProgramme
                 {
                     ProgrammeID = p.ProgrammeID,
                     ProgrammeName = p.ProgrammeName,
-                    // 🚩 這裡直接補全 URL，讓 Android 的 Glide 能直接用
                     CoverImage = _baseUrl + p.CoverImage,
-
                     PlaceID = p.PlaceID,
                     PlaceName = p.Place != null ? p.Place.PlaceName : "尚未公佈地點",
-
                     ProgrammeStatusID = p.ProgrammeStatusID ?? "O",
                     ProgrammeStatusName = p.ProgrammeStatus != null ? p.ProgrammeStatus.ProgrammeStatusName : "售票中",
 
                     Capacity = p.Session.SelectMany(s => s.TicketsArea).Any()
-                               ? p.Session.SelectMany(s => s.TicketsArea).Sum(a => (int?)a.Capacity) ?? 0
-                               : 0,
+                                ? p.Session.SelectMany(s => s.TicketsArea).Sum(a => (int?)a.Capacity) ?? 0
+                                : 0,
                     Remaining = p.Session.SelectMany(s => s.TicketsArea).Sum(a => a.Remaining),
 
                     StartTime = p.Session.OrderByDescending(s => s.StartTime).Select(s => (DateTime?)s.StartTime).FirstOrDefault(),
@@ -260,6 +273,7 @@ namespace TicketSalesSystem.Service.User
                     FinalAmount = o.Tickets.Sum(t => t.TicketsArea.Price),
                     OrderStatusID = o.OrderStatusID,
                     OrderStatusName = o.OrderStatus.OrderStatusName,
+                    CreateTime=o.OrderCreatedTime,
                     Seats = o.Tickets.Select(t => $"{t.RowIndex}排{t.SeatIndex}號").ToList(),
                     // 🚩 邏輯優化：根據每筆訂單的創建時間計算倒數 訂單付款倒數 (這是動態的，剩 10 分鐘//
                     RemainingSeconds = o.OrderStatusID == "P"

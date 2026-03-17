@@ -3,151 +3,8 @@
     ViewData["Title"] = Model.ProgrammeName;
     Layout = "_UserLayout";
 }
+<link rel="stylesheet" href="~/css/User/Programme/Detail.css" asp-append-version="true" />
 
-<style>
-    /* ============================================================
-           [ 1. 核心容器與基礎設定 ]
-           ============================================================ */
-    .pixel-container-box {
-        background-color: rgba(0, 0, 0, 0.6) !important; 
-        backdrop-filter: blur(8px); /
-        border: 4px solid var(--pixel-blue);
-        padding: 30px;
-        font-size: 1.1rem !important; 
-        color: #ffffff;
-    }
-
-    /* 統一小字級規範 (依照你設定的 1.2rem，若覺得太大可微調) */
-    .fs-pixel-small {
-        font-size: 1.1rem !important;
-        letter-spacing: 1px;
-    }
-
-    /* ============================================================
-           [ 2. 大標題橫幅 (Banner) ]
-           ============================================================ */
-    .pixel-banner-frame {
-        border: 4px solid var(--pixel-blue);
-        box-shadow: 0 8px 0px #000;
-        position: relative;
-        background-color: #000;
-        display: block;
-        width: 100%;
-    }
-
-        /* 合併掃描線特效：使用單一偽元素達成 */
-        .pixel-banner-frame::after {
-            content: " ";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            /* 增加掃描線質感 */
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
-            background-size: 100% 4px;
-            z-index: 2;
-            pointer-events: none;
-            opacity: 0.5;
-        }
-
-    /* ============================================================
-           [ 3. 像素分頁控制 (Tabs) ]
-           ============================================================ */
-    .pixel-nav-tabs {
-        border-bottom: 4px solid var(--pixel-blue) !important;
-        display: flex;
-        flex-wrap: nowrap; /* 確保手機版不亂跑 */
-    }
-
-        .pixel-nav-tabs .nav-link {
-            background-color: #000 !important;
-            color: var(--pixel-blue) !important;
-            border: 2px solid var(--pixel-blue) !important;
-            border-bottom: none !important;
-            border-radius: 0 !important;
-            margin-right: 5px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.9rem; /* 稍微縮小以容納更多 Tab */
-            padding: 15px 20px;
-            transition: all 0.2s;
-        }
-
-            .pixel-nav-tabs .nav-link.active {
-                background-color: var(--pixel-blue) !important;
-                color: #000 !important;
-                border-color: var(--pixel-blue) !important;
-                transform: translateY(-2px); /* 選中時稍微跳出 */
-            }
-
-    .pixel-tab-content {
-        background-color: rgba(17, 0, 34, 0.6); /* 深紫色透明感 */
-        border: 4px solid var(--pixel-blue);
-        border-top: none;
-        padding: 30px;
-        color: #fff;
-    }
-
-    /* ============================================================
-           [ 4. 徹底黑化表格 (Table) ]
-           ============================================================ */
-    .pixel-table {
-        background-color: transparent !important;
-        color: #ffffff !important;
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-        .pixel-table thead th {
-            background-color: rgba(0, 0, 0, 0.9) !important;
-            color: var(--pixel-blue) !important;
-            border-bottom: 3px solid var(--pixel-blue) !important;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.9rem !important;
-            padding: 20px !important;
-            text-align: center;
-        }
-
-        .pixel-table td {
-            background-color: transparent !important;
-            border-bottom: 1px solid rgba(0, 204, 255, 0.1) !important;
-            padding: 15px !important;
-            color: #ffffff !important;
-        }
-
-        .pixel-table tbody tr:hover {
-            background-color: rgba(0, 204, 255, 0.05) !important;
-        }
-
-    /* ============================================================
-           [ 5. 按鈕與功能類別 ]
-           ============================================================ */
-    /* 霓虹粉按鈕 (完售/取消專用) */
-    .btn-pixel-pink {
-        font-family: 'Press Start 2P', cursive;
-        background-color: var(--pixel-pink) !important;
-        color: #000 !important;
-        border: none;
-        padding: 12px 24px;
-        box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4), 4px 4px 0px 0px #000;
-        cursor: not-allowed;
-        transition: none;
-    }
-
-    /* 邊框與陰影工具 */
-    .border-pixel-pink {
-        border: 2px solid var(--pixel-pink) !important;
-    }
-
-    .shadow-glow {
-        text-shadow: 0 0 10px var(--pixel-pink);
-    }
-
-    .shadow-glow-blue {
-        text-shadow: 0 0 10px var(--pixel-blue);
-    }
-
-</style>
 
 <div class="container mt-4 mb-5">
     <div class="text-center mb-5">
@@ -262,26 +119,38 @@
                                 <td class="text-white fw-bold">@session.StartTime.ToString("yyyy/MM/dd HH:mm")</td>
                                 <td class="text-pixel-pink">@session.Programme.ProgrammeName</td>
                                 <td class="text-pixel-muted">@Model.Place?.PlaceName</td>
-                                <td class="py-3">
+                                <td class="py-3 ">
                                     @{
-                                        // 🚩 判斷該場次是否還有票 (假設你已在 Controller 加了 ThenInclude(s => s.Tickets))
+                                        // 🚩 判斷該場次是否還有票 (Active 狀態的票區)
                                         bool isSessionSoldOut = !session.TicketsArea.Any(t => t.TicketsAreaStatusID == "A");
                                     }
 
                                     @if (Model.ProgrammeStatusID == "O" && !isSessionSoldOut)
                                     {
-                                        @* 只有開賣中且有票，才給按鈕 *@
+                                        @* --- 狀態 1：開賣中 且 有票 --- *@
                                         <a asp-controller="Seats" asp-action="Index" asp-route-id="@session.SessionID"
                                            class="btn-pixel py-1 px-3 fs-pixel-small">立即訂購</a>
                                     }
+                                    else if (Model.ProgrammeStatusID == "R")
+                                    {
+                                        @* --- 🚩 狀態 2：即將開賣 (狀態 R) --- *@
+                                        <div class="d-flex flex-column align-items-end">
+                                            <span class="text-pixel-yellow fs-pixel-small shadow-glow mb-1">
+                                                <i class="bi bi-clock-history me-1"></i>[ 即將開賣 ]
+                                            </span>
+                                            <small class="text-white-50" style="font-size: 0.7rem; font-family: 'Consolas', monospace;">
+                                                START: @(session.SaleStartTime.ToString("yyyy/MM/dd HH:mm") ?? "TBA")
+                                            </small>
+                                        </div>
+                                    }
                                     else if (Model.ProgrammeStatusID == "S" || isSessionSoldOut)
                                     {
-                                        @* 只要主狀態是 S，或該場次沒票，就顯示完售 *@
+                                        @* --- 狀態 3：已完售 (主狀態 S 或 票區全數 A 狀態消失) --- *@
                                         <span class="text-pixel-pink fs-pixel-small shadow-glow">[ 已完售 ]</span>
                                     }
                                     else
                                     {
-                                        @* 其他情況 (已結束、設定中) *@
+                                        @* --- 狀態 4：其他 (已結束、停止售票) --- *@
                                         <span class="text-pixel-muted fs-pixel-small">[ 停止售票 ]</span>
                                     }
                                 </td>

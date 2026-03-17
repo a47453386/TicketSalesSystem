@@ -14,6 +14,8 @@ namespace TicketSalesSystem.ViewModel.Booking
             public decimal FinalAmount { get; set; }
             public int RemainingSeconds { get; set; }//保留時間
 
+            public DateTime CreateTime { get; set; }
+
             public string ExpireTimeText { get; set; } = "";//倒數計時顯示器
 
             public string OrderStatusID { get; set; }

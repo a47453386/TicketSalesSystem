@@ -150,20 +150,30 @@
                             <td>
                                 @if (t.TicketsStatusID == "Y")
                                 {
-                                    <div class="status-badge" style="color: var(--tech-cyan); border-color: var(--tech-cyan);">
-                                        <i class="bi bi-check2-circle me-2 text-info"></i>已進場
+                                    @* --- 狀態 Y：已進場 (任務完成感) --- *@
+                                    <div class="status-badge" style="color: #a0a0a0; border-color: #666; background: rgba(160, 160, 160, 0.1);">
+                                        <i class="bi bi-person-check-fill me-2"></i>已進場
                                     </div>
                                 }
                                 else if (t.TicketsStatusID == "A")
                                 {
-                                    <div class="status-badge" style="color: #28a745; border-color: #28a745;">
-                                        <i class="bi bi-broadcast me-2 text-success"></i>可核銷
+                                    @* --- 狀態 A：可核銷 (高亮、準備掃描感) --- *@
+                                    <div class="status-badge shadow-glow-green" style="color: #39FF14; border-color: #39FF14; background: rgba(57, 255, 20, 0.1);">
+                                        <i class="bi bi-qr-code-scan me-2"></i>可核銷
+                                    </div>
+                                }
+                                else if (t.TicketsStatusID == "S")
+                                {
+                                    @* --- 狀態 S：已售出 (穩定的持有感) --- *@
+                                    <div class="status-badge" style="color: var(--tech-cyan); border-color: var(--tech-cyan); background: rgba(0, 255, 255, 0.1);">
+                                        <i class="bi bi-ticket-perforated-fill me-2"></i>票券尚未發放
                                     </div>
                                 }
                                 else
                                 {
-                                    <div class="status-badge" style="color: var(--tech-danger); border-color: var(--tech-danger);">
-                                        <i class="bi bi-slash-circle me-2 text-danger"></i>已失效
+                                    @* --- 狀態：已失效/退票 (警告感) --- *@
+                                    <div class="status-badge" style="color: var(--tech-danger); border-color: var(--tech-danger); background: rgba(255, 0, 110, 0.1);">
+                                        <i class="bi bi-exclamation-octagon-fill me-2"></i>已失效
                                     </div>
                                 }
                             </td>

@@ -65,19 +65,8 @@ namespace TicketSalesSystem.Service.Orders
                 // 2. 處理票券狀態
                 foreach (var t in order.Tickets)
                 {
-                    // 🚩 現在 t.Session 有資料了，可以正確判斷日期
-                    if (t.Session != null && DateTime.Now >= t.Session.StartTime.AddDays(-15))
-                    {
-                        t.TicketsStatusID = "A"; // 未使用 (待領票/待進場)
-                                                 // 產生 12 位核銷碼
-                        t.CheckInCode = StringHelper.GenerateCheckInCode(12);
-                    }
-                    else
-                    {
-                        t.TicketsStatusID = "S"; // 已售出 (鎖定中)
-                    }
-
-                    
+                    t.TicketsStatusID = "S"; // 統一標記為已售出 (已持票)
+                    t.CheckInCode = StringHelper.GenerateCheckInCode(12);
                 }
 
                 await _context.SaveChangesAsync();

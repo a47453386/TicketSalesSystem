@@ -16,7 +16,7 @@ namespace TicketSalesSystem.Service.User
         string GetImageFullUrl(string fileName);
 
         //所有已開賣的活動
-        Task<List<VMProgramme>> GetProgrammesALL();
+        Task<List<VMProgramme>> GetProgrammesALL(string? keyword);
 
         //最新五則公告
         Task<List<PublicNotice>> GetLatestFiveNoticesAsync();
