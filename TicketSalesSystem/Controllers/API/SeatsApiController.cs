@@ -48,6 +48,12 @@ namespace TicketSalesSystem.Controllers.API
             if (string.IsNullOrEmpty(memberID))
                 return Unauthorized(new { message = "請先登入" });
 
+            var member = await _context.Member.FindAsync(memberID);
+            if (member.IsPhoneVerified != true)
+            {
+                return Ok(new { success = false, message = "請先完成手機驗證後再進行購票。" });
+            }
+
             var result = await _bookingService.ConfirmBookingAsync(request, memberID);
 
             if (!result.Success)

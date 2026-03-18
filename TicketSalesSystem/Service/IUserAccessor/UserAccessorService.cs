@@ -1,15 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using TicketSalesSystem.Models;
 
 namespace TicketSalesSystem.Service.IUserAccessor
 {
     public class UserAccessorService : IUserAccessorService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public UserAccessorService(IHttpContextAccessor httpContextAccessor)
+        private readonly TicketsContext _context;
+        public UserAccessorService(IHttpContextAccessor httpContextAccessor, TicketsContext context)
         {
             _httpContextAccessor = httpContextAccessor;
+            _context = context;
         }
 
         // --- 會員專區 (MemberScheme) ---
@@ -92,5 +96,17 @@ namespace TicketSalesSystem.Service.IUserAccessor
         private ClaimsIdentity? GetIdentity(string scheme) =>
             _httpContextAccessor.HttpContext?.User.Identities
                 .FirstOrDefault(i => string.Equals(i.AuthenticationType, scheme, StringComparison.OrdinalIgnoreCase));
+
+
+        public bool IsPhoneVerified()
+        {
+            var memberId = GetMemberId();
+            if (string.IsNullOrEmpty(memberId)) return false;
+
+            // 🚩 改用 DBContext 直接查，不透過 UserManager 的非同步方法，避免伺服器卡死
+            var member = _context.Member.AsNoTracking().FirstOrDefault(m => m.MemberID == memberId);
+
+            return member != null && member.IsPhoneVerified;
+        }
     }
 }

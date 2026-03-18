@@ -21,5 +21,8 @@
         string? GetOnlyMemberName();
         string? GetEmployeeName();
         bool IsAuthenticated();// 只要具備任一已驗證的身分即回傳 true
+
+        bool IsPhoneVerified();
+
     }
 }

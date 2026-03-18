@@ -10,6 +10,27 @@
 </style>
 <div class="container text-center" style="margin-top: 80px; max-width: 550px;">
 
+    <div id="phoneVerifyModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="pixel-container-box border-pixel-pink" style="max-width: 400px; width: 90%; background: #000;">
+            <div class="text-center p-4">
+                <h3 class="text-pixel-pink fw-bold mb-4">
+                    <i class="bi bi-exclamation-triangle-fill"></i><br>[ 存取受限 ]
+                </h3>
+                <p class="text-white fs-5 mb-4">
+                    偵測到您的帳號尚未完成「手機門號驗證」，請先完成驗證以啟動購票權限。
+                </p>
+                <div class="d-grid gap-3">
+                    <a asp-controller="UserMembers" asp-action="Index" class="btn-pixel py-3" style="text-decoration: none; color: black; background-color: var(--pixel-yellow);">
+                        前往驗證門號
+                    </a>
+                    <div class="btn-pixel-text fs-5" onclick="document.getElementById('phoneVerifyModal').style.display='none'">
+                        [ 稍後再說 ]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @* --- 🚩 第一階段：驗證碼閘口 (Security Override) --- *@
     <div id="gateSection">
         <div class="pixel-container-box">
@@ -84,17 +105,18 @@
         // 1. 生成像素風格驗證碼
         function generateCaptcha() {
             const canvas = document.getElementById('captchaCanvas');
+            if(!canvas) return;
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 繪製背景噪點，增加賽博感
+            // 繪製背景噪點
             for(let i=0; i<100; i++){
                 ctx.fillStyle = i % 2 === 0 ? "rgba(0, 204, 255, 0.1)" : "rgba(255, 0, 204, 0.1)";
                 ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
             }
 
             ctx.font = "bold 40px 'Courier New', Courier, monospace";
-            ctx.fillStyle = "#00ccff"; // pixel-blue
+            ctx.fillStyle = "#00ccff";
             const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
             captchaCode = "";
             for (let i = 0; i < 4; i++) {
@@ -103,7 +125,6 @@
                 ctx.save();
                 ctx.translate(45 * i + 35, 45);
                 ctx.rotate((Math.random() - 0.5) * 0.3);
-                // 加入陰影效果
                 ctx.shadowColor = "rgba(0, 204, 255, 0.5)";
                 ctx.shadowBlur = 10;
                 ctx.fillText(char, 0, 0);
@@ -111,13 +132,16 @@
             }
         }
 
-        // 2. 驗證與排隊邏輯
+        // 2. 核心：驗證與排隊邏輯 (只保留一個 startQueue)
         async function startQueue() {
-            const input = document.getElementById('captchaInput').value.toUpperCase();
+            const inputField = document.getElementById('captchaInput');
+            const input = inputField.value.toUpperCase();
 
+            // 前端初步擋下錯誤驗證碼
             if (input !== captchaCode) {
                 alert("❌ ACCESS_DENIED: 驗證碼錯誤！");
                 generateCaptcha();
+                inputField.value = "";
                 return;
             }
 
@@ -138,6 +162,15 @@
 
                 const result = await response.json();
 
+                // 🚩 A. 檢查手機驗證狀態
+                if (result.phoneNotVerified === true) {
+                    document.getElementById('phoneVerifyModal').style.display = 'flex';
+                    btn.disabled = false;
+                    btn.innerHTML = "確認送出 (RETRY)";
+                    return;
+                }
+
+                // 🚩 B. 檢查一般錯誤
                 if (!result.success) {
                     alert("❌ SERVER_REJECTED: " + result.message);
                     btn.disabled = false;
@@ -146,6 +179,7 @@
                     return;
                 }
 
+                // 🚩 C. 進入排隊或直接導向
                 if (result.isQueuing === false) {
                     window.location.href = `/Seats/Index/${sessionId}`;
                 } else {
@@ -155,11 +189,14 @@
                 }
 
             } catch (error) {
+                console.error(error);
                 alert("⚠️ CONNECTION_ERROR: 系統連線異常");
                 btn.disabled = false;
+                btn.innerHTML = "確認送出";
             }
         }
 
+        // 3. 輪詢排隊狀態
         function startPolling() {
             const check = setInterval(() => {
                 fetch(`/Seats/CheckQueueStatus?id=${sessionId}`)
@@ -167,13 +204,29 @@
                     .then(data => {
                         if (data.canEnter) {
                             clearInterval(check);
-                            let targetUrl = data.redirectUrl || `/Seats/Index/${sessionId}`;
-                            window.location.href = targetUrl;
+                            window.location.href = data.redirectUrl || `/Seats/Index/${sessionId}`;
                         }
-                    });
-            }, 2500); // 稍微增加輪詢間隔，更有「排隊」的感覺
+                    })
+                    .catch(err => console.warn("Polling error:", err));
+            }, 2500);
         }
 
-        generateCaptcha();
+        // --- 🚩 關鍵修改：頁面載入時自動偵測 ViewBag 狀態 ---
+        document.addEventListener("DOMContentLoaded", function() {
+            // 初始化驗證碼
+            generateCaptcha();
+
+            // 檢查後端傳來的手機驗證狀態 (需搭配 Controller ViewBag.IsPhoneVerified)
+            const isVerified = "@ViewBag.IsPhoneVerified".toLowerCase() === "true";
+
+            // 如果後端說沒驗證，或者這是一個 null 值（代表沒抓到）
+            if ("@ViewBag.IsPhoneVerified" !== "" && !isVerified) {
+                document.getElementById('phoneVerifyModal').style.display = 'flex';
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.innerHTML = "[ 請先驗證手機門號 ]";
+                btn.style.opacity = "0.6";
+            }
+        });
     </script>
 }

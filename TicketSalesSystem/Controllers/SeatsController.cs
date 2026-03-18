@@ -1,5 +1,6 @@
 ﻿    using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -50,6 +51,8 @@ namespace TicketSalesSystem.Controllers
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
 
+            ViewBag.IsPhoneVerified = _userAccessorService.IsPhoneVerified();
+
             // 如果他已經驗證過且拿到通行證了，就不用再排隊，直接去 Index
             var token = HttpContext.Session.GetString("BookingToken");
             if (token == "Verified_" + id)
@@ -64,30 +67,38 @@ namespace TicketSalesSystem.Controllers
         [HttpPost]
         public IActionResult VerifyGateCaptcha(string id, string captchaInput, string sessionCaptcha)
         {
-            // 🚩 這裡不再從 _memoryCache 拿，而是直接比對前端傳過來的「正確答案」
-            if (captchaInput != sessionCaptcha) return Json(new { success = false, message = "驗證碼錯誤" });
-
-            // 🚩 執行比對
-            if (sessionCaptcha.Equals(captchaInput, StringComparison.OrdinalIgnoreCase))
+            if (!_userAccessorService.IsPhoneVerified())
             {
-                // 驗證成功：發放通行證
-                HttpContext.Session.SetString("GatePassed_" + id, "true");
-                HttpContext.Session.SetString("BookingToken", "Verified_" + id);
-
-                // 檢查人數限制 (流量削峰)
-                int limit = 5;
-                int currentActive = _memoryCache.Get<int>("ActiveUserCount");
-
-                if (currentActive < limit)
-                {
-                    _memoryCache.Set("ActiveUserCount", currentActive + 1, TimeSpan.FromMinutes(10));
-                    return Json(new { success = true, isQueuing = false });
-                }
-
-                return Json(new { success = true, isQueuing = true });
+                return Json(new { success = false, phoneNotVerified = true });
             }
 
-            return Json(new { success = false, message = "驗證碼錯誤，請重新輸入" });
+
+            // 🚩 2. 驗證碼比對
+            if (string.IsNullOrEmpty(captchaInput) || !captchaInput.Equals(sessionCaptcha, StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new { success = false, message = "驗證碼錯誤，請重新產生" });
+            }
+
+            // --- 到這裡代表：驗證碼正確 且 手機已驗證 ---
+
+            // 🚩 3. 發放通行證 (Session 紀錄)
+            // 防止使用者直接輸入網址進入 Index 頁面
+            HttpContext.Session.SetString("GatePassed_" + id, "true");
+            HttpContext.Session.SetString("BookingToken", "Verified_" + id);
+
+            // 🚩 4. 流量削峰 (排隊邏輯)
+            int limit = 5; // Demo 用，實際可調高
+            int currentActive = _memoryCache.Get<int>("ActiveUserCount");
+
+            if (currentActive < limit)
+            {
+                // 進入人數未滿，直接放行
+                _memoryCache.Set("ActiveUserCount", currentActive + 1, TimeSpan.FromMinutes(10));
+                return Json(new { success = true, isQueuing = false });
+            }
+
+            // 進入人數已滿，通知前端啟動輪詢 (startPolling)
+            return Json(new { success = true, isQueuing = true });
         }
 
 
@@ -142,7 +153,8 @@ namespace TicketSalesSystem.Controllers
             {
                 return RedirectToAction("MemberLogin", "Login");
             }
-
+            var member = await _context.Member.FirstOrDefaultAsync(m => m.MemberID == memberID);
+           
             // 檢查是否有通行證，防止直接輸入網址跳過排隊
             var gatePassed = HttpContext.Session.GetString("GatePassed_" + id);
             var bookingToken = HttpContext.Session.GetString("BookingToken");
