@@ -47,9 +47,8 @@ namespace TicketSalesSystem.Controllers
                 .CountAsync(o => o.OrderCreatedTime >= dayAgo);
 
             // 4. 待處理客服
-            var pendingStatuses = new[] { "N", "A" };
             ViewBag.PendingRefunds = await _context.Question
-                .CountAsync(q =>q.Reply.Any()|| q.Reply.Any(r => pendingStatuses.Contains(r.ReplyStatusID)));
+                .CountAsync(q => !q.Reply.Any(r => r.ReplyStatusID == "Y"));
 
             // 5. 待處理活動、FAQ、公告、
             ViewBag.PendingProgramme = await _context.Programme
