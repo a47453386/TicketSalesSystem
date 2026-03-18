@@ -144,6 +144,9 @@ namespace TicketSalesSystem.Controllers
             {
                 return NotFound();
             }
+            var employeeId = _userAccessorService.GetEmployeeId();
+            publicNotice.EmployeeID = employeeId;
+            ModelState.Remove("EmployeeID");
 
             if (ModelState.IsValid)
             {

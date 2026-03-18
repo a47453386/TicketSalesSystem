@@ -33,6 +33,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger small font-monospace mb-4"></div>
             <input asp-for="PublicNoticeID" type="hidden" />
 
+
             <div class="row g-4">
                 @* --- A. 標題與核心數據 --- *@
                 <div class="col-12">
@@ -90,6 +91,7 @@
         </form>
     </div>
 </div>
+<div asp-validation-summary="All" class="text-danger"></div>
 
 
 @section Scripts {

@@ -33,7 +33,7 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger small font-monospace mb-4"></div>
             <input asp-for="FAQID" type="hidden" />
-
+            <input type="hidden" asp-for="EmployeeID" value="@User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
             <div class="row g-4">
                 @* --- A. 問題標題 --- *@
                 <div class="col-12">
@@ -110,7 +110,7 @@
         </form>
     </div>
 </div>
-
+<div asp-validation-summary="All" class="text-danger"></div>
 
 @section Scripts {
     @{

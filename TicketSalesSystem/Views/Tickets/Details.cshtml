@@ -20,8 +20,8 @@
                 </ol>
             </nav> *@
         </div>
-        <a asp-controller="Orders" asp-action="Edit" asp-route-id="@Model.OrderID" class="btn btn-outline-info">
-            <i class="bi bi-arrow-left"></i> 回到訂單
+        <a asp-controller="Tickets" asp-action="Index" class="btn btn-outline-info">
+            <i class="bi bi-arrow-left"></i> 回到票券管理
         </a>
     </div>
 
@@ -43,6 +43,7 @@
                         _ => ("#888", "bi-slash-circle", "未知狀態")
                     };
                 }
+
 
                 <div class="tech-key mb-3">當前狀態 STATUS_DIAGNOSIS</div>
 

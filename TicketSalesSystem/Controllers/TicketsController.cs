@@ -71,6 +71,14 @@ namespace TicketSalesSystem.Controllers
             }
 
             // 🚩 4. 統計數據 (全域或過濾後，此處建議用全域)
+            var today = DateTime.Today;
+
+            // 計算「今天有場次」且「已售出/有效」的票券總數
+            ViewBag.TodayExpect = await _context.Tickets
+                .Include(t => t.TicketsArea)
+                    .ThenInclude(a => a.Session)
+                .CountAsync(t => t.TicketsArea.Session.StartTime.Date == today
+                             && t.TicketsStatusID == "A"); // 假設 "Y" 代表已售出/有效
             ViewBag.TotalCount = await _context.Tickets.CountAsync();
             ViewBag.UsedCount = await _context.Tickets.CountAsync(t => t.TicketsStatusID == "Y");
             ViewBag.RefundCount = await _context.Tickets.CountAsync(t => t.TicketsStatusID == "C");

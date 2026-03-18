@@ -66,11 +66,11 @@
                                 <input class="form-control audit-input" value="@Model.Member?.Name" readonly />
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="OrderStatusID" class="text-warning small mb-2">狀態變更 STATUS</label>
+                                <label asp-for="OrderStatusID" class="text-warning small mb-2">狀態變更</label>
                                 <select asp-for="OrderStatusID" class="form-select order-input border-warning" asp-items="ViewBag.OrderStatusID"></select>
                             </div>
                             <div class="col-md-6">
-                                <label class="opacity-100 small mb-2">支付狀態 PAYMENT</label>
+                                <label class="opacity-100 small mb-2">支付狀態</label>
                                 <select class="form-select order-input opacity-50" asp-items="ViewBag.PaymentMethodID" disabled></select>
                             </div>
                         </div>
@@ -84,7 +84,7 @@
                                 </label>
                             </div>
                             <div>
-                                <label asp-for="PaymentDescription" class="opacity-100 small mb-2">管理員備註 REMARKS</label>
+                                <label asp-for="PaymentDescription" class="opacity-100 small mb-2">管理員備註</label>
                                 <textarea asp-for="PaymentDescription" class="form-control audit-input" rows="3"
                                           placeholder="請輸入審核理由、手動退款或其他管理備註..."></textarea>
                             </div>

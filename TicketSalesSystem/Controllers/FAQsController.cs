@@ -66,6 +66,7 @@ namespace TicketSalesSystem.Controllers
                 return Json(new { success = false, message = "名稱不能為空" });
             }
 
+
             try
             {
                 string ftI = await _idService.GetNextFAQTypeID();
@@ -206,11 +207,13 @@ namespace TicketSalesSystem.Controllers
                 return NotFound();
             }
 
+
             // 移除不需要驗證的導覽屬性錯誤
             // 有時候系統會抱怨 FAQType 或 FAQPublishStatus 是必填的
             ModelState.Remove("FAQType");
             ModelState.Remove("FAQPublishStatus");
             ModelState.Remove("Employee");
+            ModelState.Remove("EmployeeID");
 
             if (ModelState.IsValid)
             {

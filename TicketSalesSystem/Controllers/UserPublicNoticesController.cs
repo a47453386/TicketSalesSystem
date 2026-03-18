@@ -17,31 +17,39 @@ namespace TicketSalesSystem.Controllers
             
         }
 
-        public IActionResult UserIndex()
+        public async Task<IActionResult> UserIndex()
         {
-            var publicNotices = _context.PublicNotice
-                .Where(p => p.PublicNoticeStatus == true)
-                .ToList();
+            var now = DateTime.Now;
+            var publicNotices = await _context.PublicNotice
+                .Where(p => p.PublicNoticeStatus == true && p.PublishTime <= now && (p.RemovalTime == null || p.RemovalTime >= now))
+                .OrderByDescending(p => p.PublishTime)
+                .ToListAsync();
             return View(publicNotices);
         }
 
         public async Task<IActionResult> UserDetails(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var publicNotices = await _context.PublicNotice
-               .Where(p => p.PublicNoticeStatus == true)
-               .FirstOrDefaultAsync(m => m.PublicNoticeID == id);
+            var now = DateTime.Now;
 
-            if (publicNotices == null)
+           
+            var publicNotice = await _context.PublicNotice
+                .Where(p => p.PublicNoticeStatus == true   // 必須是啟用狀態
+                         && p.PublishTime <= now          // 必須已過上架時間
+                         &&(p.RemovalTime == null || p.RemovalTime >= now))     
+                .FirstOrDefaultAsync(m => m.PublicNoticeID == id);
+
+            if (publicNotice == null)
             {
+                // 如果條件不符（例如公告已過期），直接回傳 404
                 return NotFound();
             }
 
-            return View(publicNotices);
+            return View(publicNotice);
         }
 
     }

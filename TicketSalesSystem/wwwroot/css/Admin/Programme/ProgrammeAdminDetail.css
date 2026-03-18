@@ -110,3 +110,13 @@
         color: #000;
         box-shadow: 0 0 10px var(--tech-cyan);
     }
+
+.protocol-truncate {
+    display: -webkit-box; /* 必須使用 flexbox 變體 */
+    -webkit-box-orient: vertical; /* 設定排列方向為垂直 */
+    -webkit-line-clamp: 2; /* 🚩 關鍵：設定你想要顯示幾行 (例如 2 行) */
+    overflow: hidden; /* 隱藏超出範圍的文字 */
+    text-overflow: ellipsis; /* 超出時顯示 ... */
+    max-height: 3.2em; /* 🚩 安全保險：根據行高設定最大高度 (約 1.6 * 2) */
+    line-height: 1.6; /* 設定行高，方便計算高度 */
+}
