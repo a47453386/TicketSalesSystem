@@ -97,7 +97,7 @@
     <div id="sessions" class="mt-5 pt-5">
         <div class="d-flex align-items-center mb-4">
             <h3 class="text-pixel-yellow fw-bold mb-0">
-                <i class="bi bi-layers me-3"></i>選擇場次 
+                <i class="bi bi-layers me-3"></i>選擇場次
             </h3>
         </div>
 
@@ -121,11 +121,11 @@
                                 <td class="text-pixel-muted">@Model.Place?.PlaceName</td>
                                 <td class="py-3 ">
                                     @{
-                                        // 🚩 判斷該場次是否還有票 (Active 狀態的票區)
-                                        bool isSessionSoldOut = !session.TicketsArea.Any(t => t.TicketsAreaStatusID == "A");
+
+                                        bool isSessionSoldOut = session.TicketsArea.Any() && !session.TicketsArea.Any(t => t.TicketsAreaStatusID == "A");
                                     }
 
-                                    @if (Model.ProgrammeStatusID == "O" && !isSessionSoldOut)
+                                    @if (Model.ProgrammeStatusID == "O" )
                                     {
                                         @* --- 狀態 1：開賣中 且 有票 --- *@
                                         <a asp-controller="Seats" asp-action="Index" asp-route-id="@session.SessionID"

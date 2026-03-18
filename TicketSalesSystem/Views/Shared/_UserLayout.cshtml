@@ -106,16 +106,17 @@
                             <li class="nav-item">
                                 @if (UserAccessor.IsEmployee())
                                 {
-                                    @* 情況：已登入 - 直接顯示後台入口與登出 *@
+                                    @* 情況：已登入 - 直接顯示後台入口 *@
                                     <div class="d-flex align-items-center">
                                         <a class="nav-link pixel-nav-link text-danger" asp-controller="Admin" asp-action="Dashboard">
-                                            <i class="bi bi-shield-lock"></i> 管理後台 (@UserAccessor.GetUserRole())
+                                            @* 🚩 這裡改用 GetEmployeeName()，才會抓到 EmployeeScheme 裡的名字 *@
+                                            <i class="bi bi-shield-lock"></i> 管理後台 (@UserAccessor.GetEmployeeName())
                                         </a>
                                     </div>
                                 }
                                 else
                                 {
-                                    @* 情況：未登入 - 只顯示入口 *@
+                                    @* 情況：未登入 - 顯示員工登入入口 *@
                                     <a class="nav-link pixel-nav-link fs-pixel-small mt-1" asp-controller="Login" asp-action="EmployeeLogin">
                                         <i class="bi bi-door-open"></i> 員工入口
                                     </a>

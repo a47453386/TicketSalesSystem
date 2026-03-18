@@ -19,6 +19,7 @@
         
         string? GetUserName();// 取得當前 Identity 的顯示名稱 (通常來自 ClaimTypes.Name)
         string? GetOnlyMemberName();
+        string? GetEmployeeName();
         bool IsAuthenticated();// 只要具備任一已驗證的身分即回傳 true
     }
 }

@@ -13,7 +13,7 @@ using TicketSalesSystem.Service.ID;
 namespace TicketSalesSystem.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B,C")]
     public class FAQsController : Controller
     {
         private readonly TicketsContext _context;

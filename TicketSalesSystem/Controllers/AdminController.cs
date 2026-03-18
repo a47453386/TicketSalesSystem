@@ -11,7 +11,7 @@ using TicketSalesSystem.Service.User;
 namespace TicketSalesSystem.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(AuthenticationSchemes = "EmployeeScheme")]
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B,C,D,F")]
     public class AdminController : Controller
     {
         private readonly TicketsContext _context;

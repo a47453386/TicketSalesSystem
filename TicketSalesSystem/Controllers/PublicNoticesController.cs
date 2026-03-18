@@ -12,7 +12,7 @@ using TicketSalesSystem.Service.IUserAccessor;
 namespace TicketSalesSystem.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A")]
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,C")]
     public class PublicNoticesController : Controller
     {
         private readonly TicketsContext _context;

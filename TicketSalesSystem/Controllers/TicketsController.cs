@@ -11,7 +11,7 @@ using TicketSalesSystem.Models;
 namespace TicketSalesSystem.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B")]
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B,C")]
 
     public class TicketsController : Controller
     {

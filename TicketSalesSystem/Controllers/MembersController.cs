@@ -13,6 +13,7 @@ using TicketSalesSystem.ViewModel.Member;
 namespace TicketSalesSystem.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
+    [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "S,A,B,D")]
     public class MembersController : Controller
     {
         private readonly TicketsContext _context;

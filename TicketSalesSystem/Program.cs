@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TicketSalesSystem.Models;
@@ -153,6 +154,15 @@ builder.Services.AddAuthentication(options =>
         options.ExpireTimeSpan = TimeSpan.FromDays(1);
         options.SlidingExpiration = true;
     });
+// 2. 授權設定 (Authorization) - 🚩 這才是放 Policy 的地方
+builder.Services.AddAuthorization(options =>
+{
+    // 設定預設策略：要求系統必須同時檢查 Member 和 Employee 兩個方案
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes("MemberScheme", "EmployeeScheme")
+        .Build();
+});
 
 builder.Services.AddSession(options =>
 {

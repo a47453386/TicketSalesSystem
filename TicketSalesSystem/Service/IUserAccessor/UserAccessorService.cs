@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 namespace TicketSalesSystem.Service.IUserAccessor
 {
@@ -23,12 +24,25 @@ namespace TicketSalesSystem.Service.IUserAccessor
 
         public bool IsEmployee()
         {
-            var identity = GetIdentity("EmployeeScheme");
-            if (identity == null || !identity.IsAuthenticated) return false;
+            // 1. 取得所有的 Identity (可能包含 Member 和 Employee)
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user == null) return false;
 
-            var role = identity.FindFirst(ClaimTypes.Role)?.Value;
-            string[] staffRoles = { "S", "A", "B", "C", "F" };
-            return staffRoles.Contains(role);
+            // 2. 🚩 關鍵：明確尋找 AuthenticationType 為 "EmployeeScheme" 的那個身份
+            var employeeIdentity = user.Identities
+                .FirstOrDefault(i => i.AuthenticationType == "EmployeeScheme");
+
+            // 3. 只有當「員工身份」存在且已通過驗證時，才去檢查 Role
+            if (employeeIdentity != null && employeeIdentity.IsAuthenticated)
+            {
+                var role = employeeIdentity.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+                // 你的權限代碼清單
+                string[] staffRoles = { "S", "A", "B", "C", "F" };
+                return staffRoles.Contains(role);
+            }
+
+            return false;
         }
 
         public string? GetEmployeeId() =>
@@ -57,6 +71,15 @@ namespace TicketSalesSystem.Service.IUserAccessor
                 .FirstOrDefault(i => i.AuthenticationType == "MemberScheme");
 
             return identity?.Name; // 如果沒登入會員，這裡會是 null
+        }
+        public string? GetEmployeeName()
+        {
+            // 🚩 同樣的邏輯：指定找 EmployeeScheme
+            var identity = _httpContextAccessor.HttpContext?.User.Identities
+                .FirstOrDefault(i => i.AuthenticationType == "EmployeeScheme");
+
+            // 返回該 Identity 裡的 Name Claim
+            return identity?.Name;
         }
         // 檢查是否「任何一個身分」有登入
         public bool IsAuthenticated()
