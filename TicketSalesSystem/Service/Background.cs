@@ -10,6 +10,8 @@ namespace TicketSalesSystem.Service
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<Background> _logger;
+
+        private bool _isFirstRun = true;
         private DateTime _lastCleanupDate = DateTime.Now.Date;
         private readonly SystemMonitorService _monitor;
 
@@ -22,6 +24,7 @@ namespace TicketSalesSystem.Service
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+           
             _logger.LogInformation("正在更新活動狀態，以及檢查過期佔用票券");
             _monitor.AddLog("🚀 系統核心已啟動...");
 
@@ -32,7 +35,7 @@ namespace TicketSalesSystem.Service
                 try
                 {
                     // --- 🚩 每日維護任務：每天只跑一次 ---
-                    if (DateTime.Now.Date > _lastCleanupDate.Date)
+                    if (DateTime.Now.Date > _lastCleanupDate.Date || _isFirstRun)
                     {
                         _monitor.AddLog("🧹 偵測到跨日，執行日誌清理、解鎖票券與【庫存全量重整】...", "每日維護");
 
