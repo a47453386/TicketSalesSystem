@@ -10,7 +10,7 @@ using TicketSalesSystem.ViewModel.Question;
 
 namespace TicketSalesSystem.Controllers
 {
-    [Authorize(AuthenticationSchemes = "MemberScheme")]
+    [Authorize(Policy = "MemberOnly")]
     public class UserQuestionsController : Controller
     {
         private readonly TicketsContext _context;

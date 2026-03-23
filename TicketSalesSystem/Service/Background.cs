@@ -11,7 +11,6 @@ namespace TicketSalesSystem.Service
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<Background> _logger;
 
-        private bool _isFirstRun = true;
         private DateTime _lastCleanupDate = DateTime.Now.Date;
         private readonly SystemMonitorService _monitor;
 
@@ -35,7 +34,7 @@ namespace TicketSalesSystem.Service
                 try
                 {
                     // --- 🚩 每日維護任務：每天只跑一次 ---
-                    if (DateTime.Now.Date > _lastCleanupDate.Date || _isFirstRun)
+                    if (DateTime.Now.Date > _lastCleanupDate.Date )
                     {
                         _monitor.AddLog("🧹 偵測到跨日，執行日誌清理、解鎖票券與【庫存全量重整】...", "每日維護");
 
@@ -123,22 +122,22 @@ namespace TicketSalesSystem.Service
                 var files = directoryInfo.GetFiles("*.*")
                     .Where(f => f.LastWriteTime < threshold);
 
-                int count = 0;
-                foreach (var file in files)
-                {
-                    try
-                    {
-                        file.Delete();
-                        count++;
-                    }
-                    catch (IOException ex)
-                    {
-                        // 檔案可能正被系統佔用中，跳過不處理
-                        _logger.LogWarning($"無法刪除檔案 {file.Name}: {ex.Message}");
-                    }
-                }
+                //int count = 0;
+                //foreach (var file in files)
+                //{
+                //    try
+                //    {
+                //        file.Delete();
+                //        count++;
+                //    }
+                //    catch (IOException ex)
+                //    {
+                //        // 檔案可能正被系統佔用中，跳過不處理
+                //        _logger.LogWarning($"無法刪除檔案 {file.Name}: {ex.Message}");
+                //    }
+                //}
 
-                _logger.LogInformation($"日誌清理完成。共刪除 {count} 個過期檔案。");
+                //_logger.LogInformation($"日誌清理完成。共刪除 {count} 個過期檔案。");
             }
             catch (Exception ex)
             {

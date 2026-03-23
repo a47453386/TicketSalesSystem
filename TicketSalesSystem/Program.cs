@@ -116,6 +116,9 @@ builder.Services.AddAuthentication(options =>
 {
     // 🚩 建議設定一個預設的認證方案，避免 [Authorize] 找不到對象
     options.DefaultScheme = "MemberScheme";
+    options.DefaultChallengeScheme = "MemberScheme";
+
+
 })
     .AddCookie("MemberScheme", options =>
     {
@@ -157,11 +160,12 @@ builder.Services.AddAuthentication(options =>
 // 2. 授權設定 (Authorization) - 🚩 這才是放 Policy 的地方
 builder.Services.AddAuthorization(options =>
 {
-    // 設定預設策略：要求系統必須同時檢查 Member 和 Employee 兩個方案
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .AddAuthenticationSchemes("MemberScheme", "EmployeeScheme")
-        .Build();
+    // 建立明確的策略，不要把兩者混在 DefaultPolicy
+    options.AddPolicy("MemberOnly", policy =>
+        policy.AddAuthenticationSchemes("MemberScheme").RequireAuthenticatedUser());
+
+    options.AddPolicy("EmployeeOnly", policy =>
+        policy.AddAuthenticationSchemes("EmployeeScheme").RequireAuthenticatedUser());
 });
 
 builder.Services.AddSession(options =>
