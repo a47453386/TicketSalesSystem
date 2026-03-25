@@ -127,17 +127,37 @@ namespace TicketSalesSystem.Service.Seats
                 foreach (var seatID in bestSeatIDs)
                 {
                     var parts = seatID.Split('-');
-                    _context.Tickets.Add(new Tickets
+                    int row = int.Parse(parts[0]);
+                    int seat = int.Parse(parts[1]);
+
+                    var existingTicket = await _context.Tickets
+                        .FirstOrDefaultAsync(t => t.SessionID == request.SessionID &&
+                                                  t.TicketsAreaID == request.TicketsAreaID &&
+                                                  t.RowIndex == row &&
+                                                  t.SeatIndex == seat);
+
+                    if (existingTicket != null)
                     {
-                        TicketsID = Guid.NewGuid().ToString(),
-                        OrderID = orderID,
-                        SessionID = request.SessionID,
-                        TicketsAreaID = request.TicketsAreaID,
-                        RowIndex = int.Parse(parts[0]),
-                        SeatIndex = int.Parse(parts[1]),
-                        TicketsStatusID = "P",
-                        CreatedTime = DateTime.Now
-                    });
+                        // 🚩 如果存在，我們就「更新」它
+                        existingTicket.OrderID = orderID;
+                        existingTicket.TicketsStatusID = "P";
+                        existingTicket.CreatedTime = DateTime.Now;
+                        _context.Tickets.Update(existingTicket);
+                    }
+                    else
+                    {
+                        _context.Tickets.Add(new Tickets
+                        {
+                            TicketsID = Guid.NewGuid().ToString(),
+                            OrderID = orderID,
+                            SessionID = request.SessionID,
+                            TicketsAreaID = request.TicketsAreaID,
+                            RowIndex = int.Parse(parts[0]),
+                            SeatIndex = int.Parse(parts[1]),
+                            TicketsStatusID = "P",
+                            CreatedTime = DateTime.Now
+                        });
+                    }
                 }
 
                 // 唯一存檔點 (觸發 Trigger & Index)
@@ -165,8 +185,11 @@ namespace TicketSalesSystem.Service.Seats
             var area = await _context.TicketsArea.FindAsync(areaId);
             if (area == null || area.TicketsAreaStatusID == "B") return new List<string>();
 
+            var activeStatuses = new[] { "P", "Y","A" ,"S"};
             var soldTickets = await _context.Tickets
-                .Where(t => t.SessionID == sessionId && t.TicketsAreaID == areaId)
+                .Where(t => t.SessionID == sessionId &&
+                            t.TicketsAreaID == areaId &&
+                            activeStatuses.Contains(t.TicketsStatusID)) // 關鍵過濾
                 .ToListAsync();
 
             var allSeats = SeatHelper.GenerateSeatLayout(area.RowCount, area.SeatCount, soldTickets, area.TicketsAreaStatusID);
