@@ -184,11 +184,11 @@ namespace TicketSalesSystem.Controllers
 
             //統計該會員在「該活動」下所有場次已持有的有效票數
             // 包含：已付款 (Y)、待付款 (P)
-            var activeStatuses = new[] { "P", "Y" };
+            var ticketActiveStatuses = new[] { "P", "Y" ,"A","S"};
             int purchasedCount = await _context.Tickets
                 .Where(t => t.Order.MemberID == memberID &&
                             t.Session.ProgrammeID == session.ProgrammeID &&
-                            activeStatuses.Contains(t.Order.OrderStatusID))
+                            ticketActiveStatuses.Contains(t.TicketsStatusID))
                 .CountAsync();
 
             //計算剩餘可購張數

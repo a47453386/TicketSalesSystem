@@ -127,37 +127,17 @@ namespace TicketSalesSystem.Service.Seats
                 foreach (var seatID in bestSeatIDs)
                 {
                     var parts = seatID.Split('-');
-                    int row = int.Parse(parts[0]);
-                    int seat = int.Parse(parts[1]);
-
-                    var existingTicket = await _context.Tickets
-                        .FirstOrDefaultAsync(t => t.SessionID == request.SessionID &&
-                                                  t.TicketsAreaID == request.TicketsAreaID &&
-                                                  t.RowIndex == row &&
-                                                  t.SeatIndex == seat);
-
-                    if (existingTicket != null)
+                    _context.Tickets.Add(new Tickets
                     {
-                        // 🚩 如果存在，我們就「更新」它
-                        existingTicket.OrderID = orderID;
-                        existingTicket.TicketsStatusID = "P";
-                        existingTicket.CreatedTime = DateTime.Now;
-                        _context.Tickets.Update(existingTicket);
-                    }
-                    else
-                    {
-                        _context.Tickets.Add(new Tickets
-                        {
-                            TicketsID = Guid.NewGuid().ToString(),
-                            OrderID = orderID,
-                            SessionID = request.SessionID,
-                            TicketsAreaID = request.TicketsAreaID,
-                            RowIndex = int.Parse(parts[0]),
-                            SeatIndex = int.Parse(parts[1]),
-                            TicketsStatusID = "P",
-                            CreatedTime = DateTime.Now
-                        });
-                    }
+                        TicketsID = Guid.NewGuid().ToString(), // 每次都是新的 ID
+                        OrderID = orderID,
+                        SessionID = request.SessionID,
+                        TicketsAreaID = request.TicketsAreaID,
+                        RowIndex = int.Parse(parts[0]),
+                        SeatIndex = int.Parse(parts[1]),
+                        TicketsStatusID = "P",
+                        CreatedTime = DateTime.Now
+                    });
                 }
 
                 // 唯一存檔點 (觸發 Trigger & Index)
