@@ -4,7 +4,7 @@
 支援發票開立、QR Code 驗證與自動配位功能。
 
 ## 🎬 功能展示影片
-👉 [點我觀看完整操作影片]（貼上你的 Canva 連結）
+👉 [https://canva.link/1odpz69pbqo58w6]
 
 ## 🛠 使用技術
 - 後端：C# / ASP.NET Core 8
@@ -17,6 +17,10 @@
 - QR Code 自動驗證機制
 - 自動配位演算法
 - 資料查詢與報表瀏覽
+
+## 🔗 相關專案
+使用者購票端 App：[https://github.com/a47453386/TicketSalesSystemAPP.git]
+票券驗證端 App：[https://github.com/a47453386/TicketVerifyApp.git]
 
 ## 💻 本機執行方式
 1. Clone 此專案
