@@ -4,7 +4,7 @@
 Android App 串接，並包含完整的管理後台介面。
 
 ## 🎬 功能展示影片
-👉 [https://canva.link/1odpz69pbqo58w6]（貼上你的 Canva 連結）
+👉 [https://canva.link/1odpz69pbqo58w6]
 
 ## 🛠 使用技術
 
